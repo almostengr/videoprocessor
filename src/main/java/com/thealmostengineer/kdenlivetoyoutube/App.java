@@ -17,6 +17,9 @@ import java.util.zip.GZIPInputStream;
  */
 public class App 
 {
+	
+	static int defaultTimeout = 120;
+	
 	static void logMessage(String message) {
 		System.out.println(message);	
 	}
@@ -77,6 +80,13 @@ public class App
 		
 		logMessage("Done untarring");
 	}
+	
+	static void setProcessTimeout(String timeoutValue) {
+		Integer setTimeout = Integer.parseInt(timeoutValue);
+		if (setTimeout < 5) {
+			setTimeout = 60;
+		} // end if
+	} // end function
 	
     public static void main( String[] args )
     {
