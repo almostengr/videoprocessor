@@ -7,13 +7,14 @@ import java.lang.ProcessBuilder.Redirect;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
+
+import com.google.common.io.Files;
 
 /**
- * Hello world!
- *
+ * Application to render videos with Kdenlive and upload them to YouTube
+ * @author almostengineer, Kenny Robinson
+ * 
  */
 public class App 
 {
@@ -48,14 +49,17 @@ public class App
 		
 		return process;
 	}
-	
+
 	static File[] getFilesInDirectory(String pendingDirectory) {
+		logMessage("Getting files in " + pendingDirectory);
 		File file = new File(pendingDirectory);
 		File[] fileList = file.listFiles();
+		logMessage("Done getting files in " + pendingDirectory);
 		return fileList;
 	}
 
 	static void deleteFolder(File folder) {
+		logMessage("Deleting folder " + folder.getAbsolutePath());
 	    File[] files = folder.listFiles();
 	    if(files!=null) { //some JVMs return null for empty dirs
 	        for(File f: files) {
@@ -67,6 +71,7 @@ public class App
 	        }
 	    }
 	    folder.delete();
+	    logMessage("Done deleting folder " + folder.getAbsolutePath());
 	}
 
 	static WebDriver setTimeouts(WebDriver wDriver, int timeInSeconds) {
@@ -75,21 +80,26 @@ public class App
 		return wDriver;
 	}
 	
-	static void cleanRenderDirectory(String renderDirectory) {
-		File directory = new File(renderDirectory);
-		deleteFolder(directory);
-	}
-	
 	static void unpackageCompressTar(String filePathToGz, String outputDirectory) throws Exception {
-		logMessage("Gz file: " + filePathToGz);
-		ProcessBuilder pbGunzip = new ProcessBuilder("/bin/gunzip", filePathToGz);
-		pbGunzip.inheritIO();
-		pbGunzip.redirectError(Redirect.INHERIT);
-		pbGunzip.redirectOutput(Redirect.INHERIT);
+		logMessage("Uncompressing file " + filePathToGz);
+		// run gunzip on the file if it is compressed
+		if (filePathToGz.endsWith(".gz")) {
+			logMessage("Gz file: " + filePathToGz);
+			ProcessBuilder pbGunzip = new ProcessBuilder("/bin/gunzip", filePathToGz);
+			pbGunzip.inheritIO();
+			pbGunzip.redirectError(Redirect.INHERIT);
+			pbGunzip.redirectOutput(Redirect.INHERIT);
+			
+			logMessage("Starting gunzip for " + filePathToGz);
+			Process processGunzip = pbGunzip.start();
+			processGunzip.waitFor(60, TimeUnit.SECONDS);
+		}
 		
-		logMessage("Starting gunzip for " + filePathToGz);
-		Process processGunzip = pbGunzip.start();
-		processGunzip.waitFor(60, TimeUnit.SECONDS);
+		File outputDirectoryFile = new File(outputDirectory);
+		if (outputDirectoryFile.exists() == false) {
+			outputDirectoryFile.mkdirs();
+			logMessage("Created render directory");
+		}
 		
 		String filePathToTar = filePathToGz.substring(0, filePathToGz.lastIndexOf(".gz"));
 		logMessage("Tar file: " + filePathToTar);
@@ -98,17 +108,46 @@ public class App
 		pbUntar.redirectError(Redirect.INHERIT);
 		pbUntar.redirectOutput(Redirect.INHERIT);
 		
-		logMessage("Starting gunzip for " + filePathToTar);
 		logMessage("Untarring to " + outputDirectory);
 		Process processUntar = pbUntar.start();
 		processUntar.waitFor(60, TimeUnit.SECONDS);
 		
-		logMessage("Done untarring");
+ 		logMessage("Done uncompressing file " + filePathToGz);
 	}
 	
-	static void archiveProject(String filePathToTar, String archiveDirectory) throws Exception {
+	static void archiveProject(String filePathToGz, String archiveDirectory) throws Exception {
+		logMessage("Archiving project...");
+
+		String filePathToTar = filePathToGz.substring(0, filePathToGz.lastIndexOf(".gz"));
 		
+		ProcessBuilder pbCompressGz = new ProcessBuilder("/bin/gzip", filePathToTar);
+		pbCompressGz.inheritIO();
+		pbCompressGz.redirectError(Redirect.INHERIT);
+		pbCompressGz.redirectOutput(Redirect.INHERIT);
+		
+		Process prcCompressGz = pbCompressGz.start();
+		prcCompressGz.waitFor(300, TimeUnit.SECONDS);
+		
+		filePathToTar += ".gz"; // update file path
+		
+		File archiveFilePath = new File(archiveDirectory);
+		if (archiveFilePath.exists() == false) {
+			archiveFilePath.mkdirs();
+			logMessage("Created archive directory");
+		}
+		
+		File gzFile = new File(filePathToTar);
+		File gzArchiveFile = new File(archiveDirectory + gzFile.getName());
+		Files.move(gzFile, gzArchiveFile);
+		logMessage("Done archiving project");
 	}
+	
+	static void cleanupRenderDirectory(String renderDirectory) {
+		logMessage("Cleaning up render directory");
+		File videoOutputDirectory = new File(renderDirectory);
+		deleteFolder(videoOutputDirectory);
+		logMessage("Done cleaning up render directory");
+	} // end function
 	
 	static void setProcessTimeout(String timeoutValue) {
 		Integer setTimeout = Integer.parseInt(timeoutValue);
@@ -127,58 +166,33 @@ public class App
 //			kdenliveProcess = startKdenlive(appProperty.getProperty("kdenlivePath"));
 //			TimeUnit.SECONDS.sleep(15);
 			
-//			File[] pendingFiles = getFilesInDirectory(appProperty.getProperty("pendingDirectory"));
-//			
-//			for (int i = 0; i < pendingFiles.length; i++) {
-//				logMessage(pendingFiles[i].getAbsolutePath());
-//				
-//				unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("outputDirectory"));
-//				
-//				// TODO run the kdenlive melt command
-//				
-//				// TODO clean up the render directory 
-//				
-//				// TODO archive the tar ball
-//			} // end for
-//			
-//			File[] videoFiles = getFilesInDirectory(appProperty.getProperty("outputDirectory"));
-			WebDriver driver = null;
+			File[] pendingFiles = getFilesInDirectory(appProperty.getProperty("pendingDirectory"));
 			
-//			for (int i = 0; i < videoFiles.length; i++) {
-				// if first loop, login to the youtube and to go upload page
-//				if (i == 0) {
-			if (true) {
-//					System.setProperties(appProperty);
-					System.setProperty("webdriver.gecko.driver", appProperty.getProperty("webdriver.gecko.driver")); // set location of gecko driver for Firefox
-					
-					driver = new FirefoxDriver();
-					driver = setTimeouts(driver, 600);
-					
-					driver.manage().window().maximize();
-					
-					driver.get(appProperty.getProperty("youtubeUrl"));
-					
-					driver.findElement(By.xpath("//button[@aria-label='Create a video or post']")).click();
-					
-					driver.findElement(By.xpath("//yt-formatted-string[contains(text(),'Upload video')]")).click();
-					
-					// google login screen 
-					driver.findElement(By.id("identifierId")).sendKeys(appProperty.getProperty("webUsername"));
-					driver.findElement(By.name("password")).sendKeys(appProperty.getProperty("webPassword"));
-					
-					// after login
-					
-					driver.findElement(By.id("upload-button-text")).click();
-//				}
+			for (int i = 0; i < pendingFiles.length; i++) {
 				
-				// TODO upload each video file
-			}
+				logMessage("Processing " + pendingFiles[i].getAbsolutePath());
+				
+				unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("renderDirectory"));
+				
+				// TODO run the kdenlive melt command
+				
+				// clean up the render directory
+				cleanupRenderDirectory(appProperty.getProperty("renderDirectory"));
+				
+				// archive the tar ball
+				archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory")); 
+			} // end for
+			
+			// TODO if first loop, login to the youtube and to go upload page
+			
+			// TODO upload video via YouTube API 				
+			
 			exitCode = 0;
 		} catch (Exception e) {
 			logMessage("Exception occurred");
 			e.printStackTrace();
 		}
-    	
+    
     	logMessage("Shutting down");
 //    	if (kdenliveProcess != null) {
 //    		logMessage("killing Kdenlive");
@@ -188,3 +202,4 @@ public class App
     	System.exit(exitCode);
     } // end function
 }
+ 
