@@ -7,6 +7,10 @@ import java.lang.ProcessBuilder.Redirect;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+
 /**
  * Hello world!
  *
@@ -45,10 +49,35 @@ public class App
 		return process;
 	}
 	
-	static File[] getPendingFiles(String pendingDirectory) {
+	static File[] getFilesInDirectory(String pendingDirectory) {
 		File file = new File(pendingDirectory);
 		File[] fileList = file.listFiles();
 		return fileList;
+	}
+
+	static void deleteFolder(File folder) {
+	    File[] files = folder.listFiles();
+	    if(files!=null) { //some JVMs return null for empty dirs
+	        for(File f: files) {
+	            if(f.isDirectory()) {
+	                deleteFolder(f);
+	            } else {
+	                f.delete();
+	            }
+	        }
+	    }
+	    folder.delete();
+	}
+
+	static WebDriver setTimeouts(WebDriver wDriver, int timeInSeconds) {
+		wDriver.manage().timeouts().implicitlyWait(timeInSeconds, TimeUnit.SECONDS);
+		wDriver.manage().timeouts().pageLoadTimeout(timeInSeconds, TimeUnit.SECONDS);
+		return wDriver;
+	}
+	
+	static void cleanRenderDirectory(String renderDirectory) {
+		File directory = new File(renderDirectory);
+		deleteFolder(directory);
 	}
 	
 	static void unpackageCompressTar(String filePathToGz, String outputDirectory) throws Exception {
@@ -77,6 +106,10 @@ public class App
 		logMessage("Done untarring");
 	}
 	
+	static void archiveProject(String filePathToTar, String archiveDirectory) throws Exception {
+		
+	}
+	
 	static void setProcessTimeout(String timeoutValue) {
 		Integer setTimeout = Integer.parseInt(timeoutValue);
 		if (setTimeout < 5) {
@@ -94,16 +127,55 @@ public class App
 //			kdenliveProcess = startKdenlive(appProperty.getProperty("kdenlivePath"));
 //			TimeUnit.SECONDS.sleep(15);
 			
-			File[] pendingFiles = getPendingFiles(appProperty.getProperty("pendingDirectory"));
-			
+//			File[] pendingFiles = getFilesInDirectory(appProperty.getProperty("pendingDirectory"));
+//			
 //			for (int i = 0; i < pendingFiles.length; i++) {
-			for (int i = 0; i < 1; i++) {
-				logMessage(pendingFiles[i].getAbsolutePath());
-				unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("outputDirectory"));
+//				logMessage(pendingFiles[i].getAbsolutePath());
+//				
+//				unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("outputDirectory"));
+//				
+//				// TODO run the kdenlive melt command
+//				
+//				// TODO clean up the render directory 
+//				
+//				// TODO archive the tar ball
+//			} // end for
+//			
+//			File[] videoFiles = getFilesInDirectory(appProperty.getProperty("outputDirectory"));
+			WebDriver driver = null;
+			
+//			for (int i = 0; i < videoFiles.length; i++) {
+				// if first loop, login to the youtube and to go upload page
+//				if (i == 0) {
+			if (true) {
+//					System.setProperties(appProperty);
+					System.setProperty("webdriver.gecko.driver", appProperty.getProperty("webdriver.gecko.driver")); // set location of gecko driver for Firefox
+					
+					driver = new FirefoxDriver();
+					driver = setTimeouts(driver, 600);
+					
+					driver.manage().window().maximize();
+					
+					driver.get(appProperty.getProperty("youtubeUrl"));
+					
+					driver.findElement(By.xpath("//button[@aria-label='Create a video or post']")).click();
+					
+					driver.findElement(By.xpath("//yt-formatted-string[contains(text(),'Upload video')]")).click();
+					
+					// google login screen 
+					driver.findElement(By.id("identifierId")).sendKeys(appProperty.getProperty("webUsername"));
+					driver.findElement(By.name("password")).sendKeys(appProperty.getProperty("webPassword"));
+					
+					// after login
+					
+					driver.findElement(By.id("upload-button-text")).click();
+//				}
+				
+				// TODO upload each video file
 			}
-
 			exitCode = 0;
 		} catch (Exception e) {
+			logMessage("Exception occurred");
 			e.printStackTrace();
 		}
     	
@@ -114,5 +186,5 @@ public class App
 //    	}
     	
     	System.exit(exitCode);
-    }
+    } // end function
 }
