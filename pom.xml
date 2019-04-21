@@ -1,42 +1,61 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.thealmostengineer</groupId>
-  <artifactId>kdenlivetoyoutube</artifactId>
-  <version>1.0</version>
-  <packaging>jar</packaging>
+	<groupId>com.thealmostengineer</groupId>
+	<artifactId>kdenlivetoyoutube</artifactId>
+	<version>1.0</version>
+	<packaging>jar</packaging>
 
-  <name>kdenlivetoyoutube</name>
-  <url>http://maven.apache.org</url>
+	<name>kdenlivetoyoutube</name>
+	<url>http://maven.apache.org</url>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
-  <dependencies>
-	
-	<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-youtube -->
-	<dependency>
-	    <groupId>com.google.apis</groupId>
-	    <artifactId>google-api-services-youtube</artifactId>
-	    <version>v3-rev210-1.25.0</version>
-	</dependency>
-	
-	<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-oauth2 -->
-	<dependency>
-	    <groupId>com.google.apis</groupId>
-	    <artifactId>google-api-services-oauth2</artifactId>
-	    <version>v2-rev150-1.25.0</version>
-	</dependency>
-		
-  </dependencies>
-  <organization>
-  	<name>Kenny Robinson, The Almost Engineer</name>
-  	<url>http://thealmostengineer.com</url>
-  </organization>
-  <issueManagement>
-  	<system>Github</system>
-  	<url>https://github.com/almostengr/kdenlivejava/issues</url>
-  </issueManagement>
+	<dependencies>
+
+		<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-youtube -->
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-youtube</artifactId>
+			<version>v3-rev210-1.25.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-oauth2 -->
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-oauth2</artifactId>
+			<version>v2-rev150-1.25.0</version>
+		</dependency>
+
+	</dependencies>
+	<organization>
+		<name>Kenny Robinson, The Almost Engineer</name>
+		<url>http://thealmostengineer.com</url>
+	</organization>
+	<issueManagement>
+		<system>Github</system>
+		<url>https://github.com/almostengr/kdenlivejava/issues</url>
+	</issueManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<index>true</index>
+						<manifest>
+							<mainClass>com.thealmostengineer.kdenlivetoyoutube.App</mainClass>
+						</manifest>
+					</archive>
+					<finalName>kdenlive_to_youtube</finalName>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
