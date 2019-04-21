@@ -217,7 +217,12 @@ public class App
     	Properties appProperty;
     	
     	try {
-    		appProperty = loadProperties("testing.properties");
+//    		appProperty = loadProperties("testing.properties");
+    		if (args[0].isEmpty()) {
+    			throw new Exception("Properties file not provided.");
+    		}
+    		
+    		appProperty = loadProperties(args[0]);
 			
 			File[] pendingFiles = getFilesInDirectory(appProperty.getProperty("pendingDirectory"));
 			for (int i = 0; i < pendingFiles.length; i++) {
@@ -266,13 +271,11 @@ public class App
 			
 			exitCode = 0;
 		} catch (Exception e) {
-			logMessage("Exception occurred");
-			e.getMessage();
+//			logMessage("Exception occurred");
+			logMessage(e.getMessage());
 			e.printStackTrace();
 		}
     
-    	logMessage("Shutting down");
-    	
     	System.exit(exitCode);
     } // end function
 }
