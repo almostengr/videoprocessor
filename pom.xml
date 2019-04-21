@@ -14,13 +14,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <dependencies>    
-    <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
-	<dependency>
-	    <groupId>org.seleniumhq.selenium</groupId>
-	    <artifactId>selenium-java</artifactId>
-	    <version>3.14.0</version>
-	</dependency>
+  <dependencies>
 	
 	<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-youtube -->
 	<dependency>
@@ -37,4 +31,12 @@
 	</dependency>
 		
   </dependencies>
+  <organization>
+  	<name>Kenny Robinson, The Almost Engineer</name>
+  	<url>http://thealmostengineer.com</url>
+  </organization>
+  <issueManagement>
+  	<system>Github</system>
+  	<url>https://github.com/almostengr/kdenlivejava/issues</url>
+  </issueManagement>
 </project>
