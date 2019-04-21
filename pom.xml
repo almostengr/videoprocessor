@@ -35,6 +35,13 @@
 	    <artifactId>google-api-services-youtube</artifactId>
 	    <version>v3-rev210-1.25.0</version>
 	</dependency>
+	
+	<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-oauth2 -->
+	<dependency>
+	    <groupId>com.google.apis</groupId>
+	    <artifactId>google-api-services-oauth2</artifactId>
+	    <version>v2-rev150-1.25.0</version>
+	</dependency>
 		
   </dependencies>
 </project>
