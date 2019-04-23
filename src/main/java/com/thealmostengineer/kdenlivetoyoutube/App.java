@@ -18,36 +18,37 @@ public class App
     public static void main( String[] args )
     {
     	int exitCode = 1;
-    	Properties appProperty;
-    	
-    	FileOperations fileOperations = new FileOperations();
-    	KdenliveOperations kdenliveOperations = new KdenliveOperations();
     	
     	try {
     		if (args[0].isEmpty()) {
     			throw new Exception("Properties file not provided.");
-    		}
+    		} // end if
+        	 
+        	FileOperations fileOperations = new FileOperations();
+        	KdenliveOperations kdenliveOperations = new KdenliveOperations();
+        	Properties appProperty = fileOperations.loadProperties(args[0]);
     		
-    		appProperty = fileOperations.loadProperties(args[0]);
-			
 			File[] pendingFiles = fileOperations.getFilesInFolder(appProperty.getProperty("pendingDirectory"));
+			
 			for (int i = 0; i < pendingFiles.length; i++) {
 				try {
+					if (pendingFiles[i].getAbsolutePath().endsWith(".gz") == false || pendingFiles[i].getAbsolutePath().endsWith(".tar") == false) {
+						throw new Exception("Skipping file. Invalid extension");
+					} // end if
+					
 					logMessage("Processing " + pendingFiles[i].getAbsolutePath());
 					
-					// clean up the render directory
-					fileOperations.deleteFolder(appProperty.getProperty("renderDirectory"));
+					fileOperations.deleteFolder(appProperty.getProperty("renderDirectory")); // clean render directory
 					
 					fileOperations.unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("renderDirectory"));
 					
 					String kdenliveFileName = null;
 					String videoOutputFileName = null;
-					File renderDir = new File(appProperty.getProperty("renderDirectory"));
-					File[] renderDirFile = renderDir.listFiles();
+					File[] renderDirFile = fileOperations.getFilesInFolder(appProperty.getProperty("renderDirectory")); // renderDir.listFiles();
 					
-					for (int j = 0; j < renderDirFile.length; j++) {
-						if (renderDirFile[j].getAbsolutePath().endsWith("kdenlive")) {
-							kdenliveFileName = renderDirFile[j].getAbsolutePath();
+					for (int i2 = 0; i2 < renderDirFile.length; i2++) {
+						if (renderDirFile[i2].getAbsolutePath().endsWith("kdenlive")) {
+							kdenliveFileName = renderDirFile[i2].getAbsolutePath();
 							videoOutputFileName = appProperty.getProperty("outputDirectory") + kdenliveFileName.substring(kdenliveFileName.lastIndexOf("/")) + ".mp4";
 							logMessage("Kdenlive: " + kdenliveFileName);
 							logMessage("Video Output: " + videoOutputFileName);
@@ -56,13 +57,13 @@ public class App
 					} // end for
 
 					fileOperations.createFolder(appProperty.getProperty("outputDirectory"));
-					kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName);// run the kdenlive melt command
+					kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
 					
 					// archive the tar ball
 					fileOperations.archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory"));
 				} catch (Exception e) {
 					fileOperations.deleteFolder(appProperty.getProperty("renderDirectory"));
-					e.getMessage();
+					logMessage(e.getMessage());
 					e.printStackTrace();
 				} // end try
 				
@@ -76,7 +77,7 @@ public class App
 		} catch (Exception e) {
 			logMessage(e.getMessage());
 			e.printStackTrace();
-		}
+		} // end catch
     
     	System.exit(exitCode);
     } // end function
