@@ -17,6 +17,13 @@ import com.google.common.io.Files;
  */
 public class FileOperations {
 	
+	/**
+	 * Load the properties file
+	 * 
+	 * @param propertiesFileName	The name of the properties file
+	 * @return						Returns loaded Properties object
+	 * @throws Exception
+	 */
 	Properties loadProperties(String propertiesFileName) throws Exception {
 		App.logMessage("Loading properties");
 		
@@ -28,6 +35,11 @@ public class FileOperations {
 		return properties;
 	} // end function
 	
+	/**
+	 * Deletes the folder and it's subfolders and files
+	 * 
+	 * @param directoryStr		The path to the folder to be deleted
+	 */
 	void deleteFolder(String directoryStr) {
 		
 		File directoryFile = new File(directoryStr);
@@ -46,6 +58,12 @@ public class FileOperations {
 	    directoryFile.delete();
 	} // end function
 	
+	/**
+	 * Create a folder 
+	 * 
+	 * @param directoryStr	THe path to the folder to be created
+	 * @return
+	 */
 	File createFolder(String directoryStr) {
 		File directoryFile = new File(directoryStr);
 		
@@ -56,7 +74,18 @@ public class FileOperations {
 		
 		return directoryFile;
 	} // end function
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return super.toString();
+	}
 	
+	/**
+	 * Get the list of files in the provided directory
+	 * 
+	 * @param directory		The directory to get the files for
+	 * @return
+	 */
 	File[] getFilesInFolder(String directory) {
 		App.logMessage("Getting files in " + directory);
 		
@@ -67,6 +96,13 @@ public class FileOperations {
 		return fileList;
 	}  // end function
 	
+	/**
+	 * Archive the project 
+	 * 
+	 * @param filePathToGz		The path to the compressed archive file
+	 * @param archiveDirectory	The directory to move the compressed archive file to
+	 * @throws Exception
+	 */
 	void archiveProject(String filePathToGz, String archiveDirectory) throws Exception {
 		App.logMessage("Archiving project...");
 		
@@ -96,6 +132,13 @@ public class FileOperations {
 		App.logMessage("Done archiving project");
 	}
 	
+	/**
+	 * Uncompress and untar the archive file
+	 * 
+	 * @param filePathToGz		The path to the project archive
+	 * @param outputDirectory	The directory that the files should be untarred to
+	 * @throws Exception
+	 */
 	void unpackageCompressTar(String filePathToGz, String outputDirectory) throws Exception {
 		App.logMessage("Uncompressing file " + filePathToGz);
 		

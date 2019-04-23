@@ -15,6 +15,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class KdenliveOperations  {
 	
+	/**
+	 * Calls melt after to render the video
+	 * 
+	 * @param meltPath				The path to melt
+	 * @param kdenliveFileName		The name of the kdenlive project file
+	 * @param videoOutputFileName	The name of the video that will be rendered
+	 * @throws Exception
+	 */
 	void renderVideo(String meltPath, String kdenliveFileName, String videoOutputFileName) throws Exception {
 		if (meltPath.isEmpty()) {
 			throw new Exception("Melt path is empty");

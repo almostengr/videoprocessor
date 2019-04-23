@@ -14,10 +14,20 @@ import java.util.concurrent.TimeUnit;
  */
 public class App 
 {
+	/**
+	 * Write log messages to the console
+	 * 
+	 * @param message  The message to be written to the console
+	 */
 	static public void logMessage(String message) {
 		System.out.println(message);	
 	}
 	
+	/**
+	 * Checks to see if the process is already running. If it is, then exit
+	 * 
+	 * @throws Exception
+	 */
 	static void checkDuplicateProcess() throws Exception {
 		logMessage("Checking to see if existing process is already running");
 		
