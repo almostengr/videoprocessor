@@ -25,9 +25,8 @@ public class FileOperations {
 		properties.load(inputStream); // load the properties
 		inputStream.close(); // close the input file
 		
-		App.logMessage("Done loading properties");
 		return properties;
-	}
+	} // end function
 	
 	void deleteFolder(String directoryStr) {
 		
@@ -45,9 +44,7 @@ public class FileOperations {
 	        }
 	    }
 	    directoryFile.delete();
-	    
-	    App.logMessage("Done deleting folder " + directoryFile.getAbsolutePath());
-	}
+	} // end function
 	
 	File createFolder(String directoryStr) {
 		File directoryFile = new File(directoryStr);
