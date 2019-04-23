@@ -41,14 +41,9 @@ public class KdenliveOperations  {
 		} // end while
 		bufferedReader.close();
 		
-//		pbArguments.add("atsc_720p_30"); 		// frame and resolution
 		App.logMessage("Resolution: " + resolution);
-//		pbArguments.add(resolution);			// frame and resolution
-//		pbArguments.add("avformat");
-//		pbArguments.add("-");
 		pbArguments.add(kdenliveFileName); 			// source file
 		pbArguments.add("-consumer");
-//		pbArguments.add(videoOutputFileName);		// target file
 		pbArguments.add("avformat:" + videoOutputFileName);		// target file
 		pbArguments.add("properties=x264-medium");
 		pbArguments.add("f=mp4");
