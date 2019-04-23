@@ -1,7 +1,10 @@
 package com.thealmostengineer.kdenlivetoyoutube;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Application to render videos with Kdenlive and upload them to YouTube
@@ -14,6 +17,33 @@ public class App
 	static public void logMessage(String message) {
 		System.out.println(message);	
 	}
+	
+	static void checkDuplicateProcess() throws Exception {
+		logMessage("Checking to see if existing process is already running");
+		
+		File processList = File.createTempFile("processlist", ".tmp");
+		processList.deleteOnExit();
+		
+		ProcessBuilder processBuilder = new ProcessBuilder("/bin/ps", "-ef");
+		processBuilder.inheritIO();
+		processBuilder.redirectErrorStream(true);
+		processBuilder.redirectOutput(processList);
+		
+		Process process = processBuilder.start();
+		process.waitFor(15, TimeUnit.SECONDS);
+		
+		BufferedReader bufferedReader = new BufferedReader(new FileReader(processList));
+		String line = "";
+		String output = "";
+		while ((line = bufferedReader.readLine()) != null) {
+			output = line;
+		} // end while
+		bufferedReader.close();
+		
+		if (output.toLowerCase().contains(" melt")) {
+			throw new Exception("Process already running");
+		} // end if
+	} // end function
 	
     public static void main( String[] args )
     {
