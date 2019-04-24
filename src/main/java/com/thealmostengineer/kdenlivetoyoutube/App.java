@@ -72,35 +72,35 @@ public class App
 			
 			for (int i = 0; i < pendingFiles.length; i++) {
 				try {
-					if (pendingFiles[i].getAbsolutePath().endsWith(".gz") == false || pendingFiles[i].getAbsolutePath().endsWith(".tar") == false) {
-						throw new Exception("Skipping file. Invalid extension");
+					if (pendingFiles[i].getAbsolutePath().toLowerCase().endsWith(".gz") || 
+							pendingFiles[i].getAbsolutePath().toLowerCase().endsWith(".tar")) {
+					
+						logMessage("Processing " + pendingFiles[i].getAbsolutePath());
+						
+						fileOperations.deleteFolder(appProperty.getProperty("renderDirectory")); // clean render directory
+						
+						fileOperations.unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("renderDirectory"));
+						
+						String kdenliveFileName = null;
+						String videoOutputFileName = null;
+						File[] renderDirFile = fileOperations.getFilesInFolder(appProperty.getProperty("renderDirectory")); // renderDir.listFiles();
+						
+						for (int i2 = 0; i2 < renderDirFile.length; i2++) {
+							if (renderDirFile[i2].getAbsolutePath().endsWith("kdenlive")) {
+								kdenliveFileName = renderDirFile[i2].getAbsolutePath();
+								videoOutputFileName = appProperty.getProperty("outputDirectory") + kdenliveFileName.substring(kdenliveFileName.lastIndexOf("/")) + ".mp4";
+								logMessage("Kdenlive: " + kdenliveFileName);
+								logMessage("Video Output: " + videoOutputFileName);
+								break;
+							} // end if
+						} // end for
+	
+						fileOperations.createFolder(appProperty.getProperty("outputDirectory"));
+						kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
+						
+						// archive the tar ball
+						fileOperations.archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory"));
 					} // end if
-					
-					logMessage("Processing " + pendingFiles[i].getAbsolutePath());
-					
-					fileOperations.deleteFolder(appProperty.getProperty("renderDirectory")); // clean render directory
-					
-					fileOperations.unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("renderDirectory"));
-					
-					String kdenliveFileName = null;
-					String videoOutputFileName = null;
-					File[] renderDirFile = fileOperations.getFilesInFolder(appProperty.getProperty("renderDirectory")); // renderDir.listFiles();
-					
-					for (int i2 = 0; i2 < renderDirFile.length; i2++) {
-						if (renderDirFile[i2].getAbsolutePath().endsWith("kdenlive")) {
-							kdenliveFileName = renderDirFile[i2].getAbsolutePath();
-							videoOutputFileName = appProperty.getProperty("outputDirectory") + kdenliveFileName.substring(kdenliveFileName.lastIndexOf("/")) + ".mp4";
-							logMessage("Kdenlive: " + kdenliveFileName);
-							logMessage("Video Output: " + videoOutputFileName);
-							break;
-						} // end if
-					} // end for
-
-					fileOperations.createFolder(appProperty.getProperty("outputDirectory"));
-					kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
-					
-					// archive the tar ball
-					fileOperations.archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory"));
 				} catch (Exception e) {
 					fileOperations.deleteFolder(appProperty.getProperty("renderDirectory"));
 					logMessage(e.getMessage());
