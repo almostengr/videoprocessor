@@ -2,6 +2,9 @@ package com.thealmostengineer.kdenlivetoyoutube;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.Properties;
@@ -33,6 +36,26 @@ public class FileOperations {
 		inputStream.close(); // close the input file
 		
 		return properties;
+	} // end function
+	
+	/**
+	 * Save the property to the properties file
+	 * 
+	 * @param property		The key of the property to save
+	 * @param value			The value of the property to save
+	 * @param fileName		The name of the file to save the property to
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	void saveProperty(String property, String value, String fileName) throws FileNotFoundException, IOException {
+		Properties properties = new Properties();
+		File file = new File(fileName);
+		FileOutputStream fileOutputStream = new FileOutputStream(file);
+		
+		App.logMessage("Saving the property to " + file.getAbsolutePath());
+		properties.setProperty(property, value);
+		properties.store(fileOutputStream, "");
+		fileOutputStream.close(); // close the file
 	} // end function
 	
 	/**
