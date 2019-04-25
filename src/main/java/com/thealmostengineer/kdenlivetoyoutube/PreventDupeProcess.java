@@ -17,23 +17,26 @@ public class PreventDupeProcess {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		
+		App.logMessage("Creating process file" + this.processFile.getAbsolutePath());
 		FileWriter fileWriter = new FileWriter(this.processFile);
 		fileWriter.write("Started at " + dateFormat.format(date));
 		fileWriter.close();
-	}
+	} // end function
 	
 	boolean checkForDuplicateProcess() throws IOException {
 		boolean returnValue = false;
 		
 		this.createProcessFile();
 		
+		App.logMessage("Checking for duplicate processes");
+		
 		FileOperations fileOperations = new FileOperations();
 		File[] fileListing = fileOperations.getFilesInFolder(processFile.getPath());
 	
 		int counter = 0;
 		for (int i = 0; i < fileListing.length; i++) {
-			if (fileListing[i].getAbsolutePath().contains("kdenlivetoyoutube") &&
-					fileListing[i].getAbsolutePath().endsWith(".tmp")) {
+			// check to see if multiple kdenlive processes have been started
+			if (fileListing[i].getAbsolutePath().contains("kdenlivetoyoutube") && fileListing[i].getAbsolutePath().endsWith(".tmp")) {
 				counter++;
 			} // end if
 			
