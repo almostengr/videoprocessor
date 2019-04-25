@@ -10,8 +10,6 @@ import java.lang.ProcessBuilder.Redirect;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.io.Files;
-
 /**
  * Manipulate the files used by the process 
  * 
@@ -150,7 +148,7 @@ public class FileOperations {
 		
 		File gzFile = new File(filePathToTar);
 		File gzArchiveFile = new File(archiveDirectory + gzFile.getName());
-		Files.move(gzFile, gzArchiveFile);
+		gzFile.renameTo(gzArchiveFile); // equivalent of move file
 		
 		App.logMessage("Done archiving project");
 	}
