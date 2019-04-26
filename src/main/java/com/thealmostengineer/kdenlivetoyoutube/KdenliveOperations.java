@@ -34,8 +34,12 @@ public class KdenliveOperations  {
 			throw new Exception("Video output file name is empty");
 		}
 		
+		String[] meltPathSplit = meltPath.split(" ");
 		ArrayList<String> pbArguments = new ArrayList<String>();
-		pbArguments.add(meltPath);
+//		pbArguments.add(meltPath);
+		for (int i = 0; i < meltPathSplit.length; i++) {
+			pbArguments.add(meltPathSplit[i]);
+		}
 		
 		App.logMessage("Reading kdenlive file for resolution information");
 		File kdenliveFile = new File(kdenliveFileName);
