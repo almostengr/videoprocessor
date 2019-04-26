@@ -23,7 +23,7 @@ public class PreventDupeProcess {
 		fileWriter.close();
 	} // end function
 	
-	boolean checkForDuplicateProcess() throws IOException {
+	boolean checkForDuplicateProcess() throws Exception, IOException {
 		boolean returnValue = false;
 		
 		this.createProcessFile();
@@ -31,18 +31,18 @@ public class PreventDupeProcess {
 		App.logMessage("Checking for duplicate processes");
 		
 		FileOperations fileOperations = new FileOperations();
-		File[] fileListing = fileOperations.getFilesInFolder(processFile.getPath());
+		File[] fileListing = fileOperations.getFilesInFolder(processFile.getParent());
 	
 		int counter = 0;
 		for (int i = 0; i < fileListing.length; i++) {
+			
 			// check to see if multiple kdenlive processes have been started
 			if (fileListing[i].getAbsolutePath().contains("kdenlivetoyoutube") && fileListing[i].getAbsolutePath().endsWith(".tmp")) {
 				counter++;
 			} // end if
 			
 			if (counter > 1) {
-				App.logMessage("Process is already running. Exiting");
-				returnValue = true;
+				throw new Exception("Process is already running.");
 			} // end if
 		} // end for
 		
