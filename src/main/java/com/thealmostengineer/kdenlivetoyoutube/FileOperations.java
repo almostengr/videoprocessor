@@ -111,11 +111,32 @@ public class FileOperations {
 		App.logMessage("Getting files in " + directory);
 		
 		File file = new File(directory);
+		
+		// create the directory if it does nto exist
+		if (file.exists() == false) {
+			this.createFolder(directory);
+		}
+		
 		File[] fileList = file.listFiles();
 		
-		App.logMessage("Done getting files in " + directory);
 		return fileList;
 	}  // end function
+	
+	int getCountOfFilesInFolder(String directory) {
+		App.logMessage("Getting count of files in " + directory);
+		
+		File file = new File(directory);
+		
+		// create the directory if it does nto exist
+		if (file.exists() == false) {
+			this.createFolder(directory);
+		}
+
+		File[] fileList = file.listFiles();
+		
+		App.logMessage("Found " + fileList.length + " items in directory");
+		return fileList.length;
+	}
 	
 	/**
 	 * Archive the project 
@@ -125,7 +146,7 @@ public class FileOperations {
 	 * @throws Exception
 	 */
 	void archiveProject(String filePathToGz, String archiveDirectory) throws Exception {
-		App.logMessage("Archiving project...");
+		App.logMessage("Archiving project files");
 		
 		String filePathToTar; 
 		try {
@@ -149,8 +170,6 @@ public class FileOperations {
 		File gzFile = new File(filePathToTar);
 		File gzArchiveFile = new File(archiveDirectory + gzFile.getName());
 		gzFile.renameTo(gzArchiveFile); // equivalent of move file
-		
-		App.logMessage("Done archiving project");
 	}
 	
 	/**
