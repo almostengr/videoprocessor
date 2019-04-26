@@ -67,8 +67,12 @@ public class App
         	FileOperations fileOperations = new FileOperations();
         	KdenliveOperations kdenliveOperations = new KdenliveOperations();
         	Properties appProperty = fileOperations.loadProperties(args[0]);
+        	PreventDupeProcess preventDupeProcess = new PreventDupeProcess();
+        	
+        	preventDupeProcess.checkForDuplicateProcess();
     		
 			File[] pendingFiles = fileOperations.getFilesInFolder(appProperty.getProperty("pendingDirectory"));
+			fileOperations.getCountOfFilesInFolder(appProperty.getProperty("pendingDirectory"));
 			
 			for (int i = 0; i < pendingFiles.length; i++) {
 				try {
@@ -78,7 +82,6 @@ public class App
 						logMessage("Processing " + pendingFiles[i].getAbsolutePath());
 						
 						fileOperations.deleteFolder(appProperty.getProperty("renderDirectory")); // clean render directory
-						
 						fileOperations.unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("renderDirectory"));
 						
 						String kdenliveFileName = null;
@@ -102,7 +105,6 @@ public class App
 						fileOperations.archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory"));
 					} // end if
 				} catch (Exception e) {
-					fileOperations.deleteFolder(appProperty.getProperty("renderDirectory"));
 					logMessage(e.getMessage());
 					e.printStackTrace();
 				} // end try
@@ -119,6 +121,7 @@ public class App
 			e.printStackTrace();
 		} // end catch
     
+    	logMessage("Exiting");
     	System.exit(exitCode);
     } // end function
 }
