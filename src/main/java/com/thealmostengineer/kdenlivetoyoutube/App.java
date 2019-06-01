@@ -1,12 +1,9 @@
 package com.thealmostengineer.kdenlivetoyoutube;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Application to render videos with Kdenlive and upload them to YouTube
@@ -25,40 +22,6 @@ public class App
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
 		LocalDateTime now = LocalDateTime.now();
 		System.out.println("[" + dtf.format(now) + "] " + message);	
-	} // end function
-	
-	/**
-	 * Checks to see if the process is already running. If it is, then exit
-	 * 
-	 * @throws Exception
-	 */
-	static void checkDuplicateProcess() throws Exception {
-		logMessage("Checking to see if existing process is already running");
-		
-		// create temporary file in temp directory
-		File processList = File.createTempFile("processlist", ".tmp");
-		processList.deleteOnExit();
-		
-		// check to see if the process is already running
-		ProcessBuilder processBuilder = new ProcessBuilder("/bin/ps", "-ef");
-		processBuilder.inheritIO();
-		processBuilder.redirectErrorStream(true);
-		processBuilder.redirectOutput(processList);
-		
-		Process process = processBuilder.start();
-		process.waitFor(15, TimeUnit.SECONDS);
-		
-		BufferedReader bufferedReader = new BufferedReader(new FileReader(processList));
-		String line = "";
-		String output = "";
-		while ((line = bufferedReader.readLine()) != null) {
-			output = line;
-		} // end while
-		bufferedReader.close();
-		
-		if (output.toLowerCase().contains(" melt")) {
-			throw new Exception("Process already running");
-		} // end if
 	} // end function
 	
     public static void main( String[] args )
