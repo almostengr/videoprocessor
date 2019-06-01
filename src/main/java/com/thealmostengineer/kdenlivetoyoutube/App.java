@@ -3,6 +3,8 @@ package com.thealmostengineer.kdenlivetoyoutube;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -20,7 +22,10 @@ public class App
 	 * @param message  The message to be written to the console
 	 */
 	static public void logMessage(String message) {
-		System.out.println(message);	
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+		LocalDateTime now = LocalDateTime.now();
+//		System.out.println(dtf.format(now));
+		System.out.println("[" + dtf.format(now) + "] " + message);	
 	}
 	
 	/**
