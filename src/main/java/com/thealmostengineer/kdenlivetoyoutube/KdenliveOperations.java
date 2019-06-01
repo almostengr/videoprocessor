@@ -26,13 +26,13 @@ public class KdenliveOperations  {
 	void renderVideo(String meltPath, String kdenliveFileName, String videoOutputFileName) throws Exception {
 		if (meltPath.isEmpty()) {
 			throw new Exception("Melt path is empty");
-		}
+		} // end if
 		if (kdenliveFileName.isEmpty()) {
 			throw new Exception("Kdenlive project file name is empty");
-		}
+		} // end if
 		if (videoOutputFileName.isEmpty()) {
 			throw new Exception("Video output file name is empty");
-		}
+		} // end if
 		
 		String[] meltPathSplit = meltPath.split(" ");
 		ArrayList<String> pbArguments = new ArrayList<String>();
@@ -75,8 +75,9 @@ public class KdenliveOperations  {
 		pbRenderVideo.redirectOutput(Redirect.INHERIT);
 		
 		App.logMessage("Rendering video " + videoOutputFileName);
+		Timeouts timeouts = new Timeouts();
 		Process processRenderVideo = pbRenderVideo.start();
-		processRenderVideo.waitFor(10, TimeUnit.HOURS);	// wait for video to render
+		processRenderVideo.waitFor(timeouts.getLongTimeoutHours(), TimeUnit.HOURS);	// wait for video to render
 		App.logMessage("Done rendering video " + videoOutputFileName);
-	}
+	} // end function
 }

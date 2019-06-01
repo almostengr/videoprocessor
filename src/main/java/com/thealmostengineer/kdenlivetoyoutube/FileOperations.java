@@ -73,9 +73,9 @@ public class FileOperations {
 	                deleteFolder(f.getAbsolutePath());
 	            } else {
 	                f.delete();
-	            }
-	        }
-	    }
+	            } // end if
+	        } // end for
+	    } // end if
 	    directoryFile.delete();
 	} // end function
 	
@@ -91,15 +91,10 @@ public class FileOperations {
 		if (directoryFile.exists() == false) {
 			directoryFile.mkdirs();
 			App.logMessage("Created directory " + directoryStr);
-		}
+		} // end if
 		
 		return directoryFile;
 	} // end function
-	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return super.toString();
-	}
 	
 	/**
 	 * Get the list of files in the provided directory
@@ -115,7 +110,7 @@ public class FileOperations {
 		// create the directory if it does nto exist
 		if (file.exists() == false) {
 			this.createFolder(directory);
-		}
+		} // end if
 		
 		File[] fileList = file.listFiles();
 		
@@ -130,13 +125,13 @@ public class FileOperations {
 		// create the directory if it does nto exist
 		if (file.exists() == false) {
 			this.createFolder(directory);
-		}
+		} // end if
 
 		File[] fileList = file.listFiles();
 		
 		App.logMessage("Found " + fileList.length + " items in directory");
 		return fileList.length;
-	}
+	} // end function
 	
 	/**
 	 * Archive the project 
@@ -160,8 +155,9 @@ public class FileOperations {
 		pbCompressGz.redirectError(Redirect.INHERIT);
 		pbCompressGz.redirectOutput(Redirect.INHERIT);
 		
+		Timeouts timeouts = new Timeouts();
 		Process prcCompressGz = pbCompressGz.start();
-		prcCompressGz.waitFor(300, TimeUnit.SECONDS);
+		prcCompressGz.waitFor(timeouts.getShortTimeoutSeconds(), TimeUnit.SECONDS);
 		
 		filePathToTar += ".gz"; // update file path
 		
@@ -170,7 +166,7 @@ public class FileOperations {
 		File gzFile = new File(filePathToTar);
 		File gzArchiveFile = new File(archiveDirectory + gzFile.getName());
 		gzFile.renameTo(gzArchiveFile); // equivalent of move file
-	}
+	} // end function
 	
 	/**
 	 * Uncompress and untar the archive file
@@ -181,6 +177,8 @@ public class FileOperations {
 	 */
 	void unpackageCompressTar(String filePathToGz, String outputDirectory) throws Exception {
 		App.logMessage("Uncompressing file " + filePathToGz);
+		
+		Timeouts timeouts = new Timeouts();
 		
 		// run gunzip on the file if it is compressed
 		if (filePathToGz.endsWith(".gz")) {
@@ -194,8 +192,8 @@ public class FileOperations {
 			App.logMessage("Starting gunzip for " + filePathToGz);
 			
 			Process processGunzip = pbGunzip.start();
-			processGunzip.waitFor(60, TimeUnit.SECONDS);
-		}
+			processGunzip.waitFor(timeouts.getShortTimeoutSeconds(), TimeUnit.SECONDS);
+		} // end if
 		
 		createFolder(outputDirectory);
 		
@@ -204,7 +202,7 @@ public class FileOperations {
 			filePathToTar = filePathToGz.substring(0, filePathToGz.lastIndexOf(".gz"));
 		} catch (Exception e) {
 			filePathToTar = filePathToGz;
-		}
+		} // end try
 		
 		App.logMessage("Tar file: " + filePathToTar);
 		
@@ -216,8 +214,8 @@ public class FileOperations {
 		App.logMessage("Untarring to " + outputDirectory);
 		
 		Process processUntar = pbUntar.start();
-		processUntar.waitFor(300, TimeUnit.SECONDS);
+		processUntar.waitFor(timeouts.getShortTimeoutSeconds(), TimeUnit.SECONDS);
 		
  		App.logMessage("Done uncompressing file " + filePathToGz);
-	}
+	} // end function
 }
