@@ -63,7 +63,7 @@ public class App
 	
     public static void main( String[] args )
     {
-    	int exitCode = 1;
+    	int exitCode = 1; // default the exit code to failure
     	
     	try {
     		if (args[0].isEmpty()) {
