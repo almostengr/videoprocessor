@@ -25,7 +25,7 @@ public class App
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
 		LocalDateTime now = LocalDateTime.now();
 		System.out.println("[" + dtf.format(now) + "] " + message);	
-	}
+	} // end function
 	
 	/**
 	 * Checks to see if the process is already running. If it is, then exit
@@ -35,9 +35,11 @@ public class App
 	static void checkDuplicateProcess() throws Exception {
 		logMessage("Checking to see if existing process is already running");
 		
+		// create temporary file in temp directory
 		File processList = File.createTempFile("processlist", ".tmp");
 		processList.deleteOnExit();
 		
+		// check to see if the process is already running
 		ProcessBuilder processBuilder = new ProcessBuilder("/bin/ps", "-ef");
 		processBuilder.inheritIO();
 		processBuilder.redirectErrorStream(true);
@@ -105,11 +107,16 @@ public class App
 						fileOperations.createFolder(appProperty.getProperty("outputDirectory"));
 						kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
 						
-						String generateAudio = appProperty.getProperty("generateaudio");
-						if (generateAudio.toLowerCase().equals("yes")) {
-							VideoToAudio videoToAudio = new VideoToAudio();
-							videoToAudio.convertVideoToAudio(videoOutputFileName, appProperty.getProperty("ffmpegPath"));
-						} // end if
+						try {
+							String generateAudio = appProperty.getProperty("generateaudio");
+							
+							if (generateAudio.toLowerCase().equals("yes")) {
+								VideoToAudio videoToAudio = new VideoToAudio();
+								videoToAudio.convertVideoToAudio(videoOutputFileName, appProperty.getProperty("ffmpegPath"));
+							} // end if
+						} catch (NullPointerException e) {
+							logMessage("Generate audio value not defined in properties file");
+						} // end try
 						
 						// archive the tar ball
 						fileOperations.archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory"));
