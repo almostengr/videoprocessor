@@ -22,9 +22,8 @@ public class App
 	 * @param message  The message to be written to the console
 	 */
 	static public void logMessage(String message) {
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
 		LocalDateTime now = LocalDateTime.now();
-//		System.out.println(dtf.format(now));
 		System.out.println("[" + dtf.format(now) + "] " + message);	
 	}
 	
