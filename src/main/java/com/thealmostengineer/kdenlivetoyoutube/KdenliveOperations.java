@@ -39,7 +39,7 @@ public class KdenliveOperations  {
 //		pbArguments.add(meltPath);
 		for (int i = 0; i < meltPathSplit.length; i++) {
 			pbArguments.add(meltPathSplit[i]);
-		}
+		} // end for
 		
 		App.logMessage("Reading kdenlive file for resolution information");
 		File kdenliveFile = new File(kdenliveFileName);

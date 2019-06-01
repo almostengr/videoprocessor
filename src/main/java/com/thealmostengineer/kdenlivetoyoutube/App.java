@@ -101,6 +101,9 @@ public class App
 						fileOperations.createFolder(appProperty.getProperty("outputDirectory"));
 						kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
 						
+						VideoToAudio videoToAudio = new VideoToAudio();
+						videoToAudio.convertVideoToAudio(videoOutputFileName, appProperty.getProperty("ffmpegPath"));
+						
 						// archive the tar ball
 						fileOperations.archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory"));
 					} // end if
