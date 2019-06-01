@@ -13,11 +13,11 @@ public class PropertiesOperations {
 	
 	public void setOutputFile(File outputFile) {
 		this.outputFile = outputFile;
-	}
+	} // end function
 
 	public void setPropertiesList(ArrayList<String> propertiesList) {
 		this.propertiesList = propertiesList;
-	}
+	} // end function
 
 	public PropertiesOperations(String filePath, ArrayList<String> properties) throws Exception {
 		// TODO Auto-generated constructor stub
@@ -26,10 +26,10 @@ public class PropertiesOperations {
 		}
 		else {
 			setOutputFile(new File(filePath));
-		}
+		} // end if
 		
 		setPropertiesList(propertiesList);
-	}
+	} // end function
 	
 	void createPropertiesFile() throws FileNotFoundException, IOException {
 		Scanner scanner = new Scanner(System.in);
@@ -41,9 +41,9 @@ public class PropertiesOperations {
 			
 			FileOperations fileOperations = new FileOperations();
 			fileOperations.saveProperty(this.propertiesList.get(i), input, outputFile.getAbsolutePath());
-		}
+		} // end for
 		scanner.close();
 		
 		App.logMessage("Properties file saved to " + outputFile.getAbsolutePath());
-	}
+	} // end function
 }
