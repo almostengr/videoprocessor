@@ -216,7 +216,7 @@ public class FileOperations {
 		App.logMessage("Untarring to " + outputDirectory);
 		
 		Process processUntar = pbUntar.start();
-		processUntar.waitFor(60, TimeUnit.SECONDS);
+		processUntar.waitFor(300, TimeUnit.SECONDS);
 		
  		App.logMessage("Done uncompressing file " + filePathToGz);
 	}

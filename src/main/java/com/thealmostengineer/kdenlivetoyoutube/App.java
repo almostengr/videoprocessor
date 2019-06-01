@@ -117,7 +117,7 @@ public class App
 			
 			exitCode = 0;
 		} catch (Exception e) {
-			logMessage(e.getMessage());
+			logMessage("Error Detail: " + e.getMessage());
 			e.printStackTrace();
 		} // end catch
     
