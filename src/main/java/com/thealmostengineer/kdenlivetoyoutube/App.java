@@ -101,7 +101,12 @@ public class App
 			fileOperations.getCountOfFilesInFolder(appProperty.getProperty("outputDirectory"));
 			
 			// limit the number of files uploaded to prevent hitting the quota
-			for (int i = 0; i < 3; i++) {
+			int videoFileCounter = videoOutputFiles.length;
+			if (videoFileCounter > 3) {
+				videoFileCounter = 2;
+			} // end if
+			
+			for (int i = 0; i < videoFileCounter; i++) {
 				if (videoOutputFiles[i].getAbsolutePath().toLowerCase().endsWith(".mp4")) {
 					// login to api on first go
 					Auth.setClientSecretsPath(appProperty.getProperty("client_secrets_file"));
