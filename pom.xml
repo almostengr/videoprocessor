@@ -31,6 +31,14 @@
 			<version>v2-rev150-1.25.0</version>
 		</dependency>
 
+		<!--  https://developers.google.com/api-client-library/java/apis/youtube/v3 -->
+		<!--  Google API Library -->
+	    <dependency>
+	      <groupId>com.google.apis</groupId>
+	      <artifactId>google-api-services-youtube</artifactId>
+	      <version>v3-rev212-1.25.0</version>
+	    </dependency>
+	    
 	</dependencies>
 	<organization>
 		<name>Kenny Robinson, The Almost Engineer</name>
