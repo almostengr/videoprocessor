@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
+import com.google.j2objc.annotations.Property;
+
 /**
  * Application to render videos with Kdenlive and upload them to YouTube
  * 
@@ -13,6 +15,22 @@ import java.util.Properties;
  */
 public class App 
 {
+	static void uploadVideosToYouTube(FileOperations fileOperations, Properties appProperty) { 
+		File[] videoOutputFiles = fileOperations.getFilesInFolder(appProperty.getProperty("outputDirectory"));
+		fileOperations.getCountOfFilesInFolder(appProperty.getProperty("outputDirectory"));
+//		logMessage("Found " + videoOutputFiles.length + " files in output directory");
+		
+		for (int i = 0; i < videoOutputFiles.length; i++) {
+			if (videoOutputFiles[i].getAbsolutePath().toLowerCase().endsWith(".mp4")) {
+				// login to api on first go
+				Auth.setClientSecretsPath(appProperty.getProperty("client_secrets_file"));
+				
+				// upload video via YouTube API
+				UploadVideo.uploadVideo(videoOutputFiles[i].getAbsolutePath());
+			} // end if
+		} // end for
+	} // end function
+	
 	/**
 	 * Write log messages to the console
 	 * 
@@ -40,68 +58,66 @@ public class App
         	
         	preventDupeProcess.checkForDuplicateProcess();
     		
-			File[] pendingFiles = fileOperations.getFilesInFolder(appProperty.getProperty("pendingDirectory"));
-			fileOperations.getCountOfFilesInFolder(appProperty.getProperty("pendingDirectory"));
+//			File[] pendingFiles = fileOperations.getFilesInFolder(appProperty.getProperty("pendingDirectory"));
+//			fileOperations.getCountOfFilesInFolder(appProperty.getProperty("pendingDirectory"));
 			
-			for (int i = 0; i < pendingFiles.length; i++) {
-				try {
-					if (pendingFiles[i].getAbsolutePath().toLowerCase().endsWith(".gz") || 
-							pendingFiles[i].getAbsolutePath().toLowerCase().endsWith(".tar")) {
-					
-						logMessage("Processing " + pendingFiles[i].getAbsolutePath());
-						
-						fileOperations.deleteFolder(appProperty.getProperty("renderDirectory")); // clean render directory
-						fileOperations.unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("renderDirectory"));
-						
-						String kdenliveFileName = null;
-						String videoOutputFileName = null;
-						File[] renderDirFile = fileOperations.getFilesInFolder(appProperty.getProperty("renderDirectory")); // renderDir.listFiles();
-						
-						for (int i2 = 0; i2 < renderDirFile.length; i2++) {
-							if (renderDirFile[i2].getAbsolutePath().endsWith("kdenlive")) {
-								kdenliveFileName = renderDirFile[i2].getAbsolutePath();
-								videoOutputFileName = appProperty.getProperty("outputDirectory") + kdenliveFileName.substring(kdenliveFileName.lastIndexOf("/")) + ".mp4";
-								logMessage("Kdenlive: " + kdenliveFileName);
-								logMessage("Video Output: " + videoOutputFileName);
-								break;
-							} // end if
-						} // end for
-	
-						fileOperations.createFolder(appProperty.getProperty("outputDirectory"));
-						kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
-						
-						try {
-							String generateAudio = appProperty.getProperty("generateaudio");
-							
-							if (generateAudio.toLowerCase().equals("yes")) {
-								VideoToAudio videoToAudio = new VideoToAudio();
-								videoToAudio.convertVideoToAudio(videoOutputFileName, appProperty.getProperty("ffmpegPath"));
-							} // end if
-						} catch (NullPointerException e) {
-							logMessage("Generate audio value not defined in properties file");
-						} // end try
-						
-						// archive the tar ball
-						fileOperations.archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory"));
-					} // end if
-				} catch (Exception e) {
-					logMessage(e.getMessage());
-					e.printStackTrace();
-				} // end try
-				
-				logMessage("Done processing " + pendingFiles[i].getAbsolutePath());
-			} // end for
+//			for (int i = 0; i < pendingFiles.length; i++) {
+//				try {
+//					if (pendingFiles[i].getAbsolutePath().toLowerCase().endsWith(".gz") || 
+//							pendingFiles[i].getAbsolutePath().toLowerCase().endsWith(".tar")) {
+//					
+//						logMessage("Processing " + pendingFiles[i].getAbsolutePath());
+//						
+//						fileOperations.deleteFolder(appProperty.getProperty("renderDirectory")); // clean render directory
+//						fileOperations.unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("renderDirectory"));
+//						
+//						String kdenliveFileName = null;
+//						String videoOutputFileName = null;
+//						File[] renderDirFile = fileOperations.getFilesInFolder(appProperty.getProperty("renderDirectory")); // renderDir.listFiles();
+//						
+//						for (int i2 = 0; i2 < renderDirFile.length; i2++) {
+//							if (renderDirFile[i2].getAbsolutePath().endsWith("kdenlive")) {
+//								kdenliveFileName = renderDirFile[i2].getAbsolutePath();
+//								videoOutputFileName = appProperty.getProperty("outputDirectory") + kdenliveFileName.substring(kdenliveFileName.lastIndexOf("/")) + ".mp4";
+//								logMessage("Kdenlive: " + kdenliveFileName);
+//								logMessage("Video Output: " + videoOutputFileName);
+//								break;
+//							} // end if
+//						} // end for
+//	
+//						fileOperations.createFolder(appProperty.getProperty("outputDirectory"));
+//						kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
+//						
+//						try {
+//							String generateAudio = appProperty.getProperty("generateaudio");
+//							
+//							if (generateAudio.toLowerCase().equals("yes")) {
+//								VideoToAudio videoToAudio = new VideoToAudio();
+//								videoToAudio.convertVideoToAudio(videoOutputFileName, appProperty.getProperty("ffmpegPath"));
+//							} // end if
+//						} catch (NullPointerException e) {
+//							logMessage("Generate audio value not defined in properties file");
+//						} // end try
+//						
+//						// archive the tar ball
+//						fileOperations.archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory"));
+//					} // end if
+//				} catch (Exception e) {
+//					logMessage(e.getMessage());
+//					e.printStackTrace();
+//				} // end try
+//				
+//				logMessage("Done processing " + pendingFiles[i].getAbsolutePath());
+//			} // end for
 			
-			// TODO login to api on first go
-			// TODO upload video via YouTube API
-			
+			 
 			exitCode = 0;
 		} catch (Exception e) {
 			logMessage("Error Detail: " + e.getMessage());
 			e.printStackTrace();
 		} // end catch
     
-    	logMessage("Exiting");
+    	logMessage("Exiting, " + exitCode);
     	System.exit(exitCode);
     } // end function
 }

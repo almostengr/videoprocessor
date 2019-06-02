@@ -129,7 +129,7 @@ public class FileOperations {
 
 		File[] fileList = file.listFiles();
 		
-		App.logMessage("Found " + fileList.length + " items in directory");
+		App.logMessage("Found " + fileList.length + " items in directory " + directory);
 		return fileList.length;
 	} // end function
 	

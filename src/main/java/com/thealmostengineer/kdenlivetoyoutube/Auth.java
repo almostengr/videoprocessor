@@ -1,10 +1,14 @@
 package com.thealmostengineer.kdenlivetoyoutube;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
+import java.util.Properties;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.StoredCredential;
@@ -23,6 +27,16 @@ import com.google.api.client.util.store.FileDataStoreFactory;
  * Shared class used by every sample. Contains methods for authorizing a user and caching credentials.
  */
 public class Auth {
+	
+	static String clientSecretsPath;
+	
+	static void setClientSecretsPath(String filePath) {
+		clientSecretsPath = filePath;
+	} // end function
+	
+	static String getClientSecretsPath() {
+		return clientSecretsPath;
+	} // end function
 
     /**
      * Define a global instance of the HTTP transport.
@@ -46,9 +60,12 @@ public class Auth {
      * @param credentialDatastore name of the credential datastore to cache OAuth tokens
      */
     public static Credential authorize(List<String> scopes, String credentialDatastore) throws IOException {
-
+    	
         // Load client secrets.
-        Reader clientSecretReader = new InputStreamReader(Auth.class.getResourceAsStream("/client_secrets.json"));
+//        Reader clientSecretReader = new InputStreamReader(Auth.class.getResourceAsStream("/client_secrets.json"));
+//    	Reader clientSecretReader = new InputStreamReader(Auth.class.getResourceAsStream(clientSecretsPath));
+    	InputStream inputStream = new FileInputStream(clientSecretsPath);
+    	Reader clientSecretReader = new InputStreamReader(inputStream);
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, clientSecretReader);
 
         // Checks that the defaults have been replaced (Default = "Enter X here").

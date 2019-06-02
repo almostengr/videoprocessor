@@ -30,7 +30,9 @@ import com.google.api.services.youtube.model.VideoSnippet;
 import com.google.api.services.youtube.model.VideoStatus;
 import com.google.common.collect.Lists;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -56,7 +58,7 @@ public class UploadVideo {
      */
     private static final String VIDEO_FILE_FORMAT = "video/*";
 
-    private static final String SAMPLE_VIDEO_FILENAME = "sample-video.mp4";
+//    private static final String SAMPLE_VIDEO_FILENAME = "sample-video.mp4";
 
     /**
      * Upload the user-selected video to the user's YouTube channel. The code
@@ -65,7 +67,8 @@ public class UploadVideo {
      *
      * @param args command line args (not used).
      */
-    public static void main(String[] args) {
+//    public static void main(String[] args) {
+    public static void uploadVideo(String videoFileName) {
 
         // This OAuth 2.0 access scope allows an application to upload files
         // to the authenticated user's YouTube channel, but doesn't allow
@@ -80,7 +83,8 @@ public class UploadVideo {
             youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, credential).setApplicationName(
                     "youtube-cmdline-uploadvideo-sample").build();
 
-            System.out.println("Uploading: " + SAMPLE_VIDEO_FILENAME);
+//            System.out.println("Uploading: " + SAMPLE_VIDEO_FILENAME);
+            App.logMessage("Uploading " + videoFileName);
 
             // Add extra information to the video before uploading.
             Video videoObjectDefiningMetadata = new Video();
@@ -88,7 +92,8 @@ public class UploadVideo {
             // Set the video to be publicly visible. This is the default
             // setting. Other supporting settings are "unlisted" and "private."
             VideoStatus status = new VideoStatus();
-            status.setPrivacyStatus("public"); // TODO will need to change to private
+//            status.setPrivacyStatus("public"); // TODO will need to change to private
+            status.setPrivacyStatus("private");
             videoObjectDefiningMetadata.setStatus(status);
 
             // Most of the video's metadata is set on the VideoSnippet object.
@@ -115,8 +120,10 @@ public class UploadVideo {
             // Add the completed snippet object to the video resource.
             videoObjectDefiningMetadata.setSnippet(snippet);
 
-            InputStreamContent mediaContent = new InputStreamContent(VIDEO_FILE_FORMAT,
-                    UploadVideo.class.getResourceAsStream("/sample-video.mp4"));
+//            InputStreamContent mediaContent = new InputStreamContent(VIDEO_FILE_FORMAT,
+//                    UploadVideo.class.getResourceAsStream("/sample-video.mp4"));
+            InputStream inputStream = new FileInputStream(videoFileName);
+            InputStreamContent mediaContent = new InputStreamContent(VIDEO_FILE_FORMAT, inputStream);
 
             // Insert the video. The command sends three arguments. The first
             // specifies which information the API request is setting and which
