@@ -16,14 +16,13 @@
 	</properties>
 
 	<dependencies>
-
-		<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-youtube -->
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
 		<dependency>
-			<groupId>com.google.apis</groupId>
-			<artifactId>google-api-services-youtube</artifactId>
-			<version>v3-rev210-1.25.0</version>
+		    <groupId>org.eclipse.jetty</groupId>
+		    <artifactId>jetty-server</artifactId>
+		    <version>9.4.18.v20190429</version>
 		</dependency>
-
+			
 		<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-oauth2 -->
 		<dependency>
 			<groupId>com.google.apis</groupId>
@@ -32,13 +31,39 @@
 		</dependency>
 
 		<!--  https://developers.google.com/api-client-library/java/apis/youtube/v3 -->
-		<!--  Google API Library -->
 	    <dependency>
 	      <groupId>com.google.apis</groupId>
 	      <artifactId>google-api-services-youtube</artifactId>
 	      <version>v3-rev212-1.25.0</version>
 	    </dependency>
 	    
+	    <!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client -->
+		<dependency>
+		    <groupId>com.google.api-client</groupId>
+		    <artifactId>google-api-client</artifactId>
+		    <version>1.29.0</version>
+		</dependency>
+			    
+		<!-- https://mvnrepository.com/artifact/com.google.http-client/google-http-client-jackson2 -->
+		<dependency>
+		    <groupId>com.google.http-client</groupId>
+		    <artifactId>google-http-client-jackson2</artifactId>
+		    <version>1.29.1</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client-jetty -->
+		<dependency>
+		    <groupId>com.google.oauth-client</groupId>
+		    <artifactId>google-oauth-client-jetty</artifactId>
+		    <version>1.29.0</version>
+		</dependency>
+
+        <dependency>
+            <groupId>com.google.collections</groupId>
+            <artifactId>google-collections</artifactId>
+            <version>1.0</version>
+        </dependency>
+        
 	</dependencies>
 	<organization>
 		<name>Kenny Robinson, The Almost Engineer</name>
