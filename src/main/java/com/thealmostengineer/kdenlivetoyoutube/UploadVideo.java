@@ -58,8 +58,6 @@ public class UploadVideo {
      */
     private static final String VIDEO_FILE_FORMAT = "video/*";
 
-//    private static final String SAMPLE_VIDEO_FILENAME = "sample-video.mp4";
-
     /**
      * Upload the user-selected video to the user's YouTube channel. The code
      * looks for the video in the application's project folder and uses OAuth
@@ -67,7 +65,6 @@ public class UploadVideo {
      *
      * @param args command line args (not used).
      */
-//    public static void main(String[] args) {
     public static void uploadVideo(String videoFileName) {
 
         // This OAuth 2.0 access scope allows an application to upload files
@@ -83,7 +80,6 @@ public class UploadVideo {
             youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, credential).setApplicationName(
                     "youtube-cmdline-uploadvideo-sample").build();
 
-//            System.out.println("Uploading: " + SAMPLE_VIDEO_FILENAME);
             App.logMessage("Uploading " + videoFileName);
 
             // Add extra information to the video before uploading.
@@ -92,7 +88,6 @@ public class UploadVideo {
             // Set the video to be publicly visible. This is the default
             // setting. Other supporting settings are "unlisted" and "private."
             VideoStatus status = new VideoStatus();
-//            status.setPrivacyStatus("public"); // TODO will need to change to private
             status.setPrivacyStatus("private");
             videoObjectDefiningMetadata.setStatus(status);
 
@@ -106,7 +101,6 @@ public class UploadVideo {
             Calendar cal = Calendar.getInstance();
             
             // set the video title to the file name
-//            snippet.setTitle("Test Upload via Java on " + cal.getTime());
             String videoTitle = videoFileName.substring(videoFileName.lastIndexOf("/")+1, videoFileName.lastIndexOf(".mp4"));
             snippet.setTitle(videoTitle);
             
@@ -121,19 +115,12 @@ public class UploadVideo {
             for (int i = 0; i < tagsSeparated.length; i++) {
             	tags.add(tagsSeparated[i]);
             } // end for
-//            tags.add("test");
-//            tags.add("example");
-//            tags.add("java");
-//            tags.add("YouTube Data API V3");
-//            tags.add("erase me");
             
             snippet.setTags(tags);
 
             // Add the completed snippet object to the video resource.
             videoObjectDefiningMetadata.setSnippet(snippet);
 
-//            InputStreamContent mediaContent = new InputStreamContent(VIDEO_FILE_FORMAT,
-//                    UploadVideo.class.getResourceAsStream("/sample-video.mp4"));
             InputStream inputStream = new FileInputStream(videoFileName);
             InputStreamContent mediaContent = new InputStreamContent(VIDEO_FILE_FORMAT, inputStream);
 

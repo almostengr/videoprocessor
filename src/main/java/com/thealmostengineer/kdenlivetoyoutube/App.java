@@ -40,6 +40,8 @@ public class App
         	
         	preventDupeProcess.checkForDuplicateProcess();
     		
+        	// render video archives in the pending directory
+        	
 			File[] pendingFiles = fileOperations.getFilesInFolder(appProperty.getProperty("pendingDirectory"));
 			fileOperations.getCountOfFilesInFolder(appProperty.getProperty("pendingDirectory"));
 			
@@ -93,9 +95,10 @@ public class App
 				logMessage("Done processing " + pendingFiles[i].getAbsolutePath());
 			} // end for
 
+			// do uploading of files in output directory
+			
 			File[] videoOutputFiles = fileOperations.getFilesInFolder(appProperty.getProperty("outputDirectory"));
 			fileOperations.getCountOfFilesInFolder(appProperty.getProperty("outputDirectory"));
-//			logMessage("Found " + videoOutputFiles.length + " files in output directory");
 			
 			for (int i = 0; i < videoOutputFiles.length; i++) {
 				if (videoOutputFiles[i].getAbsolutePath().toLowerCase().endsWith(".mp4")) {
