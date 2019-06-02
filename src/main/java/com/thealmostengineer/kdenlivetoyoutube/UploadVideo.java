@@ -173,12 +173,18 @@ public class UploadVideo {
             Video returnedVideo = videoInsert.execute();
 
             // Print data about the newly inserted video from the API response.
-            System.out.println("\n================== Returned Video ==================\n");
-            System.out.println("  - Id: " + returnedVideo.getId());
-            System.out.println("  - Title: " + returnedVideo.getSnippet().getTitle());
-            System.out.println("  - Tags: " + returnedVideo.getSnippet().getTags());
-            System.out.println("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
-            System.out.println("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
+//            System.out.println("\n================== Returned Video ==================\n");
+//            System.out.println("  - Id: " + returnedVideo.getId());
+//            System.out.println("  - Title: " + returnedVideo.getSnippet().getTitle());
+//            System.out.println("  - Tags: " + returnedVideo.getSnippet().getTags());
+//            System.out.println("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
+//            System.out.println("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
+            App.logMessage("\n================== Returned Video ==================\n");
+			App.logMessage("  - Id: " + returnedVideo.getId());
+			App.logMessage("  - Title: " + returnedVideo.getSnippet().getTitle());
+			App.logMessage("  - Tags: " + returnedVideo.getSnippet().getTags());
+			App.logMessage("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
+			App.logMessage("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
 
         } catch (GoogleJsonResponseException e) {
             System.err.println("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
