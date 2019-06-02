@@ -2,14 +2,11 @@ package com.thealmostengineer.kdenlivetoyoutube;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
-import java.util.Properties;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.StoredCredential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -63,7 +60,6 @@ public class Auth {
     	
         // Load client secrets.
 //        Reader clientSecretReader = new InputStreamReader(Auth.class.getResourceAsStream("/client_secrets.json"));
-//    	Reader clientSecretReader = new InputStreamReader(Auth.class.getResourceAsStream(clientSecretsPath));
     	InputStream inputStream = new FileInputStream(clientSecretsPath);
     	Reader clientSecretReader = new InputStreamReader(inputStream);
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, clientSecretReader);

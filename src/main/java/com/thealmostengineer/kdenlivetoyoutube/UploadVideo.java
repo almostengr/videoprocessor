@@ -104,17 +104,29 @@ public class UploadVideo {
             // multiple files. You should remove this code from your project
             // and use your own standard names instead.
             Calendar cal = Calendar.getInstance();
-            snippet.setTitle("Test Upload via Java on " + cal.getTime());
-            snippet.setDescription(
-                    "Video uploaded via YouTube Data API V3 using the Java library " + "on " + cal.getTime());
+            
+            // set the video title to the file name
+//            snippet.setTitle("Test Upload via Java on " + cal.getTime());
+            String videoTitle = videoFileName.substring(videoFileName.lastIndexOf("/")+1, videoFileName.lastIndexOf(".mp4"));
+            snippet.setTitle(videoTitle);
+            
+            snippet.setDescription("Video uploaded via YouTube Data API V3 using the Java library " + "on " + cal.getTime());
 
             // Set the keyword tags that you want to associate with the video.
             List<String> tags = new ArrayList<String>();
-            tags.add("test");
-            tags.add("example");
-            tags.add("java");
-            tags.add("YouTube Data API V3");
-            tags.add("erase me");
+            
+            String[] tagsSeparated = videoTitle.split(" ");
+            
+            // use words from the file name as tags
+            for (int i = 0; i < tagsSeparated.length; i++) {
+            	tags.add(tagsSeparated[i]);
+            } // end for
+//            tags.add("test");
+//            tags.add("example");
+//            tags.add("java");
+//            tags.add("YouTube Data API V3");
+//            tags.add("erase me");
+            
             snippet.setTags(tags);
 
             // Add the completed snippet object to the video resource.
