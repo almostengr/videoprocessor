@@ -104,17 +104,36 @@ public class UploadVideo {
             String videoTitle = videoFileName.substring(videoFileName.lastIndexOf("/")+1, videoFileName.lastIndexOf(".mp4"));
             snippet.setTitle(videoTitle);
             
-            snippet.setDescription("Video uploaded via YouTube Data API V3 using the Java library " + "on " + cal.getTime());
-
+            String description = "Video uploaded via YouTube Data API V3 using the Java library " + "on " + cal.getTime() + System.lineSeparator() +
+            		videoTitle + System.lineSeparator() +
+            		System.lineSeparator() +
+            		"SUBSCRIBE!! https://www.youtube.com/channel/UC4HCouBLtXD1j1U_17aBqig?sub_confirmation=1" + System.lineSeparator() + 
+            		System.lineSeparator() +
+            		"CHANNEL SCHEDULE: New videos every week!!" + System.lineSeparator() +
+            		System.lineSeparator() +
+            		"LET’S CONNECT ONLINE!" + System.lineSeparator() + 
+            		"Website: http://thealmostengineer.com" + System.lineSeparator() + 
+            		"Instagram: http://instagram.com/almostengr" + System.lineSeparator() + 
+            		"Twitter: http://twitter.com/almostengr" + System.lineSeparator() +  
+            		"Github: http://github.com/almostengr";
+//            snippet.setDescription("Video uploaded via YouTube Data API V3 using the Java library " + "on " + cal.getTime());
+            snippet.setDescription(description);
+            
             // Set the keyword tags that you want to associate with the video.
             List<String> tags = new ArrayList<String>();
             
+            // split the video title into keywords
             String[] tagsSeparated = videoTitle.split(" ");
             
             // use words from the file name as tags
             for (int i = 0; i < tagsSeparated.length; i++) {
             	tags.add(tagsSeparated[i]);
             } // end for
+            
+            tags.add("almostengr");
+            tags.add("almost engineer");
+            tags.add("kenny robinson");
+            tags.add("thealmostengineer");
             
             snippet.setTags(tags);
 
@@ -185,6 +204,7 @@ public class UploadVideo {
 			App.logMessage("  - Tags: " + returnedVideo.getSnippet().getTags());
 			App.logMessage("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
 			App.logMessage("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
+			App.logMessage("  - Description: " + returnedVideo.getSnippet().getDescription());
 
         } catch (GoogleJsonResponseException e) {
             System.err.println("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
