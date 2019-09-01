@@ -61,7 +61,7 @@ public class App
 								break;
 							} // end if
 						} // end for
-	
+						
 						fileOperations.createFolder(appProperty.getProperty("outputDirectory"));
 						kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
 												

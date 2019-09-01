@@ -207,14 +207,14 @@ public class UploadVideo {
 			App.logger.info("  - Description: " + returnedVideo.getSnippet().getDescription());
 
         } catch (GoogleJsonResponseException e) {
-            System.err.println("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
+            logger.severe("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
                     + e.getDetails().getMessage());
             e.printStackTrace();
         } catch (IOException e) {
-            System.err.println("IOException: " + e.getMessage());
+            logger.severe("IOException: " + e.getMessage());
             e.printStackTrace();
         } catch (Throwable t) {
-            System.err.println("Throwable: " + t.getMessage());
+            logger.severe("Throwable: " + t.getMessage());
             t.printStackTrace();
         }
     }
