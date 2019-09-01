@@ -41,7 +41,7 @@ public class KdenliveOperations  {
 			pbArguments.add(meltPathSplit[i]);
 		} // end for
 		
-		App.logMessage("Reading kdenlive file for resolution information");
+		App.logger.info("Reading kdenlive file for resolution information");
 		File kdenliveFile = new File(kdenliveFileName);
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(kdenliveFile));
 		String line = "";
@@ -53,7 +53,7 @@ public class KdenliveOperations  {
 		} // end while
 		bufferedReader.close();
 		
-		App.logMessage("Resolution: " + resolution);
+		App.logger.info("Resolution: " + resolution);
 		pbArguments.add(kdenliveFileName); 			// source file
 		pbArguments.add("-consumer");
 		pbArguments.add("avformat:" + videoOutputFileName);		// target file
@@ -74,10 +74,10 @@ public class KdenliveOperations  {
 		pbRenderVideo.redirectError(Redirect.INHERIT);
 		pbRenderVideo.redirectOutput(Redirect.INHERIT);
 		
-		App.logMessage("Rendering video " + videoOutputFileName);
+		App.logger.info("Rendering video " + videoOutputFileName);
 		Timeouts timeouts = new Timeouts();
 		Process processRenderVideo = pbRenderVideo.start();
 		processRenderVideo.waitFor(timeouts.getLongTimeoutHours(), TimeUnit.HOURS);	// wait for video to render
-		App.logMessage("Done rendering video " + videoOutputFileName);
+		App.logger.info("Done rendering video " + videoOutputFileName);
 	} // end function
 }

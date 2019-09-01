@@ -4,6 +4,7 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Application to render videos with Kdenlive and upload them to YouTube
@@ -13,16 +14,8 @@ import java.util.Properties;
  */
 public class App 
 {
-	/**
-	 * Write log messages to the console
-	 * 
-	 * @param message  The message to be written to the console
-	 */
-	static public void logMessage(String message) {
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
-		LocalDateTime now = LocalDateTime.now();
-		System.out.println("[" + dtf.format(now) + "] " + message);	
-	} // end function
+	
+	static Logger logger = Logger.getAnonymousLogger();
 	
     public static void main( String[] args )
     {
@@ -50,7 +43,7 @@ public class App
 					if (pendingFiles[i].getAbsolutePath().toLowerCase().endsWith(".gz") || 
 							pendingFiles[i].getAbsolutePath().toLowerCase().endsWith(".tar")) {
 					
-						logMessage("Processing " + pendingFiles[i].getAbsolutePath());
+						logger.info("Processing " + pendingFiles[i].getAbsolutePath());
 						
 						fileOperations.deleteFolder(appProperty.getProperty("renderDirectory")); // clean render directory
 						fileOperations.unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("renderDirectory"));
@@ -63,8 +56,8 @@ public class App
 							if (renderDirFile[i2].getAbsolutePath().endsWith("kdenlive")) {
 								kdenliveFileName = renderDirFile[i2].getAbsolutePath();
 								videoOutputFileName = appProperty.getProperty("outputDirectory") + kdenliveFileName.substring(kdenliveFileName.lastIndexOf("/")) + ".mp4";
-								logMessage("Kdenlive: " + kdenliveFileName);
-								logMessage("Video Output: " + videoOutputFileName);
+								logger.info("Kdenlive: " + kdenliveFileName);
+								logger.info("Video Output: " + videoOutputFileName);
 								break;
 							} // end if
 						} // end for
@@ -81,7 +74,7 @@ public class App
 //								videoToAudio.convertVideoToAudio(videoOutputFileName, appProperty.getProperty("ffmpegPath"));
 //							} // end if
 //						} catch (NullPointerException e) {
-//							logMessage("Generate audio value not defined in properties file");
+//							logger.info("Generate audio value not defined in properties file");
 //						} // end try
 						
 						// archive the tar ball
@@ -89,11 +82,11 @@ public class App
 						
 					} // end if
 				} catch (Exception e) {
-					logMessage(e.getMessage());
+					logger.info(e.getMessage());
 					e.printStackTrace();
 				} // end try
 				
-				logMessage("Done processing " + pendingFiles[i].getAbsolutePath());
+				logger.info("Done processing " + pendingFiles[i].getAbsolutePath());
 			} // end for
 
 			// do uploading of files in output directory
@@ -118,17 +111,17 @@ public class App
 					fileOperations.deleteFolder(videoOutputFiles[i].getAbsolutePath()); // delete file after uploading
 				}
 				else {
-					logMessage("Skipped file " + videoOutputFiles[i].getAbsolutePath());
+					logger.info("Skipped file " + videoOutputFiles[i].getAbsolutePath());
 				} // end if
 			} // end for
 			 
 			exitCode = 0;
 		} catch (Exception e) {
-			logMessage("Error Detail: " + e.getMessage());
+			logger.info("Error Detail: " + e.getMessage());
 			e.printStackTrace();
 		} // end catch
     
-    	logMessage("Exiting, " + exitCode);
+    	logger.info("Exiting, " + exitCode);
     	System.exit(exitCode);
     } // end function
 }

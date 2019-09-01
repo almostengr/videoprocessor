@@ -17,7 +17,7 @@ public class PreventDupeProcess {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		
-		App.logMessage("Creating process file" + this.processFile.getAbsolutePath());
+		App.logger.info("Creating process file" + this.processFile.getAbsolutePath());
 		FileWriter fileWriter = new FileWriter(this.processFile);
 		fileWriter.write("Started at " + dateFormat.format(date));
 		fileWriter.close();
@@ -28,7 +28,7 @@ public class PreventDupeProcess {
 		
 		this.createProcessFile();
 		
-		App.logMessage("Checking for duplicate processes");
+		App.logger.info("Checking for duplicate processes");
 		
 		FileOperations fileOperations = new FileOperations();
 		File[] fileListing = fileOperations.getFilesInFolder(processFile.getParent());

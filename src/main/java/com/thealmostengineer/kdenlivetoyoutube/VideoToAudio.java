@@ -16,7 +16,7 @@ public class VideoToAudio {
 		this.audioOutputFileName = videoFileName; // take value passed in
 		this.audioOutputFileName = this.audioOutputFileName.substring(0, this.audioOutputFileName.lastIndexOf(".mp4")); // remove mp4 extension
 		this.audioOutputFileName = this.audioOutputFileName + ".mp3"; // append the mp3 extension
-		App.logMessage("Audio filename: " + this.audioOutputFileName);
+		App.logger.info("Audio filename: " + this.audioOutputFileName);
 	} // end function
 	
 	/**
@@ -36,7 +36,7 @@ public class VideoToAudio {
 	 */
 	void convertVideoToAudio(String videoFileName, String ffmpegPath) throws Exception {
 		setAudioOutputFileName(videoFileName);
-		App.logMessage("Converting video to audio " + this.audioOutputFileName);
+		App.logger.info("Converting video to audio " + this.audioOutputFileName);
 		
 		// command line arguments
 		ArrayList<String> pbArguments = new ArrayList<String>();
@@ -61,6 +61,6 @@ public class VideoToAudio {
 		
 		Process process = processBuilder.start();
 		process.waitFor(10, TimeUnit.HOURS); // wait for process to complete
-		App.logMessage("Done converting video to audio " + this.audioOutputFileName);
+		App.logger.info("Done converting video to audio " + this.audioOutputFileName);
 	} // end function
 }

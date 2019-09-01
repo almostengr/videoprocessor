@@ -44,6 +44,6 @@ public class PropertiesOperations {
 		} // end for
 		scanner.close();
 		
-		App.logMessage("Properties file saved to " + outputFile.getAbsolutePath());
+		App.logger.info("Properties file saved to " + outputFile.getAbsolutePath());
 	} // end function
 }

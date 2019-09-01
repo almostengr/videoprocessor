@@ -26,7 +26,7 @@ public class FileOperations {
 	 * @throws Exception
 	 */
 	Properties loadProperties(String propertiesFileName) throws Exception {
-		App.logMessage("Loading properties");
+		App.logger.info("Loading properties");
 		
 		InputStream inputStream = new FileInputStream(propertiesFileName); // check for the file
 		Properties properties = new Properties(); 
@@ -50,7 +50,7 @@ public class FileOperations {
 		File file = new File(fileName);
 		FileOutputStream fileOutputStream = new FileOutputStream(file);
 		
-		App.logMessage("Saving the property to " + file.getAbsolutePath());
+		App.logger.info("Saving the property to " + file.getAbsolutePath());
 		properties.setProperty(property, value);
 		properties.store(fileOutputStream, "");
 		fileOutputStream.close(); // close the file
@@ -64,7 +64,7 @@ public class FileOperations {
 	void deleteFolder(String directoryStr) {
 		
 		File directoryFile = new File(directoryStr);
-		App.logMessage("Deleting folder " + directoryFile.getAbsolutePath());
+		App.logger.info("Deleting folder " + directoryFile.getAbsolutePath());
 		
 	    File[] files = directoryFile.listFiles();
 	    if(files!=null) { //some JVMs return null for empty dirs
@@ -90,7 +90,7 @@ public class FileOperations {
 		
 		if (directoryFile.exists() == false) {
 			directoryFile.mkdirs();
-			App.logMessage("Created directory " + directoryStr);
+			App.logger.info("Created directory " + directoryStr);
 		} // end if
 		
 		return directoryFile;
@@ -103,7 +103,7 @@ public class FileOperations {
 	 * @return
 	 */
 	File[] getFilesInFolder(String directory) {
-		App.logMessage("Getting files in " + directory);
+		App.logger.info("Getting files in " + directory);
 		
 		File file = new File(directory);
 		
@@ -118,7 +118,7 @@ public class FileOperations {
 	}  // end function
 	
 	int getCountOfFilesInFolder(String directory) {
-		App.logMessage("Getting count of files in " + directory);
+		App.logger.info("Getting count of files in " + directory);
 		
 		File file = new File(directory);
 		
@@ -129,7 +129,7 @@ public class FileOperations {
 
 		File[] fileList = file.listFiles();
 		
-		App.logMessage("Found " + fileList.length + " items in directory " + directory);
+		App.logger.info("Found " + fileList.length + " items in directory " + directory);
 		return fileList.length;
 	} // end function
 	
@@ -141,7 +141,7 @@ public class FileOperations {
 	 * @throws Exception
 	 */
 	void archiveProject(String filePathToGz, String archiveDirectory) throws Exception {
-		App.logMessage("Archiving project files");
+		App.logger.info("Archiving project files");
 		
 		String filePathToTar; 
 		try {
@@ -176,20 +176,20 @@ public class FileOperations {
 	 * @throws Exception
 	 */
 	void unpackageCompressTar(String filePathToGz, String outputDirectory) throws Exception {
-		App.logMessage("Uncompressing file " + filePathToGz);
+		App.logger.info("Uncompressing file " + filePathToGz);
 		
 		Timeouts timeouts = new Timeouts();
 		
 		// run gunzip on the file if it is compressed
 		if (filePathToGz.endsWith(".gz")) {
-			App.logMessage("Gz file: " + filePathToGz);
+			App.logger.info("Gz file: " + filePathToGz);
 			
 			ProcessBuilder pbGunzip = new ProcessBuilder("/bin/gunzip", filePathToGz);
 			pbGunzip.inheritIO();
 			pbGunzip.redirectError(Redirect.INHERIT);
 			pbGunzip.redirectOutput(Redirect.INHERIT);
 			
-			App.logMessage("Starting gunzip for " + filePathToGz);
+			App.logger.info("Starting gunzip for " + filePathToGz);
 			
 			Process processGunzip = pbGunzip.start();
 			processGunzip.waitFor(timeouts.getShortTimeoutSeconds(), TimeUnit.SECONDS);
@@ -204,18 +204,18 @@ public class FileOperations {
 			filePathToTar = filePathToGz;
 		} // end try
 		
-		App.logMessage("Tar file: " + filePathToTar);
+		App.logger.info("Tar file: " + filePathToTar);
 		
 		ProcessBuilder pbUntar = new ProcessBuilder("/bin/tar", "-xf", filePathToTar, "-C", outputDirectory);
 		pbUntar.inheritIO();
 		pbUntar.redirectError(Redirect.INHERIT);
 		pbUntar.redirectOutput(Redirect.INHERIT);
 		
-		App.logMessage("Untarring to " + outputDirectory);
+		App.logger.info("Untarring to " + outputDirectory);
 		
 		Process processUntar = pbUntar.start();
 		processUntar.waitFor(timeouts.getShortTimeoutSeconds(), TimeUnit.SECONDS);
 		
- 		App.logMessage("Done uncompressing file " + filePathToGz);
+ 		App.logger.info("Done uncompressing file " + filePathToGz);
 	} // end function
 }

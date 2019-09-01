@@ -80,7 +80,7 @@ public class UploadVideo {
             youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, credential).setApplicationName(
                     "youtube-cmdline-uploadvideo-sample").build();
 
-            App.logMessage("Uploading " + videoFileName);
+            App.logger.info("Uploading " + videoFileName);
 
             // Add extra information to the video before uploading.
             Video videoObjectDefiningMetadata = new Video();
@@ -198,13 +198,13 @@ public class UploadVideo {
 //            System.out.println("  - Tags: " + returnedVideo.getSnippet().getTags());
 //            System.out.println("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
 //            System.out.println("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
-            App.logMessage("\n================== Returned Video ==================\n");
-			App.logMessage("  - Id: " + returnedVideo.getId());
-			App.logMessage("  - Title: " + returnedVideo.getSnippet().getTitle());
-			App.logMessage("  - Tags: " + returnedVideo.getSnippet().getTags());
-			App.logMessage("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
-			App.logMessage("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
-			App.logMessage("  - Description: " + returnedVideo.getSnippet().getDescription());
+            App.logger.info("\n================== Returned Video ==================\n");
+			App.logger.info("  - Id: " + returnedVideo.getId());
+			App.logger.info("  - Title: " + returnedVideo.getSnippet().getTitle());
+			App.logger.info("  - Tags: " + returnedVideo.getSnippet().getTags());
+			App.logger.info("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
+			App.logger.info("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
+			App.logger.info("  - Description: " + returnedVideo.getSnippet().getDescription());
 
         } catch (GoogleJsonResponseException e) {
             System.err.println("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
