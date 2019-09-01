@@ -64,19 +64,7 @@ public class App
 	
 						fileOperations.createFolder(appProperty.getProperty("outputDirectory"));
 						kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
-						
-						// dont convert file to audio
-//						try {
-//							String generateAudio = appProperty.getProperty("generateaudio");
-//							
-//							if (generateAudio.toLowerCase().equals("yes")) {
-//								VideoToAudio videoToAudio = new VideoToAudio();
-//								videoToAudio.convertVideoToAudio(videoOutputFileName, appProperty.getProperty("ffmpegPath"));
-//							} // end if
-//						} catch (NullPointerException e) {
-//							logger.info("Generate audio value not defined in properties file");
-//						} // end try
-						
+												
 						// archive the tar ball
 						fileOperations.archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory"));
 						
