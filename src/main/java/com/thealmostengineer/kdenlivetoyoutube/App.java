@@ -12,13 +12,10 @@ import java.util.logging.Logger;
  * @author almostengineer, Kenny Robinson
  * 
  */
-public class App 
-{
-	
+public class App {
 	static Logger logger = Logger.getAnonymousLogger();
 	
-    public static void main( String[] args )
-    {
+    public static void main( String[] args )    {
     	int exitCode = 1; // default the exit code to failure
     	
     	try {
@@ -29,9 +26,10 @@ public class App
         	FileOperations fileOperations = new FileOperations();
         	KdenliveOperations kdenliveOperations = new KdenliveOperations();
         	Properties appProperty = fileOperations.loadProperties(args[0]);
+
         	PreventDupeProcess preventDupeProcess = new PreventDupeProcess();
-        	
         	preventDupeProcess.checkForDuplicateProcess();
+        	CheckFreeSpace.main();
     		
         	// render video archives in the pending directory
         	
@@ -55,7 +53,8 @@ public class App
 						for (int i2 = 0; i2 < renderDirFile.length; i2++) {
 							if (renderDirFile[i2].getAbsolutePath().endsWith("kdenlive")) {
 								kdenliveFileName = renderDirFile[i2].getAbsolutePath();
-								videoOutputFileName = appProperty.getProperty("outputDirectory") + kdenliveFileName.substring(kdenliveFileName.lastIndexOf("/")) + ".mp4";
+								videoOutputFileName = appProperty.getProperty("outputDirectory") + 
+										kdenliveFileName.substring(kdenliveFileName.lastIndexOf("/")) + ".mp4";
 								logger.info("Kdenlive: " + kdenliveFileName);
 								logger.info("Video Output: " + videoOutputFileName);
 								break;
@@ -64,10 +63,7 @@ public class App
 						
 						fileOperations.createFolder(appProperty.getProperty("outputDirectory"));
 						kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
-												
-						// archive the tar ball
 						fileOperations.archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory"));
-						
 					} // end if
 				} catch (Exception e) {
 					logger.info(e.getMessage());
