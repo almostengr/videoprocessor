@@ -84,7 +84,8 @@ public class App {
 			} // end if
 			
 			for (int i = 0; i < videoFileCounter; i++) {
-				if (videoOutputFiles[i].getAbsolutePath().toLowerCase().endsWith(".mp4")) {
+//				if (videoOutputFiles[i].getAbsolutePath().toLowerCase().endsWith(".mp4")) {
+				if (false) {
 					// login to api on first go
 					Auth.setClientSecretsPath(appProperty.getProperty("client_secrets_file"));
 					
