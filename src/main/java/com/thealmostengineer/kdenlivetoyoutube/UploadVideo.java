@@ -105,17 +105,17 @@ public class UploadVideo {
             snippet.setTitle(videoTitle);
             
             String description = "Video uploaded via YouTube Data API V3 using the Java library " + "on " + cal.getTime() + System.lineSeparator() +
-            		videoTitle + System.lineSeparator() +
-            		System.lineSeparator() +
-            		"SUBSCRIBE!! https://www.youtube.com/channel/UC4HCouBLtXD1j1U_17aBqig?sub_confirmation=1" + System.lineSeparator() + 
-            		System.lineSeparator() +
-            		"CHANNEL SCHEDULE: New videos every week!!" + System.lineSeparator() +
-            		System.lineSeparator() +
-            		"LET’S CONNECT ONLINE!" + System.lineSeparator() + 
-            		"Website: http://thealmostengineer.com" + System.lineSeparator() + 
-            		"Instagram: http://instagram.com/almostengr" + System.lineSeparator() + 
-            		"Twitter: http://twitter.com/almostengr" + System.lineSeparator() +  
-            		"Github: http://github.com/almostengr";
+        		videoTitle + System.lineSeparator() +
+        		System.lineSeparator() +
+        		"SUBSCRIBE!! https://www.youtube.com/channel/UC4HCouBLtXD1j1U_17aBqig?sub_confirmation=1" + System.lineSeparator() + 
+        		System.lineSeparator() +
+        		"CHANNEL SCHEDULE: New videos every week!!" + System.lineSeparator() +
+        		System.lineSeparator() +
+        		"LET’S CONNECT ONLINE!" + System.lineSeparator() + 
+        		"Website: http://thealmostengineer.com" + System.lineSeparator() + 
+        		"Instagram: http://instagram.com/almostengr" + System.lineSeparator() + 
+        		"Twitter: http://twitter.com/almostengr" + System.lineSeparator() +  
+        		"Github: http://github.com/almostengr";
 //            snippet.setDescription("Video uploaded via YouTube Data API V3 using the Java library " + "on " + cal.getTime());
             snippet.setDescription(description);
             
@@ -134,6 +134,7 @@ public class UploadVideo {
             tags.add("almost engineer");
             tags.add("kenny robinson");
             tags.add("thealmostengineer");
+            tags.add("almostengr");
             
             snippet.setTags(tags);
 
@@ -207,14 +208,14 @@ public class UploadVideo {
 			App.logger.info("  - Description: " + returnedVideo.getSnippet().getDescription());
 
         } catch (GoogleJsonResponseException e) {
-            logger.severe("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
+            App.logger.severe("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
                     + e.getDetails().getMessage());
             e.printStackTrace();
         } catch (IOException e) {
-            logger.severe("IOException: " + e.getMessage());
+            App.logger.severe("IOException: " + e.getMessage());
             e.printStackTrace();
         } catch (Throwable t) {
-            logger.severe("Throwable: " + t.getMessage());
+            App.logger.severe("Throwable: " + t.getMessage());
             t.printStackTrace();
         }
     }
