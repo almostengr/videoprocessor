@@ -29,7 +29,7 @@ public class App {
 
         	PreventDupeProcess preventDupeProcess = new PreventDupeProcess();
         	preventDupeProcess.checkForDuplicateProcess();
-        	CheckFreeSpace.main();
+//        	CheckFreeSpace.main();
     		
         	// render video archives in the pending directory
         	
@@ -55,6 +55,7 @@ public class App {
 								kdenliveFileName = renderDirFile[i2].getAbsolutePath();
 								videoOutputFileName = appProperty.getProperty("outputDirectory") + 
 										kdenliveFileName.substring(kdenliveFileName.lastIndexOf("/")) + ".mp4";
+								videoOutputFileName = videoOutputFileName.replace(".kdenlive", "");
 								logger.info("Kdenlive: " + kdenliveFileName);
 								logger.info("Video Output: " + videoOutputFileName);
 								break;
