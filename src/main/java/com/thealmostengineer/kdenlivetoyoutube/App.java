@@ -1,8 +1,6 @@
 package com.thealmostengineer.kdenlivetoyoutube;
 
 import java.io.File;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 import java.util.logging.Logger;
 
