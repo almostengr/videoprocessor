@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Upload a video to the authenticated user's channel. Use OAuth 2.0 to
@@ -45,6 +46,8 @@ import java.util.List;
  * @author Jeremy Walker
  */
 public class UploadVideo {
+
+	static Logger logger = App.logger;
 
     /**
      * Define a global instance of a Youtube object, which will be used
@@ -80,7 +83,7 @@ public class UploadVideo {
             youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, credential).setApplicationName(
                     "youtube-cmdline-uploadvideo-sample").build();
 
-            App.logger.info("Uploading " + videoFileName);
+            logger.info("Uploading " + videoFileName);
 
             // Add extra information to the video before uploading.
             Video videoObjectDefiningMetadata = new Video();
@@ -199,23 +202,23 @@ public class UploadVideo {
 //            System.out.println("  - Tags: " + returnedVideo.getSnippet().getTags());
 //            System.out.println("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
 //            System.out.println("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
-            App.logger.info("\n================== Returned Video ==================\n");
-			App.logger.info("  - Id: " + returnedVideo.getId());
-			App.logger.info("  - Title: " + returnedVideo.getSnippet().getTitle());
-			App.logger.info("  - Tags: " + returnedVideo.getSnippet().getTags());
-			App.logger.info("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
-			App.logger.info("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
-			App.logger.info("  - Description: " + returnedVideo.getSnippet().getDescription());
+            logger.info("\n================== Returned Video ==================\n");
+			logger.info("  - Id: " + returnedVideo.getId());
+			logger.info("  - Title: " + returnedVideo.getSnippet().getTitle());
+			logger.info("  - Tags: " + returnedVideo.getSnippet().getTags());
+			logger.info("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
+			logger.info("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
+			logger.info("  - Description: " + returnedVideo.getSnippet().getDescription());
 
         } catch (GoogleJsonResponseException e) {
-            App.logger.severe("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
+            logger.severe("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
                     + e.getDetails().getMessage());
             e.printStackTrace();
         } catch (IOException e) {
-            App.logger.severe("IOException: " + e.getMessage());
+            logger.severe("IOException: " + e.getMessage());
             e.printStackTrace();
         } catch (Throwable t) {
-            App.logger.severe("Throwable: " + t.getMessage());
+            logger.severe("Throwable: " + t.getMessage());
             t.printStackTrace();
         }
     }

@@ -6,14 +6,16 @@ import java.io.FileReader;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Perform actions related to Kdenlive
  * 
- * @author almostengineer
+ * @author almostengr, Kenny Robinson
  *
  */
 public class KdenliveOperations  {
+	static Logger logger = App.logger;
 	
 	/**
 	 * Calls melt after to render the video
@@ -23,7 +25,7 @@ public class KdenliveOperations  {
 	 * @param videoOutputFileName	The name of the video that will be rendered
 	 * @throws Exception
 	 */
-	void renderVideo(String meltPath, String kdenliveFileName, String videoOutputFileName) throws Exception {
+	public static void renderVideo(String meltPath, String kdenliveFileName, String videoOutputFileName) throws Exception {
 		if (meltPath.isEmpty()) {
 			throw new Exception("Melt path is empty");
 		} // end if
@@ -41,7 +43,7 @@ public class KdenliveOperations  {
 			pbArguments.add(meltPathSplit[i]);
 		} // end for
 		
-		App.logger.info("Reading kdenlive file for resolution information");
+		logger.info("Reading kdenlive file for resolution information");
 		File kdenliveFile = new File(kdenliveFileName);
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(kdenliveFile));
 		String line = "";
@@ -53,7 +55,7 @@ public class KdenliveOperations  {
 		} // end while
 		bufferedReader.close();
 		
-		App.logger.info("Resolution: " + resolution);
+		logger.info("Resolution: " + resolution);
 		pbArguments.add(kdenliveFileName); 			// source file
 		pbArguments.add("-consumer");
 		pbArguments.add("avformat:" + videoOutputFileName);		// target file
@@ -74,10 +76,10 @@ public class KdenliveOperations  {
 		pbRenderVideo.redirectError(Redirect.INHERIT);
 		pbRenderVideo.redirectOutput(Redirect.INHERIT);
 		
-		App.logger.info("Rendering video " + videoOutputFileName);
+		logger.info("Rendering video " + videoOutputFileName);
 		Timeouts timeouts = new Timeouts();
 		Process processRenderVideo = pbRenderVideo.start();
 		processRenderVideo.waitFor(timeouts.getLongTimeoutHours(), TimeUnit.HOURS);	// wait for video to render
-		App.logger.info("Done rendering video " + videoOutputFileName);
+		logger.info("Done rendering video " + videoOutputFileName);
 	} // end function
 }

@@ -5,39 +5,44 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Logger;
 
+/**
+ * @author almostengr, Kenny Robinson
+ *
+ */
 public class PreventDupeProcess {
-	
-	File processFile = null;
+	static Logger logger = App.logger;
+	private static File processFile = null;
 
-	void createProcessFile() throws IOException {
-		this.processFile = File.createTempFile("kdenlivetoyoutube", ".tmp");
-		this.processFile.deleteOnExit();
+	public static void createProcessFile() throws IOException {
+		processFile = File.createTempFile("kdenlivetoyoutube", ".tmp");
+		processFile.deleteOnExit();
 		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		
-		App.logger.info("Creating process file" + this.processFile.getAbsolutePath());
-		FileWriter fileWriter = new FileWriter(this.processFile);
+		logger.info("Creating process file" + processFile.getAbsolutePath());
+		FileWriter fileWriter = new FileWriter(processFile);
 		fileWriter.write("Started at " + dateFormat.format(date));
 		fileWriter.close();
 	} // end function
 	
-	boolean checkForDuplicateProcess() throws Exception, IOException {
+	public static boolean checkForDuplicateProcess() throws Exception, IOException {
 		boolean returnValue = false;
 		
-		this.createProcessFile();
+		createProcessFile();
 		
-		App.logger.info("Checking for duplicate processes");
+		logger.info("Checking for duplicate processes");
 		
-		FileOperations fileOperations = new FileOperations();
-		File[] fileListing = fileOperations.getFilesInFolder(processFile.getParent());
+		File[] fileListing = FileOperations.getFilesInFolder(processFile.getParent());
 	
 		int counter = 0;
 		for (int i = 0; i < fileListing.length; i++) {
 			
 			// check to see if multiple kdenlive processes have been started
-			if (fileListing[i].getAbsolutePath().contains("kdenlivetoyoutube") && fileListing[i].getAbsolutePath().endsWith(".tmp")) {
+			if (fileListing[i].getAbsolutePath().contains("kdenlivetoyoutube") && 
+					fileListing[i].getAbsolutePath().endsWith(".tmp")) {
 				counter++;
 			} // end if
 			

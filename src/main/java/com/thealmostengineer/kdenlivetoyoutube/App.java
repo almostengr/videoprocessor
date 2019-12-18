@@ -7,75 +7,34 @@ import java.util.logging.Logger;
 /**
  * Application to render videos with Kdenlive and upload them to YouTube
  * 
- * @author almostengineer, Kenny Robinson
+ * @author almostengr, Kenny Robinson
  * 
  */
 public class App {
-	static Logger logger = Logger.getAnonymousLogger();
+	public static Logger logger = Logger.getAnonymousLogger();
+	public static Properties appProperty = null;
 	
     public static void main( String[] args )    {
     	int exitCode = 1; // default the exit code to failure
     	
     	try {
     		if (args[0].isEmpty()) {
+    			exitCode = 2;
     			throw new Exception("Properties file not provided.");
     		} // end if
         	 
-        	FileOperations fileOperations = new FileOperations();
-        	KdenliveOperations kdenliveOperations = new KdenliveOperations();
-        	Properties appProperty = fileOperations.loadProperties(args[0]);
+        	appProperty = LoadProperties.loadProperties(args[0]);
 
-        	PreventDupeProcess preventDupeProcess = new PreventDupeProcess();
-        	preventDupeProcess.checkForDuplicateProcess();
-//        	CheckFreeSpace.main();
+        	PreventDupeProcess.checkForDuplicateProcess();
+//        	CheckFreeSpace.checkFreeSpace();
     		
-        	// render video archives in the pending directory
-        	
-			File[] pendingFiles = fileOperations.getFilesInFolder(appProperty.getProperty("pendingDirectory"));
-			fileOperations.getCountOfFilesInFolder(appProperty.getProperty("pendingDirectory"));
+			File[] pendingFiles = FileOperations.getFilesInFolder(appProperty.getProperty("pendingDirectory"));
 			
 			for (int i = 0; i < pendingFiles.length; i++) {
-				try {
-					if (pendingFiles[i].getAbsolutePath().toLowerCase().endsWith(".gz") || 
-							pendingFiles[i].getAbsolutePath().toLowerCase().endsWith(".tar")) {
-					
-						logger.info("Processing " + pendingFiles[i].getAbsolutePath());
-						
-						fileOperations.deleteFolder(appProperty.getProperty("renderDirectory")); // clean render directory
-						fileOperations.unpackageCompressTar(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("renderDirectory"));
-						
-						String kdenliveFileName = null;
-						String videoOutputFileName = null;
-						File[] renderDirFile = fileOperations.getFilesInFolder(appProperty.getProperty("renderDirectory")); // renderDir.listFiles();
-						
-						for (int i2 = 0; i2 < renderDirFile.length; i2++) {
-							if (renderDirFile[i2].getAbsolutePath().endsWith("kdenlive")) {
-								kdenliveFileName = renderDirFile[i2].getAbsolutePath();
-								videoOutputFileName = appProperty.getProperty("outputDirectory") + 
-										kdenliveFileName.substring(kdenliveFileName.lastIndexOf("/")) + ".mp4";
-								videoOutputFileName = videoOutputFileName.replace(".kdenlive", "");
-								logger.info("Kdenlive: " + kdenliveFileName);
-								logger.info("Video Output: " + videoOutputFileName);
-								break;
-							} // end if
-						} // end for
-						
-						fileOperations.createFolder(appProperty.getProperty("outputDirectory"));
-						kdenliveOperations.renderVideo(appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
-						fileOperations.archiveProject(pendingFiles[i].getAbsolutePath(), appProperty.getProperty("archiveDirectory"));
-					} // end if
-				} catch (Exception e) {
-					logger.info(e.getMessage());
-					e.printStackTrace();
-				} // end try
-				
-				logger.info("Done processing " + pendingFiles[i].getAbsolutePath());
-			} // end for
+				ProcessPendingFile.processPendingFile(pendingFiles[i]);
+			}
 
-			// do uploading of files in output directory
-			
-			File[] videoOutputFiles = fileOperations.getFilesInFolder(appProperty.getProperty("outputDirectory"));
-			fileOperations.getCountOfFilesInFolder(appProperty.getProperty("outputDirectory"));
+			File[] videoOutputFiles = FileOperations.getFilesInFolder(appProperty.getProperty("outputDirectory"));
 			
 			// limit the number of files uploaded to prevent hitting the quota
 			int videoFileCounter = videoOutputFiles.length;
@@ -83,21 +42,9 @@ public class App {
 				videoFileCounter = 2;
 			} // end if
 			
-			for (int i = 0; i < videoFileCounter; i++) {
-//				if (videoOutputFiles[i].getAbsolutePath().toLowerCase().endsWith(".mp4")) {
-				if (false) {
-					// login to api on first go
-					Auth.setClientSecretsPath(appProperty.getProperty("client_secrets_file"));
-					
-					// upload video via YouTube API
-					UploadVideo.uploadVideo(videoOutputFiles[i].getAbsolutePath());
-					
-					fileOperations.deleteFolder(videoOutputFiles[i].getAbsolutePath()); // delete file after uploading
-				}
-				else {
-					logger.info("Skipped file " + videoOutputFiles[i].getAbsolutePath());
-				} // end if
-			} // end for
+			// for (int i = 0; i < videoFileCounter; i++) {
+				// UploadOutputFile.uploadOutputFile(videoOutputFiles[i]);
+			// } // end for
 			 
 			exitCode = 0;
 		} catch (Exception e) {
