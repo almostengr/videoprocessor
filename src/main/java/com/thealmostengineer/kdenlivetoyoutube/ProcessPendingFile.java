@@ -38,7 +38,11 @@ public class ProcessPendingFile {
 				} // end for
 				
 				FileOperations.createFolder(App.appProperty.getProperty("outputDirectory"));
-				KdenliveOperations.renderVideo(App.appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
+				RenderFullLength.renderVideo(App.appProperty.getProperty("meltPath"), kdenliveFileName, videoOutputFileName); // run the kdenlive melt command
+				
+				if (App.appProperty.getProperty("timelapse").equalsIgnoreCase("yes")) {
+					RenderTimelapse.renderTimelapse(videoOutputFileName);
+				}
 				ArchiveProject.archiveProject(pendingFile.getAbsolutePath(), App.appProperty.getProperty("archiveDirectory"));
 			} // end if
 		} catch (Exception e) {

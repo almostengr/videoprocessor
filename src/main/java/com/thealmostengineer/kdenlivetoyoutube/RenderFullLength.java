@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  * @author almostengr, Kenny Robinson
  *
  */
-public class KdenliveOperations  {
+public class RenderFullLength  {
 	static Logger logger = App.logger;
 	
 	/**
@@ -77,9 +77,8 @@ public class KdenliveOperations  {
 		pbRenderVideo.redirectOutput(Redirect.INHERIT);
 		
 		logger.info("Rendering video " + videoOutputFileName);
-		Timeouts timeouts = new Timeouts();
 		Process processRenderVideo = pbRenderVideo.start();
-		processRenderVideo.waitFor(timeouts.getLongTimeoutHours(), TimeUnit.HOURS);	// wait for video to render
+		processRenderVideo.waitFor(Timeouts.getLongTimeoutHours(), TimeUnit.HOURS);	// wait for video to render
 		logger.info("Done rendering video " + videoOutputFileName);
 	} // end function
 }

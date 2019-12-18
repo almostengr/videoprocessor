@@ -7,11 +7,11 @@ package com.thealmostengineer.kdenlivetoyoutube;
  */
 public class Timeouts {
 	
-	public int getLongTimeoutHours() {
+	public static int getLongTimeoutHours() {
 		return 12;
 	} // end function
 	
-	public int getShortTimeoutSeconds() {
+	public static int getShortTimeoutSeconds() {
 		return 5 * 60;
 	} // end function
 }
