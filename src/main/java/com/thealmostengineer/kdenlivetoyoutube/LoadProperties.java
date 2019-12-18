@@ -3,7 +3,6 @@ package com.thealmostengineer.kdenlivetoyoutube;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 /**
  * 

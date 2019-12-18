@@ -1,7 +1,6 @@
 package com.thealmostengineer.kdenlivetoyoutube;
 
 import java.io.File;
-import java.util.logging.Logger;
 
 /**
  * 

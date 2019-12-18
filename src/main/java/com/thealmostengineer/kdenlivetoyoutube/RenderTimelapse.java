@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 public class RenderTimelapse {
 	

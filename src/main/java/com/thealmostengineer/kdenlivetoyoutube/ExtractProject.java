@@ -2,7 +2,6 @@ package com.thealmostengineer.kdenlivetoyoutube;
 
 import java.lang.ProcessBuilder.Redirect;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 /**
  * Handles extracting / unarchiving the project in order to render the video
