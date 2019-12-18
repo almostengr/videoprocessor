@@ -2,6 +2,10 @@ package com.thealmostengineer.kdenlivetoyoutube;
 
 import java.io.File;
 
+import com.thealmostengineer.kdenlivetoyoutube.filesystem.FileOperations;
+import com.thealmostengineer.kdenlivetoyoutube.youtubeapi.Auth;
+import com.thealmostengineer.kdenlivetoyoutube.youtubeapi.UploadVideo;
+
 /**
  * 
  * @author almostengr, Kenny Robinson

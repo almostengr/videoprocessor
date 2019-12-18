@@ -1,4 +1,4 @@
-package com.thealmostengineer.kdenlivetoyoutube;
+package com.thealmostengineer.kdenlivetoyoutube.youtubeapi;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +19,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.thealmostengineer.kdenlivetoyoutube.App;
 
 /**
  * Shared class used by every sample. Contains methods for authorizing a user and caching credentials.

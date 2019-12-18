@@ -1,9 +1,12 @@
-package com.thealmostengineer.kdenlivetoyoutube;
+package com.thealmostengineer.kdenlivetoyoutube.ffmpeg;
 
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+
+import com.thealmostengineer.kdenlivetoyoutube.Logging;
+import com.thealmostengineer.kdenlivetoyoutube.Timeouts;
 
 public class RenderTimelapse {
 	

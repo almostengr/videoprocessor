@@ -16,7 +16,7 @@
  * Video tutorial using this is available at https://www.youtube.com/watch?v=pb_t5_ShQOM
  */
 
-package com.thealmostengineer.kdenlivetoyoutube;
+package com.thealmostengineer.kdenlivetoyoutube.youtubeapi;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -29,6 +29,7 @@ import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoSnippet;
 import com.google.api.services.youtube.model.VideoStatus;
 import com.google.common.collect.Lists;
+import com.thealmostengineer.kdenlivetoyoutube.App;
 
 import java.io.FileInputStream;
 import java.io.IOException;

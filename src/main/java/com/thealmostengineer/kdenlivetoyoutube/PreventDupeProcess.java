@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.thealmostengineer.kdenlivetoyoutube.filesystem.FileOperations;
+
 /**
  * @author almostengr, Kenny Robinson
  *

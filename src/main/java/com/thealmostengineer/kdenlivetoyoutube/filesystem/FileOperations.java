@@ -1,6 +1,8 @@
-package com.thealmostengineer.kdenlivetoyoutube;
+package com.thealmostengineer.kdenlivetoyoutube.filesystem;
 
 import java.io.File;
+
+import com.thealmostengineer.kdenlivetoyoutube.Logging;
 
 /**
  * Manipulate the files and folders used by the process 

@@ -1,8 +1,11 @@
-package com.thealmostengineer.kdenlivetoyoutube;
+package com.thealmostengineer.kdenlivetoyoutube.filesystem;
 
 import java.io.File;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.concurrent.TimeUnit;
+
+import com.thealmostengineer.kdenlivetoyoutube.Logging;
+import com.thealmostengineer.kdenlivetoyoutube.Timeouts;
 
 /**
  * Handles archiving the project after the video has been rendered. 

@@ -1,4 +1,4 @@
-package com.thealmostengineer.kdenlivetoyoutube;
+package com.thealmostengineer.kdenlivetoyoutube.kdenlive;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+
+import com.thealmostengineer.kdenlivetoyoutube.Logging;
+import com.thealmostengineer.kdenlivetoyoutube.Timeouts;
 
 /**
  * Perform actions related to Kdenlive

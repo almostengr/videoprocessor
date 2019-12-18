@@ -3,6 +3,9 @@ package com.thealmostengineer.kdenlivetoyoutube;
 import java.io.File;
 import java.util.Properties;
 
+import com.thealmostengineer.kdenlivetoyoutube.filesystem.FileOperations;
+import com.thealmostengineer.kdenlivetoyoutube.filesystem.ProcessPendingFile;
+
 /**
  * Application to render videos with Kdenlive and upload them to YouTube
  * 
