@@ -14,6 +14,10 @@ public class Logging {
 	}
 	
 	public static void error(String message) {
+		severe(message);
+	}
+	
+	public static void severe(String message) {
 		logger.severe(message);
 	}
 }

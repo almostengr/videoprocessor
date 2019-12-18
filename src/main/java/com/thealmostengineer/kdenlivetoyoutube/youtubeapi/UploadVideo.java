@@ -30,6 +30,7 @@ import com.google.api.services.youtube.model.VideoSnippet;
 import com.google.api.services.youtube.model.VideoStatus;
 import com.google.common.collect.Lists;
 import com.thealmostengineer.kdenlivetoyoutube.App;
+import com.thealmostengineer.kdenlivetoyoutube.Logging;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -37,7 +38,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Upload a video to the authenticated user's channel. Use OAuth 2.0 to
@@ -47,8 +47,6 @@ import java.util.logging.Logger;
  * @author Jeremy Walker
  */
 public class UploadVideo {
-
-	static Logger logger = App.logger;
 
     /**
      * Define a global instance of a Youtube object, which will be used
@@ -84,7 +82,7 @@ public class UploadVideo {
             youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, credential).setApplicationName(
                     "youtube-cmdline-uploadvideo-sample").build();
 
-            logger.info("Uploading " + videoFileName);
+            Logging.info("Uploading " + videoFileName);
 
             // Add extra information to the video before uploading.
             Video videoObjectDefiningMetadata = new Video();
@@ -203,23 +201,23 @@ public class UploadVideo {
 //            System.out.println("  - Tags: " + returnedVideo.getSnippet().getTags());
 //            System.out.println("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
 //            System.out.println("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
-            logger.info("\n================== Returned Video ==================\n");
-			logger.info("  - Id: " + returnedVideo.getId());
-			logger.info("  - Title: " + returnedVideo.getSnippet().getTitle());
-			logger.info("  - Tags: " + returnedVideo.getSnippet().getTags());
-			logger.info("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
-			logger.info("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
-			logger.info("  - Description: " + returnedVideo.getSnippet().getDescription());
+            Logging.info("\n================== Returned Video ==================\n");
+			Logging.info("  - Id: " + returnedVideo.getId());
+			Logging.info("  - Title: " + returnedVideo.getSnippet().getTitle());
+			Logging.info("  - Tags: " + returnedVideo.getSnippet().getTags());
+			Logging.info("  - Privacy Status: " + returnedVideo.getStatus().getPrivacyStatus());
+			Logging.info("  - Video Count: " + returnedVideo.getStatistics().getViewCount());
+			Logging.info("  - Description: " + returnedVideo.getSnippet().getDescription());
 
         } catch (GoogleJsonResponseException e) {
-            logger.severe("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
+            Logging.severe("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
                     + e.getDetails().getMessage());
             e.printStackTrace();
         } catch (IOException e) {
-            logger.severe("IOException: " + e.getMessage());
+            Logging.severe("IOException: " + e.getMessage());
             e.printStackTrace();
         } catch (Throwable t) {
-            logger.severe("Throwable: " + t.getMessage());
+            Logging.severe("Throwable: " + t.getMessage());
             t.printStackTrace();
         }
     }

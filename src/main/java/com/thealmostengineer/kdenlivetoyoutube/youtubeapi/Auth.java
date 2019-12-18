@@ -20,6 +20,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.thealmostengineer.kdenlivetoyoutube.App;
+import com.thealmostengineer.kdenlivetoyoutube.Logging;
 
 /**
  * Shared class used by every sample. Contains methods for authorizing a user and caching credentials.
@@ -28,7 +29,7 @@ public class Auth {
 	
 	static String clientSecretsPath;
 	
-	static void setClientSecretsPath(String filePath) {
+	public static void setClientSecretsPath(String filePath) {
 		clientSecretsPath = filePath;
 	} // end function
 	
@@ -70,7 +71,7 @@ public class Auth {
 //            System.out.println(
 //                    "Enter Client ID and Secret from https://console.developers.google.com/project/_/apiui/credential "
 //                            + "into src/main/resources/client_secrets.json");
-        	App.logger.info(
+        	Logging.info(
                     "Enter Client ID and Secret from https://console.developers.google.com/project/_/apiui/credential "
                             + "into src/main/resources/client_secrets.json");
             System.exit(1);
