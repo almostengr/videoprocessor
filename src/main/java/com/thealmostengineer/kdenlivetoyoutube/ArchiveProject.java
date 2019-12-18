@@ -3,7 +3,6 @@ package com.thealmostengineer.kdenlivetoyoutube;
 import java.io.File;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 /**
  * Handles archiving the project after the video has been rendered. 
@@ -12,8 +11,6 @@ import java.util.logging.Logger;
  *
  */
 public class ArchiveProject {
-
-	static Logger logger = App.logger;
 	
 	/**
 	 * Archive the project 
@@ -23,7 +20,7 @@ public class ArchiveProject {
 	 * @throws Exception
 	 */
 	public static void archiveProject(String filePathToGz, String archiveDirectory) throws Exception {
-		logger.info("Archiving project files");
+		Logging.info("Archiving project files");
 		
 		String filePathToTar; 
 		try {

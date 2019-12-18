@@ -2,7 +2,6 @@ package com.thealmostengineer.kdenlivetoyoutube;
 
 import java.io.File;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 /**
  * Application to render videos with Kdenlive and upload them to YouTube
@@ -11,7 +10,6 @@ import java.util.logging.Logger;
  * 
  */
 public class App {
-	public static Logger logger = Logger.getAnonymousLogger();
 	public static Properties appProperty = null;
 	
     public static void main( String[] args )    {
@@ -48,11 +46,11 @@ public class App {
 			 
 			exitCode = 0;
 		} catch (Exception e) {
-			logger.info("Error Detail: " + e.getMessage());
+			Logging.error("Error Detail: " + e.getMessage());
 			e.printStackTrace();
 		} // end catch
     
-    	logger.info("Exiting, " + exitCode);
+    	Logging.info("Exiting, " + exitCode);
     	System.exit(exitCode);
     } // end function
 }

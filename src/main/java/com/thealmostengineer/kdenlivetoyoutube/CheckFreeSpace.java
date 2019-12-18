@@ -13,11 +13,10 @@ import java.util.logging.Logger;
  *
  */
 public class CheckFreeSpace {
-	static Logger logger = App.logger;
 
 	public static void checkFreeSpace() throws IOException, InterruptedException, Exception {
 		// df -h . | awk '{print $5}'
-		logger.info("Checking disk space");
+		Logging.info("Checking disk space");
 		ArrayList<String> pbArguments = new ArrayList<String>();
 		
 		pbArguments.add("df");
@@ -38,18 +37,18 @@ public class CheckFreeSpace {
 		
 		while ((output = bufferedReader.readLine()) != null) {
 			if (output.toLowerCase().contains("use")) {
-				logger.info("Header line. Skipping");
+				Logging.info("Header line. Skipping");
 			}
 			else {
-				logger.info("Disk space: " + output);
+				Logging.info("Disk space: " + output);
 				int diskSpacePct = Integer.parseInt(output.replace("%", ""));
-				logger.info("Disk space: " + diskSpacePct);
+				Logging.info("Disk space: " + diskSpacePct);
 				if (diskSpacePct >= 80) {
 					throw new Exception("Not generating video as process may run out of disk space.");
 				} // end if
 			} // end if
 		} // end while
 		
-		logger.info("Done checking disk space");
+		Logging.info("Done checking disk space");
 	}
 }

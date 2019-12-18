@@ -10,7 +10,6 @@ import java.util.logging.Logger;
  *
  */
 public class FileOperations {
-	static Logger logger = App.logger;
 		
 	/**
 	 * Deletes the folder and it's subfolders and files
@@ -20,7 +19,7 @@ public class FileOperations {
 	public static void deleteFolder(String directoryStr) {
 		
 		File directoryFile = new File(directoryStr);
-		logger.info("Deleting folder " + directoryFile.getAbsolutePath());
+		Logging.info("Deleting folder " + directoryFile.getAbsolutePath());
 		
 	    File[] files = directoryFile.listFiles();
 	    if(files!=null) { //some JVMs return null for empty dirs
@@ -46,7 +45,7 @@ public class FileOperations {
 		
 		if (directoryFile.exists() == false) {
 			directoryFile.mkdirs();
-			logger.info("Created directory " + directoryStr);
+			Logging.info("Created directory " + directoryStr);
 		} // end if
 		
 		return directoryFile;
@@ -59,7 +58,7 @@ public class FileOperations {
 	 * @return
 	 */
 	public static File[] getFilesInFolder(String directory) {
-		logger.info("Getting files in " + directory);
+		Logging.info("Getting files in " + directory);
 		
 		File file = new File(directory);
 		
@@ -74,7 +73,7 @@ public class FileOperations {
 	}  // end function
 	
 	public static int getCountOfFilesInFolder(String directory) {
-		logger.info("Getting count of files in " + directory);
+		Logging.info("Getting count of files in " + directory);
 		
 		File file = new File(directory);
 		
@@ -84,7 +83,7 @@ public class FileOperations {
 
 		File[] fileList = file.listFiles();
 		
-		logger.info("Found " + fileList.length + " items in directory " + directory);
+		Logging.info("Found " + fileList.length + " items in directory " + directory);
 		return fileList.length;
 	} // end function
 }

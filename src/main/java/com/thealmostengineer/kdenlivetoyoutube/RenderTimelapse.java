@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class RenderTimelapse {
-	static Logger logger = App.logger;
 	
 	public static void renderTimelapse(String fullLengthFileName) throws IOException, InterruptedException {
 		ArrayList<String> ffmpegArguments = new ArrayList<String>();
@@ -28,9 +27,9 @@ public class RenderTimelapse {
 		renderTimelapsePb.redirectError(Redirect.INHERIT);
 		renderTimelapsePb.redirectOutput(Redirect.INHERIT);
 		
-		logger.info("Rendering video " + timelapseFileName);
+		Logging.info("Rendering video " + timelapseFileName);
 		Process processRenderVideo = renderTimelapsePb.start();
 		processRenderVideo.waitFor(Timeouts.getLongTimeoutHours(), TimeUnit.HOURS);	// wait for video to render
-		logger.info("Done rendering video " + timelapseFileName);
+		Logging.info("Done rendering video " + timelapseFileName);
 	}
 }

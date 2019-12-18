@@ -11,7 +11,6 @@ import java.util.logging.Logger;
  *
  */
 public class LoadProperties {
-	static Logger logger = App.logger;
 
 	/**
 	 * Load the properties file
@@ -21,7 +20,7 @@ public class LoadProperties {
 	 * @throws Exception
 	 */
 	public static Properties loadProperties(String propertiesFileName) throws Exception {
-		logger.info("Loading properties");
+		Logging.info("Loading properties");
 		
 		InputStream inputStream = new FileInputStream(propertiesFileName); // check for the file
 		Properties properties = new Properties(); 

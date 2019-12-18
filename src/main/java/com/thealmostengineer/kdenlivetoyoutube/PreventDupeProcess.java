@@ -12,7 +12,6 @@ import java.util.logging.Logger;
  *
  */
 public class PreventDupeProcess {
-	static Logger logger = App.logger;
 	private static File processFile = null;
 
 	public static void createProcessFile() throws IOException {
@@ -22,7 +21,7 @@ public class PreventDupeProcess {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		
-		logger.info("Creating process file" + processFile.getAbsolutePath());
+		Logging.info("Creating process file" + processFile.getAbsolutePath());
 		FileWriter fileWriter = new FileWriter(processFile);
 		fileWriter.write("Started at " + dateFormat.format(date));
 		fileWriter.close();
@@ -33,7 +32,7 @@ public class PreventDupeProcess {
 		
 		createProcessFile();
 		
-		logger.info("Checking for duplicate processes");
+		Logging.info("Checking for duplicate processes");
 		
 		File[] fileListing = FileOperations.getFilesInFolder(processFile.getParent());
 	

@@ -9,7 +9,6 @@ import java.util.logging.Logger;
  *
  */
 public class UploadOutputFile {
-	static Logger logger = App.logger;
 	
 	public static void uploadOutputFile(File videoOutputFile) {
 		if (videoOutputFile.getAbsolutePath().toLowerCase().endsWith(".mp4")) {
@@ -23,7 +22,7 @@ public class UploadOutputFile {
 			FileOperations.deleteFolder(videoOutputFile.getAbsolutePath()); // delete file after uploading
 		}
 		else {
-			logger.info("Skipped file " + videoOutputFile.getAbsolutePath());
+			Logging.info("Skipped file " + videoOutputFile.getAbsolutePath());
 		} // end if
 	}
 }

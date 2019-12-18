@@ -9,14 +9,13 @@ import java.util.logging.Logger;
  *
  */
 public class ProcessPendingFile {
-	static Logger logger = App.logger;
 	
 	public static void processPendingFile(File pendingFile) {
 		try {
 			if (pendingFile.getAbsolutePath().toLowerCase().endsWith(".gz") || 
 					pendingFile.getAbsolutePath().toLowerCase().endsWith(".tar")) {
 			
-				logger.info("Processing " + pendingFile.getAbsolutePath());
+				Logging.info("Processing " + pendingFile.getAbsolutePath());
 				
 				FileOperations.deleteFolder(App.appProperty.getProperty("renderDirectory")); // clean render directory
 				ExtractProject.unpackageCompressTar(pendingFile.getAbsolutePath(), App.appProperty.getProperty("renderDirectory"));
@@ -31,8 +30,8 @@ public class ProcessPendingFile {
 						videoOutputFileName = App.appProperty.getProperty("outputDirectory") + 
 								kdenliveFileName.substring(kdenliveFileName.lastIndexOf("/")) + ".mp4";
 						videoOutputFileName = videoOutputFileName.replace(".kdenlive", "");
-						logger.info("Kdenlive: " + kdenliveFileName);
-						logger.info("Video Output: " + videoOutputFileName);
+						Logging.info("Kdenlive: " + kdenliveFileName);
+						Logging.info("Video Output: " + videoOutputFileName);
 						break;
 					} // end if
 				} // end for
@@ -46,10 +45,10 @@ public class ProcessPendingFile {
 				ArchiveProject.archiveProject(pendingFile.getAbsolutePath(), App.appProperty.getProperty("archiveDirectory"));
 			} // end if
 		} catch (Exception e) {
-			logger.info(e.getMessage());
+			Logging.info(e.getMessage());
 			e.printStackTrace();
 		} // end try
 		
-		logger.info("Done processing " + pendingFile.getAbsolutePath());
+		Logging.info("Done processing " + pendingFile.getAbsolutePath());
 	}
 }

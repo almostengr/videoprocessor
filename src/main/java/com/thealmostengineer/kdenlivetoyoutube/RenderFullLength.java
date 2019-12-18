@@ -16,7 +16,6 @@ import java.util.logging.Logger;
  *
  */
 public class RenderFullLength  {
-	static Logger logger = App.logger;
 	
 	/**
 	 * Calls melt after to render the video
@@ -46,7 +45,7 @@ public class RenderFullLength  {
 			pbArguments.add(meltPathSplit[i]);
 		} // end for
 		
-		logger.info("Reading kdenlive file for resolution information");
+		Logging.info("Reading kdenlive file for resolution information");
 		File kdenliveFile = new File(kdenliveFileName);
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(kdenliveFile));
 		String line = "";
@@ -58,7 +57,7 @@ public class RenderFullLength  {
 		} // end while
 		bufferedReader.close();
 		
-		logger.info("Resolution: " + resolution);
+		Logging.info("Resolution: " + resolution);
 		pbArguments.add(kdenliveFileName); 			// source file
 		pbArguments.add("-consumer");
 		pbArguments.add("avformat:" + videoOutputFileName);		// target file
@@ -79,9 +78,9 @@ public class RenderFullLength  {
 		pbRenderVideo.redirectError(Redirect.INHERIT);
 		pbRenderVideo.redirectOutput(Redirect.INHERIT);
 		
-		logger.info("Rendering video " + videoOutputFileName);
+		Logging.info("Rendering video " + videoOutputFileName);
 		Process processRenderVideo = pbRenderVideo.start();
 		processRenderVideo.waitFor(Timeouts.getLongTimeoutHours(), TimeUnit.HOURS);	// wait for video to render
-		logger.info("Done rendering video " + videoOutputFileName);
+		Logging.info("Done rendering video " + videoOutputFileName);
 	} // end function
 }
