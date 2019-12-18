@@ -20,7 +20,7 @@ public class App {
     	try {
     		if (args[0].isEmpty()) {
     			exitCode = 2;
-    			throw new Exception("Properties file not provided.");
+    			throw new RuntimeException("Properties file not provided.");
     		} // end if
         	 
         	appProperty = LoadProperties.loadProperties(args[0]);

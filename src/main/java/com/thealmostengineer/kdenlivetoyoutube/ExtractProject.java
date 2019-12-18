@@ -24,8 +24,6 @@ public class ExtractProject {
 	public static void unpackageCompressTar(String filePathToGz, String outputDirectory) throws Exception {
 		logger.info("Uncompressing file " + filePathToGz);
 		
-		Timeouts timeouts = new Timeouts();
-		
 		// run gunzip on the file if it is compressed
 		if (filePathToGz.endsWith(".gz")) {
 			logger.info("Gz file: " + filePathToGz);
@@ -38,7 +36,7 @@ public class ExtractProject {
 			logger.info("Starting gunzip for " + filePathToGz);
 			
 			Process processGunzip = pbGunzip.start();
-			processGunzip.waitFor(timeouts.getShortTimeoutSeconds(), TimeUnit.SECONDS);
+			processGunzip.waitFor(Timeouts.getShortTimeoutSeconds(), TimeUnit.SECONDS);
 		} // end if
 		
 		FileOperations.createFolder(outputDirectory);
@@ -60,7 +58,7 @@ public class ExtractProject {
 		logger.info("Untarring to " + outputDirectory);
 		
 		Process processUntar = pbUntar.start();
-		processUntar.waitFor(timeouts.getShortTimeoutSeconds(), TimeUnit.SECONDS);
+		processUntar.waitFor(Timeouts.getShortTimeoutSeconds(), TimeUnit.SECONDS);
 		
  		logger.info("Done uncompressing file " + filePathToGz);
 	} // end function

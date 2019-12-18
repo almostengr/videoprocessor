@@ -37,9 +37,8 @@ public class ArchiveProject {
 		pbCompressGz.redirectError(Redirect.INHERIT);
 		pbCompressGz.redirectOutput(Redirect.INHERIT);
 		
-		Timeouts timeouts = new Timeouts();
 		Process prcCompressGz = pbCompressGz.start();
-		prcCompressGz.waitFor(timeouts.getShortTimeoutSeconds(), TimeUnit.SECONDS);
+		prcCompressGz.waitFor(Timeouts.getShortTimeoutSeconds(), TimeUnit.SECONDS);
 		
 		filePathToTar += ".gz"; // update file path
 		

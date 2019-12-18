@@ -28,7 +28,7 @@ public class PreventDupeProcess {
 		fileWriter.close();
 	} // end function
 	
-	public static boolean checkForDuplicateProcess() throws Exception, IOException {
+	public static boolean checkForDuplicateProcess() throws IOException {
 		boolean returnValue = false;
 		
 		createProcessFile();
@@ -47,7 +47,7 @@ public class PreventDupeProcess {
 			} // end if
 			
 			if (counter > 1) {
-				throw new Exception("Process is already running.");
+				throw new RuntimeException("Process is already running.");
 			} // end if
 		} // end for
 		

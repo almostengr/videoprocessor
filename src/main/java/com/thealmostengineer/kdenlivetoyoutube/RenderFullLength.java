@@ -3,6 +3,7 @@ package com.thealmostengineer.kdenlivetoyoutube;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -23,17 +24,19 @@ public class RenderFullLength  {
 	 * @param meltPath				The path to melt
 	 * @param kdenliveFileName		The name of the kdenlive project file
 	 * @param videoOutputFileName	The name of the video that will be rendered
+	 * @throws IOException 
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	public static void renderVideo(String meltPath, String kdenliveFileName, String videoOutputFileName) throws Exception {
+	public static void renderVideo(String meltPath, String kdenliveFileName, String videoOutputFileName) throws IOException, InterruptedException  {
 		if (meltPath.isEmpty()) {
-			throw new Exception("Melt path is empty");
+			throw new RuntimeException("Melt path is empty");
 		} // end if
 		if (kdenliveFileName.isEmpty()) {
-			throw new Exception("Kdenlive project file name is empty");
+			throw new RuntimeException("Kdenlive project file name is empty");
 		} // end if
 		if (videoOutputFileName.isEmpty()) {
-			throw new Exception("Video output file name is empty");
+			throw new RuntimeException("Video output file name is empty");
 		} // end if
 		
 		String[] meltPathSplit = meltPath.split(" ");
