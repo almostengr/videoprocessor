@@ -1,6 +1,12 @@
 # Kdenlive to YouTube
  
-This project is a Java application that renders videos created with Kdenlive and upload them to YouTube. 
+This project is a Java application that renders videos created with Kdenlive and upload them to YouTube.
+
+## NOTICE 
+
+This project has been archived. This application has been replaced with Linux shell scripts that generate the 
+videos. To view those scripts, visit the [ubuntu-automation](https://github.com/almostengr/ubuntu-automation)
+repository.
 
 ## Purpose
 
