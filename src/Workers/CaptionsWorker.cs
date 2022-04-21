@@ -7,6 +7,8 @@ namespace Almostengr.VideoProcessor.Workers
 {
     public class CaptionsWorker : BackgroundService
     {
+        private const string InputDirectory = "";
+        private const string OutputDirectory = "";
         private readonly ILogger<CaptionsWorker> _logger;
 
         public CaptionsWorker(ILogger<CaptionsWorker> logger)
@@ -16,7 +18,14 @@ namespace Almostengr.VideoProcessor.Workers
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            throw new System.NotImplementedException();
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                // check the incoming directory for caption files 
+
+                // process each of the files 
+                
+                await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
+            }
         }
     }
 }
