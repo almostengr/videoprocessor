@@ -5,11 +5,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Workers
 {
-    public class TranscriptWorker : BackgroundService
+    public class CaptionsWorker : BackgroundService
     {
-        private readonly ILogger<TranscriptWorker> _logger;
+        private readonly ILogger<CaptionsWorker> _logger;
 
-        public TranscriptWorker(ILogger<TranscriptWorker> logger)
+        public CaptionsWorker(ILogger<CaptionsWorker> logger)
         {
             _logger = logger;
         }

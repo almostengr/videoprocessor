@@ -1,3 +1,4 @@
+using Almostengr.VideoProcessor.Workers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -15,6 +16,7 @@ namespace Almostengr.VideoProcessor
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddHostedService<Uploadworker>();
+                    // services.AddHostedService<CaptionsWorker>();
                 });
     }
 }
