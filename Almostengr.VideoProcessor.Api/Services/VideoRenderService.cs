@@ -43,12 +43,18 @@ namespace Almostengr.VideoProcessor.Api.Services
                     _logger.LogInformation($"No tar archives found in {channel.InputDirectory}");
                     break;
                 }
+                
+                // create working directory if it does not exist 
+                
+                // clear the contents of the working directory
 
                 string videoTitle = Path.GetFileNameWithoutExtension(tarFile);
 
                 await ExtractTarFileToWorkingDirectoryAsync(tarFile, channel.WorkingDirectory);
 
                 // check the working directory for mkv or mov files; if found, convert them to mp4
+                
+                // remove originals of converted mkv and mov files
 
                 string brandingTextColor = GetBrandingTextColor(channel.Name, videoTitle);
                 string brandingText = GetBrandingText(channel, brandingTextColor);
@@ -59,7 +65,25 @@ namespace Almostengr.VideoProcessor.Api.Services
 
                 string ffmpegVideoFilter = GetChannelBrandingFilter(channel.Name, displayBrandingDuration, channelBranding);
                 ffmpegVideoFilter += GetDestinationDetails(channel.WorkingDirectory);
-                ffmpegVideoFilter += GetDestinationDetails(channel.WorkingDirectory);
+                ffmpegVideoFilter += GetMajorRoadDetails(channel.WorkingDirectory);
+                
+                // add subtitles as filter if file present
+              
+                
+                
+                // create input file for ffmpeg command
+                
+                // render video
+                
+                // copy meta data file to uploads directory, if present
+                
+                // create archive with contents of working directory
+                
+                // move archive to archive directory
+                
+                // remove extracted tar file from input directory 
+                
+                // clean working directory
 
             }
         }
