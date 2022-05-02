@@ -47,6 +47,7 @@ namespace Almostengr.VideoProcessor.Api.Services
                 // create working directory if it does not exist 
                 
                 // clear the contents of the working directory
+                async CleanWorkingDirectoryAsync();
 
                 string videoTitle = Path.GetFileNameWithoutExtension(tarFile);
 
@@ -83,7 +84,7 @@ namespace Almostengr.VideoProcessor.Api.Services
                 
                 // remove extracted tar file from input directory 
                 
-                // clean working directory
+                await CleanWorkingDirectoryAsync(); // clean working directory
 
             }
         }
@@ -164,6 +165,18 @@ namespace Almostengr.VideoProcessor.Api.Services
 
             process.Start();
             await process.WaitForExitAsync();
+        }
+        
+        private async Task RenderVideoToUploadDirectoryAsync()
+        {
+        }
+        
+        private async Task ArchiveWorkingDirectoryContentsAsync()
+        {
+        }
+        
+        private void CleanWorkingDirectoryAsync()
+        {
         }
 
         private string GetBrandingTextColor(string channelName, string videoTitle)
