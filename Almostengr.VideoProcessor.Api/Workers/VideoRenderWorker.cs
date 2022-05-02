@@ -26,19 +26,27 @@ namespace Almostengr.VideoProcessor.Workers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                ChannelPropertiesDto channelProperties = 
+                DateTime startTime = DateTime.Now;
+
+                ChannelPropertiesDto channelProperties =
                     _channelPropertiesService.GetChannelProperties(ChannelName.RhtServices);
 
-                _videoRenderService.RenderChannelVideos(channelProperties);
+                await _videoRenderService.RenderChannelVideosAsync(channelProperties);
 
-                channelProperties = 
+                channelProperties =
                     _channelPropertiesService.GetChannelProperties(ChannelName.DashCam);
 
-                _videoRenderService.RenderChannelVideos(channelProperties);
-                    
-                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                await _videoRenderService.RenderChannelVideosAsync(channelProperties);
+
+                TimeSpan elapsedTime = DateTime.Now - startTime;
+
+                if (elapsedTime.TotalMinutes < 1)
+                {
+                    await Task.Delay(TimeSpan.FromHours(2), stoppingToken);
+                }
+
             }
         }
-        
+
     }
 }

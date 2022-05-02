@@ -2,10 +2,14 @@ namespace Almostengr.VideoProcessor.Constants
 {
     public class FileExtension
     {
-        public const string Srt = ".srt";
-        public const string Txt = ".txt";
-        public const string Vtt = ".vtt";
-        public const string Sbv = ".sbv";
+        public const string TAR = ".tar";
+        public const string MP4 = ".mp4";
+        public const string MOV = ".mov";
+        public const string MKV = ".mkv";
+        public const string TAR_GZ = ".tar.gz";
+        public const string TAR_XZ = ".tar.xz";
+        public const string SRT = ".srt";
+        public const string TXT = ".txt";
     }
     
 }
