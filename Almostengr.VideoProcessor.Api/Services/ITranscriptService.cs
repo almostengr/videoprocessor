@@ -6,5 +6,7 @@ namespace Almostengr.VideoProcessor.Services
     {
         TranscriptOutputDto CleanTranscript(TranscriptInputDto inputDto);
         string[] GetTranscriptList(string srt);
+        void ArchiveTranscript(string transcriptFile);
+        void SaveTranscript(TranscriptOutputDto outputDto);
     }
 }
