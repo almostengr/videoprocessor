@@ -71,7 +71,7 @@ namespace Almostengr.VideoProcessor.Services
         
         public void ArchiveTranscript(string transcriptFilename)
         {
-            Directory.Move($"{Transcript.InputDirectory}/{transcriptFilename}", "{Transcript.OutputDirectory}/{transcriptFilename}");
+            Directory.Move($"{Transcript.InputDirectory}/{transcriptFilename}", $"{Transcript.OutputDirectory}/{transcriptFilename}");
         }
 
         public string[] GetTranscriptList(string srt)
