@@ -18,7 +18,7 @@ namespace Almostengr.VideoProcessor.Workers
             IServiceScopeFactory factory
             ) : base(logger)
         {
-            _channelPropertiesService = factory.CreateScope().ServiceProvider.GetRequiredService<IChannelPropertiesService>();
+            // _channelPropertiesService = factory.CreateScope().ServiceProvider.GetRequiredService<IChannelPropertiesService>();
             _videoRenderService = factory.CreateScope().ServiceProvider.GetRequiredService<IVideoRenderService>();
         }
 
@@ -28,15 +28,14 @@ namespace Almostengr.VideoProcessor.Workers
             {
                 DateTime startTime = DateTime.Now;
 
-                ChannelPropertiesDto channelProperties =
-                    _channelPropertiesService.GetChannelProperties(ChannelName.RhtServices);
+                // ChannelPropertiesDto channelProperties = _channelPropertiesService.GetChannelProperties(ChannelName.RhtServices);
 
-                await _videoRenderService.RenderChannelVideosAsync(channelProperties);
+                // await _videoRenderService.RenderChannelVideosAsync(channelProperties);
 
-                channelProperties =
-                    _channelPropertiesService.GetChannelProperties(ChannelName.DashCam);
+                // channelProperties = _channelPropertiesService.GetChannelProperties(ChannelName.DashCam);
 
-                await _videoRenderService.RenderChannelVideosAsync(channelProperties);
+                // await _videoRenderService.RenderChannelVideosAsync(channelProperties);
+                await _videoRenderService.RenderChannelVideosAsync();
 
                 TimeSpan elapsedTime = DateTime.Now - startTime;
 
