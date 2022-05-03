@@ -11,12 +11,10 @@ namespace Almostengr.VideoProcessor.Workers
 {
     public class VideoRenderWorker : BaseWorker
     {
-        private readonly IChannelPropertiesService _channelPropertiesService;
+        // private readonly IChannelPropertiesService _channelPropertiesService;
         private readonly IVideoRenderService _videoRenderService;
 
-        public VideoRenderWorker(ILogger<BaseWorker> logger,
-            IServiceScopeFactory factory
-            ) : base(logger)
+        public VideoRenderWorker(ILogger<BaseWorker> logger, IServiceScopeFactory factory) : base(logger)
         {
             // _channelPropertiesService = factory.CreateScope().ServiceProvider.GetRequiredService<IChannelPropertiesService>();
             _videoRenderService = factory.CreateScope().ServiceProvider.GetRequiredService<IVideoRenderService>();
