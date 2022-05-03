@@ -28,7 +28,7 @@ namespace Almostengr.VideoProcessor.Workers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var srtTranscripts = _transcriptService.GetTranscriptList(FileExtension.Srt);
+                var srtTranscripts = _transcriptService.GetTranscriptList(FileExtension.SRT);
 
                 foreach (var srtTranscript in srtTranscripts)
                 {
