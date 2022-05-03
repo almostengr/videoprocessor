@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Almostengr.VideoProcessor.Api.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Workers
@@ -14,12 +15,11 @@ namespace Almostengr.VideoProcessor.Workers
         private readonly IVideoRenderService _videoRenderService;
 
         public VideoRenderWorker(ILogger<BaseWorker> logger,
-            IChannelPropertiesService channelPropertiesService,
-            IVideoRenderService videoRenderService
+            IServiceScopeFactory factory
             ) : base(logger)
         {
-            _channelPropertiesService = channelPropertiesService;
-            _videoRenderService = videoRenderService;
+            _channelPropertiesService = factory.CreateScope().ServiceProvider.GetRequiredService<IChannelPropertiesService>();
+            _videoRenderService = factory.CreateScope().ServiceProvider.GetRequiredService<IVideoRenderService>();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
