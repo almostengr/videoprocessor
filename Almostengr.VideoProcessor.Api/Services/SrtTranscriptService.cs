@@ -55,15 +55,23 @@ namespace Almostengr.VideoProcessor.Services
 
             _logger.LogInformation("Transcript processed successfully");
 
+            return outputDto;
+        }
+        
+        public void SaveTranscript(TranscriptOutputDto transcriptDto)
+        {
             _textFileService.SaveFileContents(
-                $"{Transcript.OutputDirectory}/{outputDto.VideoTitle}.srt",
+                $"{Transcript.OutputDirectory}/{transcriptDto.VideoTitle}.srt",
                 outputDto.VideoText);
 
             _textFileService.SaveFileContents(
-                $"{Transcript.OutputDirectory}/{outputDto.VideoTitle}.md",
+                $"{Transcript.OutputDirectory}/{transcriptDto.VideoTitle}.md",
                 outputDto.BlogText);
-
-            return outputDto;
+        }
+        
+        public void ArchiveTranscript(string transcriptFilename)
+        {
+            Directory.Move($"{Transcript.InputDirectory}/{transcriptFilename}", "{Transcript.OutputDirectory}/{transcriptFilename}");
         }
 
         public string[] GetTranscriptList(string srt)
