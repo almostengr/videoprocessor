@@ -34,7 +34,7 @@ namespace Almostengr.VideoProcessor.Workers
                 
                 foreach (var transcriptFile in srtTranscripts)
                 {
-                    _logger.LogInformation($"TranscriptWorker: Processing {srtTranscript}");
+                    _logger.LogInformation($"Processing {transcriptFile}");
                     var fileContent = _transcriptService.GetFileContents(transcriptFile); // get the file contents 
                     
                     // check the format
@@ -50,7 +50,7 @@ namespace Almostengr.VideoProcessor.Workers
                     
                     _transcriptService.ArchiveTranscript(transcriptFile); // move the original file from the incoming to the output directory
                                       
-                    _logger.LogInformation($"TranscriptWorker: Finished processing {srtTranscript}");
+                    _logger.LogInformation($"Finished processing {transcriptFile}");
                 }
 
 //                 foreach (var srtTranscript in srtTranscripts)
