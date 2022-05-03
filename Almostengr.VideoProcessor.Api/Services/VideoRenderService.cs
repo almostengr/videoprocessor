@@ -258,7 +258,11 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         private void CleanWorkingDirectory()
         {
-            Directory.Delete(_channel.WorkingDirectory, true);
+            if (Directory.Exists(_channel.WorkingDirectory))
+            {
+                Directory.Delete(_channel.WorkingDirectory, true);
+            }
+            
             Directory.CreateDirectory(_channel.WorkingDirectory);
         }
 
