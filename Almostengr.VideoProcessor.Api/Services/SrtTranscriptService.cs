@@ -9,11 +9,15 @@ namespace Almostengr.VideoProcessor.Services
     {
         private readonly ILogger<SrtTranscriptService> _logger;
         private readonly ITextFileService _textFileService;
+        private readonly string _incomingDirectory;
+        private readonly string _outgoingDirectory;
 
         public SrtTranscriptService(ILogger<SrtTranscriptService> logger, ITextFileService textFileService)
         {
             _logger = logger;
             _textFileService = textFileService;
+            _incomingDirectory = $"{Directories.BaseDirectory}/transcript/incoming";
+            _outgoingDirectory = $"{Directories.BaseDirectory}/transcript/outgoing";
         }
 
         public TranscriptOutputDto CleanTranscript(TranscriptInputDto inputDto)
@@ -48,7 +52,7 @@ namespace Almostengr.VideoProcessor.Services
             blogString = ProcessSentenceCase(blogString);
 
             TranscriptOutputDto outputDto = new();
-            outputDto.VideoTitle = inputDto.VideoTitle.Replace(FileExtension.Srt, string.Empty);
+            outputDto.VideoTitle = inputDto.VideoTitle.Replace(FileExtension.SRT, string.Empty);
             outputDto.VideoText = videoString;
             outputDto.BlogText = blogString;
             outputDto.BlogWords = blogString.Split(' ').Length;
@@ -61,27 +65,27 @@ namespace Almostengr.VideoProcessor.Services
         public void SaveTranscript(TranscriptOutputDto transcriptDto)
         {
             _textFileService.SaveFileContents(
-                $"{Transcript.OutputDirectory}/{transcriptDto.VideoTitle}.srt",
-                outputDto.VideoText);
+                $"{_outgoingDirectory}/{transcriptDto.VideoTitle}.{FileExtension.SRT}",
+                transcriptDto.VideoText);
 
             _textFileService.SaveFileContents(
-                $"{Transcript.OutputDirectory}/{transcriptDto.VideoTitle}.md",
-                outputDto.BlogText);
+                $"{_outgoingDirectory}/{transcriptDto.VideoTitle}.{FileExtension.MD}",
+                transcriptDto.BlogText);
         }
         
         public void ArchiveTranscript(string transcriptFilename)
         {
-            Directory.Move($"{Transcript.InputDirectory}/{transcriptFilename}", $"{Transcript.OutputDirectory}/{transcriptFilename}");
+            Directory.Move($"{_incomingDirectory}/{transcriptFilename}", $"{_incomingDirectory}/{transcriptFilename}");
         }
 
-        public string[] GetTranscriptList(string srt)
+        public string[] GetIncomingTranscripts()
         {
-            if (Directory.Exists(Transcript.InputDirectory) == false)
+            if (Directory.Exists(_incomingDirectory) == false)
             {
-                Directory.CreateDirectory(Transcript.InputDirectory);
+                Directory.CreateDirectory(_incomingDirectory);
             }
 
-            return Directory.GetFiles(Transcript.InputDirectory, $"*{FileExtension.Srt}");
+            return Directory.GetFiles(_incomingDirectory, $"*{FileExtension.SRT}");
         }
 
         public override bool IsValidTranscript(TranscriptInputDto inputDto)

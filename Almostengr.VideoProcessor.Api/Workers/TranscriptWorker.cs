@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Almostengr.VideoProcessor.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -16,8 +16,7 @@ namespace Almostengr.VideoProcessor.Workers
         private readonly ITextFileService _textFileService;
         private readonly ILogger<TranscriptWorker> _logger;
 
-        // public TranscriptWorker(ITranscriptService transcriptService, ITextFileService textFileService,            ILogger<TranscriptWorker> logger)
-        public TranscriptWorker(ITranscriptService transcriptService, IServiceScopeFactory factory)
+        public TranscriptWorker(ILogger<TranscriptWorker> logger, IServiceScopeFactory factory)
         {
             _transcriptService = factory.CreateScope().ServiceProvider.GetRequiredService<ITranscriptService>();
             _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();
@@ -28,23 +27,26 @@ namespace Almostengr.VideoProcessor.Workers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                DateTime startTime = DateTime.Now;
-                
-                var srtTranscripts = _transcriptService.GetTranscriptList(FileExtension.SRT);
+                var srtTranscripts = _transcriptService.GetIncomingTranscripts();
                 
                 foreach (var transcriptFile in srtTranscripts)
                 {
                     _logger.LogInformation($"Processing {transcriptFile}");
-                    var fileContent = _transcriptService.GetFileContents(transcriptFile); // get the file contents 
-                    
-                    // check the format
-                    
-                    // clean the transcript
-                    var transcriptOutput = _transcriptService.CleanTranscript(new TranscriptInputDto
+                    string fileContent = _textFileService.GetFileContents(transcriptFile); // get the file contents
+
+                    TranscriptInputDto transcriptInputDto = new TranscriptInputDto
                     {
                         Input = fileContent,
                         VideoTitle = Path.GetFileName(transcriptFile)
-                    });
+                    };
+
+                    if (_transcriptService.IsValidTranscript(transcriptInputDto) == false)
+                    {
+                        _logger.LogError($"{transcriptFile} is not in a valid format");
+                        continue;
+                    }
+                    
+                    TranscriptOutputDto transcriptOutput = _transcriptService.CleanTranscript(transcriptInputDto);
                     
                     _transcriptService.SaveTranscript(transcriptOutput); // save the transcript (video, blog, original) to the output directory
                     
@@ -53,33 +55,13 @@ namespace Almostengr.VideoProcessor.Workers
                     _logger.LogInformation($"Finished processing {transcriptFile}");
                 }
 
-//                 foreach (var srtTranscript in srtTranscripts)
-//                 {
-//                     _logger.LogInformation($"TranscriptWorker: Processing {srtTranscript}");
-//                     var fileContent = _textFileService.GetFileContents(srtTranscript);
-
-//                     var transcriptOutput = _transcriptService.CleanTranscript(new TranscriptInputDto
-//                     {
-//                         Input = fileContent,
-//                         // VideoTitle = srtTranscript.Replace(TranscriptExt.Srt, string.Empty)
-//                         VideoTitle = Path.GetFileName(srtTranscript)
-//                     });
-
-//                     if (transcriptOutput != null)
-//                     {
-//                         _textFileService.DeleteFile(srtTranscript);
-//                     }
-                    
-//                     _logger.LogInformation($"TranscriptWorker: Finished processing {srtTranscript}");
-//                 }
-
-                TimeSpan elapsedTime = DateTime.Now - startTime;
-
-                if (elapsedTime.TotalMinutes < 1)
+                if (srtTranscripts.Length == 0)
                 {
+                    _logger.LogInformation("No new transcripts found");
                     await Task.Delay(TimeSpan.FromHours(2), stoppingToken);
                 }
             }
         }
+
     }
 }

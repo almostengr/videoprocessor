@@ -10,6 +10,7 @@ namespace Almostengr.VideoProcessor.Constants
         public const string TAR_XZ = ".tar.xz";
         public const string SRT = ".srt";
         public const string TXT = ".txt";
+        public const string MD = ".md";
     }
     
 }
