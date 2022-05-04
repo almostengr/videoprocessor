@@ -10,13 +10,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Workers
 {
-    public class TranscriptWorker : BackgroundService
+    public class SrtTranscriptWorker : BackgroundService
     {
         private readonly ITranscriptService _transcriptService;
         private readonly ITextFileService _textFileService;
-        private readonly ILogger<TranscriptWorker> _logger;
+        private readonly ILogger<SrtTranscriptWorker> _logger;
 
-        public TranscriptWorker(ILogger<TranscriptWorker> logger, IServiceScopeFactory factory)
+        public SrtTranscriptWorker(ILogger<SrtTranscriptWorker> logger, IServiceScopeFactory factory)
         {
             _transcriptService = factory.CreateScope().ServiceProvider.GetRequiredService<ITranscriptService>();
             _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();

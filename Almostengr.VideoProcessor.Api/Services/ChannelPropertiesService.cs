@@ -19,10 +19,6 @@ namespace Almostengr.VideoProcessor.Api.Services
                     channelProperties = new ChannelPropertiesDto
                     {
                         Name = channelName,
-                        InputDirectory = _baseDirectory + "/dashcam/input",
-                        WorkingDirectory = _baseDirectory + "/dashcam/working",
-                        ArchiveDirectory = _baseDirectory + "/dashcam/archive",
-                        UploadDirectory = _baseDirectory + "/dashcam/upload",
                         ClientSecretFileName = _baseDirectory + "dashcam_secrets.json",
                         DefaultDescription = "",
                         ChannelLabels = new List<string> {
@@ -35,16 +31,12 @@ namespace Almostengr.VideoProcessor.Api.Services
                     channelProperties = new ChannelPropertiesDto
                     {
                         Name = channelName,
-                        InputDirectory = _baseDirectory + "/rhtservices/input",
-                        WorkingDirectory = _baseDirectory + "/rhtservices/working",
-                        ArchiveDirectory = _baseDirectory + "/rhtservices/archive",
-                        UploadDirectory = _baseDirectory + "/rhtservices/upload",
                         ClientSecretFileName = _baseDirectory + "rhtservices_secrets.json",
                         DefaultDescription = "Visit https://rhtservices.net for more information.",
                         ChannelLabels = new List<string> {
                             "Robinson Handy and Technology Services",
                             "rhtservices.net",
-                            "IG: @rhtservicesllc",
+                            "instagram.com/rhtservicesllc",
                             "facebook.com/rhtservicesllc",
                             "Subscribe to our YouTube channel!",
                         }

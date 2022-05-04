@@ -16,99 +16,46 @@ namespace Almostengr.VideoProcessor.Api.Services
         private readonly Random _random;
         private readonly ILogger<VideoRenderService> _logger;
         private readonly string StreetSignFilter = "fontcolor=white:fontsize=${FONTSIZE}:box=1:boxborderw=7:boxcolor=green:${LOWERCENTER}"; // TODO enter properties
-        private ChannelPropertiesDto _channel;
+        private readonly string _incomingDirectory;
+        private readonly string _archiveDirectory;
+        private readonly string _uploadDirectory;
+        private readonly string _workingDirectory;
+        private readonly string _destinationFile;
+        private readonly string _majorRoadsFile;
+        private readonly string _subtitlesFile;
+        private readonly string _ffmpegInputFile;
 
         public VideoRenderService(ILogger<VideoRenderService> logger)
         {
             _logger = logger;
             _random = new Random();
+            _incomingDirectory = $"{Directories.BaseDirectory}/videos/incoming";
+            _archiveDirectory = $"{Directories.BaseDirectory}/videos/archive";
+            _uploadDirectory = $"{Directories.BaseDirectory}/videos/upload";
+            _workingDirectory = $"{Directories.BaseDirectory}/videos/working";
+            _destinationFile = $"{_workingDirectory}/destination.txt";
+            _majorRoadsFile = $"{_workingDirectory}/majorroads.txt";
+            _subtitlesFile = $"{_workingDirectory}/subtitles.ass";
+            _ffmpegInputFile = $"{_workingDirectory}/input.txt";
+        }
+
+        public string[] GetVideosFromInputDirectory()
+        {
+            if (Directory.Exists(_incomingDirectory) == false)
+            {
+                Directory.CreateDirectory(_incomingDirectory);
+            }
+
+            return Directory.GetFiles(_incomingDirectory, $"*{FileExtension.TAR}*");
+        }
+
+        public bool IsDiskSpaceAvailable()
+        {
+            return base.IsDiskSpaceAvailable(_incomingDirectory);
         }
 
         public async Task RenderChannelVideosAsync(ChannelPropertiesDto channelDto)
         {
-            _channel = channelDto;
-
-            _logger.LogInformation($"Rendering {_channel.Name} videos");
-
-            while (true)
-            {
-                if (IsDiskSpaceAvailable(_channel.InputDirectory) == false)
-                {
-                    _logger.LogInformation($"Not enough space to render {_channel.Name} videos");
-                    break;
-                }
-
-                // get one file from the input directory
-                var tarFile = Directory.GetFiles(_channel.InputDirectory, $"*{FileExtension.TAR}*").First();
-
-                if (tarFile.Length == 0)
-                {
-                    _logger.LogInformation($"No tar archives found in {_channel.InputDirectory}");
-                    break;
-                }
-
-                // create working directory if it does not exist
-
-                CleanWorkingDirectory(); // clear the contents of the working directory
-
-                string videoTitle = Path.GetFileNameWithoutExtension(tarFile);
-
-                await ExtractTarFileToWorkingDirectoryAsync(tarFile, _channel.WorkingDirectory);
-
-                // check the working directory for mkv or mov files;
-                var nonMp4VideoFiles = Directory.GetFiles(_channel.WorkingDirectory, $"*{FileExtension.MKV}*")
-                    .Concat(Directory.GetFiles(_channel.WorkingDirectory, $"*{FileExtension.MOV}*"));
-                foreach (var videoFile in nonMp4VideoFiles)
-                {
-                    await ConvertVideoFileToMp4Async(videoFile); //  if found, convert them to mp4
-                    File.Delete(videoFile); // remove originals of converted mkv and mov files
-                }
-
-                string brandingTextColor = GetBrandingTextColor(_channel.Name, videoTitle);
-                string brandingText = GetBrandingText(_channel, brandingTextColor);
-
-                int displayBrandingDuration = _random.Next(10, 25);
-
-                string channelBranding = GetBrandingText(_channel);
-
-                string ffmpegVideoFilter = GetChannelBrandingFilter(_channel.Name, displayBrandingDuration, channelBranding);
-                ffmpegVideoFilter += GetDestinationFilter(_channel.WorkingDirectory);
-                ffmpegVideoFilter += GetMajorRoadFilter(_channel.WorkingDirectory);
-
-                ffmpegVideoFilter += GetSubtitlesFilter(); // add subtitles as filter if file present
-
-                CreateInputFileForFfmpeg(); // create input file for ffmpeg command
-
-                await RenderVideoToUploadDirectoryAsync(); // render video
-
-                // copy meta data file to uploads directory, if present
-
-                await ArchiveWorkingDirectoryContentsAsync(); // create archive with contents of working directory
-
-                // move archive to archive directory
-
-                // remove extracted tar file from input directory
-
-                CleanWorkingDirectory(); // clean working directory
-            }
-        }
-
-        private string GetSubtitlesFilter()
-        {
-            if (File.Exists(_channel.SubtitlesFile))
-            {
-                return $", subtitles={_channel.SubtitlesFile}";
-            }
-
-            return string.Empty;
-        }
-
-        private async Task ConvertVideoFileToMp4Async(string inputFilename)
-        {
-            string outputFilename = Path.GetFileNameWithoutExtension(inputFilename) + FileExtension.MP4;
-
-            _logger.LogInformation($"Converting {inputFilename} to {outputFilename}");
-
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
             {
@@ -116,8 +63,8 @@ namespace Almostengr.VideoProcessor.Api.Services
                 ArgumentList = {
                     "-hide_banner",
                     "-i",
-                    Path.Combine(_channel.WorkingDirectory, inputFilename),
-                    Path.Combine(_channel.WorkingDirectory, outputFilename)
+                    _ffmpegInputFile,
+                    "-vf",
                 },
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -127,6 +74,51 @@ namespace Almostengr.VideoProcessor.Api.Services
 
             process.Start();
             await process.WaitForExitAsync();
+        }
+
+        public string GetSubtitlesFilter()
+        {
+            if (File.Exists(_subtitlesFile))
+            {
+                return $", subtitles={_subtitlesFile}";
+            }
+
+            return string.Empty;
+        }
+
+        public async Task ConvertVideoFilesToMp4Async()
+        {
+            var nonMp4VideoFiles = Directory.GetFiles(_workingDirectory, $"*{FileExtension.MKV}*")
+                .Concat(Directory.GetFiles(_workingDirectory, $"*{FileExtension.MOV}*"));
+
+            foreach (var videoFile in nonMp4VideoFiles)
+            {
+                string outputFilename = Path.GetFileNameWithoutExtension(videoFile) + FileExtension.MP4;
+                _logger.LogInformation($"Converting {videoFile} to {outputFilename}");
+
+                Process process = new();
+                process.StartInfo = new ProcessStartInfo()
+                {
+                    FileName = ProgramPaths.FfmpegBinary,
+                    ArgumentList = {
+                    "-hide_banner",
+                    "-i",
+                    Path.Combine(_workingDirectory, videoFile),
+                    Path.Combine(_workingDirectory, outputFilename)
+                },
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                process.Start();
+                await process.WaitForExitAsync();
+
+                Directory.Delete(Path.Combine(_workingDirectory, videoFile));
+
+                _logger.LogInformation($"Done converting {videoFile} to {outputFilename}");
+            }
         }
 
         private string GetBrandingText(ChannelPropertiesDto channelDto, string textColor = FfMpegColors.WHITE)
@@ -160,32 +152,32 @@ namespace Almostengr.VideoProcessor.Api.Services
             return ffmpegVideoFilter;
         }
 
-        private string GetDestinationFilter(string workingDirectory)
+        public string GetDestinationFilter()
         {
-            if (File.Exists(_channel.DestinationFile))
+            if (File.Exists($"{_workingDirectory}/destination.txt"))
             {
-                return $", drawtext=textfile={_channel.DestinationFile}:${StreetSignFilter}:enable='between(t,5,12)'";
+                return $", drawtext=textfile={_workingDirectory}/destination.txt:${StreetSignFilter}:enable='between(t,5,12)'";
             }
 
             return string.Empty;
         }
 
-        private string GetMajorRoadFilter(string workingDirectory)
+        public string GetMajorRoadFilter()
         {
-            if (File.Exists(_channel.MajorRoadsFile))
+            if (File.Exists($"{_workingDirectory}/majorroads.txt"))
             {
-                return $", drawtext=textfile={_channel.MajorRoadsFile}:${StreetSignFilter}:enable='between(t,12,20)'";
+                return $", drawtext=textfile={_workingDirectory}/majorroads.txt:${StreetSignFilter}:enable='between(t,12,20)'";
             }
 
             return string.Empty;
         }
 
-        private string GetChannelBrandingText(List<string> texts)
+        public string GetChannelBrandingText(List<string> texts)
         {
             return texts[_random.Next(0, texts.Count - 1)];
         }
 
-        private async Task ExtractTarFileToWorkingDirectoryAsync(string tarFile, string workingDirectory)
+        public async Task ExtractTarFileToWorkingDirectoryAsync(string tarFile)
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -195,7 +187,7 @@ namespace Almostengr.VideoProcessor.Api.Services
                     "-xvf",
                     tarFile,
                     "-C",
-                    workingDirectory
+                    _workingDirectory
                 },
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -207,7 +199,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             await process.WaitForExitAsync();
         }
 
-        private async Task RenderVideoToUploadDirectoryAsync()
+        public async Task RenderVideoToUploadDirectoryAsync()
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -219,11 +211,11 @@ namespace Almostengr.VideoProcessor.Api.Services
                     "0",
                     "-loglevel",
                     FfMpegLogLevel.ERROR,
-                    "-y", 
+                    "-y",
                     "-f",
                     "concat",
                     "-i",
-                    _channel.FfmpegInputFile,
+                    _ffmpegInputFile,
                     // TODO video title as file name with mp4 extension
                 },
                 UseShellExecute = false,
@@ -236,7 +228,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             await process.WaitForExitAsync();
         }
 
-        private async Task ArchiveWorkingDirectoryContentsAsync()
+        public async Task ArchiveWorkingDirectoryContentsAsync()
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -256,17 +248,17 @@ namespace Almostengr.VideoProcessor.Api.Services
             await process.WaitForExitAsync();
         }
 
-        private void CleanWorkingDirectory()
+        public void CleanWorkingDirectory()
         {
-            if (Directory.Exists(_channel.WorkingDirectory))
+            if (Directory.Exists(_workingDirectory))
             {
-                Directory.Delete(_channel.WorkingDirectory, true);
+                Directory.Delete(_workingDirectory, true);
             }
-            
-            Directory.CreateDirectory(_channel.WorkingDirectory);
+
+            Directory.CreateDirectory(_workingDirectory);
         }
 
-        private string GetBrandingTextColor(string channelName, string videoTitle)
+        public string GetBrandingTextColor(string channelName, string videoTitle)
         {
             if (channelName == ChannelName.DashCam && videoTitle.ToLower().Contains("night"))
             {
@@ -276,16 +268,76 @@ namespace Almostengr.VideoProcessor.Api.Services
             return FfMpegColors.WHITE;
         }
 
-        private void CreateInputFileForFfmpeg()
+        public string GetFfmpegVideoFilter(string videoTitle)
         {
-            using (StreamWriter writer = new StreamWriter(_channel.FfmpegInputFile))
+            string ffmpegVideoFilter = string.Empty;
+            string textColor = GetBrandingTextColor(ChannelName.DashCam, videoTitle);
+            int displayBrandingDuration = _random.Next(10,25);
+
+            string brandingText = GetChannelBrandingText(channelDto.ChannelLabels);
+
+            string channelBranding = $"drawtext=textfile:'{brandingText}':";
+            channelBranding += $"fontcolor:{textColor}:";
+            channelBranding += $"fontsize:${FfMpegConstants.FONT_SIZE}:";
+            channelBranding += $""; // TODO position of upper right
+            channelBranding += $"box=1:boxborderw=10:boxcolor:{FfMpegColors.BLACK}";
+            
+
+            switch (channelName)
             {
-                foreach (string file in Directory.GetFiles(_channel.WorkingDirectory, $"*{FileExtension.MP4}"))
+                case ChannelName.DashCam:
+                    ffmpegVideoFilter += $"{channelBranding}:enable='between(t,0,{displayBrandingDuration})'";
+                    ffmpegVideoFilter += $"{channelBranding}@{FfMpegConstants.DIMMED_BACKGROUND}:enable='gt(t,{displayBrandingDuration})'";
+                    break;
+
+                default:
+                    textColor = FfMpegColors.WHITE;
+                    ffmpegVideoFilter += $"{channelBranding}:enable='gt(t,0)'";
+                    break;
+            }
+
+            if (File.Exists(_majorRoadsFile))
+            {
+                ffmpegVideoFilter += $", drawtext=textfile={_majorRoadsFile}:${StreetSignFilter}:enable='between(t,12,20)'";
+            }
+
+            if (File.Exists($"{_destinationFile}"))
+            {
+                ffmpegVideoFilter += $", drawtext=textfile={_destinationFile}:${StreetSignFilter}:enable='between(t,5,12)'";
+            }
+
+            return ffmpegVideoFilter;
+        }
+
+        public void CreateInputFileForFfmpeg()
+        {
+            if (File.Exists(_ffmpegInputFile))
+            {
+                return;
+            }
+
+            using (StreamWriter writer = new StreamWriter(_ffmpegInputFile))
+            {
+                foreach (string file in Directory.GetFiles(_workingDirectory, $"*{FileExtension.MP4}"))
                 {
                     writer.WriteLine($"file '{file}'");
                 }
             }
         }
 
+        public bool DoesChannelFileExist()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetDestinationFilter(string workingDirectory)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetMajorRoadFilter(string workingDirectory)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
