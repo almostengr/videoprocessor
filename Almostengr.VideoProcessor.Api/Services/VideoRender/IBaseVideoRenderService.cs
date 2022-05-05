@@ -17,5 +17,6 @@ namespace Almostengr.VideoProcessor.Api.Services
         void CheckOrCreateFfmpegInputFile(string workingDirectory);
         void SaveVideoMetaData(VideoPropertiesDto videoProperties);
         void MoveProcessedVideoArchiveToArchive(string workingDirectory, string archiveDirectory);
+        void CreateThumbnailsFromFinalVideo(VideoPropertiesDto videoProperties);
     }
 }
