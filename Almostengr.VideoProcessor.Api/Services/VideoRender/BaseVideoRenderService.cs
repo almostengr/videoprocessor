@@ -34,6 +34,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             _lowerCenter = $"x=(w-tw)/2:y=h-th-${PADDING}";
             _lowerRight = $"x=w-tw-${PADDING}:y=h-th-${PADDING}";
         }
+        
         public abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);
 
         public async Task ArchiveWorkingDirectoryContentsAsync()
@@ -105,7 +106,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             await process.WaitForExitAsync();
         }
 
-        public async Task RenderVideoToUploadDirectoryAsync(string workingDirectory, string uploadDirectory)
+        public virtual async Task RenderVideoToUploadDirectoryAsync(string workingDirectory, string uploadDirectory)
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -122,7 +123,9 @@ namespace Almostengr.VideoProcessor.Api.Services
                     "concat",
                     "-i",
                     Path.Combine(workingDirectory, VideoRenderFiles.INPUT_FILE),
-                    // TODO video title as file name with mp4 extension
+                    "-vf",
+                    videoProperties.videoFilter,
+                    videoProperties.outputFilename
                 },
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
