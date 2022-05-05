@@ -35,7 +35,17 @@ namespace Almostengr.VideoProcessor.Workers
             _ffmpegInputFile = Path.Combine(_workingDirectory, VideoRenderFiles.INPUT_FILE);
             _subtitlesFile = Path.Combine(_workingDirectory, VideoRenderFiles.SUBTITLES_FILE);
         }
-
+        
+        protected override async Task StartAsync()
+        {
+            _videoRenderService.CreateDirectoryIfNotExists(_incomingDirectory);
+            _videoRenderService.CreateDirectoryIfNotExists(_archiveDirectory);
+            _videoRenderService.CreateDirectoryIfNotExists(_uploadDirectory);
+            _videoRenderService.CreateDirectoryIfNotExists(_workingDirectory);
+            
+            return Task.Completed;
+        }
+        
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
