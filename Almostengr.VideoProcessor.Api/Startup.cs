@@ -29,11 +29,12 @@ namespace Almostengr.VideoProcessor.Api
 
             // SERVICES //////////////////////////////////////////////////////////////////////////////////////
 
-            services.AddTransient<IVideoRenderService, VideoRenderService>();
+            services.AddSingleton<IDashCamVideoRenderService, DashCamVideoRenderService>();
+            services.AddSingleton<IRhtServicesVideoRenderService, RhtServicesVideoRenderService>();
 
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////
 
-            services.AddHostedService<VideoRenderWorker>();
+            services.AddHostedService<RhtServicesVideoRenderWorker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -13,7 +13,9 @@ namespace Almostengr.VideoProcessor.Api.DataTransferObjects
         public string VideoDescription { get; set; }
         public string VideoKeywords { get; set; }
         public string VideoLocation { get; set; }
-        public ChannelPropertiesDto ChannelProperties { get; set; }
-
+        public string IncomingArchiveFileName { get; internal set; }
+        public object UploadFileName { get; set; }
+        public string InputFile { get; set; }
+        public string OutputFile { get; set; }
     }
 }
