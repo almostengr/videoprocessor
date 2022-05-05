@@ -25,6 +25,13 @@ namespace Almostengr.VideoProcessor.Api.Services
             {
                 textColor = FfMpegColors.ORANGE;
             }
+            
+            var positionOptions = new List<string> {
+                _upperRight,
+                _lowerRight
+            };
+            
+            string textPosition = positionOptions[random.Next(0, positionOptions.Count-1)];
 
             // solid text - channel name
             string videoFilter = "drawtext=textfile:'" + channelBranding + "':";
