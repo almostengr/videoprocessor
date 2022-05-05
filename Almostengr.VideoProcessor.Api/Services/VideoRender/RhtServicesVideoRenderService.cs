@@ -11,6 +11,40 @@ namespace Almostengr.VideoProcessor.Api.Services
         public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger) : base(logger)
         {
         }
+        
+        
+        public override async Task RenderVideoToUploadDirectoryAsync(string workingDirectory, string uploadDirectory)
+        {
+            Process process = new();
+            process.StartInfo = new ProcessStartInfo()
+            {
+                FileName = ProgramPaths.FfmpegBinary,
+                ArgumentList = {
+                    "-hide_banner",
+                    "-safe",
+                    "0",
+                    "-loglevel",
+                    FfMpegLogLevel.ERROR,
+                    "-y",
+                    "-f",
+                    "concat",
+                    "-i",
+                    Path.Combine(workingDirectory, VideoRenderFiles.INPUT_FILE),
+                    "-vf",
+                    videoProperties.VideoFilter,
+                    "-c:a",
+                    "copy",
+                    videoProperties.OutputFilename
+                },
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+
+            process.Start();
+            await process.WaitForExitAsync();
+        }
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
         {
