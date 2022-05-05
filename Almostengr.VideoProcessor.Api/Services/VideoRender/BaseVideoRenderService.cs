@@ -13,7 +13,8 @@ namespace Almostengr.VideoProcessor.Api.Services
     {
         private readonly ILogger<BaseVideoRenderService> _logger;
         private const int PADDING = 20;
-        internal readonly string _subscribeFitler;
+        internal readonly string _subscribeFilter;
+        internal readonly string _subscribeScrollingFilter;
         internal readonly string _upperLeft;
         internal readonly string _upperCenter;
         internal readonly string _upperRight;
@@ -25,14 +26,18 @@ namespace Almostengr.VideoProcessor.Api.Services
         public BaseVideoRenderService(ILogger<BaseVideoRenderService> logger) : base(logger)
         {
             _logger = logger;
+            
+            
 
-            _upperLeft = $"x=${PADDING}:y=${PADDING}";
-            _upperCenter = $"x=(w-tw)/2:y=${PADDING}";
-            _upperRight = $"x=w-tw-${PADDING}:y=${PADDING}";
+            _upperLeft = $"x={PADDING}:y={PADDING}";
+            _upperCenter = $"x=(w-tw)/2:y={PADDING}";
+            _upperRight = $"x=w-tw-{PADDING}:y={PADDING}";
             _centered = $"x=(w-tw)/2:y=(h-th)/2";
-            _lowerLeft = $"x=${PADDING}:y=h-th-${PADDING}";
-            _lowerCenter = $"x=(w-tw)/2:y=h-th-${PADDING}";
-            _lowerRight = $"x=w-tw-${PADDING}:y=h-th-${PADDING}";
+            _lowerLeft = $"x={PADDING}:y=h-th-{PADDING}";
+            _lowerCenter = $"x=(w-tw)/2:y=h-th-{PADDING}";
+            _lowerRight = $"x=w-tw-{PADDING}:y=h-th-{PADDING}";
+            
+            _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfmpegColors.WHITE}:fontsize={FfmpegConstants.FONT_SIZE}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfmpegColors.RED}:box=1:boxborderw=10";
         }
         
         public abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);
