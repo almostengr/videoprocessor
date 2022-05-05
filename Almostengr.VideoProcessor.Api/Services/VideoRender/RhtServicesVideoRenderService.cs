@@ -50,7 +50,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
             Random random = new();
 
-            var channelTextOptions = new List<string> {
+            var textOptions = new List<string> {
                 "Robinson Handy and Technology Services",
                 "rhtservices.net",
                 "instagram.com/rhtservicesllc",
@@ -60,7 +60,7 @@ namespace Almostengr.VideoProcessor.Api.Services
 
             string textColor = FfMpegColors.WHITE;
 
-            string channelBranding = channelTextOptions[random.Next(0, channelTextOptions.Count - 1)];
+            string channelText = textOptions[random.Next(0, textOptions.Count - 1)];
             
             var positionOptions = new List<string> {
                 _upperRight,
@@ -68,12 +68,12 @@ namespace Almostengr.VideoProcessor.Api.Services
                 _lowerRight
             };
             
-            string channelPosition = positionOptions[random.Next(0, positionOptions.Count - 1)];
+            string textPosition = positionOptions[random.Next(0, positionOptions.Count - 1)];
 
-            string videoFilter = "drawtext=textfile:'" + channelBranding + "':";
+            string videoFilter = "drawtext=textfile:'" + channelText + "':";
             videoFilter += "fontcolor:" + textColor + ":";
             videoFilter += "fontsize:" + FfMpegConstants.FONT_SIZE + ":";
-            videoFilter += $"{channelPosition}:";
+            videoFilter += $"{textPosition}:";
             videoFilter += "box=1:boxborderw=10:boxcolor:" + FfMpegColors.BLACK;
             videoFilter += ":enable='gt(t,0)'";
 
