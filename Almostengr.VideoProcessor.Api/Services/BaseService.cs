@@ -33,5 +33,11 @@ namespace Almostengr.VideoProcessor.Api.Services
                 _logger.LogInformation($"Created directory {directory}");
             }
         }
+        
+        public async Task StartAndAwaitAsyncProcess(Process process, CancellationToken cancellationToken)
+        {
+            process.Start();
+            await process.WaitForExitAsync(cancellationToken);
+        }
     }
 }
