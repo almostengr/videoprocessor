@@ -5,7 +5,8 @@ namespace Almostengr.VideoProcessor.Api.Services
 {
     public interface IBaseVideoRenderService : IBaseService
     {
-        abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties);
+        // abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties);
+        abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
         abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);
         string[] GetVideoArchivesInDirectory(string directory);
         void CleanDirectory(string directory);
