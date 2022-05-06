@@ -12,7 +12,7 @@ namespace Almostengr.VideoProcessor.Api.Services
     public abstract class BaseVideoRenderService : BaseService, IBaseVideoRenderService
     {
         private readonly ILogger<BaseVideoRenderService> _logger;
-        private const int PADDING = 20;
+        private const int PADDING = 30;
         internal readonly string _subscribeFilter;
         internal readonly string _subscribeScrollingFilter;
         internal readonly string _upperLeft;
@@ -26,8 +26,6 @@ namespace Almostengr.VideoProcessor.Api.Services
         public BaseVideoRenderService(ILogger<BaseVideoRenderService> logger) : base(logger)
         {
             _logger = logger;
-            
-            
 
             _upperLeft = $"x={PADDING}:y={PADDING}";
             _upperCenter = $"x=(w-tw)/2:y={PADDING}";
@@ -37,7 +35,8 @@ namespace Almostengr.VideoProcessor.Api.Services
             _lowerCenter = $"x=(w-tw)/2:y=h-th-{PADDING}";
             _lowerRight = $"x=w-tw-{PADDING}:y=h-th-{PADDING}";
             
-            _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfmpegColors.WHITE}:fontsize={FfmpegConstants.FONT_SIZE}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfmpegColors.RED}:box=1:boxborderw=10";
+            _subscribeFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={FfMpegConstants.FontSize}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
+            _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={FfMpegConstants.FontSize}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
         }
         
         public abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);
@@ -74,16 +73,16 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public string[] GetVideoArchivesInDirectory(string directory)
         {
-            return Directory.GetFiles(directory, $"*{FileExtension.TAR}*");
+            return Directory.GetFiles(directory, $"*{FileExtension.Tar}*");
         }
 
         public string GetSubtitlesFilter(string workingDirectory)
         {
-            string subtitleFile = Path.Combine(workingDirectory, VideoRenderFiles.SUBTITLES_FILE);
+            string subtitleFile = Path.Combine(workingDirectory, VideoRenderFiles.SubtitlesFile);
 
             if (File.Exists(subtitleFile))
             {
-                return $"subtitles='{subtitleFile}'";
+                return $", subtitles='{subtitleFile}'";
             }
 
             return string.Empty;
@@ -111,7 +110,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             await process.WaitForExitAsync();
         }
 
-        public virtual async Task RenderVideoToUploadDirectoryAsync(string workingDirectory, string uploadDirectory)
+        public virtual async Task RenderVideoAsync(VideoPropertiesDto videoProperties)
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -122,15 +121,15 @@ namespace Almostengr.VideoProcessor.Api.Services
                     "-safe",
                     "0",
                     "-loglevel",
-                    FfMpegLogLevel.ERROR,
+                    FfMpegLogLevel.Error,
                     "-y",
                     "-f",
                     "concat",
                     "-i",
-                    Path.Combine(workingDirectory, VideoRenderFiles.INPUT_FILE),
+                    videoProperties.InputFile,
                     "-vf",
-                    videoProperties.videoFilter,
-                    videoProperties.outputFilename
+                    videoProperties.VideoFilter,
+                    videoProperties.OutputFile
                 },
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -164,12 +163,12 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public async Task ConvertVideoFilesToMp4Async(string directory)
         {
-            var nonMp4VideoFiles = Directory.GetFiles(directory, $"*{FileExtension.MKV}");
+            var nonMp4VideoFiles = Directory.GetFiles(directory, $"*{FileExtension.Mkv}");
             // .Concat(Directory.GetFiles(directory, $"*{FileExtension.MOV}"));
 
             foreach (var videoFile in nonMp4VideoFiles)
             {
-                string outputFilename = Path.GetFileNameWithoutExtension(videoFile) + FileExtension.MP4;
+                string outputFilename = Path.GetFileNameWithoutExtension(videoFile) + FileExtension.Mp4;
                 _logger.LogInformation($"Converting {videoFile} to {outputFilename}");
 
                 Process process = new();
@@ -207,13 +206,13 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public void CheckOrCreateFfmpegInputFile(string workingDirectory)
         {
-            string inputFile = Path.Combine(workingDirectory, VideoRenderFiles.INPUT_FILE);
+            string inputFile = Path.Combine(workingDirectory, VideoRenderFiles.InputFile);
 
             if (File.Exists(inputFile) == false)
             {
                 using (StreamWriter writer = new StreamWriter(inputFile))
                 {
-                    foreach (string file in Directory.GetFiles(workingDirectory, $"*{FileExtension.MP4}"))
+                    foreach (string file in Directory.GetFiles(workingDirectory, $"*{FileExtension.Mp4}"))
                     {
                         writer.WriteLine($"file '{file}'");
                     }
@@ -231,34 +230,9 @@ namespace Almostengr.VideoProcessor.Api.Services
             Directory.Move(archiveFile, archiveDirectory);
         }
 
-        public async Task RenderVideoAsync(VideoPropertiesDto videoProperties)
+        public void CreateThumbnailsFromFinalVideo(VideoPropertiesDto videoProperties)
         {
-            Process process = new();
-            process.StartInfo = new ProcessStartInfo()
-            {
-                FileName = ProgramPaths.FfmpegBinary,
-                ArgumentList = {
-                    "-hide_banner",
-                    "-safe",
-                    "0",
-                    "-loglevel",
-                    FfMpegLogLevel.ERROR,
-                    "-y",
-                    "-f",
-                    "concat",
-                    "-i",
-                    videoProperties.InputFile,
-                    videoProperties.OutputFile
-                },
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
-
-            process.Start();
-            await process.WaitForExitAsync();
+            throw new NotImplementedException();
         }
-
     }
 }

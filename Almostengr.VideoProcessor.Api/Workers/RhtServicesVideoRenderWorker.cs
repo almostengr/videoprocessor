@@ -32,18 +32,8 @@ namespace Almostengr.VideoProcessor.Workers
             _archiveDirectory = Path.Combine(Directories.BaseDirectory, "rhtvideos/archive");
             _uploadDirectory = Path.Combine(Directories.BaseDirectory, "rhtvideos/upload");
             _workingDirectory = Path.Combine(Directories.BaseDirectory, "rhtvideos/working");
-            _ffmpegInputFile = Path.Combine(_workingDirectory, VideoRenderFiles.INPUT_FILE);
-            _subtitlesFile = Path.Combine(_workingDirectory, VideoRenderFiles.SUBTITLES_FILE);
-        }
-        
-        protected override async Task StartAsync()
-        {
-            _videoRenderService.CreateDirectoryIfNotExists(_incomingDirectory);
-            _videoRenderService.CreateDirectoryIfNotExists(_archiveDirectory);
-            _videoRenderService.CreateDirectoryIfNotExists(_uploadDirectory);
-            _videoRenderService.CreateDirectoryIfNotExists(_workingDirectory);
-            
-            return Task.Completed;
+            _ffmpegInputFile = Path.Combine(_workingDirectory, VideoRenderFiles.InputFile);
+            _subtitlesFile = Path.Combine(_workingDirectory, VideoRenderFiles.SubtitlesFile);
         }
         
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -61,9 +51,9 @@ namespace Almostengr.VideoProcessor.Workers
                     _videoRenderService.CleanDirectory(_workingDirectory);
 
                     VideoPropertiesDto videoProperties = new();
-                    videoProperties.ArchiveFileName = videoArchive;
+                    videoProperties.ArchiveFile = videoArchive;
                     videoProperties.VideoDescription = DEFAULT_VIDEO_DESCRIPTION;
-                    videoProperties.IncomingArchiveFileName = Path.Combine(_incomingDirectory, videoArchive);
+                    videoProperties.IncomingArchiveFile = Path.Combine(_incomingDirectory, videoArchive);
                     videoProperties.InputFile = _ffmpegInputFile;
 
                     await _videoRenderService.ExtractTarFileToWorkingDirectoryAsync(videoArchive, _workingDirectory);
@@ -76,7 +66,7 @@ namespace Almostengr.VideoProcessor.Workers
 
                     string ffmpegVideoFilter = _videoRenderService.GetFfmpegVideoFilters(videoProperties);
 
-                    await _videoRenderService.RenderVideoToUploadDirectoryAsync(_workingDirectory, _uploadDirectory);
+                    await _videoRenderService.RenderVideoAsync(videoProperties);
 
                     _videoRenderService.SaveVideoMetaData(videoProperties);
 
@@ -86,7 +76,7 @@ namespace Almostengr.VideoProcessor.Workers
 
                     _videoRenderService.MoveProcessedVideoArchiveToArchive(_workingDirectory, _archiveDirectory);
 
-                    _videoRenderService.RemoveFile(videoProperties.IncomingArchiveFileName);
+                    _videoRenderService.RemoveFile(videoProperties.IncomingArchiveFile);
 
                     _videoRenderService.CleanDirectory(_workingDirectory);
 
@@ -101,5 +91,19 @@ namespace Almostengr.VideoProcessor.Workers
             }
         } // end of ExecuteAsync
 
+        public override Task StartAsync(CancellationToken cancellationToken)
+        {
+            _videoRenderService.CreateDirectoryIfNotExists(_incomingDirectory);
+            _videoRenderService.CreateDirectoryIfNotExists(_archiveDirectory);
+            _videoRenderService.CreateDirectoryIfNotExists(_uploadDirectory);
+            _videoRenderService.CreateDirectoryIfNotExists(_workingDirectory);
+            
+            return base.StartAsync(cancellationToken);
+        }
+
+        public override Task StopAsync(CancellationToken cancellationToken)
+        {
+            return base.StopAsync(cancellationToken);
+        }
     }
 }

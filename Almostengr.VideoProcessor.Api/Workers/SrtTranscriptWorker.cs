@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.DataTransferObjects;
-using Almostengr.VideoProcessor.Services;
+using Almostengr.VideoProcessor.Api.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

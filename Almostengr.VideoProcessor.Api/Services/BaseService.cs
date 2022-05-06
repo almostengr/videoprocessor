@@ -24,5 +24,14 @@ namespace Almostengr.VideoProcessor.Api.Services
             Directory.Delete(filename, true);
             _logger.LogInformation($"Removed file {filename}");
         }
+
+        public void CreateDirectoryIfNotExists(string directory)
+        {
+            if (Directory.Exists(directory) == false)
+            {
+                Directory.CreateDirectory(directory);
+                _logger.LogInformation($"Created directory {directory}");
+            }
+        }
     }
 }

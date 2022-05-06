@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Microsoft.Extensions.Logging;
@@ -11,9 +13,8 @@ namespace Almostengr.VideoProcessor.Api.Services
         public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger) : base(logger)
         {
         }
-        
-        
-        public override async Task RenderVideoToUploadDirectoryAsync(string workingDirectory, string uploadDirectory)
+
+        public override async Task RenderVideoAsync(VideoPropertiesDto videoProperties)
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -24,17 +25,17 @@ namespace Almostengr.VideoProcessor.Api.Services
                     "-safe",
                     "0",
                     "-loglevel",
-                    FfMpegLogLevel.ERROR,
+                    FfMpegLogLevel.Error,
                     "-y",
                     "-f",
                     "concat",
                     "-i",
-                    Path.Combine(workingDirectory, VideoRenderFiles.INPUT_FILE),
+                    videoProperties.InputFile,
                     "-vf",
                     videoProperties.VideoFilter,
                     "-c:a",
                     "copy",
-                    videoProperties.OutputFilename
+                    videoProperties.OutputFile
                 },
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -50,32 +51,35 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
             Random random = new();
 
-            var textOptions = new List<string> {
-                "Robinson Handy and Technology Services",
+            string channelText = "Robinson Handy and Technology Services";
+
+            var socialMediaOptions = new List<string> {
                 "rhtservices.net",
+                "IG: @rhtservicesllc",
                 "instagram.com/rhtservicesllc",
                 "facebook.com/rhtservicesllc",
                 "Subscribe to our YouTube channel!",
             };
 
-            string textColor = FfMpegColors.WHITE;
-
-            string channelText = textOptions[random.Next(0, textOptions.Count - 1)];
+            string socialText = socialMediaOptions[random.Next(0, socialMediaOptions.Count - 1)];
             
-            var positionOptions = new List<string> {
-                _upperRight,
-                _lowerLeft,
-                _lowerRight
-            };
-            
-            string textPosition = positionOptions[random.Next(0, positionOptions.Count - 1)];
+            string textColor = FfMpegColors.White;
 
-            string videoFilter = "drawtext=textfile:'" + channelText + "':";
-            videoFilter += "fontcolor:" + textColor + ":";
-            videoFilter += "fontsize:" + FfMpegConstants.FONT_SIZE + ":";
-            videoFilter += $"{textPosition}:";
-            videoFilter += "box=1:boxborderw=10:boxcolor:" + FfMpegColors.BLACK;
-            videoFilter += ":enable='gt(t,0)'";
+            string videoFilter = $"drawtext=textfile:'{channelText}':";
+            videoFilter += $"fontcolor:{textColor}:";
+            videoFilter += $"fontsize:{FfMpegConstants.FontSize}:";
+            videoFilter += $"{_upperRight}:";
+            videoFilter += $"box=1:boxborderw=10:boxcolor:{FfMpegColors.Black}";
+            videoFilter += $"@{FfMpegConstants.DimmedBackground}";
+            videoFilter += $":enable='gt(t,0)'";
+
+            videoFilter += $", drawtext=textfile:'{socialText}':";
+            videoFilter += $"fontcolor:{textColor}:";
+            videoFilter += $"fontsize:{FfMpegConstants.FontSize}:";
+            videoFilter += $"{_lowerRight}:";
+            videoFilter += $"box=1:boxborderw=10:boxcolor:{FfMpegColors.Black}";
+            videoFilter += $"@{FfMpegConstants.DimmedBackground}";
+            videoFilter += $":enable='gt(t,0)'";
 
             return videoFilter;
         }

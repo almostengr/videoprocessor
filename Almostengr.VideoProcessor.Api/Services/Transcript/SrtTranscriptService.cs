@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Services
+namespace Almostengr.VideoProcessor.Api.Services
 {
     public class SrtTranscriptService : BaseTranscriptService, ITranscriptService
     {
@@ -52,7 +52,7 @@ namespace Almostengr.VideoProcessor.Services
             blogString = ProcessSentenceCase(blogString);
 
             TranscriptOutputDto outputDto = new();
-            outputDto.VideoTitle = inputDto.VideoTitle.Replace(FileExtension.SRT, string.Empty);
+            outputDto.VideoTitle = inputDto.VideoTitle.Replace(FileExtension.Srt, string.Empty);
             outputDto.VideoText = videoString;
             outputDto.BlogText = blogString;
             outputDto.BlogWords = blogString.Split(' ').Length;
@@ -65,11 +65,11 @@ namespace Almostengr.VideoProcessor.Services
         public void SaveTranscript(TranscriptOutputDto transcriptDto)
         {
             _textFileService.SaveFileContents(
-                $"{_outgoingDirectory}/{transcriptDto.VideoTitle}.{FileExtension.SRT}",
+                $"{_outgoingDirectory}/{transcriptDto.VideoTitle}.{FileExtension.Srt}",
                 transcriptDto.VideoText);
 
             _textFileService.SaveFileContents(
-                $"{_outgoingDirectory}/{transcriptDto.VideoTitle}.{FileExtension.MD}",
+                $"{_outgoingDirectory}/{transcriptDto.VideoTitle}.{FileExtension.Md}",
                 transcriptDto.BlogText);
         }
         
@@ -85,7 +85,7 @@ namespace Almostengr.VideoProcessor.Services
                 Directory.CreateDirectory(_incomingDirectory);
             }
 
-            return Directory.GetFiles(_incomingDirectory, $"*{FileExtension.SRT}");
+            return Directory.GetFiles(_incomingDirectory, $"*{FileExtension.Srt}");
         }
 
         public override bool IsValidTranscript(TranscriptInputDto inputDto)

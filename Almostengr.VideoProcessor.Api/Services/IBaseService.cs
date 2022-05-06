@@ -4,5 +4,6 @@ namespace Almostengr.VideoProcessor.Api.Services
     {
         bool IsDiskSpaceAvailable(string directory);
         void RemoveFile(string filename);
+        void CreateDirectoryIfNotExists(string directory);
     }
 }

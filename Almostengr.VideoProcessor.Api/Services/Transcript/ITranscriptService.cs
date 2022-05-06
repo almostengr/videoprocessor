@@ -1,6 +1,6 @@
 using Almostengr.VideoProcessor.DataTransferObjects;
 
-namespace Almostengr.VideoProcessor.Services
+namespace Almostengr.VideoProcessor.Api.Services
 {
     public interface ITranscriptService : IBaseTranscriptService
     {

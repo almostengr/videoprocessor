@@ -1,4 +1,5 @@
 using Almostengr.VideoProcessor.Api.Services;
+using Almostengr.VideoProcessor.Api.Services;
 using Almostengr.VideoProcessor.Workers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,10 +32,12 @@ namespace Almostengr.VideoProcessor.Api
 
             services.AddSingleton<IDashCamVideoRenderService, DashCamVideoRenderService>();
             services.AddSingleton<IRhtServicesVideoRenderService, RhtServicesVideoRenderService>();
+            services.AddSingleton<ITranscriptService, SrtTranscriptService>();
 
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////
 
             services.AddHostedService<RhtServicesVideoRenderWorker>();
+            services.AddHostedService<SrtTranscriptWorker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

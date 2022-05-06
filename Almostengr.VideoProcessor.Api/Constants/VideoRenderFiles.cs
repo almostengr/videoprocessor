@@ -2,9 +2,9 @@ namespace Almostengr.VideoProcessor.Api.Constants
 {
     public static class VideoRenderFiles
     {
-        public const string INPUT_FILE = "input.txt";
-        public const string SUBTITLES_FILE = "subtitles.ass";
-        public const string DESTINATION_FILE = "destination.txt";
-        public const string MAJOR_ROADS_FILE = "majorroads.txt";
+        public const string InputFile = "input.txt";
+        public const string SubtitlesFile = "subtitles.ass";
+        public const string DestinationFile = "destination.txt";
+        public const string MajorRoadsFile = "majorroads.txt";
     }
 }

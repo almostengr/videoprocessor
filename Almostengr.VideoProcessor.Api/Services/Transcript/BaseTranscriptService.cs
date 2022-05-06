@@ -1,9 +1,9 @@
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
 
-namespace Almostengr.VideoProcessor.Services
+namespace Almostengr.VideoProcessor.Api.Services
 {
-    public class BaseTranscriptService : IBaseTranscriptService
+    public abstract class BaseTranscriptService : IBaseTranscriptService
     {
         public string ProcessSentenceCase(string input)
         {
