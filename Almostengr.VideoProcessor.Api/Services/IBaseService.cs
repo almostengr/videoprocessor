@@ -5,6 +5,6 @@ namespace Almostengr.VideoProcessor.Api.Services
         bool IsDiskSpaceAvailable(string directory);
         void RemoveFile(string filename);
         void CreateDirectoryIfNotExists(string directory);
-        void StartAndAwaitAsyncProcess(Process process, CancellationToken cancellationToken);
+        Task StartAndAwaitAsyncProcess(Process process, CancellationToken cancellationToken);
     }
 }
