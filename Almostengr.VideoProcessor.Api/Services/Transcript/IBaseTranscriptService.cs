@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.DataTransferObjects;
 
 namespace Almostengr.VideoProcessor.Api.Services
 {
-    public interface IBaseTranscriptService
+    public interface IBaseTranscriptService : IBaseService
     {
         bool IsValidTranscript(TranscriptInputDto inputDto);
         string CleanBlogString(string blogText);

@@ -1,10 +1,15 @@
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
+using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services
 {
-    public abstract class BaseTranscriptService : IBaseTranscriptService
+    public abstract class BaseTranscriptService : BaseService, IBaseTranscriptService
     {
+        protected BaseTranscriptService(ILogger<BaseService> logger) : base(logger)
+        {
+        }
+
         public string ProcessSentenceCase(string input)
         {
             string[] inputLines = input.Split(". ");

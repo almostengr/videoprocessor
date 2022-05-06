@@ -12,7 +12,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         private readonly string _incomingDirectory;
         private readonly string _outgoingDirectory;
 
-        public SrtTranscriptService(ILogger<SrtTranscriptService> logger, ITextFileService textFileService)
+        public SrtTranscriptService(ILogger<SrtTranscriptService> logger, ITextFileService textFileService) : base(logger)
         {
             _logger = logger;
             _textFileService = textFileService;

@@ -1,5 +1,4 @@
 using Almostengr.VideoProcessor.Api.Services;
-using Almostengr.VideoProcessor.Api.Services;
 using Almostengr.VideoProcessor.Workers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,6 +31,7 @@ namespace Almostengr.VideoProcessor.Api
 
             services.AddSingleton<IDashCamVideoRenderService, DashCamVideoRenderService>();
             services.AddSingleton<IRhtServicesVideoRenderService, RhtServicesVideoRenderService>();
+            services.AddSingleton<ITextFileService, TextFileService>();
             services.AddSingleton<ITranscriptService, SrtTranscriptService>();
 
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////

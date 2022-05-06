@@ -7,6 +7,7 @@ using Almostengr.VideoProcessor.Api.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Almostengr.VideoProcessor.Constants;
 
 namespace Almostengr.VideoProcessor.Workers
 {
@@ -15,12 +16,23 @@ namespace Almostengr.VideoProcessor.Workers
         private readonly ITranscriptService _transcriptService;
         private readonly ITextFileService _textFileService;
         private readonly ILogger<SrtTranscriptWorker> _logger;
+        private readonly string _incomingDirectory;
+        private readonly string _outgoingDirectory;
 
         public SrtTranscriptWorker(ILogger<SrtTranscriptWorker> logger, IServiceScopeFactory factory)
         {
             _transcriptService = factory.CreateScope().ServiceProvider.GetRequiredService<ITranscriptService>();
             _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();
             _logger = logger;
+            _incomingDirectory = Path.Combine(Directories.BaseDirectory, "transcript/incoming");
+            _outgoingDirectory = Path.Combine(Directories.BaseDirectory, "transcript/outgoing");
+        }
+
+        public override Task StartAsync(CancellationToken cancellationToken)
+        {
+            _transcriptService.CreateDirectoryIfNotExists(_incomingDirectory);
+            _transcriptService.CreateDirectoryIfNotExists(_outgoingDirectory);
+            return base.StartAsync(cancellationToken);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
