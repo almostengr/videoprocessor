@@ -14,7 +14,8 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
         }
 
-        public override async Task RenderVideoAsync(VideoPropertiesDto videoProperties)
+//         public override async Task RenderVideoAsync(VideoPropertiesDto videoProperties)
+        public override Process RenderVideoAsync(VideoPropertiesDto videoProperties)
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -37,14 +38,17 @@ namespace Almostengr.VideoProcessor.Api.Services
                     "copy",
                     videoProperties.OutputFile
                 },
+                WorkingDirectory = videoProperties.WorkingDirectory,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
 
-            process.Start();
-            await process.WaitForExitAsync();
+//             process.Start();
+//             await process.WaitForExitAsync();
+
+            return process;
         }
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
