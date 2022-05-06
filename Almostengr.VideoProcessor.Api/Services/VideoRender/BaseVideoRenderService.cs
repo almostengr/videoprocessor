@@ -41,7 +41,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         
         public abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);
 
-        public async Task ArchiveWorkingDirectoryContentsAsync()
+        public async Task ArchiveWorkingDirectoryContentsAsync(CancellationToken cancellationToken)
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -58,7 +58,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             };
 
             process.Start();
-            await process.WaitForExitAsync();
+            await process.WaitForExitAsync(cancellationToken);
         }
 
         public void CleanDirectory(string directory)
@@ -88,7 +88,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             return string.Empty;
         }
 
-        public async Task ExtractTarFileToWorkingDirectoryAsync(string tarFile, string workingDirectory)
+        public async Task ExtractTarFileToWorkingDirectoryAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -107,10 +107,11 @@ namespace Almostengr.VideoProcessor.Api.Services
             };
 
             process.Start();
-            await process.WaitForExitAsync();
+            await process.WaitForExitAsync(cancellationToken);
         }
 
-        public virtual async Task RenderVideoAsync(VideoPropertiesDto videoProperties)
+//         public virtual async Task RenderVideoAsync(VideoPropertiesDto videoProperties)
+        public virtual async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -138,7 +139,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             };
 
             process.Start();
-            await process.WaitForExitAsync();
+            await process.WaitForExitAsync(cancellationToken);
         }
 
         public async Task ArchiveWorkingDirectoryContentsAsync(string workingDirectory, string archiveDirectory)
@@ -158,7 +159,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             };
 
             process.Start();
-            await process.WaitForExitAsync();
+            await process.WaitForExitAsync(cancellationToken);
         }
 
         public async Task ConvertVideoFilesToMp4Async(string directory)
@@ -188,7 +189,7 @@ namespace Almostengr.VideoProcessor.Api.Services
                 };
 
                 process.Start();
-                await process.WaitForExitAsync();
+                await process.WaitForExitAsync(cancellationToken);
 
                 Directory.Delete(Path.Combine(directory, videoFile));
 
