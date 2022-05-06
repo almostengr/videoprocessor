@@ -14,8 +14,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
         }
 
-//         public override async Task RenderVideoAsync(VideoPropertiesDto videoProperties)
-        public override Process RenderVideoAsync(VideoPropertiesDto videoProperties)
+        public override Process RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -45,10 +44,8 @@ namespace Almostengr.VideoProcessor.Api.Services
                 CreateNoWindow = true
             };
 
-//             process.Start();
-//             await process.WaitForExitAsync();
-
-            return process;
+            process.Start();
+            await process.WaitForExitAsync(cancellationToken);
         }
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
