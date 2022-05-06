@@ -11,9 +11,9 @@ namespace Almostengr.VideoProcessor.Api.Services
         string[] GetVideoArchivesInDirectory(string directory);
         void CleanDirectory(string directory);
         string GetSubtitlesFilter(string workingDirectory);
-        Task ExtractTarFileToWorkingDirectoryAsync(string tarFile, string workingDirectory);
-        Task ArchiveWorkingDirectoryContentsAsync(string workingDirectory, string archiveDirectory);
-        Task ConvertVideoFilesToMp4Async(string directory);
+        Task ExtractTarFileToWorkingDirectoryAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken);
+        Task ArchiveWorkingDirectoryContentsAsync(string workingDirectory, string archiveDirectory, CancellationToken cancellationToken);
+        Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken);
         void LowerCaseFileNamesInDirectory(string directory);
         void CheckOrCreateFfmpegInputFile(string workingDirectory);
         void SaveVideoMetaData(VideoPropertiesDto videoProperties);
