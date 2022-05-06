@@ -142,7 +142,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             await process.WaitForExitAsync(cancellationToken);
         }
 
-        public async Task ArchiveWorkingDirectoryContentsAsync(string workingDirectory, string archiveDirectory)
+        public async Task ArchiveWorkingDirectoryContentsAsync(string workingDirectory, string archiveDirectory, CancellationToken cancellationToken)
         {
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
@@ -162,7 +162,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             await process.WaitForExitAsync(cancellationToken);
         }
 
-        public async Task ConvertVideoFilesToMp4Async(string directory)
+        public async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
         {
             var nonMp4VideoFiles = Directory.GetFiles(directory, $"*{FileExtension.Mkv}");
             // .Concat(Directory.GetFiles(directory, $"*{FileExtension.MOV}"));
