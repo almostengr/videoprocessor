@@ -12,6 +12,7 @@
             "program": "${workspaceFolder}/Almostengr.VideoProcessor.Api/bin/Debug/net5.0/Almostengr.VideoProcessor.Api.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Almostengr.VideoProcessor.Api",
+            "console": "internalConsole",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
