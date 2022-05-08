@@ -3,8 +3,10 @@ namespace Almostengr.VideoProcessor.Api.Services
     public interface IBaseService
     {
         bool IsDiskSpaceAvailable(string directory);
-        void RemoveFile(string filename);
-        void CreateDirectoryIfNotExists(string directory);
-        Task StartAndAwaitAsyncProcess(Process process, CancellationToken cancellationToken);
+        void DeleteDirectory(string pathName);
+        void DeleteFile(string pathName);
+        void CreateDirectory(string directory);
+        void MoveFile(string source, string destination);
+        string[] GetDirectoryContents(string path, string searchPattern);
     }
 }

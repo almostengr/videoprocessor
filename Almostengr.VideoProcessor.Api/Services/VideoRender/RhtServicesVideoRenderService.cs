@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
+using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Microsoft.Extensions.Logging;
@@ -10,12 +12,17 @@ namespace Almostengr.VideoProcessor.Api.Services
 {
     public class RhtServicesVideoRenderService : BaseVideoRenderService, IRhtServicesVideoRenderService
     {
+        private readonly ILogger<RhtServicesVideoRenderService> _logger;
+
         public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger) : base(logger)
         {
+            _logger = logger;
         }
 
-        public override Process RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
+        public override async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
         {
+            _logger.LogInformation($"Rendering {videoProperties.SourceTarFilePath}");
+            
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
             {
@@ -30,12 +37,12 @@ namespace Almostengr.VideoProcessor.Api.Services
                     "-f",
                     "concat",
                     "-i",
-                    videoProperties.InputFile,
+                    videoProperties.FfmpegInputFilePath,
                     "-vf",
                     videoProperties.VideoFilter,
                     "-c:a",
                     "copy",
-                    videoProperties.OutputFile
+                    videoProperties.OutputVideoFile
                 },
                 WorkingDirectory = videoProperties.WorkingDirectory,
                 UseShellExecute = false,
@@ -46,39 +53,39 @@ namespace Almostengr.VideoProcessor.Api.Services
 
             process.Start();
             await process.WaitForExitAsync(cancellationToken);
+            _logger.LogInformation(process.StandardOutput.ReadToEnd());
+            _logger.LogError(process.StandardError.ReadToEnd());
         }
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
         {
-            Random random = new();
-
-            string channelText = "Robinson Handy and Technology Services";
-
-            var socialMediaOptions = new List<string> {
+            List<string> socialMediaOptions = new List<string> {
                 "rhtservices.net",
-                "IG: @rhtservicesllc",
+                "IG @rhtservicesllc",
                 "instagram.com/rhtservicesllc",
                 "facebook.com/rhtservicesllc",
-                "Subscribe to our YouTube channel!",
+                // "Subscribe to our YouTube channel!",
             };
 
-            string socialText = socialMediaOptions[random.Next(0, socialMediaOptions.Count - 1)];
+            Random random = new();
+            string socialText = socialMediaOptions[random.Next(0, socialMediaOptions.Count)];
             
+            string channelText = "Robinson Handy and Technology Services";
             string textColor = FfMpegColors.White;
 
             string videoFilter = $"drawtext=textfile:'{channelText}':";
-            videoFilter += $"fontcolor:{textColor}:";
-            videoFilter += $"fontsize:{FfMpegConstants.FontSize}:";
+            videoFilter += $"fontcolor={textColor}:";
+            videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
             videoFilter += $"{_upperRight}:";
-            videoFilter += $"box=1:boxborderw=10:boxcolor:{FfMpegColors.Black}";
+            videoFilter += $"box=1:boxborderw={FfMpegConstants.RhtBorderWidth.ToString()}:boxcolor={FfMpegColors.Black}";
             videoFilter += $"@{FfMpegConstants.DimmedBackground}";
             videoFilter += $":enable='gt(t,0)'";
 
             videoFilter += $", drawtext=textfile:'{socialText}':";
-            videoFilter += $"fontcolor:{textColor}:";
-            videoFilter += $"fontsize:{FfMpegConstants.FontSize}:";
+            videoFilter += $"fontcolor={textColor}:";
+            videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
             videoFilter += $"{_lowerRight}:";
-            videoFilter += $"box=1:boxborderw=10:boxcolor:{FfMpegColors.Black}";
+            videoFilter += $"box=1:boxborderw={FfMpegConstants.RhtBorderWidth.ToString()}:boxcolor={FfMpegColors.Black}";
             videoFilter += $"@{FfMpegConstants.DimmedBackground}";
             videoFilter += $":enable='gt(t,0)'";
 

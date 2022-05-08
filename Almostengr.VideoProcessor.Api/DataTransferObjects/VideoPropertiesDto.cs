@@ -1,23 +1,38 @@
+using System;
+using System.IO;
+using Almostengr.VideoProcessor.Constants;
+
 namespace Almostengr.VideoProcessor.Api.DataTransferObjects
 {
     public class VideoPropertiesDto
     {
-        public string ArchiveFile { get; set; }
-        public string VideoTitle { 
+        public string SourceTarFilePath { get; set; }
+        public string VideoTitle { get { return Path.GetFileNameWithoutExtension(SourceTarFilePath).Replace($"{FileExtension.Tar}", ""); } }
+        public string ArchiveTarFile
+        {
             get
             {
-                return ArchiveFile.Split('.')[0];
+                return $"{VideoTitle}.{DateTime.Now.ToString("yyyyMMdd")}.{DateTime.Now.ToString("HHmmss")}.tar.xz"; 
+                // return Path.Combine(
+                //     ArchiveDirectory,
+                //     $"{VideoTitle}.{DateTime.Now.ToString("yyyyMMdd")}.{DateTime.Now.ToString("HHmmss")}.tar.xz"
+                // );
             }
         }
-
+        // public string ArchiveTarFilePath { get { return $"{VideoTitle}.tar.xz"; } }
         public string VideoDescription { get; set; }
-        public string VideoKeywords { get; set; }
-        public string VideoLocation { get; set; }
-        public string IncomingArchiveFile { get; set; }
-        public object UploadFile { get; set; }
-        public string InputFile { get; set; }
-        public string OutputFile { get; set; }
-        public int VideoDurationSeconds {get;set;}
-        public string VideoFilter { get; internal set; }
+        public string FfmpegInputFilePath { get; set; }
+        public string OutputVideoFile
+        {
+            get
+            {
+                return Path.Combine(UploadDirectory, $"{VideoTitle}.mp4");
+            }
+        }
+        public int VideoDurationSeconds { get; set; }
+        public string VideoFilter { get; set; }
+        public string WorkingDirectory { get; set; }
+        public string UploadDirectory { get; set; }
+        public string ArchiveDirectory { get; set; }
     }
 }

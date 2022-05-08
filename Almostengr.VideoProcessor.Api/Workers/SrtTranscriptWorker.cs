@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +6,7 @@ using Almostengr.VideoProcessor.Api.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Almostengr.VideoProcessor.Constants;
+using Almostengr.VideoProcessor.Api.Common;
 
 namespace Almostengr.VideoProcessor.Workers
 {
@@ -15,6 +14,7 @@ namespace Almostengr.VideoProcessor.Workers
     {
         private readonly ITranscriptService _transcriptService;
         private readonly ITextFileService _textFileService;
+        private readonly AppSettings _appSettings;
         private readonly ILogger<SrtTranscriptWorker> _logger;
         private readonly string _incomingDirectory;
         private readonly string _outgoingDirectory;
@@ -23,15 +23,16 @@ namespace Almostengr.VideoProcessor.Workers
         {
             _transcriptService = factory.CreateScope().ServiceProvider.GetRequiredService<ITranscriptService>();
             _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();
+            _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _logger = logger;
-            _incomingDirectory = Path.Combine(Directories.BaseDirectory, "transcript/incoming");
-            _outgoingDirectory = Path.Combine(Directories.BaseDirectory, "transcript/outgoing");
+            _incomingDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "transcript/incoming");
+            _outgoingDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "transcript/outgoing");
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
-            _transcriptService.CreateDirectoryIfNotExists(_incomingDirectory);
-            _transcriptService.CreateDirectoryIfNotExists(_outgoingDirectory);
+            _transcriptService.CreateDirectory(_incomingDirectory);
+            _transcriptService.CreateDirectory(_outgoingDirectory);
             return base.StartAsync(cancellationToken);
         }
 
@@ -70,7 +71,7 @@ namespace Almostengr.VideoProcessor.Workers
                 if (srtTranscripts.Length == 0)
                 {
                     _logger.LogInformation("No new transcripts found");
-                    await Task.Delay(TimeSpan.FromHours(2), stoppingToken);
+                    await Task.Delay(_appSettings.WorkerServiceInterval, stoppingToken);
                 }
             }
         }

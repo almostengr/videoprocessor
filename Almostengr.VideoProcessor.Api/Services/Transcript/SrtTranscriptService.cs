@@ -1,4 +1,5 @@
 using System.IO;
+using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
@@ -9,15 +10,17 @@ namespace Almostengr.VideoProcessor.Api.Services
     {
         private readonly ILogger<SrtTranscriptService> _logger;
         private readonly ITextFileService _textFileService;
+        private readonly AppSettings _appSettings;
         private readonly string _incomingDirectory;
         private readonly string _outgoingDirectory;
 
-        public SrtTranscriptService(ILogger<SrtTranscriptService> logger, ITextFileService textFileService) : base(logger)
+        public SrtTranscriptService(ILogger<SrtTranscriptService> logger, ITextFileService textFileService, AppSettings appSettings) : base(logger)
         {
             _logger = logger;
             _textFileService = textFileService;
-            _incomingDirectory = $"{Directories.BaseDirectory}/transcript/incoming";
-            _outgoingDirectory = $"{Directories.BaseDirectory}/transcript/outgoing";
+            _appSettings = appSettings;
+            _incomingDirectory = $"{_appSettings.Directories.BaseDirectory}/transcript/incoming";
+            _outgoingDirectory = $"{_appSettings.Directories.BaseDirectory}/transcript/outgoing";
         }
 
         public TranscriptOutputDto CleanTranscript(TranscriptInputDto inputDto)

@@ -4,6 +4,8 @@ namespace Almostengr.VideoProcessor.Api.Constants
     {
         public const string FontSize = "h/35";
         public const string DimmedBackground = "0.3";
+        public const int DashCamBorderWidth = 10;
+        public const int RhtBorderWidth = 7;
     }
 
     public class FfMpegColors

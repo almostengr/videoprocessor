@@ -1,7 +1,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
+using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Almostengr.VideoProcessor.Constants;
@@ -34,46 +36,43 @@ namespace Almostengr.VideoProcessor.Api.Services
             _lowerLeft = $"x={PADDING}:y=h-th-{PADDING}";
             _lowerCenter = $"x=(w-tw)/2:y=h-th-{PADDING}";
             _lowerRight = $"x=w-tw-{PADDING}:y=h-th-{PADDING}";
-            
+
             _subscribeFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={FfMpegConstants.FontSize}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
             _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={FfMpegConstants.FontSize}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
         }
-        
+
         public abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);
 
-        public async Task ArchiveWorkingDirectoryContentsAsync(CancellationToken cancellationToken)
+        public async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
         {
-            Process process = new();
-            process.StartInfo = new ProcessStartInfo()
+            _logger.LogInformation($"Archiving directory contents: {directoryToArchive}");
+
+            Process process = new Process
             {
-                FileName = ProgramPaths.TarBinary,
-                ArgumentList = {
-                    "-cvJf",
-                    // TODO video title as file name with mp4 extension
-                },
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/bash",
+                    Arguments = $"-c \"cd {directoryToArchive} && tar -cvJf \\\"{Path.Combine(archiveDestination, archiveName)}\\\" *\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
             };
 
             process.Start();
             await process.WaitForExitAsync(cancellationToken);
-        }
 
-        public void CleanDirectory(string directory)
-        {
-            if (Directory.Exists(directory))
+            _logger.LogInformation(process.StandardOutput.ReadToEnd());
+            if (process.StandardError.ReadToEnd().Length > 0)
             {
-                Directory.Delete(directory, true);
+                _logger.LogError(process.StandardError.ReadToEnd());
             }
-
-            Directory.CreateDirectory(directory);
         }
 
         public string[] GetVideoArchivesInDirectory(string directory)
         {
-            return Directory.GetFiles(directory, $"*{FileExtension.Tar}*");
+            return base.GetDirectoryContents(directory, $"*{FileExtension.Tar}*");
         }
 
         public string GetSubtitlesFilter(string workingDirectory)
@@ -88,8 +87,10 @@ namespace Almostengr.VideoProcessor.Api.Services
             return string.Empty;
         }
 
-        public async Task ExtractTarFileToWorkingDirectoryAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
+        public async Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
         {
+            _logger.LogInformation($"Extracting tar file: {tarFile}");
+
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
             {
@@ -110,9 +111,10 @@ namespace Almostengr.VideoProcessor.Api.Services
             await process.WaitForExitAsync(cancellationToken);
         }
 
-//         public virtual async Task RenderVideoAsync(VideoPropertiesDto videoProperties)
         public virtual async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
         {
+            _logger.LogInformation($"Rendering video: {videoProperties.SourceTarFilePath}");
+
             Process process = new();
             process.StartInfo = new ProcessStartInfo()
             {
@@ -127,31 +129,12 @@ namespace Almostengr.VideoProcessor.Api.Services
                     "-f",
                     "concat",
                     "-i",
-                    videoProperties.InputFile,
+                    videoProperties.FfmpegInputFilePath,
                     "-vf",
                     videoProperties.VideoFilter,
-                    videoProperties.OutputFile
+                    videoProperties.OutputVideoFile
                 },
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
-
-            process.Start();
-            await process.WaitForExitAsync(cancellationToken);
-        }
-
-        public async Task ArchiveWorkingDirectoryContentsAsync(string workingDirectory, string archiveDirectory, CancellationToken cancellationToken)
-        {
-            Process process = new();
-            process.StartInfo = new ProcessStartInfo()
-            {
-                FileName = ProgramPaths.TarBinary,
-                ArgumentList = {
-                    "-cvJf",
-                    // TODO video title as file name with mp4 extension
-                },
+                WorkingDirectory = videoProperties.WorkingDirectory,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -164,6 +147,8 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
         {
+            _logger.LogInformation($"Converting video files to mp4: {directory}");
+            
             var nonMp4VideoFiles = Directory.GetFiles(directory, $"*{FileExtension.Mkv}");
             // .Concat(Directory.GetFiles(directory, $"*{FileExtension.MOV}"));
 
@@ -177,11 +162,12 @@ namespace Almostengr.VideoProcessor.Api.Services
                 {
                     FileName = ProgramPaths.FfmpegBinary,
                     ArgumentList = {
-                    "-hide_banner",
-                    "-i",
-                    Path.Combine(directory, videoFile),
-                    Path.Combine(directory, outputFilename)
-                },
+                        "-hide_banner",
+                        "-i",
+                        Path.Combine(directory, videoFile),
+                        Path.Combine(directory, outputFilename)
+                    },
+                    WorkingDirectory = directory,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -191,7 +177,7 @@ namespace Almostengr.VideoProcessor.Api.Services
                 process.Start();
                 await process.WaitForExitAsync(cancellationToken);
 
-                Directory.Delete(Path.Combine(directory, videoFile));
+                base.DeleteDirectory(Path.Combine(directory, videoFile));
 
                 _logger.LogInformation($"Done converting {videoFile} to {outputFilename}");
             }
@@ -201,39 +187,46 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
             foreach (string file in Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories))
             {
-                File.Move(file, file.ToLower());
+                File.Move(
+                    file,
+                    Path.Combine(directory, Path.GetFileName(file).ToLower())
+                );
             }
         }
 
         public void CheckOrCreateFfmpegInputFile(string workingDirectory)
         {
-            string inputFile = Path.Combine(workingDirectory, VideoRenderFiles.InputFile);
+            string ffmpegInputFile = Path.Combine(workingDirectory, VideoRenderFiles.InputFile);
+            string inputFile = Path.Combine(workingDirectory, "input.txt");
 
-            if (File.Exists(inputFile) == false)
+            if (File.Exists(inputFile))
             {
-                using (StreamWriter writer = new StreamWriter(inputFile))
+                File.Move(inputFile, ffmpegInputFile);
+            }
+
+            if (File.Exists(ffmpegInputFile) == false)
+            {
+                using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
                 {
                     foreach (string file in Directory.GetFiles(workingDirectory, $"*{FileExtension.Mp4}"))
                     {
-                        writer.WriteLine($"file '{file}'");
+                        writer.WriteLine($"file '{Path.GetFileName(file)}'");
                     }
                 }
             }
         }
 
-        public void SaveVideoMetaData(VideoPropertiesDto videoProperties)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void MoveProcessedVideoArchiveToArchive(string archiveFile, string archiveDirectory)
-        {
-            Directory.Move(archiveFile, archiveDirectory);
-        }
-
         public void CreateThumbnailsFromFinalVideo(VideoPropertiesDto videoProperties)
         {
             throw new NotImplementedException();
+        }
+
+        public void CleanUpBeforeArchiving(string workingDirectory)
+        {
+            _logger.LogInformation($"Cleaning up before archiving: {workingDirectory}");
+            base.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
+            base.DeleteFile(Path.Combine(workingDirectory, "dashcam.txt"));
+            base.DeleteFile(Path.Combine(workingDirectory, "services.txt"));
         }
     }
 }

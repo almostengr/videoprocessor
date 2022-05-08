@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 
@@ -5,19 +6,16 @@ namespace Almostengr.VideoProcessor.Api.Services
 {
     public interface IBaseVideoRenderService : IBaseService
     {
-        // abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties);
-        abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
+        abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken);
         abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);
         string[] GetVideoArchivesInDirectory(string directory);
-        void CleanDirectory(string directory);
         string GetSubtitlesFilter(string workingDirectory);
-        Task ExtractTarFileToWorkingDirectoryAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken);
-        Task ArchiveWorkingDirectoryContentsAsync(string workingDirectory, string archiveDirectory, CancellationToken cancellationToken);
+        Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken);
+        Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken);
         Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken);
         void LowerCaseFileNamesInDirectory(string directory);
         void CheckOrCreateFfmpegInputFile(string workingDirectory);
-        void SaveVideoMetaData(VideoPropertiesDto videoProperties);
-        void MoveProcessedVideoArchiveToArchive(string workingDirectory, string archiveDirectory);
         void CreateThumbnailsFromFinalVideo(VideoPropertiesDto videoProperties);
+        void CleanUpBeforeArchiving(string workingDirectory);
     }
 }

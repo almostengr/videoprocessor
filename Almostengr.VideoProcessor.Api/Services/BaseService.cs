@@ -14,30 +14,51 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public bool IsDiskSpaceAvailable(string directory)
         {
-            var freeSpace = new DriveInfo(directory).AvailableFreeSpace;
-            var totalSpace = new DriveInfo(directory).TotalSize;
-            return (freeSpace / totalSpace) > 0.05;
+            double freeSpace = new DriveInfo(directory).AvailableFreeSpace;
+            double totalSpace = new DriveInfo(directory).TotalSize;
+            double spaceRemaining = (freeSpace / totalSpace);
+            _logger.LogInformation($"Disk space remaining: {spaceRemaining.ToString()}");
+            return spaceRemaining > 0.05;
         }
 
-        public void RemoveFile(string filename)
+        public void DeleteDirectory(string directoryName)
         {
-            Directory.Delete(filename, true);
-            _logger.LogInformation($"Removed file {filename}");
-        }
-
-        public void CreateDirectoryIfNotExists(string directory)
-        {
-            if (Directory.Exists(directory) == false)
+            if (Directory.Exists(directoryName))
             {
-                Directory.CreateDirectory(directory);
-                _logger.LogInformation($"Created directory {directory}");
+                Directory.Delete(directoryName, true);
+                _logger.LogInformation($"Removed directory {directoryName}");
             }
         }
-        
-        public async Task StartAndAwaitAsyncProcess(Process process, CancellationToken cancellationToken)
+
+        public void DeleteFile(string filename)
         {
-            process.Start();
-            await process.WaitForExitAsync(cancellationToken);
+            if (File.Exists(filename))
+            {
+                File.Delete(filename);
+                _logger.LogInformation($"Removed file {filename}");
+            }
         }
-    }
+
+        public void CreateDirectory(string pathname)
+        {
+            if (Directory.Exists(pathname) == false)
+            {
+                Directory.CreateDirectory(pathname);
+                _logger.LogInformation($"Created directory {pathname}");
+            }
+        }
+
+        public void MoveFile(string source, string destination)
+        {
+            if (File.Exists(source) || Directory.Exists(destination))
+            {
+                Directory.Move(source, destination);
+            }
+        }
+
+        public string[] GetDirectoryContents(string path, string searchPattern = "*.*")
+        {
+            return Directory.GetFiles(path, searchPattern);
+        }
+    } // end of class BaseService
 }
