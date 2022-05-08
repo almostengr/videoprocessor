@@ -1,3 +1,4 @@
+using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.Api.Services;
 using Almostengr.VideoProcessor.Workers;
 using Microsoft.AspNetCore.Builder;
@@ -26,6 +27,8 @@ namespace Almostengr.VideoProcessor.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Almostengr.VideoProcessor.Api", Version = "v1" });
             });
+
+            services.AddSingleton<AppSettings>();
 
             // SERVICES //////////////////////////////////////////////////////////////////////////////////////
 
