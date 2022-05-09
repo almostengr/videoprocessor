@@ -43,13 +43,12 @@ namespace Almostengr.VideoProcessor.Api.Services
             };
 
             string channelBranding = "Kenny Ram Dash Cam";
-            string textPosition = positionOptions[random.Next(0, positionOptions.Count)];
 
             // solid text - channel name
-            string videoFilter = $"drawtext=textfile:'" + channelBranding + "':";
-            videoFilter += $"fontcolor=" + textColor + ":";
+            string videoFilter = $"drawtext=textfile:'{channelBranding}':";
+            videoFilter += $"fontcolor={textColor}:";
             videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
-            videoFilter += $"{textPosition}:";
+            videoFilter += $"{_upperRight}:";
             videoFilter += $"box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor={FfMpegColors.Black}";
             videoFilter += $":enable='between(t,0,{randomDuration})', ";
 
@@ -59,11 +58,11 @@ namespace Almostengr.VideoProcessor.Api.Services
             videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
             videoFilter += $"{_upperRight}:";
             videoFilter += $"box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor={FfMpegColors.Black}";
-            videoFilter += $":@{FfMpegConstants.DimmedBackground}:";
+            videoFilter += $"@{FfMpegConstants.DimmedBackground}:";
             videoFilter += $"enable='gt(t,{randomDuration})', ";
 
             // solid text - video title
-            videoFilter += $"drawtext=textfile:'{videoProperties.VideoTitle}':";
+            videoFilter += $"drawtext=textfile:'{videoProperties.VideoTitle.Split(";")[0]}':";
             videoFilter += $"fontcolor={textColor}:";
             videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
             videoFilter += $"{_upperLeft}:";
@@ -71,13 +70,13 @@ namespace Almostengr.VideoProcessor.Api.Services
             videoFilter += $":enable='between(t,0,{randomDuration})', ";
 
             // dimmed text - video title
-            videoFilter += $"drawtext=textfile:'{videoProperties.VideoTitle}':";
+            videoFilter += $"drawtext=textfile:'{videoProperties.VideoTitle.Split(";")[0]}':";
             videoFilter += $"fontcolor={textColor}:";
             videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
             videoFilter += $"{_upperLeft}:";
             videoFilter += $"box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor={FfMpegColors.Black}";
-            videoFilter += $":@{FfMpegConstants.DimmedBackground}:";
-            videoFilter += $"enable='gt(t,{randomDuration})', ";
+            videoFilter += $"@{FfMpegConstants.DimmedBackground}:";
+            videoFilter += $"enable='gt(t,{randomDuration})'";
 
             return videoFilter;
         }
@@ -121,12 +120,15 @@ namespace Almostengr.VideoProcessor.Api.Services
                     "concat",
                     "-i",
                     videoProperties.FfmpegInputFilePath,
-                    "-vf",
-                    videoProperties.VideoFilter,
                     "-i",
                     _musicService.PickRandomMusicTrack(),
+                    "-vf",
+                    videoProperties.VideoFilter,
                     "-shortest",
-                    "-a",
+                    "-map",
+                    "0:v:0",
+                    "-map",
+                    "1:a:0",
                     videoProperties.OutputVideoFile
                 },
                 WorkingDirectory = videoProperties.WorkingDirectory,
@@ -138,6 +140,9 @@ namespace Almostengr.VideoProcessor.Api.Services
 
             process.Start();
             await process.WaitForExitAsync(cancellationToken);
+
+            _logger.LogInformation(process.StandardOutput.ReadToEnd());
+            _logger.LogError(process.StandardError.ReadToEnd());
         }
 
 
