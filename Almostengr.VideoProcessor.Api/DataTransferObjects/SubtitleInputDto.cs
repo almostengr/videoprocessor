@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.DataTransferObjects
 {
-    public class TranscriptInputDto
+    public class SubtitleInputDto
     {
         public string VideoTitle { get; set; } = string.Empty;
         public bool SaveFile { get; set; } = false;

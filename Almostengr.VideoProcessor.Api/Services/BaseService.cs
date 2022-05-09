@@ -50,8 +50,9 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public void MoveFile(string source, string destination)
         {
-            if (File.Exists(source) || Directory.Exists(destination))
+            if (File.Exists(source) && Directory.Exists(destination))
             {
+                _logger.LogInformation($"Moving file {source} to {destination}");
                 Directory.Move(source, destination);
             }
         }

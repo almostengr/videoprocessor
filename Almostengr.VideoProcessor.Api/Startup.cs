@@ -22,25 +22,29 @@ namespace Almostengr.VideoProcessor.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Almostengr.VideoProcessor.Api", Version = "v1" });
-            });
 
             services.AddSingleton<AppSettings>();
 
             // SERVICES //////////////////////////////////////////////////////////////////////////////////////
 
             services.AddSingleton<IDashCamVideoRenderService, DashCamVideoRenderService>();
+            services.AddSingleton<IMusicService, MusicService>();
             services.AddSingleton<IRhtServicesVideoRenderService, RhtServicesVideoRenderService>();
             services.AddSingleton<ITextFileService, TextFileService>();
-            services.AddSingleton<ITranscriptService, SrtTranscriptService>();
+            services.AddSingleton<ISubtitleService, SrtSubtitleService>();
 
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////
 
+            services.AddHostedService<DashCamVideoRenderWorker>();
             services.AddHostedService<RhtServicesVideoRenderWorker>();
-            services.AddHostedService<SrtTranscriptWorker>();
+            services.AddHostedService<SrtSubtitleWorker>();
+
+            
+            services.AddControllers();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Almostengr.VideoProcessor.Api", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -10,18 +10,18 @@ using Almostengr.VideoProcessor.Api.Common;
 
 namespace Almostengr.VideoProcessor.Workers
 {
-    public class SrtTranscriptWorker : BackgroundService
+    public class SrtSubtitleWorker : BackgroundService
     {
-        private readonly ITranscriptService _transcriptService;
+        private readonly ISubtitleService _transcriptService;
         private readonly ITextFileService _textFileService;
         private readonly AppSettings _appSettings;
-        private readonly ILogger<SrtTranscriptWorker> _logger;
+        private readonly ILogger<SrtSubtitleWorker> _logger;
         private readonly string _incomingDirectory;
         private readonly string _outgoingDirectory;
 
-        public SrtTranscriptWorker(ILogger<SrtTranscriptWorker> logger, IServiceScopeFactory factory)
+        public SrtSubtitleWorker(ILogger<SrtSubtitleWorker> logger, IServiceScopeFactory factory)
         {
-            _transcriptService = factory.CreateScope().ServiceProvider.GetRequiredService<ITranscriptService>();
+            _transcriptService = factory.CreateScope().ServiceProvider.GetRequiredService<ISubtitleService>();
             _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _logger = logger;
@@ -40,14 +40,14 @@ namespace Almostengr.VideoProcessor.Workers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var srtTranscripts = _transcriptService.GetIncomingTranscripts();
+                var srtTranscripts = _transcriptService.GetIncomingTranscripts(_incomingDirectory);
                 
                 foreach (var transcriptFile in srtTranscripts)
                 {
                     _logger.LogInformation($"Processing {transcriptFile}");
                     string fileContent = _textFileService.GetFileContents(transcriptFile); // get the file contents
 
-                    TranscriptInputDto transcriptInputDto = new TranscriptInputDto
+                    SubtitleInputDto transcriptInputDto = new SubtitleInputDto
                     {
                         Input = fileContent,
                         VideoTitle = Path.GetFileName(transcriptFile)
@@ -59,11 +59,11 @@ namespace Almostengr.VideoProcessor.Workers
                         continue;
                     }
                     
-                    TranscriptOutputDto transcriptOutput = _transcriptService.CleanTranscript(transcriptInputDto);
+                    SubtitleOutputDto transcriptOutput = _transcriptService.CleanTranscript(transcriptInputDto);
                     
-                    _transcriptService.SaveTranscript(transcriptOutput); // save the transcript (video, blog, original) to the output directory
+                    _transcriptService.SaveTranscript(transcriptOutput, _outgoingDirectory);
                     
-                    _transcriptService.ArchiveTranscript(transcriptFile); // move the original file from the incoming to the output directory
+                    _transcriptService.ArchiveTranscript(transcriptFile, _outgoingDirectory);
                                       
                     _logger.LogInformation($"Finished processing {transcriptFile}");
                 }

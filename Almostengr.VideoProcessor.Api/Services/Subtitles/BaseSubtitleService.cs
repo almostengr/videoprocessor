@@ -4,9 +4,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services
 {
-    public abstract class BaseTranscriptService : BaseService, IBaseTranscriptService
+    public abstract class BaseSubtitleService : BaseService, IBaseSubtitleService
     {
-        protected BaseTranscriptService(ILogger<BaseService> logger) : base(logger)
+        protected BaseSubtitleService(ILogger<BaseService> logger) : base(logger)
         {
         }
 
@@ -61,7 +61,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             return output;
         }
 
-        public virtual bool IsValidTranscript(TranscriptInputDto inputDto)
+        public virtual bool IsValidTranscript(SubtitleInputDto inputDto)
         {
             if (string.IsNullOrEmpty(inputDto.Input) == false)
             {

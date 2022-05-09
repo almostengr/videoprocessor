@@ -6,29 +6,22 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services
 {
-    public class SrtTranscriptService : BaseTranscriptService, ITranscriptService
+    public class SrtSubtitleService : BaseSubtitleService, ISubtitleService
     {
-        private readonly ILogger<SrtTranscriptService> _logger;
+        private readonly ILogger<SrtSubtitleService> _logger;
         private readonly ITextFileService _textFileService;
-        private readonly AppSettings _appSettings;
-        private readonly string _incomingDirectory;
-        private readonly string _outgoingDirectory;
 
-        public SrtTranscriptService(ILogger<SrtTranscriptService> logger, ITextFileService textFileService, AppSettings appSettings) : base(logger)
+        public SrtSubtitleService(ILogger<SrtSubtitleService> logger, ITextFileService textFileService) : base(logger)
         {
             _logger = logger;
             _textFileService = textFileService;
-            _appSettings = appSettings;
-            _incomingDirectory = $"{_appSettings.Directories.BaseDirectory}/transcript/incoming";
-            _outgoingDirectory = $"{_appSettings.Directories.BaseDirectory}/transcript/outgoing";
         }
 
-        public TranscriptOutputDto CleanTranscript(TranscriptInputDto inputDto)
+        public SubtitleOutputDto CleanTranscript(SubtitleInputDto inputDto)
         {
             string[] inputLines = inputDto.Input.Split('\n');
             int counter = 0;
-            string videoString = string.Empty;
-            string blogString = string.Empty;
+            string videoString = string.Empty, blogString = string.Empty;
 
             foreach (var line in inputLines)
             {
@@ -54,7 +47,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             blogString = CleanBlogString(blogString);
             blogString = ProcessSentenceCase(blogString);
 
-            TranscriptOutputDto outputDto = new();
+            SubtitleOutputDto outputDto = new();
             outputDto.VideoTitle = inputDto.VideoTitle.Replace(FileExtension.Srt, string.Empty);
             outputDto.VideoText = videoString;
             outputDto.BlogText = blogString;
@@ -64,34 +57,29 @@ namespace Almostengr.VideoProcessor.Api.Services
 
             return outputDto;
         }
-        
-        public void SaveTranscript(TranscriptOutputDto transcriptDto)
+
+        public void SaveTranscript(SubtitleOutputDto transcriptDto, string archiveDirectory)
         {
             _textFileService.SaveFileContents(
-                $"{_outgoingDirectory}/{transcriptDto.VideoTitle}.{FileExtension.Srt}",
+                Path.Combine(archiveDirectory, $"{transcriptDto.VideoTitle}.{FileExtension.Srt}"),
                 transcriptDto.VideoText);
 
             _textFileService.SaveFileContents(
-                $"{_outgoingDirectory}/{transcriptDto.VideoTitle}.{FileExtension.Md}",
+                Path.Combine(archiveDirectory, $"{transcriptDto.VideoTitle}.{FileExtension.Md}"),
                 transcriptDto.BlogText);
         }
-        
-        public void ArchiveTranscript(string transcriptFilename)
+
+        public void ArchiveTranscript(string transcriptFilePath, string archiveDirectory)
         {
-            Directory.Move($"{_incomingDirectory}/{transcriptFilename}", $"{_incomingDirectory}/{transcriptFilename}");
+            base.MoveFile(transcriptFilePath, archiveDirectory);
         }
 
-        public string[] GetIncomingTranscripts()
+        public string[] GetIncomingTranscripts(string directory)
         {
-            if (Directory.Exists(_incomingDirectory) == false)
-            {
-                Directory.CreateDirectory(_incomingDirectory);
-            }
-
-            return Directory.GetFiles(_incomingDirectory, $"*{FileExtension.Srt}");
+            return base.GetDirectoryContents(directory, $"*{FileExtension.Srt}");
         }
 
-        public override bool IsValidTranscript(TranscriptInputDto inputDto)
+        public override bool IsValidTranscript(SubtitleInputDto inputDto)
         {
             if (string.IsNullOrEmpty(inputDto.Input))
             {

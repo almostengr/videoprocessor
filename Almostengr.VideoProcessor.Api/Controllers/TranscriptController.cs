@@ -5,28 +5,30 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Controllers
 {
+    [ApiController]
     public class TranscriptController : ControllerBase
     {
         private readonly ILogger<TranscriptController> _logger;
-        private readonly ITranscriptService _transcriptService;
+        private readonly ISubtitleService _subtitleService;
 
-        public TranscriptController(ILogger<TranscriptController> logger, ITranscriptService transcripService)
+        public TranscriptController(ILogger<TranscriptController> logger, ISubtitleService subtitleService)
         {
             _logger = logger;
-            _transcriptService = transcripService;
+            _subtitleService = subtitleService;
         }
 
         [HttpPost]
-        public ActionResult<TranscriptOutputDto> CleanTranscript(TranscriptInputDto inputDto)
+        [Route("/transcript/clean")]
+        public ActionResult<SubtitleOutputDto> CleanTranscript(SubtitleInputDto inputDto)
         {
-            if (_transcriptService.IsValidTranscript(inputDto) == false)
+            if (_subtitleService.IsValidTranscript(inputDto) == false)
             {
                 string invalidMsg = "Input is not in a valid format";
                 _logger.LogError(invalidMsg);
                 return BadRequest(invalidMsg);
             }
 
-            return _transcriptService.CleanTranscript(inputDto);
+            return _subtitleService.CleanTranscript(inputDto);
         }
 
     }
