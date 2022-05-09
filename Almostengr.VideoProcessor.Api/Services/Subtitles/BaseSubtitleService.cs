@@ -1,4 +1,3 @@
-using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
 
@@ -52,7 +51,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             {
                 if (previousWord != word)
                 {
-                    output += word + Formatting.Space;
+                    output += word + " ";
                 }
 
                 previousWord = word;

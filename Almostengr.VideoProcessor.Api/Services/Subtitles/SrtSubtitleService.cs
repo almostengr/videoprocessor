@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
@@ -34,11 +35,11 @@ namespace Almostengr.VideoProcessor.Api.Services
                     .Replace("all right", "alright")
                     .Trim();
 
-                videoString += cleanedLine.ToUpper() + Formatting.NewLine;
+                videoString += cleanedLine.ToUpper() + Environment.NewLine;
 
                 if (counter == 3)
                 {
-                    blogString += cleanedLine + Formatting.NewLine;
+                    blogString += cleanedLine + Environment.NewLine;
                 }
             }
 
