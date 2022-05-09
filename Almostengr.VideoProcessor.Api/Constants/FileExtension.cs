@@ -3,6 +3,7 @@ namespace Almostengr.VideoProcessor.Constants
     public class FileExtension
     {
         public const string Tar = ".tar";
+        public const string Mp3 = ".mp3";
         public const string Mp4 = ".mp4";
         public const string Mov = ".mov";
         public const string Mkv = ".mkv";

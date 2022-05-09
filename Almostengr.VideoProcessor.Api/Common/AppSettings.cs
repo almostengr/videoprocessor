@@ -21,6 +21,13 @@ namespace Almostengr.VideoProcessor.Api.Common
 #else
         public string BaseDirectory = "/home/almostengineer/Downloads/";
 #endif
+
+
+#if RELEASE
+        public string MusicDirectory = "/home/almostengineer/Music/";
+#else
+        public string MusicDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music";
+#endif
     }
 
     public class ProgramPaths
@@ -28,5 +35,4 @@ namespace Almostengr.VideoProcessor.Api.Common
         public const string TarBinary = "/bin/tar";
         public const string FfmpegBinary = "/usr/bin/ffmpeg";
     }
-
 }
