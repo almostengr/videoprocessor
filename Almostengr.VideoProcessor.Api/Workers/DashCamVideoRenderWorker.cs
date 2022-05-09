@@ -48,6 +48,7 @@ namespace Almostengr.VideoProcessor.Workers
                     bool IsDiskSpaceAvailable = _videoRenderService.IsDiskSpaceAvailable(_incomingDirectory);
                     if (IsDiskSpaceAvailable == false)
                     {
+                        _logger.LogError("Not enough disk space to process video.");
                         break;
                     }
 
