@@ -232,13 +232,5 @@ namespace Almostengr.VideoProcessor.Api.Services
             base.DeleteFile(Path.Combine(workingDirectory, "services.txt"));
         }
 
-
-        public string PickRandomMusicTrack()
-        {
-            var musicMixes = base.GetDirectoryContents(_appSettings.Directories.MusicDirectory, $"{FileExtension.Mp3}")
-                .Where(x => x.ToLower().Contains("mix"));
-            Random random = new();
-            return musicMixes.ElementAt(random.Next(0, musicMixes.Count()));
-        }
     }
 }
