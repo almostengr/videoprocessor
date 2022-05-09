@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Microsoft.Extensions.Logging;
@@ -10,10 +14,14 @@ namespace Almostengr.VideoProcessor.Api.Services
     public class DashCamVideoRenderService : BaseVideoRenderService, IDashCamVideoRenderService
     {
         private readonly string _streetSignFilter;
+        private readonly ILogger<DashCamVideoRenderService> _logger;
+        private readonly AppSettings _appSettings;
 
-        public DashCamVideoRenderService(ILogger<DashCamVideoRenderService> logger) : base(logger)
+        public DashCamVideoRenderService(ILogger<DashCamVideoRenderService> logger, AppSettings appSettings) : base(logger, appSettings)
         {
             _streetSignFilter = $"fontcolor=white:fontsize={FfMpegConstants.FontSize}:box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor=green:{_lowerCenter}";
+            _logger = logger;
+            _appSettings = appSettings;
         }
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
@@ -91,6 +99,45 @@ namespace Almostengr.VideoProcessor.Api.Services
 
             return string.Empty;
         }
+
+        public override async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"Rendering video: {videoProperties.SourceTarFilePath}");
+
+            Process process = new();
+            process.StartInfo = new ProcessStartInfo()
+            {
+                FileName = ProgramPaths.FfmpegBinary,
+                ArgumentList = {
+                    "-hide_banner",
+                    "-safe",
+                    "0",
+                    "-loglevel",
+                    FfMpegLogLevel.Error,
+                    "-y",
+                    "-f",
+                    "concat",
+                    "-i",
+                    videoProperties.FfmpegInputFilePath,
+                    "-vf",
+                    videoProperties.VideoFilter,
+                    "-i",
+                    PickRandomMusicTrack(),
+                    "-shortest",
+                    "-a",
+                    videoProperties.OutputVideoFile
+                },
+                WorkingDirectory = videoProperties.WorkingDirectory,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+
+            process.Start();
+            await process.WaitForExitAsync(cancellationToken);
+        }
+
 
     }
 }

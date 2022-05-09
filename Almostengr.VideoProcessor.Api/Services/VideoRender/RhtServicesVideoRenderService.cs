@@ -14,7 +14,7 @@ namespace Almostengr.VideoProcessor.Api.Services
     {
         private readonly ILogger<RhtServicesVideoRenderService> _logger;
 
-        public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger) : base(logger)
+        public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger, AppSettings appSettings) : base(logger, appSettings)
         {
             _logger = logger;
         }

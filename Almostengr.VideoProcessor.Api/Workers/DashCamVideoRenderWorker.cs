@@ -11,28 +11,28 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Workers
 {
-    public class RhtServicesVideoRenderWorker : BackgroundService
+    public class DashCamVideoRenderWorker : BackgroundService
     {
-        private readonly IRhtServicesVideoRenderService _videoRenderService;
+        private readonly IDashCamVideoRenderService _videoRenderService;
         private readonly AppSettings _appSettings;
-        private readonly ILogger<RhtServicesVideoRenderWorker> _logger;
+        private readonly ILogger<DashCamVideoRenderWorker> _logger;
         private readonly string _incomingDirectory;
         private readonly string _archiveDirectory;
         private readonly string _uploadDirectory;
         private readonly string _workingDirectory;
         private readonly string _ffmpegInputFilePath;
         private readonly string _subtitlesFile;
-        private const string DEFAULT_VIDEO_DESCRIPTION = "Visit https://rhtservices.net for more information.";
+        private const string DEFAULT_VIDEO_DESCRIPTION = "Video was recorded using a Uniden DC8 dash cam.";
 
-        public RhtServicesVideoRenderWorker(ILogger<RhtServicesVideoRenderWorker> logger, IServiceScopeFactory factory)
+        public DashCamVideoRenderWorker(ILogger<DashCamVideoRenderWorker> logger, IServiceScopeFactory factory)
         {
-            _videoRenderService = factory.CreateScope().ServiceProvider.GetRequiredService<IRhtServicesVideoRenderService>();
+            _videoRenderService = factory.CreateScope().ServiceProvider.GetRequiredService<IDashCamVideoRenderService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _logger = logger;
-            _incomingDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "rhtvideos/incoming");
-            _archiveDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "rhtvideos/archive");
-            _uploadDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "rhtvideos/upload");
-            _workingDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "rhtvideos/working");
+            _incomingDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "dashcam/incoming");
+            _archiveDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "dashcam/archive");
+            _uploadDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "dashcam/upload");
+            _workingDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "dashcam/working");
             _ffmpegInputFilePath = Path.Combine(_workingDirectory, VideoRenderFiles.InputFile);
             _subtitlesFile = Path.Combine(_workingDirectory, VideoRenderFiles.SubtitlesFile);
         }

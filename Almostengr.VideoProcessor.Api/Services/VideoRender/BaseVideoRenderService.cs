@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Common;
@@ -14,6 +15,7 @@ namespace Almostengr.VideoProcessor.Api.Services
     public abstract class BaseVideoRenderService : BaseService, IBaseVideoRenderService
     {
         private readonly ILogger<BaseVideoRenderService> _logger;
+        private readonly AppSettings _appSettings;
         private const int PADDING = 30;
         internal readonly string _subscribeFilter;
         internal readonly string _subscribeScrollingFilter;
@@ -25,9 +27,10 @@ namespace Almostengr.VideoProcessor.Api.Services
         internal readonly string _lowerCenter;
         internal readonly string _lowerRight;
 
-        public BaseVideoRenderService(ILogger<BaseVideoRenderService> logger) : base(logger)
+        public BaseVideoRenderService(ILogger<BaseVideoRenderService> logger, AppSettings appSettings) : base(logger)
         {
             _logger = logger;
+            _appSettings = appSettings;
 
             _upperLeft = $"x={PADDING}:y={PADDING}";
             _upperCenter = $"x=(w-tw)/2:y={PADDING}";
@@ -227,6 +230,15 @@ namespace Almostengr.VideoProcessor.Api.Services
             base.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
             base.DeleteFile(Path.Combine(workingDirectory, "dashcam.txt"));
             base.DeleteFile(Path.Combine(workingDirectory, "services.txt"));
+        }
+
+
+        public string PickRandomMusicTrack()
+        {
+            var musicMixes = base.GetDirectoryContents(_appSettings.Directories.MusicDirectory, $"{FileExtension.Mp3}")
+                .Where(x => x.ToLower().Contains("mix"));
+            Random random = new();
+            return musicMixes.ElementAt(random.Next(0, musicMixes.Count()));
         }
     }
 }
