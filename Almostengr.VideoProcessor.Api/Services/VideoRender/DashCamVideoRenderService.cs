@@ -16,12 +16,15 @@ namespace Almostengr.VideoProcessor.Api.Services
         private readonly string _streetSignFilter;
         private readonly ILogger<DashCamVideoRenderService> _logger;
         private readonly AppSettings _appSettings;
+        private readonly IMusicService _musicService;
 
-        public DashCamVideoRenderService(ILogger<DashCamVideoRenderService> logger, AppSettings appSettings) : base(logger, appSettings)
+        public DashCamVideoRenderService(ILogger<DashCamVideoRenderService> logger, AppSettings appSettings,
+            IServiceScopeFactory factory) : base(logger, appSettings)
         {
             _streetSignFilter = $"fontcolor=white:fontsize={FfMpegConstants.FontSize}:box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor=green:{_lowerCenter}";
             _logger = logger;
             _appSettings = appSettings;
+            _musicService = factory.CreateScope().ServiceProvider.GetRequiredService<IMusicService>();
         }
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
@@ -122,7 +125,7 @@ namespace Almostengr.VideoProcessor.Api.Services
                     "-vf",
                     videoProperties.VideoFilter,
                     "-i",
-                    PickRandomMusicTrack(),
+                    _musicService.PickRandomMusicTrack(),
                     "-shortest",
                     "-a",
                     videoProperties.OutputVideoFile
