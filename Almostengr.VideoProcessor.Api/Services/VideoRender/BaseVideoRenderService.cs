@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Common;
@@ -151,8 +152,9 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
             _logger.LogInformation($"Converting video files to mp4: {directory}");
             
-            var nonMp4VideoFiles = Directory.GetFiles(directory, $"*{FileExtension.Mkv}");
-            // .Concat(Directory.GetFiles(directory, $"*{FileExtension.MOV}"));
+            var nonMp4VideoFiles = Directory.GetFiles(directory)
+                .Where(x => x.EndsWith(FileExtension.Mkv) || x.EndsWith(FileExtension.Mov))
+                .OrderBy(x => x).ToArray();
 
             foreach (var videoFile in nonMp4VideoFiles)
             {
