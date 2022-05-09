@@ -69,7 +69,7 @@ namespace Almostengr.VideoProcessor.Workers
                         _workingDirectory,
                         stoppingToken);
 
-                    _videoRenderService.LowerCaseFileNamesInDirectory(_workingDirectory);
+                    _videoRenderService.PrepareFileNamesInDirectory(_workingDirectory);
 
                     await _videoRenderService.ConvertVideoFilesToMp4Async(_workingDirectory, stoppingToken);
 

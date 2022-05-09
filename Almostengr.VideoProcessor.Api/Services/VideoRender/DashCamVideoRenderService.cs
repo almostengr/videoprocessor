@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services
@@ -15,7 +16,6 @@ namespace Almostengr.VideoProcessor.Api.Services
     {
         private readonly string _streetSignFilter;
         private readonly ILogger<DashCamVideoRenderService> _logger;
-        private readonly AppSettings _appSettings;
         private readonly IMusicService _musicService;
 
         public DashCamVideoRenderService(ILogger<DashCamVideoRenderService> logger, AppSettings appSettings,
@@ -23,7 +23,6 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
             _streetSignFilter = $"fontcolor=white:fontsize={FfMpegConstants.FontSize}:box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor=green:{_lowerCenter}";
             _logger = logger;
-            _appSettings = appSettings;
             _musicService = factory.CreateScope().ServiceProvider.GetRequiredService<IMusicService>();
         }
 

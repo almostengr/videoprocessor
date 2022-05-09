@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Common;
@@ -186,13 +185,13 @@ namespace Almostengr.VideoProcessor.Api.Services
             }
         }
 
-        public void LowerCaseFileNamesInDirectory(string directory)
+        public void PrepareFileNamesInDirectory(string directory)
         {
             foreach (string file in Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories))
             {
                 File.Move(
                     file,
-                    Path.Combine(directory, Path.GetFileName(file).ToLower())
+                    Path.Combine(directory, Path.GetFileName(file).ToLower().Replace(" ", "_"))
                 );
             }
         }

@@ -1,5 +1,4 @@
 using System.IO;
-using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;

@@ -13,7 +13,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken);
         Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken);
         Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken);
-        void LowerCaseFileNamesInDirectory(string directory);
+        void PrepareFileNamesInDirectory(string directory);
         void CheckOrCreateFfmpegInputFile(string workingDirectory);
         void CreateThumbnailsFromFinalVideo(VideoPropertiesDto videoProperties);
         void CleanUpBeforeArchiving(string workingDirectory);
