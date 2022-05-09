@@ -17,6 +17,5 @@ namespace Almostengr.VideoProcessor.Api.Services
         void CheckOrCreateFfmpegInputFile(string workingDirectory);
         void CreateThumbnailsFromFinalVideo(VideoPropertiesDto videoProperties);
         void CleanUpBeforeArchiving(string workingDirectory);
-        string PickRandomMusicTrack();
     }
 }
