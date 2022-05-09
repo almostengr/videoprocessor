@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services
@@ -59,7 +60,7 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public string[] GetDirectoryContents(string path, string searchPattern = "*.*")
         {
-            return Directory.GetFiles(path, searchPattern);
+            return Directory.GetFiles(path, searchPattern).OrderBy(x => x).ToArray();
         }
     } // end of class BaseService
 }
