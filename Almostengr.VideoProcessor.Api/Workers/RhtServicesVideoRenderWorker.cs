@@ -79,11 +79,13 @@ namespace Almostengr.VideoProcessor.Workers
 
                     await _videoRenderService.RenderVideoAsync(videoProperties, stoppingToken); // TODO enable after testing
 
+                    await _videoRenderService.CreateThumbnailsFromFinalVideoAsync(videoProperties, stoppingToken);
+
                     _videoRenderService.CleanUpBeforeArchiving(_workingDirectory);
 
                     await _videoRenderService.ArchiveDirectoryContentsAsync(
                         _workingDirectory,
-                        videoProperties.ArchiveTarFile, // videoProperties.VideoTitle,
+                        videoProperties.ArchiveTarFile,
                         _archiveDirectory,
                         stoppingToken);
 

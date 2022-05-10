@@ -15,7 +15,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken);
         void PrepareFileNamesInDirectory(string directory);
         void CheckOrCreateFfmpegInputFile(string workingDirectory);
-        void CreateThumbnailsFromFinalVideo(VideoPropertiesDto videoProperties);
+        abstract Task CreateThumbnailsFromFinalVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken);
         void CleanUpBeforeArchiving(string workingDirectory);
     }
 }

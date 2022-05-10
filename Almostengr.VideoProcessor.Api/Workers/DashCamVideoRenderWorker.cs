@@ -78,13 +78,15 @@ namespace Almostengr.VideoProcessor.Workers
 
                     videoProperties.VideoFilter = _videoRenderService.GetFfmpegVideoFilters(videoProperties);
 
-                    await _videoRenderService.RenderVideoAsync(videoProperties, stoppingToken); // TODO enable after testing
+                    await _videoRenderService.RenderVideoAsync(videoProperties, stoppingToken); // todo disabled for testing
+
+                    await _videoRenderService.CreateThumbnailsFromFinalVideoAsync(videoProperties, stoppingToken);
 
                     _videoRenderService.CleanUpBeforeArchiving(_workingDirectory);
 
                     await _videoRenderService.ArchiveDirectoryContentsAsync(
                         _workingDirectory,
-                        videoProperties.ArchiveTarFile, // videoProperties.VideoTitle,
+                        videoProperties.ArchiveTarFile,
                         _archiveDirectory,
                         stoppingToken);
 

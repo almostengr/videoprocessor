@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -135,7 +134,7 @@ namespace Almostengr.VideoProcessor.Api.Services
                     videoProperties.FfmpegInputFilePath,
                     "-vf",
                     videoProperties.VideoFilter,
-                    videoProperties.OutputVideoFile
+                    videoProperties.OutputVideoFilePath
                 },
                 WorkingDirectory = videoProperties.WorkingDirectory,
                 UseShellExecute = false,
@@ -151,7 +150,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         public async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Converting video files to mp4: {directory}");
-            
+
             var nonMp4VideoFiles = Directory.GetFiles(directory)
                 .Where(x => x.EndsWith(FileExtension.Mkv) || x.EndsWith(FileExtension.Mov))
                 .OrderBy(x => x).ToArray();
@@ -220,9 +219,52 @@ namespace Almostengr.VideoProcessor.Api.Services
             }
         }
 
-        public void CreateThumbnailsFromFinalVideo(VideoPropertiesDto videoProperties)
+        public virtual async Task CreateThumbnailsFromFinalVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation($"Creating thumbnails for {videoProperties.OutputVideoFilePath}");
+
+            for (int sceneChangePct = 80; sceneChangePct > 0; sceneChangePct -= 5)
+            {
+                Process process = new();
+                process.StartInfo = new ProcessStartInfo()
+                {
+                    FileName = ProgramPaths.FfmpegBinary,
+                    ArgumentList = {
+                        "-y",
+                        "-hide_banner",
+                        "-loglevel",
+                        FfMpegLogLevel.Warning,
+                        "-i",
+                        videoProperties.OutputVideoFilePath,
+                        "-vf",
+                        $"select=gt(scene\\,0.{sceneChangePct})",
+                        "-frames:v",
+                        _appSettings.ThumbnailFrames.ToString(),
+                        "-vsync",
+                        "vfr",
+                        $"{videoProperties.VideoTitle}-%03d.jpg"
+                    },
+                    WorkingDirectory = videoProperties.UploadDirectory,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                process.Start();
+                await process.WaitForExitAsync(cancellationToken);
+
+                _logger.LogInformation(process.StandardOutput.ReadToEnd());
+                _logger.LogError(process.StandardError.ReadToEnd());
+
+                int thumbnailsCreated = base.GetDirectoryContents(videoProperties.UploadDirectory, $"{videoProperties.VideoTitle}*{FileExtension.Jpg}").Count();
+
+                if (thumbnailsCreated >= _appSettings.ThumbnailFrames)
+                {
+                    _logger.LogInformation($"Done creating thumbnails for {videoProperties.OutputVideoFilePath}");
+                    break;
+                }
+            } // end for
         }
 
         public void CleanUpBeforeArchiving(string workingDirectory)

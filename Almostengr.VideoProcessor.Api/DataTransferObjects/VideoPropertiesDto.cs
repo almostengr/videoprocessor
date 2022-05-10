@@ -22,7 +22,7 @@ namespace Almostengr.VideoProcessor.Api.DataTransferObjects
         // public string ArchiveTarFilePath { get { return $"{VideoTitle}.tar.xz"; } }
         public string VideoDescription { get; set; }
         public string FfmpegInputFilePath { get; set; }
-        public string OutputVideoFile
+        public string OutputVideoFilePath
         {
             get
             {

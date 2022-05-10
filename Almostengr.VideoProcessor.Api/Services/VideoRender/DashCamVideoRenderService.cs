@@ -129,7 +129,7 @@ namespace Almostengr.VideoProcessor.Api.Services
                     "0:v:0",
                     "-map",
                     "1:a:0",
-                    videoProperties.OutputVideoFile
+                    videoProperties.OutputVideoFilePath
                 },
                 WorkingDirectory = videoProperties.WorkingDirectory,
                 UseShellExecute = false,

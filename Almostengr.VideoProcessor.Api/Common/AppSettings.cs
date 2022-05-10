@@ -12,12 +12,13 @@ namespace Almostengr.VideoProcessor.Api.Common
 
         public Directories Directories { get; set; } = new();
         public ProgramPaths ProgramPaths { get; set; } = new();
+        public int ThumbnailFrames { get; set; } = 5;
     }
 
     public class Directories
     {
 #if RELEASE
-            public string BaseDirectory = "/home/almostengineer/Videos/";
+        public string BaseDirectory = "/home/almostengineer/Videos/";
 #else
         public string BaseDirectory = "/home/almostengineer/Downloads/";
 #endif

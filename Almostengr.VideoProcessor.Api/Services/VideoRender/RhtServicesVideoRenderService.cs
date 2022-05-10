@@ -42,7 +42,7 @@ namespace Almostengr.VideoProcessor.Api.Services
                     videoProperties.VideoFilter,
                     "-c:a",
                     "copy",
-                    videoProperties.OutputVideoFile
+                    videoProperties.OutputVideoFilePath
                 },
                 WorkingDirectory = videoProperties.WorkingDirectory,
                 UseShellExecute = false,
