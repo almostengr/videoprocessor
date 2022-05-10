@@ -53,7 +53,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "/bin/bash",
+                    FileName = ProgramPaths.BashShell,
                     Arguments = $"-c \"cd {directoryToArchive} && tar -cvJf \\\"{Path.Combine(archiveDestination, archiveName)}\\\" *\"",
                     UseShellExecute = false,
                     CreateNoWindow = true,
@@ -115,6 +115,11 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public virtual async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
         {
+            if (_appSettings.DoRenderVideos == false)
+            {
+                return;
+            }
+
             _logger.LogInformation($"Rendering video: {videoProperties.SourceTarFilePath}");
 
             Process process = new();
@@ -221,6 +226,11 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public virtual async Task CreateThumbnailsFromFinalVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
         {
+            if (_appSettings.DoRenderVideos == false)
+            {
+                return;
+            }
+
             _logger.LogInformation($"Creating thumbnails for {videoProperties.OutputVideoFilePath}");
 
             for (int sceneChangePct = 80; sceneChangePct > 0; sceneChangePct -= 5)

@@ -17,6 +17,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         private readonly string _streetSignFilter;
         private readonly ILogger<DashCamVideoRenderService> _logger;
         private readonly IMusicService _musicService;
+        private readonly AppSettings _appSettings;
 
         public DashCamVideoRenderService(ILogger<DashCamVideoRenderService> logger, AppSettings appSettings,
             IServiceScopeFactory factory) : base(logger, appSettings)
@@ -24,6 +25,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             _streetSignFilter = $"fontcolor=white:fontsize={FfMpegConstants.FontSize}:box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor=green:{_lowerCenter}";
             _logger = logger;
             _musicService = factory.CreateScope().ServiceProvider.GetRequiredService<IMusicService>();
+            _appSettings = appSettings;
         }
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
@@ -103,6 +105,11 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public override async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
         {
+            if (_appSettings.DoRenderVideos == false)
+            {
+                return;
+            }
+
             _logger.LogInformation($"Rendering video: {videoProperties.SourceTarFilePath}");
 
             Process process = new();

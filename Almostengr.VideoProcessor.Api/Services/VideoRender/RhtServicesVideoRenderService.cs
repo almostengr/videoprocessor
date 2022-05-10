@@ -13,14 +13,21 @@ namespace Almostengr.VideoProcessor.Api.Services
     public class RhtServicesVideoRenderService : BaseVideoRenderService, IRhtServicesVideoRenderService
     {
         private readonly ILogger<RhtServicesVideoRenderService> _logger;
+        private readonly AppSettings _appSettings;
 
         public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger, AppSettings appSettings) : base(logger, appSettings)
         {
             _logger = logger;
+            _appSettings = appSettings;
         }
 
         public override async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
         {
+            if (_appSettings.DoRenderVideos == false)
+            {
+                return;
+            }
+
             _logger.LogInformation($"Rendering {videoProperties.SourceTarFilePath}");
             
             Process process = new();
@@ -64,7 +71,6 @@ namespace Almostengr.VideoProcessor.Api.Services
                 "IG @rhtservicesllc",
                 "instagram.com/rhtservicesllc",
                 "facebook.com/rhtservicesllc",
-                // "Subscribe to our YouTube channel!",
             };
 
             Random random = new();

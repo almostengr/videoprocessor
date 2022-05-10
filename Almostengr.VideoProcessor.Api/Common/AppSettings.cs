@@ -13,6 +13,7 @@ namespace Almostengr.VideoProcessor.Api.Common
         public Directories Directories { get; set; } = new();
         public ProgramPaths ProgramPaths { get; set; } = new();
         public int ThumbnailFrames { get; set; } = 5;
+        public bool DoRenderVideos { get; set; } = true;
     }
 
     public class Directories
@@ -35,5 +36,6 @@ namespace Almostengr.VideoProcessor.Api.Common
     {
         public const string TarBinary = "/bin/tar";
         public const string FfmpegBinary = "/usr/bin/ffmpeg";
+        public const string BashShell = "/bin/bash";
     }
 }
