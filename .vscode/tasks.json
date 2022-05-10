@@ -14,11 +14,92 @@
                 // Do not generate summary otherwise it leads to duplicate errors in Problems panel
                 "/consoleloggerparameters:NoSummary"
             ],
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "presentation": {
                 "reveal": "silent"
             },
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "${workspaceFolder}/Almostengr.VideoProcessor.Api/Almostengr.VideoProcessor.Api.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Clean Release Project",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "clean",
+                "-c",
+                "Release",
+            ],
+            "group": "none"
+        },
+        {
+            "label": "Publish Release",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "publish",
+                "-r",
+                "linux-x64",
+                "-c",
+                "Release",
+                "*sln"
+            ],
+            "group": "none",
+            "dependsOn": ["Clean Release Project"]
+        },
+        {
+            "label": "Deploy Local",
+            "command": "scp",
+            "type": "shell",
+            "args": [
+                "-pr",
+                "${workspaceRoot}/LinuxService/thermometerapi.service",
+                "${workspaceRoot}/Almostengr.VideoProcessor.Api/bin/Release/net5.0/linux-x64/publish/*",
+                "iamadmin@media://home/iamadmin/videoprocessor/",
+            ],
+            "group": "none",
+            "dependsOn": ["Publish Release"],
+        },
+        {
+            "label": "Package TAR Release",
+            "command": "tar",
+            "type": "shell",
+            "args": [
+                "-czvf",
+                "${workspaceRoot}/Almostengr.VideoProcessor.Api.tar.gz",
+                "-C",
+                "${workspaceRoot}/Almostengr.VideoProcessor.Api/bin/Release/net5.0/linux-x64/publish",
+                "."
+            ],
+            "dependsOn": ["Publish Release"],
+        },
+        {
+            "label": "Tag Release",
+            "command" : "git",
+            "type": "shell",
+            "args": [
+                "tag",
+                "-a",
+                "\"v$(date +%Y.%m.%d)\"",
+                "-m",
+                "\"version $(date +%Y.%m.%d)\""
+            ],
+            "dependsOn": ["Package Release"],
         }
     ]
 }
