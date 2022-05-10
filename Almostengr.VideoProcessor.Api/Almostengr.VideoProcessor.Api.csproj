@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Company>Robinson Handy and Technology Services LLC</Company>
+    <Copyright>Copyright © $([System.DateTime]::UtcNow.ToString(yyyy)) Robinson Handy and Technology Services</Copyright>
+    <Product>Video Processor</Product>
+    <Authors>Kenny Robinson</Authors>
+    <AssemblyName>Almostengr.VideoProcessor.Api</AssemblyName>
+    <RootNamespace>Almostengr.VideoProcessor.Api</RootNamespace>
+    <Version>$([System.DateTime]::UtcNow.ToString(yyyy.MM.dd))</Version>
   </PropertyGroup>
 
   <ItemGroup>
