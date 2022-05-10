@@ -99,7 +99,7 @@
                 "-m",
                 "\"version $(date +%Y.%m.%d)\""
             ],
-            "dependsOn": ["Package Release"],
+            "dependsOn": ["Package TAR Release"],
         }
     ]
 }
