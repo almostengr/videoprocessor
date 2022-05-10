@@ -98,7 +98,6 @@ namespace Almostengr.VideoProcessor.Workers
 
                 if (videoArchives.Length == 0)
                 {
-                    _logger.LogInformation("No videos to process");
                     await Task.Delay(_appSettings.WorkerServiceInterval, stoppingToken);
                 }
             }
