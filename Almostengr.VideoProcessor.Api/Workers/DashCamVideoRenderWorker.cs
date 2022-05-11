@@ -39,14 +39,15 @@ namespace Almostengr.VideoProcessor.Workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            bool isDiskSpaceAvailable = false;
             while (!stoppingToken.IsCancellationRequested)
             {
                 string[] videoArchives = _videoRenderService.GetVideoArchivesInDirectory(_incomingDirectory);
 
                 foreach (var videoArchive in videoArchives)
                 {
-                    bool IsDiskSpaceAvailable = _videoRenderService.IsDiskSpaceAvailable(_incomingDirectory);
-                    if (IsDiskSpaceAvailable == false)
+                    isDiskSpaceAvailable = _videoRenderService.IsDiskSpaceAvailable(_incomingDirectory);
+                    if (isDiskSpaceAvailable == false)
                     {
                         _logger.LogError("Not enough disk space to process video.");
                         break;
@@ -97,7 +98,7 @@ namespace Almostengr.VideoProcessor.Workers
                     _logger.LogInformation($"Finished processing {videoArchive}");
                 }
 
-                if (videoArchives.Length == 0)
+                if (videoArchives.Length == 0 || isDiskSpaceAvailable == false)
                 {
                     await Task.Delay(_appSettings.WorkerServiceInterval, stoppingToken);
                 }

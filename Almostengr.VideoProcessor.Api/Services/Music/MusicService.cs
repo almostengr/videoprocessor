@@ -12,7 +12,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         private readonly AppSettings _appSettings;
         private readonly Random _random;
 
-        public MusicService(ILogger<BaseService> logger, AppSettings appSettings) : base(logger)
+        public MusicService(ILogger<BaseService> logger, AppSettings appSettings) : base(logger, appSettings)
         {
             _appSettings = appSettings;
             _random = new Random();

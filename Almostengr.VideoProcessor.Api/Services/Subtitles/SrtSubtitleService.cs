@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
@@ -11,7 +12,8 @@ namespace Almostengr.VideoProcessor.Api.Services
         private readonly ILogger<SrtSubtitleService> _logger;
         private readonly ITextFileService _textFileService;
 
-        public SrtSubtitleService(ILogger<SrtSubtitleService> logger, ITextFileService textFileService) : base(logger)
+        public SrtSubtitleService(ILogger<SrtSubtitleService> logger, ITextFileService textFileService,
+            AppSettings appSettings) : base(logger, appSettings)
         {
             _logger = logger;
             _textFileService = textFileService;

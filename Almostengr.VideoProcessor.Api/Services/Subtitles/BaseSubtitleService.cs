@@ -1,3 +1,4 @@
+using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
 
@@ -5,7 +6,7 @@ namespace Almostengr.VideoProcessor.Api.Services
 {
     public abstract class BaseSubtitleService : BaseService, IBaseSubtitleService
     {
-        protected BaseSubtitleService(ILogger<BaseService> logger) : base(logger)
+        protected BaseSubtitleService(ILogger<BaseService> logger, AppSettings appSettings) : base(logger, appSettings)
         {
         }
 

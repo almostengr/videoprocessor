@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using Almostengr.VideoProcessor.Api.Common;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services
@@ -7,10 +8,12 @@ namespace Almostengr.VideoProcessor.Api.Services
     public abstract class BaseService : IBaseService
     {
         private readonly ILogger<BaseService> _logger;
+        private readonly AppSettings _appSettings;
 
-        public BaseService(ILogger<BaseService> logger)
+        public BaseService(ILogger<BaseService> logger, AppSettings appSettings)
         {
             _logger = logger;
+            _appSettings = appSettings;
         }
 
         public bool IsDiskSpaceAvailable(string directory)
@@ -19,7 +22,14 @@ namespace Almostengr.VideoProcessor.Api.Services
             double totalSpace = new DriveInfo(directory).TotalSize;
             double spaceRemaining = (freeSpace / totalSpace);
             _logger.LogInformation($"Disk space remaining: {spaceRemaining.ToString()}");
-            return spaceRemaining > 0.05;
+
+            if (spaceRemaining > _appSettings.DiskSpaceThreshold)
+            {
+                return true;
+            }
+
+            _logger.LogError("Disk space is too low");
+            return false;
         }
 
         public void DeleteDirectory(string directoryName)

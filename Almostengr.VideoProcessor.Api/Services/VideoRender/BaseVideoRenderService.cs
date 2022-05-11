@@ -26,7 +26,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         internal readonly string _lowerCenter;
         internal readonly string _lowerRight;
 
-        public BaseVideoRenderService(ILogger<BaseVideoRenderService> logger, AppSettings appSettings) : base(logger)
+        public BaseVideoRenderService(ILogger<BaseVideoRenderService> logger, AppSettings appSettings) : base(logger, appSettings)
         {
             _logger = logger;
             _appSettings = appSettings;
@@ -157,7 +157,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             _logger.LogInformation($"Converting video files to mp4: {directory}");
 
             var nonMp4VideoFiles = Directory.GetFiles(directory)
-                .Where(x => x.EndsWith(FileExtension.Mkv) || x.EndsWith(FileExtension.Mov))
+                .Where(x => x.ToLower().EndsWith(FileExtension.Mkv) || x.ToLower().EndsWith(FileExtension.Mov))
                 .OrderBy(x => x).ToArray();
 
             foreach (var videoFile in nonMp4VideoFiles)
@@ -216,7 +216,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             {
                 using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
                 {
-                    foreach (string file in Directory.GetFiles(workingDirectory, $"*{FileExtension.Mp4}"))
+                    foreach (string file in Directory.GetFiles(workingDirectory, $"*{FileExtension.Mp4}").OrderBy(x => x))
                     {
                         writer.WriteLine($"file '{Path.GetFileName(file)}'");
                     }

@@ -13,7 +13,8 @@ namespace Almostengr.VideoProcessor.Api.Common
         public Directories Directories { get; set; } = new();
         public ProgramPaths ProgramPaths { get; set; } = new();
         public int ThumbnailFrames { get; set; } = 5;
-        public bool DoRenderVideos { get; set; } = true;
+        public bool DoRenderVideos { get; set; } = false;
+        public double DiskSpaceThreshold { get; set; } = 0.05;
     }
 
     public class Directories
