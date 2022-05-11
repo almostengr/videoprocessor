@@ -70,7 +70,6 @@ namespace Almostengr.VideoProcessor.Workers
 
                 if (srtTranscripts.Length == 0)
                 {
-                    _logger.LogInformation("No new transcripts found");
                     await Task.Delay(_appSettings.WorkerServiceInterval, stoppingToken);
                 }
             }
