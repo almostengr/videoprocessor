@@ -21,8 +21,6 @@ namespace Almostengr.VideoProcessor.Workers
         private readonly string _uploadDirectory;
         private readonly string _workingDirectory;
         private readonly string _ffmpegInputFilePath;
-        private readonly string _subtitlesFile;
-        private const string DEFAULT_VIDEO_DESCRIPTION = "Visit https://rhtservices.net for more information.";
 
         public RhtServicesVideoRenderWorker(ILogger<RhtServicesVideoRenderWorker> logger, IServiceScopeFactory factory)
         {
@@ -34,7 +32,6 @@ namespace Almostengr.VideoProcessor.Workers
             _uploadDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "rhtvideos/upload");
             _workingDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "rhtvideos/working");
             _ffmpegInputFilePath = Path.Combine(_workingDirectory, VideoRenderFiles.InputFile);
-            _subtitlesFile = Path.Combine(_workingDirectory, VideoRenderFiles.SubtitlesFile);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -58,7 +55,6 @@ namespace Almostengr.VideoProcessor.Workers
 
                     VideoPropertiesDto videoProperties = new();
                     videoProperties.SourceTarFilePath = videoArchive;
-                    videoProperties.VideoDescription = DEFAULT_VIDEO_DESCRIPTION;
                     videoProperties.FfmpegInputFilePath = _ffmpegInputFilePath;
                     videoProperties.WorkingDirectory = _workingDirectory;
                     videoProperties.UploadDirectory = _uploadDirectory;
