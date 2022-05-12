@@ -51,16 +51,19 @@ namespace Almostengr.VideoProcessor.Api.Services
             videoFilter += $"fontcolor={textColor}:";
             videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
             videoFilter += $"{_upperRight}:";
-            videoFilter += $"box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor={FfMpegColors.Black}";
-            videoFilter += $":enable='between(t,0,{randomDuration})', ";
+            videoFilter += $"box=1:";
+            videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
+            videoFilter += $"boxcolor={FfMpegColors.Black}:";
+            videoFilter += $"enable='between(t,0,{randomDuration})', ";
 
             // dimmed text - channel name
             videoFilter += $"drawtext=textfile:'{channelBranding}':";
             videoFilter += $"fontcolor={textColor}:";
             videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
             videoFilter += $"{_upperRight}:";
-            videoFilter += $"box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor={FfMpegColors.Black}";
-            videoFilter += $"@{FfMpegConstants.DimmedBackground}:";
+            videoFilter += $"box=1:";
+            videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
+            videoFilter += $"boxcolor={FfMpegColors.Black}@{FfMpegConstants.DimmedBackground}:";
             videoFilter += $"enable='gt(t,{randomDuration})', ";
 
             // solid text - video title
@@ -68,16 +71,19 @@ namespace Almostengr.VideoProcessor.Api.Services
             videoFilter += $"fontcolor={textColor}:";
             videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
             videoFilter += $"{_upperLeft}:";
-            videoFilter += $"box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor={FfMpegColors.Black}";
-            videoFilter += $":enable='between(t,0,{randomDuration})', ";
+            videoFilter += $"box=1:";
+            videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
+            videoFilter += $"boxcolor={FfMpegColors.Black}:";
+            videoFilter += $"enable='between(t,0,{randomDuration})', ";
 
             // dimmed text - video title
             videoFilter += $"drawtext=textfile:'{videoProperties.VideoTitle.Split(";")[0]}':";
             videoFilter += $"fontcolor={textColor}:";
             videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
             videoFilter += $"{_upperLeft}:";
-            videoFilter += $"box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor={FfMpegColors.Black}";
-            videoFilter += $"@{FfMpegConstants.DimmedBackground}:";
+            videoFilter += $"box=1:";
+            videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
+            videoFilter += $"boxcolor={FfMpegColors.Black}@{FfMpegConstants.DimmedBackground}:";
             videoFilter += $"enable='gt(t,{randomDuration})'";
 
             return videoFilter;
@@ -87,7 +93,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
             if (File.Exists(destinationFile))
             {
-                return $", drawtext=textfile=destination.txt:${_streetSignFilter}:enable='between(t,5,12)'";
+                return $", drawtext=textfile={VideoRenderFiles.DestinationFile}:${_streetSignFilter}:enable='between(t,5,12)'";
             }
 
             return string.Empty;
@@ -97,7 +103,7 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
             if (File.Exists(majorRoadsFile))
             {
-                return $", drawtext=textfile=majorroads.txt:${_streetSignFilter}:enable='between(t,12,19)'";
+                return $", drawtext=textfile={VideoRenderFiles.MajorRoadsFile}:${_streetSignFilter}:enable='between(t,12,19)'";
             }
 
             return string.Empty;
@@ -151,7 +157,6 @@ namespace Almostengr.VideoProcessor.Api.Services
             _logger.LogInformation(process.StandardOutput.ReadToEnd());
             _logger.LogError(process.StandardError.ReadToEnd());
         }
-
 
     }
 }

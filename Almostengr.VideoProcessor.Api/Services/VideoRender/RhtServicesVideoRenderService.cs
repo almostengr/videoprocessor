@@ -83,17 +83,19 @@ namespace Almostengr.VideoProcessor.Api.Services
             videoFilter += $"fontcolor={textColor}:";
             videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
             videoFilter += $"{_upperRight}:";
-            videoFilter += $"box=1:boxborderw={FfMpegConstants.RhtBorderWidth.ToString()}:boxcolor={FfMpegColors.Black}";
-            videoFilter += $"@{FfMpegConstants.DimmedBackground}";
-            videoFilter += $":enable='gt(t,0)'";
+            videoFilter += $"box=1:";
+            videoFilter += $"boxborderw={FfMpegConstants.RhtBorderWidth.ToString()}:";
+            videoFilter += $"boxcolor={FfMpegColors.Black}@{FfMpegConstants.DimmedBackground}:";
+            videoFilter += $"enable='gt(t,0)'";
 
             videoFilter += $", drawtext=textfile:'{socialText}':";
             videoFilter += $"fontcolor={textColor}:";
             videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
             videoFilter += $"{_lowerRight}:";
-            videoFilter += $"box=1:boxborderw={FfMpegConstants.RhtBorderWidth.ToString()}:boxcolor={FfMpegColors.Black}";
-            videoFilter += $"@{FfMpegConstants.DimmedBackground}";
-            videoFilter += $":enable='gt(t,0)'";
+            videoFilter += $"box=1:";
+            videoFilter += $"boxborderw={FfMpegConstants.RhtBorderWidth.ToString()}:";
+            videoFilter += $"boxcolor={FfMpegColors.Black}@{FfMpegConstants.DimmedBackground}:";
+            videoFilter += $"enable='gt(t,0)'";
 
             return videoFilter;
         }
