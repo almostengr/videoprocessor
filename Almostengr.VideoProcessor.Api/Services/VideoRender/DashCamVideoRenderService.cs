@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
+using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services
+namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 {
     public class DashCamVideoRenderService : BaseVideoRenderService, IDashCamVideoRenderService
     {

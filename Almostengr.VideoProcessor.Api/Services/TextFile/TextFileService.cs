@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services
+namespace Almostengr.VideoProcessor.Api.Services.TextFile
 {
     public class TextFileService : ITextFileService
     {

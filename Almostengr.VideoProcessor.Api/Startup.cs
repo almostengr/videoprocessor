@@ -1,5 +1,8 @@
 using Almostengr.VideoProcessor.Api.Common;
-using Almostengr.VideoProcessor.Api.Services;
+using Almostengr.VideoProcessor.Api.Services.MusicService;
+using Almostengr.VideoProcessor.Api.Services.Subtitles;
+using Almostengr.VideoProcessor.Api.Services.TextFile;
+using Almostengr.VideoProcessor.Api.Services.VideoRender;
 using Almostengr.VideoProcessor.Workers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

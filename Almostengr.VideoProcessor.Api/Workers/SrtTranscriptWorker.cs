@@ -2,11 +2,13 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.DataTransferObjects;
-using Almostengr.VideoProcessor.Api.Services;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Almostengr.VideoProcessor.Api.Common;
+using Almostengr.VideoProcessor.Api.Services.Subtitles;
+using Almostengr.VideoProcessor.Api.Services.TextFile;
 
 namespace Almostengr.VideoProcessor.Workers
 {
@@ -25,8 +27,8 @@ namespace Almostengr.VideoProcessor.Workers
             _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _logger = logger;
-            _incomingDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "transcript/incoming");
-            _outgoingDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "transcript/outgoing");
+            _incomingDirectory = Path.Combine(_appSettings.Directories.TranscriptBaseDirectory, "transcript/incoming");
+            _outgoingDirectory = Path.Combine(_appSettings.Directories.TranscriptBaseDirectory, "transcript/outgoing");
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)

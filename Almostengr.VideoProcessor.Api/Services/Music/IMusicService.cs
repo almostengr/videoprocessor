@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Api.Services
+namespace Almostengr.VideoProcessor.Api.Services.MusicService
 {
     public interface IMusicService : IBaseService
     {

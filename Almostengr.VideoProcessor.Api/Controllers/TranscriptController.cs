@@ -1,7 +1,8 @@
 using Almostengr.VideoProcessor.DataTransferObjects;
-using Almostengr.VideoProcessor.Api.Services;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Almostengr.VideoProcessor.Api.Services.Subtitles;
 
 namespace Almostengr.VideoProcessor.Controllers
 {

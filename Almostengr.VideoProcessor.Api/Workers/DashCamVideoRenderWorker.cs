@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
-using Almostengr.VideoProcessor.Api.Services;
+using Almostengr.VideoProcessor.Api.Services.VideoRender;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -29,10 +29,10 @@ namespace Almostengr.VideoProcessor.Workers
             _videoRenderService = factory.CreateScope().ServiceProvider.GetRequiredService<IDashCamVideoRenderService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _logger = logger;
-            _incomingDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "dashcam/incoming");
-            _archiveDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "dashcam/archive");
-            _uploadDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "dashcam/upload");
-            _workingDirectory = Path.Combine(_appSettings.Directories.BaseDirectory, "dashcam/working");
+            _incomingDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "dashcam/incoming");
+            _archiveDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "dashcam/archive");
+            _uploadDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "dashcam/upload");
+            _workingDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "dashcam/working");
             _ffmpegInputFilePath = Path.Combine(_workingDirectory, VideoRenderFiles.InputFile);
             _subtitlesFile = Path.Combine(_workingDirectory, VideoRenderFiles.SubtitlesFile);
         }

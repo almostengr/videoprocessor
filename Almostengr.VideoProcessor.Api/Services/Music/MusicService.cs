@@ -5,7 +5,7 @@ using Almostengr.VideoProcessor.Api.Common;
 using Almostengr.VideoProcessor.Constants;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services
+namespace Almostengr.VideoProcessor.Api.Services.MusicService
 {
     public class MusicService : BaseService, IMusicService
     {

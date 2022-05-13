@@ -20,15 +20,14 @@ namespace Almostengr.VideoProcessor.Api.Common
     public class Directories
     {
 #if RELEASE
-        public string BaseDirectory = "/home/almostengineer/Videos/";
-#else
-        public string BaseDirectory = "/home/almostengineer/Downloads/";
-#endif
-
-
-#if RELEASE
+        public string TranscriptBaseDirectory = "/home/almostengineer/Videos/";
+        public string DashCamBaseDirectory = "/home/almostengineer/";
+        public string RhtBaseDirectory = "/home/almostengineer/";
         public string MusicDirectory = "/home/almostengineer/Music/";
 #else
+        public string TranscriptBaseDirectory = "/home/almostengineer/Downloads/";
+        public string DashCamBaseDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/Kenny Ram Dash Cam";
+        public string RhtBaseDirectory = "/home/almostengineer/Downloads/";
         public string MusicDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music";
 #endif
     }

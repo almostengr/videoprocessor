@@ -1,6 +1,6 @@
 using Almostengr.VideoProcessor.DataTransferObjects;
 
-namespace Almostengr.VideoProcessor.Api.Services
+namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 {
     public interface ISubtitleService : IBaseSubtitleService
     {

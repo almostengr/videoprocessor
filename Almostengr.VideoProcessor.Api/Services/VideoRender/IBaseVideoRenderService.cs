@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 
-namespace Almostengr.VideoProcessor.Api.Services
+namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 {
     public interface IBaseVideoRenderService : IBaseService
     {

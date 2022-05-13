@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Api.Services
+namespace Almostengr.VideoProcessor.Api.Services.TextFile
 {
     public interface ITextFileService 
     {

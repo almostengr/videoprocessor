@@ -1,11 +1,12 @@
 using System;
 using System.IO;
 using Almostengr.VideoProcessor.Api.Common;
+using Almostengr.VideoProcessor.Api.Services.TextFile;
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services
+namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 {
     public class SrtSubtitleService : BaseSubtitleService, ISubtitleService
     {
