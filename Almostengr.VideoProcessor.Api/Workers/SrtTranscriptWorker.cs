@@ -6,7 +6,7 @@ using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Almostengr.VideoProcessor.Api.Common;
+using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
 using Almostengr.VideoProcessor.Api.Services.TextFile;
 

@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Api.Common;
+using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Almostengr.VideoProcessor.Constants;

@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using Almostengr.VideoProcessor.Api.Common;
+using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Constants;
 using Microsoft.Extensions.Logging;
 

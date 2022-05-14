@@ -1,6 +1,6 @@
 using System.IO;
 using System.Linq;
-using Almostengr.VideoProcessor.Api.Common;
+using Almostengr.VideoProcessor.Api.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services
@@ -61,9 +61,10 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public void MoveFile(string source, string destination)
         {
-            if (File.Exists(source) && Directory.Exists(destination))
+            if (File.Exists(source))
             {
                 _logger.LogInformation($"Moving file {source} to {destination}");
+                CreateDirectory(destination);
                 Directory.Move(source, destination);
             }
         }

@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Almostengr.VideoProcessor.Api.Common;
+using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Services.TextFile;
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;

@@ -1,6 +1,6 @@
 using System;
 
-namespace Almostengr.VideoProcessor.Api.Common
+namespace Almostengr.VideoProcessor.Api.Configuration
 {
     public class AppSettings
     {

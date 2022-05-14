@@ -1,28 +1,17 @@
 using System;
 using System.IO;
+using Almostengr.VideoProcessor.Api.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.TextFile
 {
-    public class TextFileService : ITextFileService
+    public class TextFileService : BaseService, ITextFileService
     {
         private readonly ILogger<TextFileService> _logger;
 
-        public TextFileService(ILogger<TextFileService> logger)
+        public TextFileService(ILogger<TextFileService> logger, AppSettings appSettings) : base(logger, appSettings)
         {
             _logger = logger;
-        }
-
-        public void DeleteFile(string fileName)
-        {
-            try
-            {
-                File.Delete(fileName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error deleting file {fileName}");
-            }
         }
 
         public string GetFileContents(string filePath)
@@ -47,11 +36,11 @@ namespace Almostengr.VideoProcessor.Api.Services.TextFile
         {
             try
             {
-                var DirectoryName = Path.GetDirectoryName(filePath);
+                var directoryName = Path.GetDirectoryName(filePath);
 
-                if (Directory.Exists(DirectoryName) == false)
+                if (Directory.Exists(directoryName) == false)
                 {
-                    Directory.CreateDirectory(DirectoryName);
+                    base.CreateDirectory(directoryName);
                 }
 
                 File.WriteAllText(filePath, content);
