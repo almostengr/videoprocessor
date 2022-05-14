@@ -8,7 +8,7 @@
     <Authors>Kenny Robinson</Authors>
     <AssemblyName>Almostengr.VideoProcessor.Api</AssemblyName>
     <RootNamespace>Almostengr.VideoProcessor.Api</RootNamespace>
-    <Version>$([System.DateTime]::UtcNow.ToString(yyyy.MM.dd))</Version>
+    <Version>5.$([System.DateTime]::UtcNow.ToString(yy.MM.dd))</Version>
   </PropertyGroup>
 
   <ItemGroup>

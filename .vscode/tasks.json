@@ -95,9 +95,9 @@
             "args": [
                 "tag",
                 "-a",
-                "\"v$(date +%Y.%m.%d)\"",
+                "\"v5.$(date +%Y.%m.%d)\"",
                 "-m",
-                "\"version $(date +%Y.%m.%d)\""
+                "\"version 5.$(date +%Y.%m.%d)\""
             ],
             "dependsOn": ["Package TAR Release"],
         }
