@@ -27,10 +27,10 @@ namespace Almostengr.VideoProcessor.Workers
             _videoRenderService = factory.CreateScope().ServiceProvider.GetRequiredService<IRhtServicesVideoRenderService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _logger = logger;
-            _incomingDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "rhtvideos/incoming");
-            _archiveDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "rhtvideos/archive");
-            _uploadDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "rhtvideos/upload");
-            _workingDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "rhtvideos/working");
+            _incomingDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "incoming");
+            _archiveDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "archive");
+            _uploadDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "upload");
+            _workingDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "working");
             _ffmpegInputFilePath = Path.Combine(_workingDirectory, VideoRenderFiles.InputFile);
         }
 

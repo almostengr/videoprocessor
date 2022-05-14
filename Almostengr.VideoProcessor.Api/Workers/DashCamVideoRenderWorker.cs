@@ -29,10 +29,10 @@ namespace Almostengr.VideoProcessor.Workers
             _videoRenderService = factory.CreateScope().ServiceProvider.GetRequiredService<IDashCamVideoRenderService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _logger = logger;
-            _incomingDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "dashcam/incoming");
-            _archiveDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "dashcam/archive");
-            _uploadDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "dashcam/upload");
-            _workingDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "dashcam/working");
+            _incomingDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "incoming");
+            _archiveDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "archive");
+            _uploadDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "upload");
+            _workingDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "working");
             _ffmpegInputFilePath = Path.Combine(_workingDirectory, VideoRenderFiles.InputFile);
             _subtitlesFile = Path.Combine(_workingDirectory, VideoRenderFiles.SubtitlesFile);
         }

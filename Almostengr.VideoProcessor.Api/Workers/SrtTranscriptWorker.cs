@@ -27,8 +27,8 @@ namespace Almostengr.VideoProcessor.Workers
             _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _logger = logger;
-            _incomingDirectory = Path.Combine(_appSettings.Directories.TranscriptBaseDirectory, "transcript/incoming");
-            _outgoingDirectory = Path.Combine(_appSettings.Directories.TranscriptBaseDirectory, "transcript/outgoing");
+            _incomingDirectory = Path.Combine(_appSettings.Directories.TranscriptBaseDirectory, "incoming");
+            _outgoingDirectory = Path.Combine(_appSettings.Directories.TranscriptBaseDirectory, "outgoing");
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
