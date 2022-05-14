@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -15,15 +14,18 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 {
     public class DashCamVideoRenderService : BaseVideoRenderService, IDashCamVideoRenderService
     {
-        private readonly string _streetSignFilter;
+        private readonly string _streetSignTextSubfilter;
+        private readonly string _streetSignBoxFilter;
         private readonly ILogger<DashCamVideoRenderService> _logger;
         private readonly IMusicService _musicService;
         private readonly AppSettings _appSettings;
+        private const string _channelBranding = "Kenny Ram Dash Cam";
 
         public DashCamVideoRenderService(ILogger<DashCamVideoRenderService> logger, AppSettings appSettings,
             IServiceScopeFactory factory) : base(logger, appSettings)
         {
-            _streetSignFilter = $"fontcolor=white:fontsize={FfMpegConstants.FontSize}:box=1:boxborderw={FfMpegConstants.DashCamBorderWidth}:boxcolor=green:{_lowerCenter}";
+            _streetSignBoxFilter = $", drawbox=x=0:y=in_h-200:w=in_w:h=200:color={FfMpegColors.Green}:t=fill";
+            _streetSignTextSubfilter = $"fontcolor=white:fontsize={FfMpegConstants.FontSizeLarge}:{_lowerCenter}";
             _logger = logger;
             _musicService = factory.CreateScope().ServiceProvider.GetRequiredService<IMusicService>();
             _appSettings = appSettings;
@@ -32,7 +34,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
         {
             Random random = new();
-            int randomDuration = random.Next(5, 26);
+            int randomDuration = random.Next(5, 16);
 
             string textColor = FfMpegColors.White;
             if (videoProperties.VideoTitle.ToLower().Contains("night"))
@@ -40,17 +42,11 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
                 textColor = FfMpegColors.Orange;
             }
 
-            var positionOptions = new List<string> {
-                _upperRight,
-                _lowerRight
-            };
-
-            string channelBranding = "Kenny Ram Dash Cam";
-
             // solid text - channel name
-            string videoFilter = $"drawtext=textfile:'{channelBranding}':";
+            string videoFilter = string.Empty;
+            videoFilter += $"drawtext=textfile:'{_channelBranding}':";
             videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
+            videoFilter += $"fontsize={FfMpegConstants.FontSizeSmall}:";
             videoFilter += $"{_upperRight}:";
             videoFilter += $"box=1:";
             videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
@@ -58,9 +54,9 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             videoFilter += $"enable='between(t,0,{randomDuration})', ";
 
             // dimmed text - channel name
-            videoFilter += $"drawtext=textfile:'{channelBranding}':";
+            videoFilter += $"drawtext=textfile:'{_channelBranding}':";
             videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
+            videoFilter += $"fontsize={FfMpegConstants.FontSizeSmall}:";
             videoFilter += $"{_upperRight}:";
             videoFilter += $"box=1:";
             videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
@@ -70,7 +66,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             // solid text - video title
             videoFilter += $"drawtext=textfile:'{videoProperties.VideoTitle.Split(";")[0]}':";
             videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
+            videoFilter += $"fontsize={FfMpegConstants.FontSizeSmall}:";
             videoFilter += $"{_upperLeft}:";
             videoFilter += $"box=1:";
             videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
@@ -80,7 +76,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             // dimmed text - video title
             videoFilter += $"drawtext=textfile:'{videoProperties.VideoTitle.Split(";")[0]}':";
             videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
+            videoFilter += $"fontsize={FfMpegConstants.FontSizeSmall}:";
             videoFilter += $"{_upperLeft}:";
             videoFilter += $"box=1:";
             videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
@@ -90,21 +86,21 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             return videoFilter;
         }
 
-        public string GetDestinationFilter(string destinationFile)
+        public string GetDestinationFilter(string workingDirectory)
         {
-            if (File.Exists(destinationFile))
+            if (File.Exists(Path.Combine(workingDirectory, VideoRenderFiles.DestinationFile)))
             {
-                return $", drawtext=textfile={VideoRenderFiles.DestinationFile}:${_streetSignFilter}:enable='between(t,5,12)'";
+                return $"{_streetSignBoxFilter}, drawtext=textfile={VideoRenderFiles.DestinationFile}:${_streetSignTextSubfilter}:enable='between(t,2,12)'";
             }
 
             return string.Empty;
         }
 
-        public string GetMajorRoadsFilter(string majorRoadsFile)
+        public string GetMajorRoadsFilter(string workingDirectory)
         {
-            if (File.Exists(majorRoadsFile))
+            if (File.Exists(Path.Combine(workingDirectory, VideoRenderFiles.MajorRoadsFile)))
             {
-                return $", drawtext=textfile={VideoRenderFiles.MajorRoadsFile}:${_streetSignFilter}:enable='between(t,12,19)'";
+                return $"{_streetSignBoxFilter}, drawtext=textfile={VideoRenderFiles.MajorRoadsFile}:${_streetSignTextSubfilter}:enable='between(t,12,22)'";
             }
 
             return string.Empty;

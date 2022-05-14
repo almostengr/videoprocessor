@@ -78,6 +78,8 @@ namespace Almostengr.VideoProcessor.Workers
                     _videoRenderService.CheckOrCreateFfmpegInputFile(_workingDirectory);
 
                     videoProperties.VideoFilter = _videoRenderService.GetFfmpegVideoFilters(videoProperties);
+                    videoProperties.VideoFilter += _videoRenderService.GetDestinationFilter(videoProperties.WorkingDirectory);
+                    videoProperties.VideoFilter += _videoRenderService.GetMajorRoadsFilter(videoProperties.WorkingDirectory);
 
                     await _videoRenderService.RenderVideoAsync(videoProperties, stoppingToken); // todo disabled for testing
 

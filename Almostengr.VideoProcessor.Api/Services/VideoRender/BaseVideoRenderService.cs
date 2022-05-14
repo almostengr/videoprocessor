@@ -39,8 +39,8 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             _lowerCenter = $"x=(w-tw)/2:y=h-th-{PADDING}";
             _lowerRight = $"x=w-tw-{PADDING}:y=h-th-{PADDING}";
 
-            _subscribeFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={FfMpegConstants.FontSize}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
-            _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={FfMpegConstants.FontSize}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
+            _subscribeFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={FfMpegConstants.FontSizeSmall}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
+            _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={FfMpegConstants.FontSizeSmall}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
         }
 
         public abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);

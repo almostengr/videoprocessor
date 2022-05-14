@@ -67,35 +67,27 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
         {
             List<string> socialMediaOptions = new List<string> {
+                "Robinson Handy and Technology Services",
                 "rhtservices.net",
                 "IG @rhtservicesllc",
                 "instagram.com/rhtservicesllc",
                 "facebook.com/rhtservicesllc",
             };
 
+            List<string> positionOptions = new List<string> {
+                _lowerRight,
+                _upperRight
+            };
+
             Random random = new();
-            string socialText = socialMediaOptions[random.Next(0, socialMediaOptions.Count)];
-            
-            string channelText = "Robinson Handy and Technology Services";
-            string textColor = FfMpegColors.White;
 
-            string videoFilter = $"drawtext=textfile:'{channelText}':";
-            videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
-            videoFilter += $"{_upperRight}:";
+            string videoFilter = $"drawtext=textfile:'{socialMediaOptions[random.Next(0, socialMediaOptions.Count)]}':";
+            videoFilter += $"fontcolor={FfMpegColors.White}@{FfMpegConstants.DimmedBackground}:";
+            videoFilter += $"fontsize={FfMpegConstants.FontSizeSmall}:";
+            videoFilter += $"{positionOptions[random.Next(0, positionOptions.Count)]}:";
             videoFilter += $"box=1:";
             videoFilter += $"boxborderw={FfMpegConstants.RhtBorderWidth.ToString()}:";
-            videoFilter += $"boxcolor={FfMpegColors.Black}@{FfMpegConstants.DimmedBackground}:";
-            videoFilter += $"enable='gt(t,0)'";
-
-            videoFilter += $", drawtext=textfile:'{socialText}':";
-            videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={FfMpegConstants.FontSize}:";
-            videoFilter += $"{_lowerRight}:";
-            videoFilter += $"box=1:";
-            videoFilter += $"boxborderw={FfMpegConstants.RhtBorderWidth.ToString()}:";
-            videoFilter += $"boxcolor={FfMpegColors.Black}@{FfMpegConstants.DimmedBackground}:";
-            videoFilter += $"enable='gt(t,0)'";
+            videoFilter += $"boxcolor={FfMpegColors.Black}@{FfMpegConstants.DimmedBackground}";
 
             return videoFilter;
         }
