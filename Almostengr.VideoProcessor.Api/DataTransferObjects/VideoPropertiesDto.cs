@@ -12,7 +12,7 @@ namespace Almostengr.VideoProcessor.Api.DataTransferObjects
         {
             get
             {
-                return $"{VideoTitle}.{DateTime.Now.ToString("yyyyMMdd")}.{DateTime.Now.ToString("HHmmss")}.tar.xz"; 
+                return $"{VideoTitle.Replace(".mp4", string.Empty)}.{DateTime.Now.ToString("yyyyMMdd")}.{DateTime.Now.ToString("HHmmss")}.tar.xz"; 
             }
         }
         public string VideoDescription { get; set; }
