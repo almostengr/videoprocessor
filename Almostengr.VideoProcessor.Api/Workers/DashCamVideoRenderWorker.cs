@@ -58,6 +58,8 @@ namespace Almostengr.VideoProcessor.Workers
                     _videoRenderService.DeleteDirectory(_workingDirectory);
                     _videoRenderService.CreateDirectory(_workingDirectory);
 
+                    await _videoRenderService.ConfirmFileTransferCompleteAsync(videoArchive);
+
                     VideoPropertiesDto videoProperties = new();
                     videoProperties.SourceTarFilePath = videoArchive;
                     videoProperties.VideoDescription = DEFAULT_VIDEO_DESCRIPTION;
