@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -6,6 +5,7 @@ using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
+using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Almostengr.VideoProcessor.Constants;
 using Microsoft.Extensions.Logging;
 
@@ -15,6 +15,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
     {
         private readonly ILogger<BaseVideoRenderService> _logger;
         private readonly AppSettings _appSettings;
+        private readonly IExternalProcessService _externalProcess;
         private const int PADDING = 30;
         internal readonly string _subscribeFilter;
         internal readonly string _subscribeScrollingFilter;
@@ -26,10 +27,13 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         internal readonly string _lowerCenter;
         internal readonly string _lowerRight;
 
-        public BaseVideoRenderService(ILogger<BaseVideoRenderService> logger, AppSettings appSettings) : base(logger, appSettings)
+        public BaseVideoRenderService(ILogger<BaseVideoRenderService> logger, AppSettings appSettings,
+            IExternalProcessService externalProcess) :
+            base(logger, appSettings)
         {
             _logger = logger;
             _appSettings = appSettings;
+            _externalProcess = externalProcess;
 
             _upperLeft = $"x={PADDING}:y={PADDING}";
             _upperCenter = $"x=(w-tw)/2:y={PADDING}";
@@ -49,27 +53,14 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         {
             _logger.LogInformation($"Archiving directory contents: {directoryToArchive}");
 
-            Process process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = ProgramPaths.BashShell,
-                    Arguments = $"-c \"cd {directoryToArchive} && tar -cvJf \\\"{Path.Combine(archiveDestination, archiveName)}\\\" *\"",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
-            };
+            await _externalProcess.RunProcessAsync(
+                ProgramPaths.BashShell,
+                $"-c \"cd \\\"{directoryToArchive}\\\" && tar -cvJf \\\"{Path.Combine(archiveDestination, archiveName)}\\\" *\"",
+                directoryToArchive,
+                cancellationToken,
+                10);
 
-            process.Start();
-            await process.WaitForExitAsync(cancellationToken);
-
-            _logger.LogInformation(process.StandardOutput.ReadToEnd());
-            if (process.StandardError.ReadToEnd().Length > 0)
-            {
-                _logger.LogError(process.StandardError.ReadToEnd());
-            }
+            _logger.LogInformation($"Done archiving directory contents: {directoryToArchive}");
         }
 
         public string[] GetVideoArchivesInDirectory(string directory)
@@ -93,24 +84,14 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         {
             _logger.LogInformation($"Extracting tar file: {tarFile}");
 
-            Process process = new();
-            process.StartInfo = new ProcessStartInfo()
-            {
-                FileName = ProgramPaths.TarBinary,
-                ArgumentList = {
-                    "-xvf",
-                    tarFile,
-                    "-C",
-                    workingDirectory
-                },
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
+            await _externalProcess.RunProcessAsync(
+                ProgramPaths.TarBinary,
+                $"-xvf \"{tarFile}\" -C \"{workingDirectory}\"",
+                Path.GetDirectoryName(tarFile),
+                cancellationToken,
+                10);
 
-            process.Start();
-            await process.WaitForExitAsync(cancellationToken);
+            _logger.LogInformation($"Done extracting tar file: {tarFile}");
         }
 
         public virtual async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
@@ -122,34 +103,14 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
             _logger.LogInformation($"Rendering video: {videoProperties.SourceTarFilePath}");
 
-            Process process = new();
-            process.StartInfo = new ProcessStartInfo()
-            {
-                FileName = ProgramPaths.FfmpegBinary,
-                ArgumentList = {
-                    "-hide_banner",
-                    "-safe",
-                    "0",
-                    "-loglevel",
-                    FfMpegLogLevel.Error,
-                    "-y",
-                    "-f",
-                    "concat",
-                    "-i",
-                    videoProperties.FfmpegInputFilePath,
-                    "-vf",
-                    videoProperties.VideoFilter,
-                    videoProperties.OutputVideoFilePath
-                },
-                WorkingDirectory = videoProperties.WorkingDirectory,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
+            await _externalProcess.RunProcessAsync(
+                ProgramPaths.FfmpegBinary,
+                $"-hide_banner -y -safe 0 -loglevel {FfMpegLogLevel.Error} -f concat -i {videoProperties.FfmpegInputFilePath} -vf {videoProperties.VideoFilter} {videoProperties.OutputVideoFilePath}",
+                videoProperties.WorkingDirectory,
+                cancellationToken,
+                240);
 
-            process.Start();
-            await process.WaitForExitAsync(cancellationToken);
+            _logger.LogInformation($"Done rendering video: {videoProperties.SourceTarFilePath}");
         }
 
         public async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
@@ -165,27 +126,14 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
                 string outputFilename = Path.GetFileNameWithoutExtension(videoFile) + FileExtension.Mp4;
                 _logger.LogInformation($"Converting {videoFile} to {outputFilename}");
 
-                Process process = new();
-                process.StartInfo = new ProcessStartInfo()
-                {
-                    FileName = ProgramPaths.FfmpegBinary,
-                    ArgumentList = {
-                        "-hide_banner",
-                        "-i",
-                        Path.Combine(directory, videoFile),
-                        Path.Combine(directory, outputFilename)
-                    },
-                    WorkingDirectory = directory,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true
-                };
+                await _externalProcess.RunProcessAsync(
+                    ProgramPaths.FfmpegBinary,
+                    $"-hide_banner -y -safe 0 -loglevel {FfMpegLogLevel.Error} -f concat -i {Path.Combine(directory, videoFile)} {Path.Combine(directory, outputFilename)}",
+                    directory,
+                    cancellationToken,
+                    20);
 
-                process.Start();
-                await process.WaitForExitAsync(cancellationToken);
-
-                base.DeleteDirectory(Path.Combine(directory, videoFile));
+                base.DeleteFile(videoFile);
 
                 _logger.LogInformation($"Done converting {videoFile} to {outputFilename}");
             }
@@ -233,39 +181,14 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
             _logger.LogInformation($"Creating thumbnails for {videoProperties.OutputVideoFilePath}");
 
-            for (int sceneChangePct = 80; sceneChangePct > 0; sceneChangePct -= 5)
+            for (int sceneChangePct = 90; sceneChangePct > 0; sceneChangePct -= 10)
             {
-                Process process = new();
-                process.StartInfo = new ProcessStartInfo()
-                {
-                    FileName = ProgramPaths.FfmpegBinary,
-                    ArgumentList = {
-                        "-y",
-                        "-hide_banner",
-                        "-loglevel",
-                        FfMpegLogLevel.Warning,
-                        "-i",
-                        videoProperties.OutputVideoFilePath,
-                        "-vf",
-                        $"select=gt(scene\\,0.{sceneChangePct})",
-                        "-frames:v",
-                        _appSettings.ThumbnailFrames.ToString(),
-                        "-vsync",
-                        "vfr",
-                        $"{videoProperties.VideoTitle}-%03d.jpg"
-                    },
-                    WorkingDirectory = videoProperties.UploadDirectory,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true
-                };
-
-                process.Start();
-                await process.WaitForExitAsync(cancellationToken);
-
-                _logger.LogInformation(process.StandardOutput.ReadToEnd());
-                _logger.LogError(process.StandardError.ReadToEnd());
+                await _externalProcess.RunProcessAsync(
+                    ProgramPaths.FfmpegBinary,
+                    $"-hide_banner -y -loglevel {FfMpegLogLevel.Warning} -i {videoProperties.OutputVideoFilePath} -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {_appSettings.ThumbnailFrames.ToString()} -vsync vfr {videoProperties.VideoTitle}-%03d.jpg",
+                    videoProperties.UploadDirectory,
+                    cancellationToken,
+                    240);
 
                 int thumbnailsCreated = base.GetDirectoryContents(videoProperties.UploadDirectory, $"{videoProperties.VideoTitle}*{FileExtension.Jpg}").Count();
 
@@ -283,6 +206,8 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             base.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
             base.DeleteFile(Path.Combine(workingDirectory, "dashcam.txt"));
             base.DeleteFile(Path.Combine(workingDirectory, "services.txt"));
+            base.DeleteFile(Path.Combine(workingDirectory, "ae_intro.mp4"));
+            base.DeleteFile(Path.Combine(workingDirectory, "ae_outtro2.mp4"));
         }
 
     }

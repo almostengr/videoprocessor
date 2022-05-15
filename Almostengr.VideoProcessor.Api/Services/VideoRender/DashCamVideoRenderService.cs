@@ -1,11 +1,11 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
+using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,15 +19,18 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         private readonly ILogger<DashCamVideoRenderService> _logger;
         private readonly IMusicService _musicService;
         private readonly AppSettings _appSettings;
+        private readonly IExternalProcessService _externalProcess;
         private const string _channelBranding = "Kenny Ram Dash Cam";
 
         public DashCamVideoRenderService(ILogger<DashCamVideoRenderService> logger, AppSettings appSettings,
-            IServiceScopeFactory factory) : base(logger, appSettings)
+            IExternalProcessService externalProcess, IServiceScopeFactory factory) :
+            base(logger, appSettings, externalProcess)
         {
             _streetSignBoxFilter = $", drawbox=x=0:y=in_h-200:w=in_w:h=200:color={FfMpegColors.Green}:t=fill";
             _streetSignTextSubfilter = $"fontcolor=white:fontsize={FfMpegConstants.FontSizeLarge}:{_lowerCenter}";
             _logger = logger;
             _musicService = factory.CreateScope().ServiceProvider.GetRequiredService<IMusicService>();
+            _externalProcess = externalProcess;
             _appSettings = appSettings;
         }
 
@@ -115,44 +118,14 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
             _logger.LogInformation($"Rendering video: {videoProperties.SourceTarFilePath}");
 
-            Process process = new();
-            process.StartInfo = new ProcessStartInfo()
-            {
-                FileName = ProgramPaths.FfmpegBinary,
-                ArgumentList = {
-                    "-hide_banner",
-                    "-safe",
-                    "0",
-                    "-loglevel",
-                    FfMpegLogLevel.Error,
-                    "-y",
-                    "-f",
-                    "concat",
-                    "-i",
-                    videoProperties.FfmpegInputFilePath,
-                    "-i",
-                    _musicService.PickRandomMusicTrack(),
-                    "-vf",
-                    videoProperties.VideoFilter,
-                    "-shortest",
-                    "-map",
-                    "0:v:0",
-                    "-map",
-                    "1:a:0",
-                    videoProperties.OutputVideoFilePath
-                },
-                WorkingDirectory = videoProperties.WorkingDirectory,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
+            await _externalProcess.RunProcessAsync(
+                ProgramPaths.FfmpegBinary,
+                $"-hide_banner -y -safe 0 -loglevel {FfMpegLogLevel.Error} -f concat -i {videoProperties.FfmpegInputFilePath} -i {_musicService.PickRandomMusicTrack()} -vf {videoProperties.VideoFilter} -shortest -map 0:v:0 -map 1:a:0 {videoProperties.OutputVideoFilePath}",
+                videoProperties.WorkingDirectory,
+                cancellationToken,
+                240);
 
-            process.Start();
-            await process.WaitForExitAsync(cancellationToken);
-
-            _logger.LogInformation(process.StandardOutput.ReadToEnd());
-            _logger.LogError(process.StandardError.ReadToEnd());
+            _logger.LogInformation($"Done rendering video: {videoProperties.SourceTarFilePath}");
         }
 
     }

@@ -1,4 +1,5 @@
 using Almostengr.VideoProcessor.Api.Configuration;
+using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
 using Almostengr.VideoProcessor.Api.Services.TextFile;
@@ -36,6 +37,7 @@ namespace Almostengr.VideoProcessor.Api
             // SERVICES //////////////////////////////////////////////////////////////////////////////////////
 
             services.AddSingleton<IDashCamVideoRenderService, DashCamVideoRenderService>();
+            services.AddTransient<IExternalProcessService, ExternalProcessService>();
             services.AddSingleton<IMusicService, MusicService>();
             services.AddSingleton<IRhtServicesVideoRenderService, RhtServicesVideoRenderService>();
             services.AddSingleton<ITextFileService, TextFileService>();
@@ -43,11 +45,9 @@ namespace Almostengr.VideoProcessor.Api
 
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////
 
-            services.AddHostedService<DashCamVideoRenderWorker>();
+            // services.AddHostedService<DashCamVideoRenderWorker>();
             services.AddHostedService<RhtServicesVideoRenderWorker>();
             services.AddHostedService<SrtSubtitleWorker>();
-
-     
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

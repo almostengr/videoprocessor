@@ -13,20 +13,15 @@ namespace Almostengr.VideoProcessor.Api.DataTransferObjects
             get
             {
                 return $"{VideoTitle}.{DateTime.Now.ToString("yyyyMMdd")}.{DateTime.Now.ToString("HHmmss")}.tar.xz"; 
-                // return Path.Combine(
-                //     ArchiveDirectory,
-                //     $"{VideoTitle}.{DateTime.Now.ToString("yyyyMMdd")}.{DateTime.Now.ToString("HHmmss")}.tar.xz"
-                // );
             }
         }
-        // public string ArchiveTarFilePath { get { return $"{VideoTitle}.tar.xz"; } }
         public string VideoDescription { get; set; }
         public string FfmpegInputFilePath { get; set; }
         public string OutputVideoFilePath
         {
             get
             {
-                return Path.Combine(UploadDirectory, $"{VideoTitle}.mp4");
+                return Path.Combine(UploadDirectory, $"{VideoTitle.Replace(".mp4", string.Empty)}.mp4");
             }
         }
         public int VideoDurationSeconds { get; set; }

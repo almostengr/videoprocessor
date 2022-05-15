@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
+using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.VideoRender
@@ -14,11 +14,15 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
     {
         private readonly ILogger<RhtServicesVideoRenderService> _logger;
         private readonly AppSettings _appSettings;
+        private readonly IExternalProcessService _externalProcess;
 
-        public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger, AppSettings appSettings) : base(logger, appSettings)
+        public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger, AppSettings appSettings, 
+            IExternalProcessService externalProcess) : 
+            base(logger, appSettings, externalProcess)
         {
             _logger = logger;
             _appSettings = appSettings;
+            _externalProcess = externalProcess;
         }
 
         public override async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
@@ -29,39 +33,15 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             }
 
             _logger.LogInformation($"Rendering {videoProperties.SourceTarFilePath}");
-            
-            Process process = new();
-            process.StartInfo = new ProcessStartInfo()
-            {
-                FileName = ProgramPaths.FfmpegBinary,
-                ArgumentList = {
-                    "-hide_banner",
-                    "-safe",
-                    "0",
-                    "-loglevel",
-                    FfMpegLogLevel.Error,
-                    "-y",
-                    "-f",
-                    "concat",
-                    "-i",
-                    videoProperties.FfmpegInputFilePath,
-                    "-vf",
-                    videoProperties.VideoFilter,
-                    "-c:a",
-                    "copy",
-                    videoProperties.OutputVideoFilePath
-                },
-                WorkingDirectory = videoProperties.WorkingDirectory,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
 
-            process.Start();
-            await process.WaitForExitAsync(cancellationToken);
-            _logger.LogInformation(process.StandardOutput.ReadToEnd());
-            _logger.LogError(process.StandardError.ReadToEnd());
+            await _externalProcess.RunProcessAsync(
+                ProgramPaths.FfmpegBinary,
+                $"-hide_banner -y -safe 0 -loglevel {FfMpegLogLevel.Error} -f concat -i {videoProperties.FfmpegInputFilePath} -vf {videoProperties.VideoFilter} -c:a copy {videoProperties.OutputVideoFilePath}",
+                videoProperties.WorkingDirectory,
+                cancellationToken,
+                240);
+
+            _logger.LogInformation($"Done rendering {videoProperties.SourceTarFilePath}");
         }
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
