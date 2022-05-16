@@ -2,7 +2,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.DataTransferObjects;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -47,6 +46,9 @@ namespace Almostengr.VideoProcessor.Workers
                 foreach (var transcriptFile in srtTranscripts)
                 {
                     _logger.LogInformation($"Processing {transcriptFile}");
+
+                    await _textFileService.ConfirmFileTransferCompleteAsync(transcriptFile);
+
                     string fileContent = _textFileService.GetFileContents(transcriptFile); // get the file contents
 
                     SubtitleInputDto transcriptInputDto = new SubtitleInputDto

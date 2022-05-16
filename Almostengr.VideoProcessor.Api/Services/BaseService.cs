@@ -1,5 +1,7 @@
+using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -73,5 +75,25 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
             return Directory.GetFiles(path, searchPattern).OrderBy(x => x).ToArray();
         }
+
+        public async Task ConfirmFileTransferCompleteAsync(string videoArchive)
+        {
+            _logger.LogInformation($"Confirming file transfer complete: {videoArchive}");
+
+            FileInfo fileInfo = new FileInfo(videoArchive);
+            long currentSize = fileInfo.Length;
+            long previousSize = 0;
+
+            while (currentSize != previousSize)
+            {
+                previousSize = currentSize;
+                await Task.Delay(TimeSpan.FromSeconds(5));
+                fileInfo.Refresh();
+                currentSize = fileInfo.Length;
+            }
+
+            _logger.LogInformation($"Done confirming file transfer complete: {videoArchive}");
+        }
+        
     } // end of class BaseService
 }

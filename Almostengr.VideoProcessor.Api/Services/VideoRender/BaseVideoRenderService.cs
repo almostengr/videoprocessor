@@ -211,30 +211,10 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             base.DeleteFile(Path.Combine(workingDirectory, "services.txt"));
             base.DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
             base.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
-            base.DeleteFile(Path.Combine(workingDirectory, "*.kdenlive"));
 
             base.DeleteDirectory(Path.Combine(workingDirectory, "images"));
             base.DeleteDirectory(Path.Combine(workingDirectory, "sounds"));
             base.DeleteDirectory(Path.Combine(workingDirectory, "videos"));
-        }
-
-        public async Task ConfirmFileTransferCompleteAsync(string videoArchive)
-        {
-            _logger.LogInformation($"Confirming file transfer complete: {videoArchive}");
-
-            FileInfo fileInfo = new FileInfo(videoArchive);
-            long currentSize = fileInfo.Length;
-            long previousSize = 0;
-
-            while (currentSize != previousSize)
-            {
-                previousSize = currentSize;
-                await Task.Delay(TimeSpan.FromSeconds(5));
-                fileInfo.Refresh();
-                currentSize = fileInfo.Length;
-            }
-
-            _logger.LogInformation($"Done confirming file transfer complete: {videoArchive}");
         }
 
     }
