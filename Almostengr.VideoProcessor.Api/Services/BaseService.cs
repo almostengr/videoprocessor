@@ -23,7 +23,7 @@ namespace Almostengr.VideoProcessor.Api.Services
             double freeSpace = new DriveInfo(directory).AvailableFreeSpace;
             double totalSpace = new DriveInfo(directory).TotalSize;
             double spaceRemaining = (freeSpace / totalSpace);
-            _logger.LogInformation($"Disk space remaining: {spaceRemaining.ToString()}");
+            _logger.LogInformation($"Disk space free: {(spaceRemaining * 100).ToString("###.##")}%");
 
             if (spaceRemaining > _appSettings.DiskSpaceThreshold)
             {
@@ -94,6 +94,6 @@ namespace Almostengr.VideoProcessor.Api.Services
 
             _logger.LogInformation($"Done confirming file transfer complete: {videoArchive}");
         }
-        
+
     } // end of class BaseService
 }
