@@ -26,13 +26,14 @@ namespace Almostengr.VideoProcessor.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            AppSettings appSettings = Configuration.GetSection(nameof(AppSettings)).Get<AppSettings>();
+            services.AddSingleton(appSettings);
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Almostengr.VideoProcessor.Api", Version = "v1" });
             });
-
-            services.AddSingleton<AppSettings>();
 
             // SERVICES //////////////////////////////////////////////////////////////////////////////////////
 

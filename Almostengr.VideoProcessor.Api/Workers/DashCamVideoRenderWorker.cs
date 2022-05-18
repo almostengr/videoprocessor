@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -104,7 +105,7 @@ namespace Almostengr.VideoProcessor.Workers
 
                 if (videoArchives.Length == 0 || isDiskSpaceAvailable == false)
                 {
-                    await Task.Delay(_appSettings.WorkerServiceInterval, stoppingToken);
+                    await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), stoppingToken);
                 }
             }
         } // end of ExecuteAsync

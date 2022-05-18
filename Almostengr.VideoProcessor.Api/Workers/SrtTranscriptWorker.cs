@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
 using Almostengr.VideoProcessor.Api.Services.TextFile;
+using System;
 
 namespace Almostengr.VideoProcessor.Workers
 {
@@ -74,7 +75,7 @@ namespace Almostengr.VideoProcessor.Workers
 
                 if (srtTranscripts.Length == 0)
                 {
-                    await Task.Delay(_appSettings.WorkerServiceInterval, stoppingToken);
+                    await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), stoppingToken);
                 }
             }
         }
