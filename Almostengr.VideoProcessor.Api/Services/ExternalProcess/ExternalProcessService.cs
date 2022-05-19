@@ -10,12 +10,10 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
     public class ExternalProcessService : IExternalProcessService
     {
         private readonly ILogger<ExternalProcessService> _logger;
-        private readonly AppSettings _appSettings;
 
         public ExternalProcessService(ILogger<ExternalProcessService> logger, AppSettings appSettings)
         {
             _logger = logger;
-            _appSettings = appSettings;
         }
 
         public async Task RunProcessAsync(string processExecutable, string[] arguments, string workingDirectory,
@@ -50,12 +48,14 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
             string stdError = process.StandardError.ReadToEnd();
             string stdOut = process.StandardOutput.ReadToEnd();
 
+            bool alarmed = false;
             while (process.HasExited == false)
             {
                 TimeSpan elapsedTime = DateTime.Now.TimeOfDay - startTime;
-                if (elapsedTime.TotalMinutes > processAlarmTime)
+                if (elapsedTime.TotalMinutes > processAlarmTime && alarmed == false)
                 {
                     _logger.LogWarning($"Process taking longer than expected to complete. Elapsed time: {elapsedTime}");
+                    alarmed = true;
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
@@ -65,7 +65,12 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
             process.Close();
 
             _logger.LogInformation(stdOut);
-            _logger.LogError(stdError);
+
+            if (stdError.Length > 0)
+            {
+                _logger.LogError(stdError);
+                throw new ApplicationException(stdError);
+            }
         }
 
     }

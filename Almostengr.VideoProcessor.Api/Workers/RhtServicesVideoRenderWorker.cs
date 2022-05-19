@@ -64,8 +64,16 @@ namespace Almostengr.VideoProcessor.Workers
                     videoProperties.UploadDirectory = _uploadDirectory;
                     videoProperties.ArchiveDirectory = _archiveDirectory;
 
-                    await _videoRenderService.ExtractTarFileAsync(
-                        videoArchive, _workingDirectory, stoppingToken);
+                    try
+                    {
+                        await _videoRenderService.ExtractTarFileAsync(
+                            videoArchive, _workingDirectory, stoppingToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, ex.Message);
+                        break;
+                    }
 
                     _videoRenderService.PrepareFileNamesInDirectory(_workingDirectory);
 
@@ -75,7 +83,15 @@ namespace Almostengr.VideoProcessor.Workers
 
                     videoProperties.VideoFilter = _videoRenderService.GetFfmpegVideoFilters(videoProperties);
 
-                    await _videoRenderService.RenderVideoAsync(videoProperties, stoppingToken);
+                    try
+                    {
+                        await _videoRenderService.RenderVideoAsync(videoProperties, stoppingToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, ex.Message);
+                        break;
+                    }
 
                     await _videoRenderService.CreateThumbnailsFromFinalVideoAsync(videoProperties, stoppingToken);
 
