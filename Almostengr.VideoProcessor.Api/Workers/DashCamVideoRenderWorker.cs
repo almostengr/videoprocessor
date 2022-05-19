@@ -70,9 +70,7 @@ namespace Almostengr.VideoProcessor.Workers
                     videoProperties.ArchiveDirectory = _archiveDirectory;
 
                     await _videoRenderService.ExtractTarFileAsync(
-                        videoArchive,
-                        _workingDirectory,
-                        stoppingToken);
+                        videoArchive, _workingDirectory, stoppingToken);
 
                     _videoRenderService.PrepareFileNamesInDirectory(_workingDirectory);
 
@@ -84,17 +82,14 @@ namespace Almostengr.VideoProcessor.Workers
                     videoProperties.VideoFilter += _videoRenderService.GetDestinationFilter(videoProperties.WorkingDirectory);
                     videoProperties.VideoFilter += _videoRenderService.GetMajorRoadsFilter(videoProperties.WorkingDirectory);
 
-                    await _videoRenderService.RenderVideoAsync(videoProperties, stoppingToken); // todo disabled for testing
+                    await _videoRenderService.RenderVideoAsync(videoProperties, stoppingToken);
 
                     await _videoRenderService.CreateThumbnailsFromFinalVideoAsync(videoProperties, stoppingToken);
 
                     _videoRenderService.CleanUpBeforeArchiving(_workingDirectory);
 
                     await _videoRenderService.ArchiveDirectoryContentsAsync(
-                        _workingDirectory,
-                        videoProperties.ArchiveTarFile,
-                        _archiveDirectory,
-                        stoppingToken);
+                        _workingDirectory, videoProperties.ArchiveTarFile, _archiveDirectory, stoppingToken);
 
                     _videoRenderService.DeleteFile(videoProperties.SourceTarFilePath);
 

@@ -37,11 +37,7 @@ namespace Almostengr.VideoProcessor.Api.Services.TextFile
             try
             {
                 var directoryName = Path.GetDirectoryName(filePath);
-
-                if (Directory.Exists(directoryName) == false)
-                {
-                    base.CreateDirectory(directoryName);
-                }
+                base.CreateDirectory(directoryName);
 
                 File.WriteAllText(filePath, content);
             }

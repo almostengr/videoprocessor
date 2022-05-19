@@ -46,7 +46,7 @@ namespace Almostengr.VideoProcessor.Api
 
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////
 
-            // services.AddHostedService<DashCamVideoRenderWorker>();
+            services.AddHostedService<DashCamVideoRenderWorker>();
             services.AddHostedService<RhtServicesVideoRenderWorker>();
             services.AddHostedService<SrtSubtitleWorker>();
         }

@@ -43,14 +43,14 @@ namespace Almostengr.VideoProcessor.Workers
             while (!stoppingToken.IsCancellationRequested)
             {
                 var srtTranscripts = _transcriptService.GetIncomingTranscripts(_incomingDirectory);
-                
+
                 foreach (var transcriptFile in srtTranscripts)
                 {
                     _logger.LogInformation($"Processing {transcriptFile}");
 
                     await _textFileService.ConfirmFileTransferCompleteAsync(transcriptFile);
 
-                    string fileContent = _textFileService.GetFileContents(transcriptFile); // get the file contents
+                    string fileContent = _textFileService.GetFileContents(transcriptFile);
 
                     SubtitleInputDto transcriptInputDto = new SubtitleInputDto
                     {
@@ -63,13 +63,13 @@ namespace Almostengr.VideoProcessor.Workers
                         _logger.LogError($"{transcriptFile} is not in a valid format");
                         continue;
                     }
-                    
+
                     SubtitleOutputDto transcriptOutput = _transcriptService.CleanTranscript(transcriptInputDto);
-                    
+
                     _transcriptService.SaveTranscript(transcriptOutput, _outgoingDirectory);
-                    
+
                     _transcriptService.ArchiveTranscript(transcriptFile, _outgoingDirectory);
-                                      
+
                     _logger.LogInformation($"Finished processing {transcriptFile}");
                 }
 
