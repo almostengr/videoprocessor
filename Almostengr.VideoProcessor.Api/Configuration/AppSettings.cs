@@ -3,7 +3,7 @@ namespace Almostengr.VideoProcessor.Api.Configuration
     public class AppSettings
     {
         public int WorkerServiceInterval { get; set; }
-        public Directories Directories = new();
+        public Directories Directories { get; set; }
         public int ThumbnailFrames { get; set; }
         public bool DoRenderVideos { get; set; }
         public double DiskSpaceThreshold { get; set; }
