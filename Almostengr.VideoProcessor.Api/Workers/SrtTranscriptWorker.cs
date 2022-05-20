@@ -9,6 +9,7 @@ using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
 using Almostengr.VideoProcessor.Api.Services.TextFile;
 using System;
+using System.Linq;
 
 namespace Almostengr.VideoProcessor.Workers
 {
@@ -42,9 +43,16 @@ namespace Almostengr.VideoProcessor.Workers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var srtTranscripts = _transcriptService.GetIncomingTranscripts(_incomingDirectory);
+                string transcriptFile = _transcriptService.GetIncomingTranscripts(_incomingDirectory).FirstOrDefault();
+                bool isDiskSpaceAvailable = _transcriptService.IsDiskSpaceAvailable(_incomingDirectory);
 
-                foreach (var transcriptFile in srtTranscripts)
+                if (string.IsNullOrEmpty(transcriptFile) || isDiskSpaceAvailable == false)
+                {
+                    await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), stoppingToken);
+                    continue;
+                }
+
+                try
                 {
                     _logger.LogInformation($"Processing {transcriptFile}");
 
@@ -67,17 +75,15 @@ namespace Almostengr.VideoProcessor.Workers
                     SubtitleOutputDto transcriptOutput = _transcriptService.CleanTranscript(transcriptInputDto);
 
                     _transcriptService.SaveTranscript(transcriptOutput, _outgoingDirectory);
-
                     _transcriptService.ArchiveTranscript(transcriptFile, _outgoingDirectory);
 
                     _logger.LogInformation($"Finished processing {transcriptFile}");
                 }
-
-                if (srtTranscripts.Length == 0)
+                catch (Exception ex)
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), stoppingToken);
+                    _logger.LogError(ex, ex.Message);
                 }
-            }
+            } // end while
         }
 
     }
