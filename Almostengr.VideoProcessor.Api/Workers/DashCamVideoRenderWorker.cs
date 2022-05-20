@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Configuration;
@@ -40,20 +41,19 @@ namespace Almostengr.VideoProcessor.Workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            bool isDiskSpaceAvailable = false;
             while (!stoppingToken.IsCancellationRequested)
             {
-                string[] videoArchives = _videoRenderService.GetVideoArchivesInDirectory(_incomingDirectory);
+                string videoArchive = _videoRenderService.GetVideoArchivesInDirectory(_incomingDirectory).FirstOrDefault();
+                bool isDiskSpaceAvailable = _videoRenderService.IsDiskSpaceAvailable(_incomingDirectory);
 
-                foreach (var videoArchive in videoArchives)
+                if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)
                 {
-                    isDiskSpaceAvailable = _videoRenderService.IsDiskSpaceAvailable(_incomingDirectory);
-                    if (isDiskSpaceAvailable == false)
-                    {
-                        _logger.LogError("Not enough disk space to process video.");
-                        break;
-                    }
+                    await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), stoppingToken);
+                    continue;
+                }
 
+                try
+                {
                     _logger.LogInformation($"Processing {videoArchive}");
 
                     _videoRenderService.DeleteDirectory(_workingDirectory);
@@ -69,16 +69,7 @@ namespace Almostengr.VideoProcessor.Workers
                     videoProperties.UploadDirectory = _uploadDirectory;
                     videoProperties.ArchiveDirectory = _archiveDirectory;
 
-                    try
-                    {
-                        await _videoRenderService.ExtractTarFileAsync(
-                            videoArchive, _workingDirectory, stoppingToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, ex.Message);
-                        break;
-                    }
+                    await _videoRenderService.ExtractTarFileAsync(videoArchive, _workingDirectory, stoppingToken);
 
                     _videoRenderService.PrepareFileNamesInDirectory(_workingDirectory);
 
@@ -90,15 +81,7 @@ namespace Almostengr.VideoProcessor.Workers
                     videoProperties.VideoFilter += _videoRenderService.GetDestinationFilter(videoProperties.WorkingDirectory);
                     videoProperties.VideoFilter += _videoRenderService.GetMajorRoadsFilter(videoProperties.WorkingDirectory);
 
-                    try
-                    {
-                        await _videoRenderService.RenderVideoAsync(videoProperties, stoppingToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, ex.Message);
-                        break;
-                    }
+                    await _videoRenderService.RenderVideoAsync(videoProperties, stoppingToken);
 
                     await _videoRenderService.CreateThumbnailsFromFinalVideoAsync(videoProperties, stoppingToken);
 
@@ -110,14 +93,13 @@ namespace Almostengr.VideoProcessor.Workers
                     _videoRenderService.DeleteFile(videoProperties.SourceTarFilePath);
 
                     _videoRenderService.DeleteDirectory(_workingDirectory);
-
-                    _logger.LogInformation($"Finished processing {videoArchive}");
                 }
-
-                if (videoArchives.Length == 0 || isDiskSpaceAvailable == false)
+                catch (Exception ex)
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), stoppingToken);
+                    _logger.LogError(ex, ex.Message);
                 }
+
+                _logger.LogInformation($"Finished processing {videoArchive}");
             }
         } // end of ExecuteAsync
 
