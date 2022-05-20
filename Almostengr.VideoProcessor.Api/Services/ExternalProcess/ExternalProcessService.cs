@@ -42,7 +42,7 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
             };
 
             TimeSpan startTime = DateTime.Now.TimeOfDay;
-
+            
             process.Start();
 
             string stdError = process.StandardError.ReadToEnd();
@@ -68,7 +68,6 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
 
             if (stdError.Length > 0)
             {
-                _logger.LogError(stdError);
                 throw new ApplicationException(stdError);
             }
         }
