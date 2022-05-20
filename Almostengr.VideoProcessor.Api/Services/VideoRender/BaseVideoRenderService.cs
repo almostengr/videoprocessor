@@ -129,7 +129,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
                 await _externalProcess.RunProcessAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"-hide_banner -y -safe 0 -loglevel {FfMpegLogLevel.Error} -f concat -i {Path.Combine(directory, videoFile)} {Path.Combine(directory, outputFilename)}",
+                    $"-hide_banner -y -loglevel {FfMpegLogLevel.Error} -i {Path.GetFileName(videoFile)} {Path.GetFileName(outputFilename)}",
                     directory,
                     cancellationToken,
                     20);
