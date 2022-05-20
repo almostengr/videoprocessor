@@ -23,14 +23,13 @@ namespace Almostengr.VideoProcessor.Api.Services
             double freeSpace = new DriveInfo(directory).AvailableFreeSpace;
             double totalSpace = new DriveInfo(directory).TotalSize;
             double spaceRemaining = (freeSpace / totalSpace);
-            _logger.LogInformation($"Disk space free: {(spaceRemaining * 100).ToString("###.##")}%");
 
             if (spaceRemaining > _appSettings.DiskSpaceThreshold)
             {
                 return true;
             }
 
-            _logger.LogError("Disk space is too low");
+            _logger.LogError($"Disk space is too low. Disk space free: {(spaceRemaining * 100).ToString("###.##")}%");
             return false;
         }
 
@@ -43,21 +42,21 @@ namespace Almostengr.VideoProcessor.Api.Services
             }
         }
 
-        public void DeleteFile(string filename)
+        public void DeleteFile(string fileName)
         {
-            if (File.Exists(filename))
+            if (File.Exists(fileName))
             {
-                File.Delete(filename);
-                _logger.LogInformation($"Removed file {filename}");
+                File.Delete(fileName);
+                _logger.LogInformation($"Removed file {fileName}");
             }
         }
 
-        public void CreateDirectory(string pathname)
+        public void CreateDirectory(string pathName)
         {
-            if (Directory.Exists(pathname) == false)
+            if (Directory.Exists(pathName) == false)
             {
-                Directory.CreateDirectory(pathname);
-                _logger.LogInformation($"Created directory {pathname}");
+                Directory.CreateDirectory(pathName);
+                _logger.LogInformation($"Created directory {pathName}");
             }
         }
 
