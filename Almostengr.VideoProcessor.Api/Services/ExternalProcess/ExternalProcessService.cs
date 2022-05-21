@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Configuration;
@@ -49,9 +51,10 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
             string stdOut = process.StandardOutput.ReadToEnd();
 
             bool alarmed = false;
+            TimeSpan elapsedTime = DateTime.Now.TimeOfDay;
             while (process.HasExited == false)
             {
-                TimeSpan elapsedTime = DateTime.Now.TimeOfDay - startTime;
+                elapsedTime = DateTime.Now.TimeOfDay - startTime;
                 if (elapsedTime.TotalMinutes > processAlarmTime && alarmed == false)
                 {
                     _logger.LogWarning($"Process taking longer than expected to complete. Elapsed time: {elapsedTime}");
@@ -64,12 +67,25 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
 
             process.Close();
 
+            _logger.LogInformation($"Elapsed time: {elapsedTime}");
             _logger.LogInformation(stdOut);
 
-            if (stdError.Length > 0)
+            int validErrorCount = ExcludeSpecifiedErrors(stdError);
+
+            if (validErrorCount > 0)
             {
                 throw new ApplicationException(stdError);
             }
+        }
+
+        private int ExcludeSpecifiedErrors(string standardError)
+        {
+            return standardError.Split("\n").ToList()
+                .Where(x => 
+                    !x.Contains("libva: /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so init failed") &&
+                    !x.Equals("")
+                )
+                .Count();
         }
 
     }
