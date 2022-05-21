@@ -212,6 +212,19 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             base.DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
             base.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
 
+            string[] files = Directory.GetFiles(workingDirectory);
+            foreach (var file in files)
+            {
+                if (
+                    file.EndsWith($".{FileExtension.Gif}") ||
+                    file.EndsWith($".{FileExtension.Kdenlive}") || 
+                    file.EndsWith($".{FileExtension.Mp3}")
+                    )
+                {
+                    base.DeleteFile(Path.Combine(workingDirectory, file));
+                }
+            }
+
             base.DeleteDirectory(Path.Combine(workingDirectory, "images"));
             base.DeleteDirectory(Path.Combine(workingDirectory, "sounds"));
             base.DeleteDirectory(Path.Combine(workingDirectory, "videos"));
