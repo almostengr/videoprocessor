@@ -2,7 +2,9 @@ namespace Almostengr.VideoProcessor.Constants
 {
     public class FileExtension
     {
+        public const string Gif = ".gif";
         public const string Jpg = ".jpg";
+        public const string Kdenlive = ".kdenlive";
         public const string Md = ".md";
         public const string Mov = ".mov";
         public const string Mkv = ".mkv";
@@ -13,8 +15,6 @@ namespace Almostengr.VideoProcessor.Constants
         public const string TarGz = ".tar.gz";
         public const string TarXz = ".tar.xz";
         public const string Txt = ".txt";
-        public const string Kdenlive = ".kdenlive";
-        public const string Gif = ".gif";
     }
     
 }

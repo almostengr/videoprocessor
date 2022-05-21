@@ -1,5 +1,4 @@
 using Almostengr.VideoProcessor.DataTransferObjects;
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
