@@ -36,7 +36,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
             await _externalProcess.RunProcessAsync(
                 ProgramPaths.FfmpegBinary,
-                $"-hide_banner -y -safe 0 -loglevel {FfMpegLogLevel.Error} -f concat -i {videoProperties.FfmpegInputFilePath} -vf {videoProperties.VideoFilter} -c:a copy {videoProperties.OutputVideoFilePath}",
+                $"-hide_banner -y -safe 0 -loglevel {FfMpegLogLevel.Error} -hwaccel vaapi -hwaccel_output_format vaapi -f concat -i {videoProperties.FfmpegInputFilePath} -vf {videoProperties.VideoFilter} -vcodec h264_vaapi -b:v 5M -c:a copy {videoProperties.OutputVideoFilePath}",
                 videoProperties.WorkingDirectory,
                 cancellationToken,
                 240);

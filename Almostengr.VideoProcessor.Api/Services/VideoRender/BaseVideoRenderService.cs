@@ -94,24 +94,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             _logger.LogInformation($"Done extracting tar file: {tarFile}");
         }
 
-        public virtual async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
-        {
-            if (_appSettings.DoRenderVideos == false)
-            {
-                return;
-            }
-
-            _logger.LogInformation($"Rendering video: {videoProperties.SourceTarFilePath}");
-
-            await _externalProcess.RunProcessAsync(
-                ProgramPaths.FfmpegBinary,
-                $"-hide_banner -y -safe 0 -loglevel {FfMpegLogLevel.Error} -f concat -i {videoProperties.FfmpegInputFilePath} -vf {videoProperties.VideoFilter} {videoProperties.OutputVideoFilePath}",
-                videoProperties.WorkingDirectory,
-                cancellationToken,
-                240);
-
-            _logger.LogInformation($"Done rendering video: {videoProperties.SourceTarFilePath}");
-        }
+        public abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken);
 
         public async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
         {
@@ -128,7 +111,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
                 await _externalProcess.RunProcessAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"-hide_banner -y -loglevel {FfMpegLogLevel.Error} -i {Path.GetFileName(videoFile)} {Path.GetFileName(outputFilename)}",
+                    $"-loglevel {FfMpegLogLevel.Error} -hide_banner -y -hwaccel vaapi -hwaccel_output_format vaapi -i {Path.GetFileName(videoFile)} -f mp4 -vcodec h264_vaapi -b:v 5M {Path.GetFileName(outputFilename)}",
                     directory,
                     cancellationToken,
                     20);
@@ -207,6 +190,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             base.DeleteFile(Path.Combine(workingDirectory, "ae_intro.mp4"));
             base.DeleteFile(Path.Combine(workingDirectory, "ae_outtro2.mp4"));
             base.DeleteFile(Path.Combine(workingDirectory, "dashcam.txt"));
+            base.DeleteFile(Path.Combine(workingDirectory, "dash_cam_opening.mp4"));
             base.DeleteFile(Path.Combine(workingDirectory, "services.txt"));
             base.DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
             base.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
@@ -214,19 +198,22 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             string[] files = Directory.GetFiles(workingDirectory);
             foreach (var file in files)
             {
+                string loweredFile = file.ToLower();
                 if (
-                    file.EndsWith($".{FileExtension.Gif}") ||
-                    file.EndsWith($".{FileExtension.Kdenlive}") || 
-                    file.EndsWith($".{FileExtension.Mp3}")
+                    loweredFile.EndsWith(FileExtension.Gif) ||
+                    loweredFile.EndsWith(FileExtension.Kdenlive) || 
+                    loweredFile.EndsWith(FileExtension.Mp3)
                     )
                 {
                     base.DeleteFile(Path.Combine(workingDirectory, file));
                 }
             }
 
-            base.DeleteDirectory(Path.Combine(workingDirectory, "images"));
-            base.DeleteDirectory(Path.Combine(workingDirectory, "sounds"));
-            base.DeleteDirectory(Path.Combine(workingDirectory, "videos"));
+            string[] directories = Directory.GetDirectories(workingDirectory);
+            foreach(var directory in directories)
+            {
+                base.DeleteDirectory(directory);
+            }
         }
 
     }
