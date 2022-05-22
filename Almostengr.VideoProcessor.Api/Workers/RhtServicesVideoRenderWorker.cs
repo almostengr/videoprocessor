@@ -38,9 +38,11 @@ namespace Almostengr.VideoProcessor.Workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            Random random = new();
             while (!stoppingToken.IsCancellationRequested)
             {
-                string videoArchive = _videoRenderService.GetVideoArchivesInDirectory(_incomingDirectory).FirstOrDefault();
+                string videoArchive = _videoRenderService.GetVideoArchivesInDirectory(_incomingDirectory)
+                    .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
                 bool isDiskSpaceAvailable = _videoRenderService.IsDiskSpaceAvailable(_incomingDirectory);
 
                 if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)

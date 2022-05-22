@@ -41,9 +41,11 @@ namespace Almostengr.VideoProcessor.Workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            Random random = new();
             while (!stoppingToken.IsCancellationRequested)
             {
-                string transcriptFile = _transcriptService.GetIncomingTranscripts(_incomingDirectory).FirstOrDefault();
+                string transcriptFile = _transcriptService.GetIncomingTranscripts(_incomingDirectory)
+                    .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
                 bool isDiskSpaceAvailable = _transcriptService.IsDiskSpaceAvailable(_incomingDirectory);
 
                 if (string.IsNullOrEmpty(transcriptFile) || isDiskSpaceAvailable == false)
