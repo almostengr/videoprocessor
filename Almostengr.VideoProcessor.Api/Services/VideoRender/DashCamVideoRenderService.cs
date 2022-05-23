@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
+using Almostengr.VideoProcessor.Api.Enums;
+using Almostengr.VideoProcessor.Api.Services.Data;
 using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,12 +14,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 {
-    public class DashCamVideoRenderService : BaseVideoRenderService, IDashCamVideoRenderService
+    public class DashCamVideoRenderService : VideoRenderService, IDashCamVideoRenderService
     {
         private readonly string _streetSignTextSubfilter;
         private readonly string _streetSignBoxFilter;
         private readonly ILogger<DashCamVideoRenderService> _logger;
         private readonly IMusicService _musicService;
+        private readonly IStatusService _statusService;
         private readonly AppSettings _appSettings;
         private readonly IExternalProcessService _externalProcess;
         private const string _channelBranding = "Kenny Ram Dash Cam";
@@ -30,6 +33,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             _streetSignTextSubfilter = $"fontcolor=white:fontsize={FfMpegConstants.FontSizeLarge}:{_lowerCenter}";
             _logger = logger;
             _musicService = factory.CreateScope().ServiceProvider.GetRequiredService<IMusicService>();
+            _statusService = factory.CreateScope().ServiceProvider.GetRequiredService<IStatusService>();
             _externalProcess = externalProcess;
             _appSettings = appSettings;
         }
@@ -117,6 +121,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             }
 
             _logger.LogInformation($"Rendering video: {videoProperties.SourceTarFilePath}");
+            await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Rendering);
 
             await _externalProcess.RunProcessAsync(
                 ProgramPaths.FfmpegBinary,
@@ -128,5 +133,36 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             _logger.LogInformation($"Done rendering video: {videoProperties.SourceTarFilePath}");
         }
 
+        public override async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
+        {
+            await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Archiving);
+            await base.ArchiveDirectoryContentsAsync(directoryToArchive, archiveName, archiveDestination, cancellationToken);
+        }
+
+        public override void CleanUpBeforeArchiving(string workingDirectory)
+        {
+            _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Archiving);
+            base.CleanUpBeforeArchiving(workingDirectory);
+        }
+
+        public override async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
+        {
+            await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.ConvertingToMp4);
+            await base.ConvertVideoFilesToMp4Async(directory, cancellationToken);
+        }
+
+        public override async Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
+        {
+            await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Extracting);
+            await _statusService.UpsertAsync(new StatusDto { Key = StatusKeys.RhtFile, Value = tarFile });
+            await base.ExtractTarFileAsync(tarFile, workingDirectory, cancellationToken);
+        }
+
+        public override async Task StandByModeAsync(CancellationToken cancellationToken)
+        {
+            await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Idle);
+            await _statusService.UpsertAsync(new StatusDto { Key = StatusKeys.DashFile, Value = string.Empty });
+            await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), cancellationToken);
+        }
     }
 }

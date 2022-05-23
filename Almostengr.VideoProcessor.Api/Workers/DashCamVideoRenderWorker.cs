@@ -23,8 +23,6 @@ namespace Almostengr.VideoProcessor.Workers
         private readonly string _uploadDirectory;
         private readonly string _workingDirectory;
         private readonly string _ffmpegInputFilePath;
-        private readonly string _subtitlesFile;
-        private const string DEFAULT_VIDEO_DESCRIPTION = "Video was recorded using a Uniden DC8 dash cam.";
 
         public DashCamVideoRenderWorker(ILogger<DashCamVideoRenderWorker> logger, IServiceScopeFactory factory)
         {
@@ -36,7 +34,6 @@ namespace Almostengr.VideoProcessor.Workers
             _uploadDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "upload");
             _workingDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "working");
             _ffmpegInputFilePath = Path.Combine(_workingDirectory, VideoRenderFiles.InputFile);
-            _subtitlesFile = Path.Combine(_workingDirectory, VideoRenderFiles.SubtitlesFile);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -50,7 +47,7 @@ namespace Almostengr.VideoProcessor.Workers
 
                 if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), stoppingToken);
+                    await _videoRenderService.StandByModeAsync(stoppingToken);
                     continue;
                 }
 
@@ -65,7 +62,6 @@ namespace Almostengr.VideoProcessor.Workers
 
                     VideoPropertiesDto videoProperties = new();
                     videoProperties.SourceTarFilePath = videoArchive;
-                    videoProperties.VideoDescription = DEFAULT_VIDEO_DESCRIPTION;
                     videoProperties.FfmpegInputFilePath = _ffmpegInputFilePath;
                     videoProperties.WorkingDirectory = _workingDirectory;
                     videoProperties.UploadDirectory = _uploadDirectory;

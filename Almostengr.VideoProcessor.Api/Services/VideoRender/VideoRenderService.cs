@@ -11,9 +11,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 {
-    public abstract class BaseVideoRenderService : BaseService, IBaseVideoRenderService
+    public abstract class VideoRenderService : BaseService, IVideoRenderService
     {
-        private readonly ILogger<BaseVideoRenderService> _logger;
+        private readonly ILogger<VideoRenderService> _logger;
         private readonly AppSettings _appSettings;
         private readonly IExternalProcessService _externalProcess;
         private const int PADDING = 30;
@@ -27,7 +27,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         internal readonly string _lowerCenter;
         internal readonly string _lowerRight;
 
-        public BaseVideoRenderService(ILogger<BaseVideoRenderService> logger, AppSettings appSettings,
+        public VideoRenderService(ILogger<VideoRenderService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess) :
             base(logger, appSettings)
         {
@@ -49,7 +49,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
         public abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);
 
-        public async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
+        public virtual async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Archiving directory contents: {directoryToArchive}");
 
@@ -63,12 +63,12 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             _logger.LogInformation($"Done archiving directory contents: {directoryToArchive}");
         }
 
-        public string[] GetVideoArchivesInDirectory(string directory)
+        public virtual string[] GetVideoArchivesInDirectory(string directory)
         {
             return base.GetDirectoryContents(directory, $"*{FileExtension.Tar}*");
         }
 
-        public string GetSubtitlesFilter(string workingDirectory)
+        public virtual string GetSubtitlesFilter(string workingDirectory)
         {
             string subtitleFile = Path.Combine(workingDirectory, VideoRenderFiles.SubtitlesFile);
 
@@ -80,7 +80,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             return string.Empty;
         }
 
-        public async Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
+        public virtual async Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Extracting tar file: {tarFile}");
 
@@ -96,7 +96,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
         public abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken);
 
-        public async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
+        public virtual async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Converting video files to mp4: {directory}");
 
@@ -122,7 +122,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             }
         }
 
-        public void PrepareFileNamesInDirectory(string directory)
+        public virtual void PrepareFileNamesInDirectory(string directory)
         {
             foreach (string file in Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories))
             {
@@ -133,7 +133,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             }
         }
 
-        public void CheckOrCreateFfmpegInputFile(string workingDirectory)
+        public virtual void CheckOrCreateFfmpegInputFile(string workingDirectory)
         {
             string ffmpegInputFile = Path.Combine(workingDirectory, VideoRenderFiles.InputFile);
             string inputFile = Path.Combine(workingDirectory, "input.txt");
@@ -183,7 +183,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             } // end for
         }
 
-        public void CleanUpBeforeArchiving(string workingDirectory)
+        public virtual void CleanUpBeforeArchiving(string workingDirectory)
         {
             _logger.LogInformation($"Cleaning up before archiving: {workingDirectory}");
 
@@ -201,7 +201,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
                 string loweredFile = file.ToLower();
                 if (
                     loweredFile.EndsWith(FileExtension.Gif) ||
-                    loweredFile.EndsWith(FileExtension.Kdenlive) || 
+                    loweredFile.EndsWith(FileExtension.Kdenlive) ||
                     loweredFile.EndsWith(FileExtension.Mp3)
                     )
                 {
@@ -210,11 +210,12 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             }
 
             string[] directories = Directory.GetDirectories(workingDirectory);
-            foreach(var directory in directories)
+            foreach (var directory in directories)
             {
                 base.DeleteDirectory(directory);
             }
         }
 
+        public abstract Task StandByModeAsync(CancellationToken cancellationToken);
     }
 }

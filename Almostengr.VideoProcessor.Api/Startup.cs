@@ -1,4 +1,6 @@
 using Almostengr.VideoProcessor.Api.Configuration;
+using Almostengr.VideoProcessor.Api.Database;
+using Almostengr.VideoProcessor.Api.Repository;
 using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
@@ -7,6 +9,7 @@ using Almostengr.VideoProcessor.Api.Services.VideoRender;
 using Almostengr.VideoProcessor.Workers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -34,6 +37,14 @@ namespace Almostengr.VideoProcessor.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Almostengr.VideoProcessor.Api", Version = "v1" });
             });
+
+            // DATABASE //////////////////////////////////////////////////////////////////////////////////////
+            
+            // services.AddDbContext<IVideoDbContext, VideoDbContext>(options => options.UseInMemoryDatabase("VideoProcessor"));
+
+            // REPOSITORY ////////////////////////////////////////////////////////////////////////////////////
+
+            // services.AddTransient<IStatusRepository, StatusRepository>();
 
             // SERVICES //////////////////////////////////////////////////////////////////////////////////////
 

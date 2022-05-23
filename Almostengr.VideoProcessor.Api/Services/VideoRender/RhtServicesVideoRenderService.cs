@@ -5,24 +5,28 @@ using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
+using Almostengr.VideoProcessor.Api.Enums;
+using Almostengr.VideoProcessor.Api.Services.Data;
 using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 {
-    public class RhtServicesVideoRenderService : BaseVideoRenderService, IRhtServicesVideoRenderService
+    public class RhtServicesVideoRenderService : VideoRenderService, IRhtServicesVideoRenderService
     {
         private readonly ILogger<RhtServicesVideoRenderService> _logger;
         private readonly AppSettings _appSettings;
         private readonly IExternalProcessService _externalProcess;
+        private readonly IStatusService _statusService;
 
-        public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger, AppSettings appSettings, 
-            IExternalProcessService externalProcess) : 
+        public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger, AppSettings appSettings,
+            IExternalProcessService externalProcess, IStatusService statusService) :
             base(logger, appSettings, externalProcess)
         {
             _logger = logger;
             _appSettings = appSettings;
             _externalProcess = externalProcess;
+            _statusService = statusService;
         }
 
         public override async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
@@ -33,6 +37,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             }
 
             _logger.LogInformation($"Rendering {videoProperties.SourceTarFilePath}");
+            await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Rendering);
 
             await _externalProcess.RunProcessAsync(
                 ProgramPaths.FfmpegBinary,
@@ -70,6 +75,38 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             videoFilter += $"boxcolor={FfMpegColors.Black}@{FfMpegConstants.DimmedBackground}";
 
             return videoFilter;
+        }
+
+        public override async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
+        {
+            await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Archiving);
+            await base.ArchiveDirectoryContentsAsync(directoryToArchive, archiveName, archiveDestination, cancellationToken);
+        }
+
+        public override void CleanUpBeforeArchiving(string workingDirectory)
+        {
+            _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Archiving);
+            base.CleanUpBeforeArchiving(workingDirectory);
+        }
+
+        public override async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
+        {
+            await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.ConvertingToMp4);
+            await base.ConvertVideoFilesToMp4Async(directory, cancellationToken);
+        }
+
+        public override async Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
+        {
+            await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Extracting);
+            await _statusService.UpsertAsync(new StatusDto { Key = StatusKeys.RhtFile, Value = tarFile });
+            await base.ExtractTarFileAsync(tarFile, workingDirectory, cancellationToken);
+        }
+
+        public override async Task StandByModeAsync(CancellationToken cancellationToken)
+        {
+            await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Idle);
+            await _statusService.UpsertAsync(new StatusDto { Key = StatusKeys.RhtFile, Value = string.Empty });
+            await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), cancellationToken);
         }
     }
 }

@@ -4,7 +4,7 @@ using Almostengr.VideoProcessor.Api.DataTransferObjects;
 
 namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 {
-    public interface IBaseVideoRenderService : IBaseService
+    public interface IVideoRenderService : IBaseService
     {
         abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken);
         abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);
@@ -17,5 +17,6 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         void CheckOrCreateFfmpegInputFile(string workingDirectory);
         abstract Task CreateThumbnailsFromFinalVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken);
         void CleanUpBeforeArchiving(string workingDirectory);
+        Task StandByModeAsync(CancellationToken cancellationToken);
     }
 }
