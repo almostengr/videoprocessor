@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Almostengr.VideoProcessor.Api.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.TextFile
@@ -9,7 +8,7 @@ namespace Almostengr.VideoProcessor.Api.Services.TextFile
     {
         private readonly ILogger<TextFileService> _logger;
 
-        public TextFileService(ILogger<TextFileService> logger, AppSettings appSettings) : base(logger, appSettings)
+        public TextFileService(ILogger<TextFileService> logger) : base(logger)
         {
             _logger = logger;
         }

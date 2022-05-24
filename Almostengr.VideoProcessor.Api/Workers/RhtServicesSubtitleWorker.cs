@@ -13,29 +13,29 @@ using System.Linq;
 
 namespace Almostengr.VideoProcessor.Workers
 {
-    public class SrtSubtitleWorker : BackgroundService
+    public class RhtServicesSubtitleWorker : BackgroundService
     {
-        private readonly ISubtitleService _transcriptService;
+        private readonly ISrtSubtitleService _transcriptService;
         private readonly ITextFileService _textFileService;
         private readonly AppSettings _appSettings;
-        private readonly ILogger<SrtSubtitleWorker> _logger;
+        private readonly ILogger<RhtServicesSubtitleWorker> _logger;
         private readonly string _incomingDirectory;
-        private readonly string _outgoingDirectory;
+        private readonly string _uploadDirectory;
 
-        public SrtSubtitleWorker(ILogger<SrtSubtitleWorker> logger, IServiceScopeFactory factory)
+        public RhtServicesSubtitleWorker(ILogger<RhtServicesSubtitleWorker> logger, IServiceScopeFactory factory)
         {
-            _transcriptService = factory.CreateScope().ServiceProvider.GetRequiredService<ISubtitleService>();
+            _transcriptService = factory.CreateScope().ServiceProvider.GetRequiredService<ISrtSubtitleService>();
             _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _logger = logger;
-            _incomingDirectory = Path.Combine(_appSettings.Directories.TranscriptBaseDirectory, "incoming");
-            _outgoingDirectory = Path.Combine(_appSettings.Directories.TranscriptBaseDirectory, "outgoing");
+            _incomingDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "incoming");
+            _uploadDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "upload");
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
             _transcriptService.CreateDirectory(_incomingDirectory);
-            _transcriptService.CreateDirectory(_outgoingDirectory);
+            _transcriptService.CreateDirectory(_uploadDirectory);
             return base.StartAsync(cancellationToken);
         }
 
@@ -46,7 +46,7 @@ namespace Almostengr.VideoProcessor.Workers
             {
                 string transcriptFile = _transcriptService.GetIncomingTranscripts(_incomingDirectory)
                     .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
-                bool isDiskSpaceAvailable = _transcriptService.IsDiskSpaceAvailable(_incomingDirectory);
+                bool isDiskSpaceAvailable = _transcriptService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
 
                 if (string.IsNullOrEmpty(transcriptFile) || isDiskSpaceAvailable == false)
                 {
@@ -68,7 +68,7 @@ namespace Almostengr.VideoProcessor.Workers
                         VideoTitle = Path.GetFileName(transcriptFile)
                     };
 
-                    if (_transcriptService.IsValidTranscript(transcriptInputDto) == false)
+                    if (_transcriptService.IsValidFile(transcriptInputDto) == false)
                     {
                         _logger.LogError($"{transcriptFile} is not in a valid format");
                         continue;
@@ -76,8 +76,8 @@ namespace Almostengr.VideoProcessor.Workers
 
                     SubtitleOutputDto transcriptOutput = _transcriptService.CleanTranscript(transcriptInputDto);
 
-                    _transcriptService.SaveTranscript(transcriptOutput, _outgoingDirectory);
-                    _transcriptService.ArchiveTranscript(transcriptFile, _outgoingDirectory);
+                    _transcriptService.SaveTranscript(transcriptOutput, _uploadDirectory);
+                    _transcriptService.ArchiveTranscript(transcriptFile, _uploadDirectory);
 
                     _logger.LogInformation($"Finished processing {transcriptFile}");
                 }

@@ -8,13 +8,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 {
-    public class SrtSubtitleService : BaseSubtitleService, ISubtitleService
+    public class SrtSubtitleService : SubtitleService, ISrtSubtitleService
     {
         private readonly ILogger<SrtSubtitleService> _logger;
         private readonly ITextFileService _textFileService;
 
-        public SrtSubtitleService(ILogger<SrtSubtitleService> logger, ITextFileService textFileService,
-            AppSettings appSettings) : base(logger, appSettings)
+        public SrtSubtitleService(ILogger<SrtSubtitleService> logger, ITextFileService textFileService) : base(logger)
         {
             _logger = logger;
             _textFileService = textFileService;
@@ -46,9 +45,9 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
                 }
             }
 
-            blogString = RemoveDupesFromBlogString(blogString);
+            blogString = RemoveDuplicatesFromBlogString(blogString);
             blogString = CleanBlogString(blogString);
-            blogString = ProcessSentenceCase(blogString);
+            blogString = ConvertToSentenceCase(blogString);
 
             SubtitleOutputDto outputDto = new();
             outputDto.VideoTitle = inputDto.VideoTitle.Replace(FileExtension.Srt, string.Empty);
@@ -82,7 +81,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
             return base.GetDirectoryContents(directory, $"*{FileExtension.Srt}");
         }
 
-        public override bool IsValidTranscript(SubtitleInputDto inputDto)
+        public override bool IsValidFile(SubtitleInputDto inputDto)
         {
             if (string.IsNullOrEmpty(inputDto.Input))
             {

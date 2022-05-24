@@ -9,9 +9,9 @@ namespace Almostengr.VideoProcessor.Controllers
     public class TranscriptController : ControllerBase
     {
         private readonly ILogger<TranscriptController> _logger;
-        private readonly ISubtitleService _subtitleService;
+        private readonly ISrtSubtitleService _subtitleService;
 
-        public TranscriptController(ILogger<TranscriptController> logger, ISubtitleService subtitleService)
+        public TranscriptController(ILogger<TranscriptController> logger, ISrtSubtitleService subtitleService)
         {
             _logger = logger;
             _subtitleService = subtitleService;
@@ -21,7 +21,7 @@ namespace Almostengr.VideoProcessor.Controllers
         [Route("/transcript/clean")]
         public ActionResult<SubtitleOutputDto> CleanTranscript(SubtitleInputDto inputDto)
         {
-            if (_subtitleService.IsValidTranscript(inputDto) == false)
+            if (_subtitleService.IsValidFile(inputDto) == false)
             {
                 string invalidMsg = "Input is not in a valid format";
                 _logger.LogError(invalidMsg);

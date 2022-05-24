@@ -4,13 +4,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 {
-    public abstract class BaseSubtitleService : BaseService, IBaseSubtitleService
+    public abstract class SubtitleService : BaseService, ISubtitleService
     {
-        protected BaseSubtitleService(ILogger<BaseService> logger, AppSettings appSettings) : base(logger, appSettings)
+        protected SubtitleService(ILogger<BaseService> logger) : base(logger)
         {
         }
 
-        public string ProcessSentenceCase(string input)
+        public string ConvertToSentenceCase(string input)
         {
             string[] inputLines = input.Split(". ");
             string output = string.Empty;
@@ -42,7 +42,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
                 .Trim();
         }
 
-        public string RemoveDupesFromBlogString(string blogText)
+        public string RemoveDuplicatesFromBlogString(string blogText)
         {
             string[] words = blogText.Split(' ');
             string previousWord = string.Empty;
@@ -61,14 +61,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
             return output;
         }
 
-        public virtual bool IsValidTranscript(SubtitleInputDto inputDto)
-        {
-            if (string.IsNullOrEmpty(inputDto.Input) == false)
-            {
-                return true;
-            }
+        public abstract bool IsValidFile(SubtitleInputDto inputDto);
 
-            return false;
-        }
     } // end class
 }

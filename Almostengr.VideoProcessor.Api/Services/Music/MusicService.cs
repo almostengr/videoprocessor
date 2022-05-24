@@ -12,7 +12,7 @@ namespace Almostengr.VideoProcessor.Api.Services.MusicService
         private readonly AppSettings _appSettings;
         private readonly Random _random;
 
-        public MusicService(ILogger<BaseService> logger, AppSettings appSettings) : base(logger, appSettings)
+        public MusicService(ILogger<BaseService> logger, AppSettings appSettings) : base(logger)
         {
             _appSettings = appSettings;
             _random = new Random();
@@ -37,12 +37,12 @@ namespace Almostengr.VideoProcessor.Api.Services.MusicService
 
             return outputString;
         }
-        
+
         public string PickRandomMusicTrack()
         {
             var musicMixes = base.GetDirectoryContents(_appSettings.Directories.MusicDirectory, $"*{FileExtension.Mp3}")
                 .Where(x => x.ToLower().Contains("mix"));
-            return musicMixes.ElementAt(_random.Next(0, musicMixes.Count()-1));
+            return musicMixes.ElementAt(_random.Next(0, musicMixes.Count() - 1));
         }
 
     }

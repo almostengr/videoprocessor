@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Api.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services
@@ -10,21 +9,19 @@ namespace Almostengr.VideoProcessor.Api.Services
     public abstract class BaseService : IBaseService
     {
         private readonly ILogger<BaseService> _logger;
-        private readonly AppSettings _appSettings;
 
-        public BaseService(ILogger<BaseService> logger, AppSettings appSettings)
+        public BaseService(ILogger<BaseService> logger)
         {
             _logger = logger;
-            _appSettings = appSettings;
         }
 
-        public bool IsDiskSpaceAvailable(string directory)
+        public bool IsDiskSpaceAvailable(string directory, double threshold)
         {
             double freeSpace = new DriveInfo(directory).AvailableFreeSpace;
             double totalSpace = new DriveInfo(directory).TotalSize;
             double spaceRemaining = (freeSpace / totalSpace);
 
-            if (spaceRemaining > _appSettings.DiskSpaceThreshold)
+            if (spaceRemaining > threshold)
             {
                 return true;
             }

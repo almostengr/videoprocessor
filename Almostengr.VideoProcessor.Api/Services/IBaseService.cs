@@ -4,7 +4,7 @@ namespace Almostengr.VideoProcessor.Api.Services
 {
     public interface IBaseService
     {
-        bool IsDiskSpaceAvailable(string directory);
+        bool IsDiskSpaceAvailable(string directory, double threshold);
         void DeleteDirectory(string pathName);
         void DeleteFile(string pathName);
         void CreateDirectory(string directory);

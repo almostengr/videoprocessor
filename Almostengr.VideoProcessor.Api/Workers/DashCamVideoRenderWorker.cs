@@ -43,7 +43,7 @@ namespace Almostengr.VideoProcessor.Workers
             {
                 string videoArchive = _videoRenderService.GetVideoArchivesInDirectory(_incomingDirectory)
                     .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
-                bool isDiskSpaceAvailable = _videoRenderService.IsDiskSpaceAvailable(_incomingDirectory);
+                bool isDiskSpaceAvailable = _videoRenderService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
 
                 if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)
                 {

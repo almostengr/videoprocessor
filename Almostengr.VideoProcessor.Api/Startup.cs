@@ -53,13 +53,13 @@ namespace Almostengr.VideoProcessor.Api
             services.AddSingleton<IMusicService, MusicService>();
             services.AddSingleton<IRhtServicesVideoRenderService, RhtServicesVideoRenderService>();
             services.AddSingleton<ITextFileService, TextFileService>();
-            services.AddSingleton<ISubtitleService, SrtSubtitleService>();
+            services.AddSingleton<ISrtSubtitleService, SrtSubtitleService>();
 
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////
 
             services.AddHostedService<DashCamVideoRenderWorker>();
             services.AddHostedService<RhtServicesVideoRenderWorker>();
-            services.AddHostedService<SrtSubtitleWorker>();
+            services.AddHostedService<RhtServicesSubtitleWorker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

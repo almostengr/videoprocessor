@@ -2,11 +2,11 @@ using Almostengr.VideoProcessor.DataTransferObjects;
 
 namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 {
-    public interface ISubtitleService : IBaseSubtitleService
+    public interface ISubtitleService : IBaseService
     {
-        void ArchiveTranscript(string transcriptFilePath, string archiveDirectory);
-        SubtitleOutputDto CleanTranscript(SubtitleInputDto inputDto);
-        string[] GetIncomingTranscripts(string directory);
-        void SaveTranscript(SubtitleOutputDto transcriptDto, string archiveDirectory);
+        bool IsValidFile(SubtitleInputDto inputDto);
+        string CleanBlogString(string blogText);
+        string ConvertToSentenceCase(string input);
+        string RemoveDuplicatesFromBlogString(string blogText);
     }
 }

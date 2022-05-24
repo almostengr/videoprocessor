@@ -12,7 +12,7 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
     {
         private readonly ILogger<ExternalProcessService> _logger;
 
-        public ExternalProcessService(ILogger<ExternalProcessService> logger, AppSettings appSettings)
+        public ExternalProcessService(ILogger<ExternalProcessService> logger)
         {
             _logger = logger;
         }

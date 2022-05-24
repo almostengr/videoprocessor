@@ -29,7 +29,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
         public VideoRenderService(ILogger<VideoRenderService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess) :
-            base(logger, appSettings)
+            base(logger)
         {
             _logger = logger;
             _appSettings = appSettings;
