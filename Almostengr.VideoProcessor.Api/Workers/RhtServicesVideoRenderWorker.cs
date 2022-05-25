@@ -81,7 +81,7 @@ namespace Almostengr.VideoProcessor.Workers
 
                     await _videoRenderService.CreateThumbnailsFromFinalVideoAsync(videoProperties, stoppingToken);
 
-                    _videoRenderService.CleanUpBeforeArchiving(_workingDirectory);
+                    await _videoRenderService.CleanUpBeforeArchivingAsync(_workingDirectory);
 
                     await _videoRenderService.ArchiveDirectoryContentsAsync(
                         _workingDirectory, videoProperties.ArchiveTarFile, _archiveDirectory, stoppingToken);
@@ -92,7 +92,7 @@ namespace Almostengr.VideoProcessor.Workers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, ex.Message);
+                    _logger.LogError(ex.InnerException, ex.Message);
                 }
 
                 _logger.LogInformation($"Finished processing {videoArchive}");
