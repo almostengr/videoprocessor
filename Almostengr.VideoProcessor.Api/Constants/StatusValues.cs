@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Api.Constants
 {
-    public class StatusValues
+    public static class StatusValues
     {
         public const string Extracting = "extracting";
         public const string ConvertingToMp4 = "converting";
