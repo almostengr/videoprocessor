@@ -50,14 +50,14 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
         {
             List<string> socialMediaOptions = new List<string> {
-                "Robinson Handy and Technology Services",
+                "facebook.com/rhtservicesllc",
+                "instagram.com/rhtservicesllc",
                 "rhtservices.net",
-                "rhtservices.net/youtube",
                 "rhtservices.net/facebook",
                 "rhtservices.net/instagram",
                 "rhtservices.net/nextdoor",
-                "instagram.com/rhtservicesllc",
-                "facebook.com/rhtservicesllc",
+                "rhtservices.net/youtube",
+                "Robinson Handy and Technology Services",
             };
 
             List<string> positionOptions = new List<string> {
