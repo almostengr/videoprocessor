@@ -1,6 +1,7 @@
 using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Database;
 using Almostengr.VideoProcessor.Api.Repository;
+using Almostengr.VideoProcessor.Api.Services.Data;
 using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
@@ -40,20 +41,21 @@ namespace Almostengr.VideoProcessor.Api
 
             // DATABASE //////////////////////////////////////////////////////////////////////////////////////
             
-            // services.AddDbContext<IVideoDbContext, VideoDbContext>(options => options.UseInMemoryDatabase("VideoProcessor"));
+            services.AddDbContext<VideoDbContext>(options => options.UseInMemoryDatabase("VideoProcessor"));
 
             // REPOSITORY ////////////////////////////////////////////////////////////////////////////////////
 
-            // services.AddTransient<IStatusRepository, StatusRepository>();
+            services.AddTransient<IStatusRepository, StatusRepository>();
 
             // SERVICES //////////////////////////////////////////////////////////////////////////////////////
 
-            services.AddSingleton<IDashCamVideoRenderService, DashCamVideoRenderService>();
+            services.AddTransient<IDashCamVideoRenderService, DashCamVideoRenderService>();
             services.AddTransient<IExternalProcessService, ExternalProcessService>();
-            services.AddSingleton<IMusicService, MusicService>();
-            services.AddSingleton<IRhtServicesVideoRenderService, RhtServicesVideoRenderService>();
-            services.AddSingleton<ITextFileService, TextFileService>();
-            services.AddSingleton<ISrtSubtitleService, SrtSubtitleService>();
+            services.AddTransient<IMusicService, MusicService>();
+            services.AddTransient<IRhtServicesVideoRenderService, RhtServicesVideoRenderService>();
+            services.AddTransient<ITextFileService, TextFileService>();
+            services.AddTransient<IStatusService, StatusService>();
+            services.AddTransient<ISrtSubtitleService, SrtSubtitleService>();
 
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////
 
