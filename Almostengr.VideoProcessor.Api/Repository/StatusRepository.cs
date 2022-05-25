@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -43,9 +44,16 @@ namespace Almostengr.VideoProcessor.Api.Repository
             await _dbContext.SaveChangesAsync();
         }
 
-        public void Update(StatusDto statusDto)
+        public async void Update(StatusDto statusDto)
         {
-            _dbContext.Statuses.Update(new Status(statusDto));
+            var entity = await _dbContext.Statuses
+                .Where(s => s.Id == (int) statusDto.Key)
+                .FirstOrDefaultAsync();
+
+            entity.Value = statusDto.Value;
+            entity.LastChanged = DateTime.Now;
+
+            _dbContext.Statuses.Update(entity);
         }
     }
 }
