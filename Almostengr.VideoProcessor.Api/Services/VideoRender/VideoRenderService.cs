@@ -128,7 +128,13 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             {
                 File.Move(
                     file,
-                    Path.Combine(directory, Path.GetFileName(file).ToLower().Replace(" ", "_"))
+                    Path.Combine(
+                            directory,
+                            Path.GetFileName(file)
+                                .ToLower()
+                                .Replace(";", "_")
+                                .Replace(" ", "_")
+                                .Replace("__", "_"))
                 );
             }
         }
@@ -183,9 +189,9 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             } // end for
         }
 
-        public virtual void CleanUpBeforeArchiving(string workingDirectory)
+        public virtual async Task CleanUpBeforeArchivingAsync(string workingDirectory)
         {
-            _logger.LogInformation($"Cleaning up before archiving: {workingDirectory}");
+            _logger.LogInformation($"Cleaning up before archiving {workingDirectory}");
 
             base.DeleteFile(Path.Combine(workingDirectory, "ae_intro.mp4"));
             base.DeleteFile(Path.Combine(workingDirectory, "ae_outtro2.mp4"));
@@ -195,18 +201,15 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             base.DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
             base.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
 
-            string[] files = Directory.GetFiles(workingDirectory);
+            string[] files = Directory.GetFiles(workingDirectory)
+                .Where(f => f.EndsWith(FileExtension.Gif) || 
+                    f.EndsWith(FileExtension.Kdenlive) || 
+                    f.EndsWith(FileExtension.Mp3))
+                .ToArray();
+
             foreach (var file in files)
             {
-                string loweredFile = file.ToLower();
-                if (
-                    loweredFile.EndsWith(FileExtension.Gif) ||
-                    loweredFile.EndsWith(FileExtension.Kdenlive) ||
-                    loweredFile.EndsWith(FileExtension.Mp3)
-                    )
-                {
-                    base.DeleteFile(Path.Combine(workingDirectory, file));
-                }
+                base.DeleteFile(Path.Combine(workingDirectory, file));
             }
 
             string[] directories = Directory.GetDirectories(workingDirectory);
@@ -214,6 +217,10 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             {
                 base.DeleteDirectory(directory);
             }
+
+            _logger.LogInformation($"Done cleaning up before arching {workingDirectory}");
+
+            await Task.CompletedTask;
         }
 
         public abstract Task StandByModeAsync(CancellationToken cancellationToken);
