@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

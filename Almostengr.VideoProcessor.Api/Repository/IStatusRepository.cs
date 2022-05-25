@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Almostengr.VideoProcessor.Api.Enums;
-using Almostengr.VideoProcessor.Api.Models;
 
 namespace Almostengr.VideoProcessor.Api.Repository
 {
