@@ -31,7 +31,6 @@ namespace Almostengr.VideoProcessor.Api.Services.Data
         public async Task InsertAsync(StatusDto status)
         {
             await _statusRepository.InsertAsync(status);
-            await _statusRepository.SaveChangesAsync();
         }
 
         public async Task UpsertAsync(StatusDto status)
@@ -44,17 +43,20 @@ namespace Almostengr.VideoProcessor.Api.Services.Data
             }
 
             _statusRepository.Update(status);
-            await _statusRepository.SaveChangesAsync();
         }
 
-        public async Task UpsertAsync(StatusKeys key, StatusValues value)
+        public async Task UpsertAsync(StatusKeys key, string value)
         {
             StatusDto dto = new StatusDto{
                 Key = key,
-                Value = value.ToString(),
+                Value = value,
             };
 
             await UpsertAsync(dto);
+        }
+
+        public async Task SaveChangesAsync()
+        {
             await _statusRepository.SaveChangesAsync();
         }
     }
