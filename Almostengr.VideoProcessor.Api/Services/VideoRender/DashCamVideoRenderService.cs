@@ -122,6 +122,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
             _logger.LogInformation($"Rendering video: {videoProperties.SourceTarFilePath}");
             await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Rendering);
+            await _statusService.SaveChangesAsync();
 
             await _externalProcess.RunProcessAsync(
                 ProgramPaths.FfmpegBinary,
@@ -136,32 +137,37 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         public override async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Archiving);
+            await _statusService.SaveChangesAsync();
             await base.ArchiveDirectoryContentsAsync(directoryToArchive, archiveName, archiveDestination, cancellationToken);
         }
 
-        public override void CleanUpBeforeArchiving(string workingDirectory)
+        public override async Task CleanUpBeforeArchivingAsync(string workingDirectory)
         {
-            _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Archiving);
-            base.CleanUpBeforeArchiving(workingDirectory);
+            await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Archiving);
+            await _statusService.SaveChangesAsync();
+            await base.CleanUpBeforeArchivingAsync(workingDirectory);
         }
 
         public override async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.ConvertingToMp4);
+            await _statusService.SaveChangesAsync();
             await base.ConvertVideoFilesToMp4Async(directory, cancellationToken);
         }
 
         public override async Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Extracting);
-            await _statusService.UpsertAsync(new StatusDto { Key = StatusKeys.RhtFile, Value = tarFile });
+            await _statusService.UpsertAsync(StatusKeys.RhtFile, tarFile);
+            await _statusService.SaveChangesAsync();
             await base.ExtractTarFileAsync(tarFile, workingDirectory, cancellationToken);
         }
 
         public override async Task StandByModeAsync(CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Idle);
-            await _statusService.UpsertAsync(new StatusDto { Key = StatusKeys.DashFile, Value = string.Empty });
+            await _statusService.UpsertAsync(StatusKeys.DashFile, string.Empty);
+            await _statusService.SaveChangesAsync();
             await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), cancellationToken);
         }
     }
