@@ -52,6 +52,10 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             List<string> socialMediaOptions = new List<string> {
                 "Robinson Handy and Technology Services",
                 "rhtservices.net",
+                "rhtservices.net/youtube",
+                "rhtservices.net/facebook",
+                "rhtservices.net/instagram",
+                "rhtservices.net/nextdoor",
                 "instagram.com/rhtservicesllc",
                 "facebook.com/rhtservicesllc",
             };
