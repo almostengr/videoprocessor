@@ -16,7 +16,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         void PrepareFileNamesInDirectory(string directory);
         void CheckOrCreateFfmpegInputFile(string workingDirectory);
         abstract Task CreateThumbnailsFromFinalVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken);
-        void CleanUpBeforeArchiving(string workingDirectory);
+        Task CleanUpBeforeArchivingAsync(string workingDirectory);
         Task StandByModeAsync(CancellationToken cancellationToken);
     }
 }

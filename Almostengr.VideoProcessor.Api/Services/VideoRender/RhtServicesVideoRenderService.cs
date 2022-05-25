@@ -37,7 +37,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             }
 
             _logger.LogInformation($"Rendering {videoProperties.SourceTarFilePath}");
-            await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Rendering);
+            await _statusService.UpsertAsync(StatusKeys.RhtStatus, nameof(StatusValues.Rendering));
 
             await _externalProcess.RunProcessAsync(
                 ProgramPaths.FfmpegBinary,
@@ -83,10 +83,10 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             await base.ArchiveDirectoryContentsAsync(directoryToArchive, archiveName, archiveDestination, cancellationToken);
         }
 
-        public override void CleanUpBeforeArchiving(string workingDirectory)
+        public override async Task CleanUpBeforeArchivingAsync(string workingDirectory)
         {
-            _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Archiving);
-            base.CleanUpBeforeArchiving(workingDirectory);
+            await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Archiving);
+            await base.CleanUpBeforeArchivingAsync(workingDirectory);
         }
 
         public override async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
@@ -98,14 +98,14 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         public override async Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Extracting);
-            await _statusService.UpsertAsync(new StatusDto { Key = StatusKeys.RhtFile, Value = tarFile });
+            await _statusService.UpsertAsync(StatusKeys.RhtFile, tarFile);
             await base.ExtractTarFileAsync(tarFile, workingDirectory, cancellationToken);
         }
 
         public override async Task StandByModeAsync(CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Idle);
-            await _statusService.UpsertAsync(new StatusDto { Key = StatusKeys.RhtFile, Value = string.Empty });
+            await _statusService.UpsertAsync(StatusKeys.RhtFile, string.Empty);
             await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), cancellationToken);
         }
     }
