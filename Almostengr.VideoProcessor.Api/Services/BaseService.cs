@@ -34,8 +34,8 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
             if (Directory.Exists(directoryName))
             {
+                _logger.LogInformation($"Removing directory {directoryName}");
                 Directory.Delete(directoryName, true);
-                _logger.LogInformation($"Removed directory {directoryName}");
             }
         }
 
@@ -43,8 +43,8 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
             if (File.Exists(fileName))
             {
+                _logger.LogInformation($"Removing file {fileName}");
                 File.Delete(fileName);
-                _logger.LogInformation($"Removed file {fileName}");
             }
         }
 
@@ -52,8 +52,8 @@ namespace Almostengr.VideoProcessor.Api.Services
         {
             if (Directory.Exists(pathName) == false)
             {
+                _logger.LogInformation($"Creating directory {pathName}");
                 Directory.CreateDirectory(pathName);
-                _logger.LogInformation($"Created directory {pathName}");
             }
         }
 
@@ -87,8 +87,6 @@ namespace Almostengr.VideoProcessor.Api.Services
                 fileInfo.Refresh();
                 currentSize = fileInfo.Length;
             }
-
-            _logger.LogInformation($"Done confirming file transfer complete: {videoArchive}");
         }
 
     } // end of class BaseService

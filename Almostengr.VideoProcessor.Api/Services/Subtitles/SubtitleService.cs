@@ -1,4 +1,3 @@
-using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
 

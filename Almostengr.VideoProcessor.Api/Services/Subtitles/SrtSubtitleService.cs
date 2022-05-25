@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Services.TextFile;
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
@@ -21,6 +20,8 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 
         public SubtitleOutputDto CleanTranscript(SubtitleInputDto inputDto)
         {
+            _logger.LogInformation($"Cleaning transcript");
+            
             string[] inputLines = inputDto.Input.Split('\n');
             int counter = 0;
             string videoString = string.Empty, blogString = string.Empty;
@@ -54,8 +55,6 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
             outputDto.VideoText = videoString;
             outputDto.BlogText = blogString;
             outputDto.BlogWords = blogString.Split(' ').Length;
-
-            _logger.LogInformation("Transcript processed successfully");
 
             return outputDto;
         }

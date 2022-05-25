@@ -45,8 +45,6 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
                 videoProperties.WorkingDirectory,
                 cancellationToken,
                 240);
-
-            _logger.LogInformation($"Done rendering {videoProperties.SourceTarFilePath}");
         }
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
@@ -54,7 +52,6 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             List<string> socialMediaOptions = new List<string> {
                 "Robinson Handy and Technology Services",
                 "rhtservices.net",
-                "IG @rhtservicesllc",
                 "instagram.com/rhtservicesllc",
                 "facebook.com/rhtservicesllc",
             };

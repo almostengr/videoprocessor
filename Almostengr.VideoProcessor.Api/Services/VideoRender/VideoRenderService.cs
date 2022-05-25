@@ -59,8 +59,6 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
                 directoryToArchive,
                 cancellationToken,
                 10);
-
-            _logger.LogInformation($"Done archiving directory contents: {directoryToArchive}");
         }
 
         public virtual string[] GetVideoArchivesInDirectory(string directory)
@@ -90,16 +88,12 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
                 Path.GetDirectoryName(tarFile),
                 cancellationToken,
                 10);
-
-            _logger.LogInformation($"Done extracting tar file: {tarFile}");
         }
 
         public abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken);
 
         public virtual async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"Converting video files to mp4: {directory}");
-
             var nonMp4VideoFiles = Directory.GetFiles(directory)
                 .Where(x => x.ToLower().EndsWith(FileExtension.Mkv) || x.ToLower().EndsWith(FileExtension.Mov))
                 .OrderBy(x => x).ToArray();
@@ -117,8 +111,6 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
                     20);
 
                 base.DeleteFile(videoFile);
-
-                _logger.LogInformation($"Done converting {videoFile} to {outputFilename}");
             }
         }
 
@@ -172,6 +164,8 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
             for (int sceneChangePct = 90; sceneChangePct > 0; sceneChangePct -= 10)
             {
+                _logger.LogInformation($"Scene change percent {sceneChangePct}%");
+
                 await _externalProcess.RunProcessAsync(
                     ProgramPaths.FfmpegBinary,
                     $"-hide_banner -y -loglevel {FfMpegLogLevel.Warning} -i {videoProperties.OutputVideoFilePath} -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {_appSettings.ThumbnailFrames.ToString()} -vsync vfr {videoProperties.VideoTitle}-%03d.jpg",
@@ -183,7 +177,6 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
                 if (thumbnailsCreated >= _appSettings.ThumbnailFrames)
                 {
-                    _logger.LogInformation($"Done creating thumbnails for {videoProperties.OutputVideoFilePath}");
                     break;
                 }
             } // end for
@@ -217,8 +210,6 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             {
                 base.DeleteDirectory(directory);
             }
-
-            _logger.LogInformation($"Done cleaning up before arching {workingDirectory}");
 
             await Task.CompletedTask;
         }

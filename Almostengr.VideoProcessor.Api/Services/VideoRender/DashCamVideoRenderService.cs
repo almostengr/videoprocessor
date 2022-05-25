@@ -130,8 +130,6 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
                 videoProperties.WorkingDirectory,
                 cancellationToken,
                 240);
-
-            _logger.LogInformation($"Done rendering video: {videoProperties.SourceTarFilePath}");
         }
 
         public override async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
