@@ -8,6 +8,7 @@ using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Almostengr.VideoProcessor.Api.Enums;
 using Almostengr.VideoProcessor.Api.Services.Data;
 using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
+using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.VideoRender
@@ -20,8 +21,9 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         private readonly IStatusService _statusService;
 
         public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger, AppSettings appSettings,
-            IExternalProcessService externalProcess, IStatusService statusService) :
-            base(logger, appSettings, externalProcess)
+            IExternalProcessService externalProcess, IFileSystemService fileSystem, 
+            IStatusService statusService) :
+             base(logger, appSettings, externalProcess, fileSystem)
         {
             _logger = logger;
             _appSettings = appSettings;

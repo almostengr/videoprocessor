@@ -1,16 +1,19 @@
 using System;
 using System.IO;
+using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.TextFile
 {
-    public class TextFileService : BaseService, ITextFileService
+    public class TextFileService : ITextFileService
     {
         private readonly ILogger<TextFileService> _logger;
+        private readonly IFileSystemService _fileSystem;
 
-        public TextFileService(ILogger<TextFileService> logger) : base(logger)
+        public TextFileService(ILogger<TextFileService> logger, IFileSystemService fileSystem)
         {
             _logger = logger;
+            _fileSystem = fileSystem;
         }
 
         public string GetFileContents(string filePath)
@@ -36,7 +39,7 @@ namespace Almostengr.VideoProcessor.Api.Services.TextFile
             try
             {
                 var directoryName = Path.GetDirectoryName(filePath);
-                base.CreateDirectory(directoryName);
+                _fileSystem.CreateDirectory(directoryName);
 
                 File.WriteAllText(filePath, content);
             }

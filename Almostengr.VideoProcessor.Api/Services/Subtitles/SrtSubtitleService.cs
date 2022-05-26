@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Api.Services.TextFile;
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
@@ -11,17 +12,20 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
     {
         private readonly ILogger<SrtSubtitleService> _logger;
         private readonly ITextFileService _textFileService;
+        private readonly IFileSystemService _fileSystem;
 
-        public SrtSubtitleService(ILogger<SrtSubtitleService> logger, ITextFileService textFileService) : base(logger)
+        public SrtSubtitleService(ILogger<SrtSubtitleService> logger, ITextFileService textFileService,
+        IFileSystemService fileSystem) : base(logger)
         {
             _logger = logger;
             _textFileService = textFileService;
+            _fileSystem = fileSystem;
         }
 
         public SubtitleOutputDto CleanTranscript(SubtitleInputDto inputDto)
         {
             _logger.LogInformation($"Cleaning transcript");
-            
+
             string[] inputLines = inputDto.Input.Split('\n');
             int counter = 0;
             string videoString = string.Empty, blogString = string.Empty;
@@ -72,12 +76,12 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 
         public void ArchiveTranscript(string transcriptFilePath, string archiveDirectory)
         {
-            base.MoveFile(transcriptFilePath, archiveDirectory);
+            _fileSystem.MoveFile(transcriptFilePath, archiveDirectory);
         }
 
         public string[] GetIncomingTranscripts(string directory)
         {
-            return base.GetDirectoryContents(directory, $"*{FileExtension.Srt}");
+            return _fileSystem.GetDirectoryContents(directory, $"*{FileExtension.Srt}");
         }
 
         public override bool IsValidFile(SubtitleInputDto inputDto)

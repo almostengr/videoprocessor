@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 
-namespace Almostengr.VideoProcessor.Api.Services
+namespace Almostengr.VideoProcessor.Api.Services.FileSystem
 {
-    public interface IBaseService
+    public interface IFileSystemService
     {
         bool IsDiskSpaceAvailable(string directory, double threshold);
         void DeleteDirectory(string pathName);

@@ -10,6 +10,7 @@ using Almostengr.VideoProcessor.Api.Services.Subtitles;
 using Almostengr.VideoProcessor.Api.Services.TextFile;
 using System;
 using System.Linq;
+using Almostengr.VideoProcessor.Api.Services.FileSystem;
 
 namespace Almostengr.VideoProcessor.Workers
 {
@@ -18,6 +19,7 @@ namespace Almostengr.VideoProcessor.Workers
         private readonly ISrtSubtitleService _transcriptService;
         private readonly ITextFileService _textFileService;
         private readonly AppSettings _appSettings;
+        private readonly IFileSystemService _fileSystemService;
         private readonly ILogger<RhtServicesSubtitleWorker> _logger;
         private readonly string _incomingDirectory;
         private readonly string _uploadDirectory;
@@ -27,6 +29,7 @@ namespace Almostengr.VideoProcessor.Workers
             _transcriptService = factory.CreateScope().ServiceProvider.GetRequiredService<ISrtSubtitleService>();
             _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
+            _fileSystemService = factory.CreateScope().ServiceProvider.GetRequiredService<IFileSystemService>();
             _logger = logger;
             _incomingDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "incoming");
             _uploadDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "upload");
@@ -34,8 +37,8 @@ namespace Almostengr.VideoProcessor.Workers
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
-            _transcriptService.CreateDirectory(_incomingDirectory);
-            _transcriptService.CreateDirectory(_uploadDirectory);
+            _fileSystemService.CreateDirectory(_incomingDirectory);
+            _fileSystemService.CreateDirectory(_uploadDirectory);
             return base.StartAsync(cancellationToken);
         }
 
@@ -46,7 +49,7 @@ namespace Almostengr.VideoProcessor.Workers
             {
                 string transcriptFile = _transcriptService.GetIncomingTranscripts(_incomingDirectory)
                     .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
-                bool isDiskSpaceAvailable = _transcriptService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
+                bool isDiskSpaceAvailable = _fileSystemService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
 
                 if (string.IsNullOrEmpty(transcriptFile) || isDiskSpaceAvailable == false)
                 {
@@ -58,7 +61,7 @@ namespace Almostengr.VideoProcessor.Workers
                 {
                     _logger.LogInformation($"Processing {transcriptFile}");
 
-                    await _textFileService.ConfirmFileTransferCompleteAsync(transcriptFile);
+                    await _fileSystemService.ConfirmFileTransferCompleteAsync(transcriptFile);
 
                     string fileContent = _textFileService.GetFileContents(transcriptFile);
 

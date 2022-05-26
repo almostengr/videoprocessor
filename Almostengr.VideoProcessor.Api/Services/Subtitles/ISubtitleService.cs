@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.DataTransferObjects;
 
 namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 {
-    public interface ISubtitleService : IBaseService
+    public interface ISubtitleService
     {
         bool IsValidFile(SubtitleInputDto inputDto);
         string CleanBlogString(string blogText);

@@ -8,6 +8,7 @@ using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Almostengr.VideoProcessor.Api.Enums;
 using Almostengr.VideoProcessor.Api.Services.Data;
 using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
+using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -26,8 +27,8 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         private const string _channelBranding = "Kenny Ram Dash Cam";
 
         public DashCamVideoRenderService(ILogger<DashCamVideoRenderService> logger, AppSettings appSettings,
-            IExternalProcessService externalProcess, IServiceScopeFactory factory) :
-            base(logger, appSettings, externalProcess)
+            IExternalProcessService externalProcess, IFileSystemService fileSystem, IServiceScopeFactory factory) :
+            base(logger, appSettings, externalProcess, fileSystem)
         {
             _streetSignBoxFilter = $", drawbox=x=0:y=in_h-200:w=in_w:h=200:color={FfMpegColors.Green}:t=fill";
             _streetSignTextSubfilter = $"fontcolor=white:fontsize={FfMpegConstants.FontSizeLarge}:{_lowerCenter}";

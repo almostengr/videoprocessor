@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Api.Services.MusicService
 {
-    public interface IMusicService : IBaseService
+    public interface IMusicService
     {
         string GetFfmpegMusicInputList();
         string PickRandomMusicTrack();

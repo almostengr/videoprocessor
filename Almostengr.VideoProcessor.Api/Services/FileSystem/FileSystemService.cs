@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services
+namespace Almostengr.VideoProcessor.Api.Services.FileSystem
 {
-    public abstract class BaseService : IBaseService
+    public class FileSystemService : IFileSystemService
     {
-        private readonly ILogger<BaseService> _logger;
+        private readonly ILogger<FileSystemService> _logger;
 
-        public BaseService(ILogger<BaseService> logger)
+        public FileSystemService(ILogger<FileSystemService> logger)
         {
             _logger = logger;
         }
@@ -69,7 +69,9 @@ namespace Almostengr.VideoProcessor.Api.Services
 
         public string[] GetDirectoryContents(string path, string searchPattern = "*.*")
         {
-            return Directory.GetFiles(path, searchPattern).OrderBy(x => x).ToArray();
+            return Directory.GetFiles(path, searchPattern)
+                .OrderBy(x => x)
+                .ToArray();
         }
 
         public async Task ConfirmFileTransferCompleteAsync(string videoArchive)

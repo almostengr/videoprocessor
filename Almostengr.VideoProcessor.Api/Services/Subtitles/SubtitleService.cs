@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 {
-    public abstract class SubtitleService : BaseService, ISubtitleService
+    public abstract class SubtitleService : ISubtitleService
     {
-        protected SubtitleService(ILogger<BaseService> logger) : base(logger)
+        protected SubtitleService(ILogger<SubtitleService> logger)
         {
         }
 

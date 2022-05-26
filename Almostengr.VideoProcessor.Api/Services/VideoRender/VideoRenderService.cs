@@ -6,16 +6,18 @@ using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
+using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Constants;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 {
-    public abstract class VideoRenderService : BaseService, IVideoRenderService
+    public abstract class VideoRenderService : IVideoRenderService
     {
         private readonly ILogger<VideoRenderService> _logger;
         private readonly AppSettings _appSettings;
         private readonly IExternalProcessService _externalProcess;
+        private readonly IFileSystemService _fileSystem;
         private const int PADDING = 30;
         internal readonly string _subscribeFilter;
         internal readonly string _subscribeScrollingFilter;
@@ -28,12 +30,12 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         internal readonly string _lowerRight;
 
         public VideoRenderService(ILogger<VideoRenderService> logger, AppSettings appSettings,
-            IExternalProcessService externalProcess) :
-            base(logger)
+            IExternalProcessService externalProcess, IFileSystemService fileSystem)
         {
             _logger = logger;
             _appSettings = appSettings;
             _externalProcess = externalProcess;
+            _fileSystem = fileSystem;
 
             _upperLeft = $"x={PADDING}:y={PADDING}";
             _upperCenter = $"x=(w-tw)/2:y={PADDING}";
@@ -63,7 +65,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
         public virtual string[] GetVideoArchivesInDirectory(string directory)
         {
-            return base.GetDirectoryContents(directory, $"*{FileExtension.Tar}*");
+            return _fileSystem.GetDirectoryContents(directory, $"*{FileExtension.Tar}*");
         }
 
         public virtual string GetSubtitlesFilter(string workingDirectory)
@@ -110,7 +112,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
                     cancellationToken,
                     20);
 
-                base.DeleteFile(videoFile);
+                _fileSystem.DeleteFile(videoFile);
             }
         }
 
@@ -173,7 +175,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
                     cancellationToken,
                     240);
 
-                int thumbnailsCreated = base.GetDirectoryContents(videoProperties.UploadDirectory, $"{videoProperties.VideoTitle}*{FileExtension.Jpg}").Count();
+                int thumbnailsCreated = _fileSystem.GetDirectoryContents(videoProperties.UploadDirectory, $"{videoProperties.VideoTitle}*{FileExtension.Jpg}").Count();
 
                 if (thumbnailsCreated >= _appSettings.ThumbnailFrames)
                 {
@@ -186,13 +188,13 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         {
             _logger.LogInformation($"Cleaning up before archiving {workingDirectory}");
 
-            base.DeleteFile(Path.Combine(workingDirectory, "ae_intro.mp4"));
-            base.DeleteFile(Path.Combine(workingDirectory, "ae_outtro2.mp4"));
-            base.DeleteFile(Path.Combine(workingDirectory, "dashcam.txt"));
-            base.DeleteFile(Path.Combine(workingDirectory, "dash_cam_opening.mp4"));
-            base.DeleteFile(Path.Combine(workingDirectory, "services.txt"));
-            base.DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
-            base.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
+            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "ae_intro.mp4"));
+            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "ae_outtro2.mp4"));
+            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "dashcam.txt"));
+            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "dash_cam_opening.mp4"));
+            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "services.txt"));
+            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
+            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
 
             string[] files = Directory.GetFiles(workingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Gif) || 
@@ -202,13 +204,13 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
             foreach (var file in files)
             {
-                base.DeleteFile(Path.Combine(workingDirectory, file));
+                _fileSystem.DeleteFile(Path.Combine(workingDirectory, file));
             }
 
             string[] directories = Directory.GetDirectories(workingDirectory);
             foreach (var directory in directories)
             {
-                base.DeleteDirectory(directory);
+                _fileSystem.DeleteDirectory(directory);
             }
 
             await Task.CompletedTask;

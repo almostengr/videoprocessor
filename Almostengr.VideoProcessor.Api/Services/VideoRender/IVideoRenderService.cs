@@ -4,7 +4,7 @@ using Almostengr.VideoProcessor.Api.DataTransferObjects;
 
 namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 {
-    public interface IVideoRenderService : IBaseService
+    public interface IVideoRenderService
     {
         abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken);
         abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);

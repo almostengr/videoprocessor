@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
+using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Api.Services.VideoRender;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,6 +18,7 @@ namespace Almostengr.VideoProcessor.Workers
     {
         private readonly IRhtServicesVideoRenderService _videoRenderService;
         private readonly AppSettings _appSettings;
+        private readonly IFileSystemService _fileSystemService;
         private readonly ILogger<RhtServicesVideoRenderWorker> _logger;
         private readonly string _incomingDirectory;
         private readonly string _archiveDirectory;
@@ -28,6 +30,7 @@ namespace Almostengr.VideoProcessor.Workers
         {
             _videoRenderService = factory.CreateScope().ServiceProvider.GetRequiredService<IRhtServicesVideoRenderService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
+            _fileSystemService = factory.CreateScope().ServiceProvider.GetRequiredService<IFileSystemService>();
             _logger = logger;
             _incomingDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "incoming");
             _archiveDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "archive");
@@ -43,7 +46,7 @@ namespace Almostengr.VideoProcessor.Workers
             {
                 string videoArchive = _videoRenderService.GetVideoArchivesInDirectory(_incomingDirectory)
                     .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
-                bool isDiskSpaceAvailable = _videoRenderService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
+                bool isDiskSpaceAvailable = _fileSystemService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
 
                 if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)
                 {
@@ -55,10 +58,10 @@ namespace Almostengr.VideoProcessor.Workers
                 {
                     _logger.LogInformation($"Processing {videoArchive}");
 
-                    _videoRenderService.DeleteDirectory(_workingDirectory);
-                    _videoRenderService.CreateDirectory(_workingDirectory);
+                    _fileSystemService.DeleteDirectory(_workingDirectory);
+                    _fileSystemService.CreateDirectory(_workingDirectory);
 
-                    await _videoRenderService.ConfirmFileTransferCompleteAsync(videoArchive);
+                    await _fileSystemService.ConfirmFileTransferCompleteAsync(videoArchive);
 
                     VideoPropertiesDto videoProperties = new();
                     videoProperties.SourceTarFilePath = videoArchive;
@@ -86,9 +89,9 @@ namespace Almostengr.VideoProcessor.Workers
                     await _videoRenderService.ArchiveDirectoryContentsAsync(
                         _workingDirectory, videoProperties.ArchiveTarFile, _archiveDirectory, stoppingToken);
 
-                    _videoRenderService.DeleteFile(videoProperties.SourceTarFilePath);
+                    _fileSystemService.DeleteFile(videoProperties.SourceTarFilePath);
 
-                    _videoRenderService.DeleteDirectory(_workingDirectory);
+                    _fileSystemService.DeleteDirectory(_workingDirectory);
                 }
                 catch (Exception ex)
                 {
@@ -101,10 +104,10 @@ namespace Almostengr.VideoProcessor.Workers
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
-            _videoRenderService.CreateDirectory(_incomingDirectory);
-            _videoRenderService.CreateDirectory(_archiveDirectory);
-            _videoRenderService.CreateDirectory(_uploadDirectory);
-            _videoRenderService.CreateDirectory(_workingDirectory);
+            _fileSystemService.CreateDirectory(_incomingDirectory);
+            _fileSystemService.CreateDirectory(_archiveDirectory);
+            _fileSystemService.CreateDirectory(_uploadDirectory);
+            _fileSystemService.CreateDirectory(_workingDirectory);
 
             return base.StartAsync(cancellationToken);
         }

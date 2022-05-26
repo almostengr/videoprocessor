@@ -3,6 +3,7 @@ using Almostengr.VideoProcessor.Api.Database;
 using Almostengr.VideoProcessor.Api.Repository;
 using Almostengr.VideoProcessor.Api.Services.Data;
 using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
+using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
 using Almostengr.VideoProcessor.Api.Services.TextFile;
@@ -51,11 +52,12 @@ namespace Almostengr.VideoProcessor.Api
 
             services.AddTransient<IDashCamVideoRenderService, DashCamVideoRenderService>();
             services.AddTransient<IExternalProcessService, ExternalProcessService>();
+            services.AddTransient<IFileSystemService, FileSystemService>();
             services.AddTransient<IMusicService, MusicService>();
             services.AddTransient<IRhtServicesVideoRenderService, RhtServicesVideoRenderService>();
-            services.AddTransient<ITextFileService, TextFileService>();
-            services.AddTransient<IStatusService, StatusService>();
             services.AddTransient<ISrtSubtitleService, SrtSubtitleService>();
+            services.AddTransient<IStatusService, StatusService>();
+            services.AddTransient<ITextFileService, TextFileService>();
 
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////
 
