@@ -51,7 +51,7 @@ namespace Almostengr.VideoProcessor.Workers
 
                 if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)
                 {
-                    await _videoRenderService.StandByModeAsync(stoppingToken);
+                    await _videoRenderService.WorkerIdleAsync(stoppingToken);
                     continue;
                 }
 

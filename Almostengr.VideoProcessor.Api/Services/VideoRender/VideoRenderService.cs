@@ -216,6 +216,6 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             await Task.CompletedTask;
         }
 
-        public abstract Task StandByModeAsync(CancellationToken cancellationToken);
+        public abstract Task WorkerIdleAsync(CancellationToken cancellationToken);
     }
 }

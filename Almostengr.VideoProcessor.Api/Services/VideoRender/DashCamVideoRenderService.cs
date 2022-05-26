@@ -162,7 +162,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             await base.ExtractTarFileAsync(tarFile, workingDirectory, cancellationToken);
         }
 
-        public override async Task StandByModeAsync(CancellationToken cancellationToken)
+        public override async Task WorkerIdleAsync(CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Idle);
             await _statusService.UpsertAsync(StatusKeys.DashFile, string.Empty);
