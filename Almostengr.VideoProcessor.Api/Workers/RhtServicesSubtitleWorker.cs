@@ -48,6 +48,7 @@ namespace Almostengr.VideoProcessor.Workers
             while (!stoppingToken.IsCancellationRequested)
             {
                 string transcriptFile = _transcriptService.GetIncomingTranscripts(_incomingDirectory)
+                    .Where(x => x.StartsWith(".") == false)
                     .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
                 bool isDiskSpaceAvailable = _fileSystemService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
 
