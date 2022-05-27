@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Constants
 {
-    public static class YtVideoPrivacyStatus
+    public sealed class YtVideoPrivacyStatus
     {
         public const string Private = "private";
         public const string Public = "public";

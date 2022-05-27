@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Api.Constants
 {
-    public static class ProgramPaths
+    public sealed class ProgramPaths
     {
         public const string BashShell = "/bin/bash";
         public const string FfmpegBinary = "/usr/bin/ffmpeg";

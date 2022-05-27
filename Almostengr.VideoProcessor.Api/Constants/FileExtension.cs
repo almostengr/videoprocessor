@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Constants
 {
-    public class FileExtension
+    public sealed class FileExtension
     {
         public const string Gif = ".gif";
         public const string Jpg = ".jpg";

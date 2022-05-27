@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Api.Constants
 {
-    public class FfMpegConstants
+    public sealed class FfMpegConstants
     {
         public const int DashCamBorderWidth = 10;
         public const string DimmedBackground = "0.3";
@@ -9,7 +9,7 @@ namespace Almostengr.VideoProcessor.Api.Constants
         public const int RhtBorderWidth = 7;
     }
 
-    public class FfMpegColors
+    public sealed class FfMpegColors
     {
         public const string Black = "black";
         public const string Green = "green";
@@ -18,7 +18,7 @@ namespace Almostengr.VideoProcessor.Api.Constants
         public const string White = "white";
     }
 
-    public class FfMpegLogLevel
+    public sealed class FfMpegLogLevel
     {
         public const string Error = "error";
         public const string Warning = "warning";
