@@ -25,9 +25,9 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
             IStatusService statusService) :
              base(logger, appSettings, externalProcess, fileSystem)
         {
-            _logger = logger;
             _appSettings = appSettings;
             _externalProcess = externalProcess;
+            _logger = logger;
             _statusService = statusService;
         }
 
@@ -83,7 +83,9 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         public override async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Archiving);
-            await base.ArchiveDirectoryContentsAsync(directoryToArchive, archiveName, archiveDestination, cancellationToken);
+            // await base.ArchiveDirectoryContentsAsync(directoryToArchive, archiveName, archiveDestination, cancellationToken);
+            await _externalProcess.ArchiveDirectoryAsync(
+                directoryToArchive, archiveName, directoryToArchive, cancellationToken);
         }
 
         public override async Task CleanUpBeforeArchivingAsync(string workingDirectory)

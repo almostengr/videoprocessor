@@ -55,12 +55,12 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         {
             _logger.LogInformation($"Archiving directory contents: {directoryToArchive}");
 
-            await _externalProcess.RunProcessAsync(
-                ProgramPaths.BashShell,
-                $"-c \"cd \\\"{directoryToArchive}\\\" && tar -cvJf \\\"{Path.Combine(archiveDestination, archiveName)}\\\" *\"",
-                directoryToArchive,
-                cancellationToken,
-                10);
+            // await _externalProcess.RunProcessAsync(
+            //     ProgramPaths.BashShell,
+            //     $"-c \"cd \\\"{directoryToArchive}\\\" && tar -cvJf \\\"{Path.Combine(archiveDestination, archiveName)}\\\" *\"",
+            //     directoryToArchive,
+            //     cancellationToken,
+            //     10);
         }
 
         public virtual string[] GetVideoArchivesInDirectory(string directory)
