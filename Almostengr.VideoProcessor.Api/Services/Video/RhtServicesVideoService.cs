@@ -11,16 +11,16 @@ using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services.VideoRender
+namespace Almostengr.VideoProcessor.Api.Services.Video
 {
-    public class RhtServicesVideoRenderService : VideoRenderService, IRhtServicesVideoRenderService
+    public class RhtServicesVideoService : VideoService, IRhtServicesVideoService
     {
-        private readonly ILogger<RhtServicesVideoRenderService> _logger;
+        private readonly ILogger<RhtServicesVideoService> _logger;
         private readonly AppSettings _appSettings;
         private readonly IExternalProcessService _externalProcess;
         private readonly IStatusService _statusService;
 
-        public RhtServicesVideoRenderService(ILogger<RhtServicesVideoRenderService> logger, AppSettings appSettings,
+        public RhtServicesVideoService(ILogger<RhtServicesVideoService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess, IFileSystemService fileSystem, 
             IStatusService statusService) :
              base(logger, appSettings, externalProcess, fileSystem)

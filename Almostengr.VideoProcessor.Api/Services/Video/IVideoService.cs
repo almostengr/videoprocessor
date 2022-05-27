@@ -2,9 +2,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 
-namespace Almostengr.VideoProcessor.Api.Services.VideoRender
+namespace Almostengr.VideoProcessor.Api.Services.Video
 {
-    public interface IVideoRenderService
+    public interface IVideoService
     {
         abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken);
         abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);

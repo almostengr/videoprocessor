@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Api.Constants
 {
-    public sealed class VideoRenderFiles
+    public sealed class VideoTextFiles
     {
         public const string DestinationFile = "destination.txt";
         public const string InputFile = "ffmpeginput.txt";

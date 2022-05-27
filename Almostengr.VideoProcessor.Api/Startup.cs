@@ -7,7 +7,7 @@ using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
 using Almostengr.VideoProcessor.Api.Services.TextFile;
-using Almostengr.VideoProcessor.Api.Services.VideoRender;
+using Almostengr.VideoProcessor.Api.Services.Video;
 using Almostengr.VideoProcessor.Workers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -50,19 +50,19 @@ namespace Almostengr.VideoProcessor.Api
 
             // SERVICES //////////////////////////////////////////////////////////////////////////////////////
 
-            services.AddTransient<IDashCamVideoRenderService, DashCamVideoRenderService>();
+            services.AddTransient<IDashCamVideoService, DashCamVideoService>();
             services.AddTransient<IExternalProcessService, ExternalProcessService>();
             services.AddTransient<IFileSystemService, FileSystemService>();
             services.AddTransient<IMusicService, MusicService>();
-            services.AddTransient<IRhtServicesVideoRenderService, RhtServicesVideoRenderService>();
+            services.AddTransient<IRhtServicesVideoService, RhtServicesVideoService>();
             services.AddTransient<ISrtSubtitleService, SrtSubtitleService>();
             services.AddTransient<IStatusService, StatusService>();
             services.AddTransient<ITextFileService, TextFileService>();
 
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////
 
-            services.AddHostedService<DashCamVideoRenderWorker>();
-            services.AddHostedService<RhtServicesVideoRenderWorker>();
+            services.AddHostedService<DashCamVideoWorker>();
+            services.AddHostedService<RhtServicesVideoWorker>();
             services.AddHostedService<RhtServicesSubtitleWorker>();
         }
 

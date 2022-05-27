@@ -1,6 +1,6 @@
-namespace Almostengr.VideoProcessor.Api.Services.VideoRender
+namespace Almostengr.VideoProcessor.Api.Services.Video
 {
-    public interface IDashCamVideoRenderService : IVideoRenderService
+    public interface IDashCamVideoService : IVideoService
     {
         string GetDestinationFilter(string workingDirectory);
         string GetMajorRoadsFilter(string workingDirectory);

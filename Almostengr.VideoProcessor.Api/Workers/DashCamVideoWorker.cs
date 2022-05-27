@@ -7,28 +7,28 @@ using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Almostengr.VideoProcessor.Api.Services.FileSystem;
-using Almostengr.VideoProcessor.Api.Services.VideoRender;
+using Almostengr.VideoProcessor.Api.Services.Video;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Workers
 {
-    public class DashCamVideoRenderWorker : BackgroundService
+    public class DashCamVideoWorker : BackgroundService
     {
-        private readonly IDashCamVideoRenderService _videoRenderService;
+        private readonly IDashCamVideoService _VideoService;
         private readonly AppSettings _appSettings;
         private readonly IFileSystemService _fileSystemService;
-        private readonly ILogger<DashCamVideoRenderWorker> _logger;
+        private readonly ILogger<DashCamVideoWorker> _logger;
         private readonly string _incomingDirectory;
         private readonly string _archiveDirectory;
         private readonly string _uploadDirectory;
         private readonly string _workingDirectory;
         private readonly string _ffmpegInputFilePath;
 
-        public DashCamVideoRenderWorker(ILogger<DashCamVideoRenderWorker> logger, IServiceScopeFactory factory)
+        public DashCamVideoWorker(ILogger<DashCamVideoWorker> logger, IServiceScopeFactory factory)
         {
-            _videoRenderService = factory.CreateScope().ServiceProvider.GetRequiredService<IDashCamVideoRenderService>();
+            _VideoService = factory.CreateScope().ServiceProvider.GetRequiredService<IDashCamVideoService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _fileSystemService = factory.CreateScope().ServiceProvider.GetRequiredService<IFileSystemService>();
             _logger = logger;
@@ -36,7 +36,7 @@ namespace Almostengr.VideoProcessor.Workers
             _archiveDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "archive");
             _uploadDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "upload");
             _workingDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "working");
-            _ffmpegInputFilePath = Path.Combine(_workingDirectory, VideoRenderFiles.InputFile);
+            _ffmpegInputFilePath = Path.Combine(_workingDirectory, VideoTextFiles.InputFile);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -44,14 +44,14 @@ namespace Almostengr.VideoProcessor.Workers
             Random random = new();
             while (!stoppingToken.IsCancellationRequested)
             {
-                string videoArchive = _videoRenderService.GetVideoArchivesInDirectory(_incomingDirectory)
+                string videoArchive = _VideoService.GetVideoArchivesInDirectory(_incomingDirectory)
                     .Where(x => x.StartsWith(".") == false)
                     .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
                 bool isDiskSpaceAvailable = _fileSystemService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
 
                 if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)
                 {
-                    await _videoRenderService.WorkerIdleAsync(stoppingToken);
+                    await _VideoService.WorkerIdleAsync(stoppingToken);
                     continue;
                 }
 
@@ -71,25 +71,25 @@ namespace Almostengr.VideoProcessor.Workers
                     videoProperties.UploadDirectory = _uploadDirectory;
                     videoProperties.ArchiveDirectory = _archiveDirectory;
 
-                    await _videoRenderService.ExtractTarFileAsync(videoArchive, _workingDirectory, stoppingToken);
+                    await _VideoService.ExtractTarFileAsync(videoArchive, _workingDirectory, stoppingToken);
 
-                    _videoRenderService.PrepareFileNamesInDirectory(_workingDirectory);
+                    _VideoService.PrepareFileNamesInDirectory(_workingDirectory);
 
-                    await _videoRenderService.ConvertVideoFilesToMp4Async(_workingDirectory, stoppingToken);
+                    await _VideoService.ConvertVideoFilesToMp4Async(_workingDirectory, stoppingToken);
 
-                    _videoRenderService.CheckOrCreateFfmpegInputFile(_workingDirectory);
+                    _VideoService.CheckOrCreateFfmpegInputFile(_workingDirectory);
 
-                    videoProperties.VideoFilter = _videoRenderService.GetFfmpegVideoFilters(videoProperties);
-                    videoProperties.VideoFilter += _videoRenderService.GetDestinationFilter(videoProperties.WorkingDirectory);
-                    videoProperties.VideoFilter += _videoRenderService.GetMajorRoadsFilter(videoProperties.WorkingDirectory);
+                    videoProperties.VideoFilter = _VideoService.GetFfmpegVideoFilters(videoProperties);
+                    videoProperties.VideoFilter += _VideoService.GetDestinationFilter(videoProperties.WorkingDirectory);
+                    videoProperties.VideoFilter += _VideoService.GetMajorRoadsFilter(videoProperties.WorkingDirectory);
 
-                    await _videoRenderService.RenderVideoAsync(videoProperties, stoppingToken);
+                    await _VideoService.RenderVideoAsync(videoProperties, stoppingToken);
 
-                    await _videoRenderService.CreateThumbnailsFromFinalVideoAsync(videoProperties, stoppingToken);
+                    await _VideoService.CreateThumbnailsFromFinalVideoAsync(videoProperties, stoppingToken);
 
-                    await _videoRenderService.CleanUpBeforeArchivingAsync(_workingDirectory);
+                    await _VideoService.CleanUpBeforeArchivingAsync(_workingDirectory);
 
-                    await _videoRenderService.ArchiveDirectoryContentsAsync(
+                    await _VideoService.ArchiveDirectoryContentsAsync(
                         _workingDirectory, videoProperties.ArchiveTarFile, _archiveDirectory, stoppingToken);
 
                     _fileSystemService.DeleteFile(videoProperties.SourceTarFilePath);

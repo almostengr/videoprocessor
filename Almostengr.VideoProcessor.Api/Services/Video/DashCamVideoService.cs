@@ -13,20 +13,20 @@ using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services.VideoRender
+namespace Almostengr.VideoProcessor.Api.Services.Video
 {
-    public class DashCamVideoRenderService : VideoRenderService, IDashCamVideoRenderService
+    public class DashCamVideoService : VideoService, IDashCamVideoService
     {
         private readonly string _streetSignTextSubfilter;
         private readonly string _streetSignBoxFilter;
-        private readonly ILogger<DashCamVideoRenderService> _logger;
+        private readonly ILogger<DashCamVideoService> _logger;
         private readonly IMusicService _musicService;
         private readonly IStatusService _statusService;
         private readonly AppSettings _appSettings;
         private readonly IExternalProcessService _externalProcess;
         private const string _channelBranding = "Kenny Ram Dash Cam";
 
-        public DashCamVideoRenderService(ILogger<DashCamVideoRenderService> logger, AppSettings appSettings,
+        public DashCamVideoService(ILogger<DashCamVideoService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess, IFileSystemService fileSystem, IServiceScopeFactory factory) :
             base(logger, appSettings, externalProcess, fileSystem)
         {
@@ -96,9 +96,9 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
         public string GetDestinationFilter(string workingDirectory)
         {
-            if (File.Exists(Path.Combine(workingDirectory, VideoRenderFiles.DestinationFile)))
+            if (File.Exists(Path.Combine(workingDirectory, VideoTextFiles.DestinationFile)))
             {
-                return $"{_streetSignBoxFilter}, drawtext=textfile={VideoRenderFiles.DestinationFile}:${_streetSignTextSubfilter}:enable='between(t,2,12)'";
+                return $"{_streetSignBoxFilter}, drawtext=textfile={VideoTextFiles.DestinationFile}:${_streetSignTextSubfilter}:enable='between(t,2,12)'";
             }
 
             return string.Empty;
@@ -106,9 +106,9 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
         public string GetMajorRoadsFilter(string workingDirectory)
         {
-            if (File.Exists(Path.Combine(workingDirectory, VideoRenderFiles.MajorRoadsFile)))
+            if (File.Exists(Path.Combine(workingDirectory, VideoTextFiles.MajorRoadsFile)))
             {
-                return $"{_streetSignBoxFilter}, drawtext=textfile={VideoRenderFiles.MajorRoadsFile}:${_streetSignTextSubfilter}:enable='between(t,12,22)'";
+                return $"{_streetSignBoxFilter}, drawtext=textfile={VideoTextFiles.MajorRoadsFile}:${_streetSignTextSubfilter}:enable='between(t,12,22)'";
             }
 
             return string.Empty;

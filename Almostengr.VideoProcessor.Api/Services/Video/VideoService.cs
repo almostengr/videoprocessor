@@ -10,11 +10,11 @@ using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Constants;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services.VideoRender
+namespace Almostengr.VideoProcessor.Api.Services.Video
 {
-    public abstract class VideoRenderService : IVideoRenderService
+    public abstract class VideoService : IVideoService
     {
-        private readonly ILogger<VideoRenderService> _logger;
+        private readonly ILogger<VideoService> _logger;
         private readonly AppSettings _appSettings;
         private readonly IExternalProcessService _externalProcess;
         private readonly IFileSystemService _fileSystem;
@@ -29,7 +29,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
         internal readonly string _lowerCenter;
         internal readonly string _lowerRight;
 
-        public VideoRenderService(ILogger<VideoRenderService> logger, AppSettings appSettings,
+        public VideoService(ILogger<VideoService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess, IFileSystemService fileSystem)
         {
             _logger = logger;
@@ -70,7 +70,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
         public virtual string GetSubtitlesFilter(string workingDirectory)
         {
-            string subtitleFile = Path.Combine(workingDirectory, VideoRenderFiles.SubtitlesFile);
+            string subtitleFile = Path.Combine(workingDirectory, VideoTextFiles.SubtitlesFile);
 
             if (File.Exists(subtitleFile))
             {
@@ -135,7 +135,7 @@ namespace Almostengr.VideoProcessor.Api.Services.VideoRender
 
         public virtual void CheckOrCreateFfmpegInputFile(string workingDirectory)
         {
-            string ffmpegInputFile = Path.Combine(workingDirectory, VideoRenderFiles.InputFile);
+            string ffmpegInputFile = Path.Combine(workingDirectory, VideoTextFiles.InputFile);
             string inputFile = Path.Combine(workingDirectory, "input.txt");
 
             if (File.Exists(inputFile))
