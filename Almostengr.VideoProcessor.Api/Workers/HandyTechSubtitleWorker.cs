@@ -14,17 +14,17 @@ using Almostengr.VideoProcessor.Api.Services.FileSystem;
 
 namespace Almostengr.VideoProcessor.Workers
 {
-    public class RhtServicesSubtitleWorker : BackgroundService
+    public class HandyTechSubtitleWorker : BackgroundService
     {
         private readonly ISrtSubtitleService _transcriptService;
         private readonly ITextFileService _textFileService;
         private readonly AppSettings _appSettings;
         private readonly IFileSystemService _fileSystemService;
-        private readonly ILogger<RhtServicesSubtitleWorker> _logger;
+        private readonly ILogger<HandyTechSubtitleWorker> _logger;
         private readonly string _incomingDirectory;
         private readonly string _uploadDirectory;
 
-        public RhtServicesSubtitleWorker(ILogger<RhtServicesSubtitleWorker> logger, IServiceScopeFactory factory)
+        public HandyTechSubtitleWorker(ILogger<HandyTechSubtitleWorker> logger, IServiceScopeFactory factory)
         {
             _transcriptService = factory.CreateScope().ServiceProvider.GetRequiredService<ISrtSubtitleService>();
             _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();

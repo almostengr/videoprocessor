@@ -16,15 +16,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.Video
 {
-    public class RhtServicesVideoService : VideoService, IRhtServicesVideoService
+    public class HandyTechVideoService : VideoService, IHandyTechVideoService
     {
-        private readonly ILogger<RhtServicesVideoService> _logger;
+        private readonly ILogger<HandyTechVideoService> _logger;
         private readonly IFileSystemService _fileSystem;
         private readonly AppSettings _appSettings;
         private readonly IExternalProcessService _externalProcess;
         private readonly IStatusService _statusService;
 
-        public RhtServicesVideoService(ILogger<RhtServicesVideoService> logger, AppSettings appSettings,
+        public HandyTechVideoService(ILogger<HandyTechVideoService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess, IFileSystemService fileSystem,
             IStatusService statusService) :
              base(logger, appSettings, externalProcess, fileSystem)

@@ -54,7 +54,7 @@ namespace Almostengr.VideoProcessor.Api
             services.AddTransient<IExternalProcessService, ExternalProcessService>();
             services.AddTransient<IFileSystemService, FileSystemService>();
             services.AddTransient<IMusicService, MusicService>();
-            services.AddTransient<IRhtServicesVideoService, RhtServicesVideoService>();
+            services.AddTransient<IHandyTechVideoService, HandyTechVideoService>();
             services.AddTransient<ISrtSubtitleService, SrtSubtitleService>();
             services.AddTransient<IStatusService, StatusService>();
             services.AddTransient<ITextFileService, TextFileService>();
@@ -62,8 +62,8 @@ namespace Almostengr.VideoProcessor.Api
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////
 
             services.AddHostedService<DashCamVideoWorker>();
-            services.AddHostedService<RhtServicesVideoWorker>();
-            services.AddHostedService<RhtServicesSubtitleWorker>();
+            services.AddHostedService<HandyTechVideoWorker>();
+            services.AddHostedService<HandyTechSubtitleWorker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

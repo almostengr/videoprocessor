@@ -13,20 +13,20 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Workers
 {
-    public class RhtServicesVideoWorker : BackgroundService
+    public class HandyTechVideoWorker : BackgroundService
     {
-        private readonly IRhtServicesVideoService _videoService;
+        private readonly IHandyTechVideoService _videoService;
         private readonly AppSettings _appSettings;
         private readonly IFileSystemService _fileSystemService;
-        private readonly ILogger<RhtServicesVideoWorker> _logger;
+        private readonly ILogger<HandyTechVideoWorker> _logger;
         private readonly string _incomingDirectory;
         private readonly string _archiveDirectory;
         private readonly string _uploadDirectory;
         private readonly string _workingDirectory;
 
-        public RhtServicesVideoWorker(ILogger<RhtServicesVideoWorker> logger, IServiceScopeFactory factory)
+        public HandyTechVideoWorker(ILogger<HandyTechVideoWorker> logger, IServiceScopeFactory factory)
         {
-            _videoService = factory.CreateScope().ServiceProvider.GetRequiredService<IRhtServicesVideoService>();
+            _videoService = factory.CreateScope().ServiceProvider.GetRequiredService<IHandyTechVideoService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _fileSystemService = factory.CreateScope().ServiceProvider.GetRequiredService<IFileSystemService>();
             _logger = logger;
