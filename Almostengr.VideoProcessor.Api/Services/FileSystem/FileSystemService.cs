@@ -74,6 +74,13 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
                 .ToArray();
         }
 
+        public string[] GetDirectoryContents(string path)
+        {
+            return Directory.GetFiles(path)
+                .OrderBy(x => x)
+                .ToArray();
+        }
+
         public async Task ConfirmFileTransferCompleteAsync(string videoArchive)
         {
             _logger.LogInformation($"Confirming file transfer complete: {videoArchive}");

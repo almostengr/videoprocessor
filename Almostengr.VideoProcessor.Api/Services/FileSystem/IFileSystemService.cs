@@ -11,5 +11,6 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
         void MoveFile(string source, string destination);
         string[] GetDirectoryContents(string path, string searchPattern);
         Task ConfirmFileTransferCompleteAsync(string videoArchive);
+        string[] GetDirectoryContents(string path);
     }
 }

@@ -16,7 +16,7 @@ namespace Almostengr.VideoProcessor.Workers
 {
     public class HandyTechSubtitleWorker : BackgroundService
     {
-        private readonly ISrtSubtitleService _transcriptService;
+        private readonly ISrtSubtitleService _subtitleService;
         private readonly ITextFileService _textFileService;
         private readonly AppSettings _appSettings;
         private readonly IFileSystemService _fileSystemService;
@@ -26,7 +26,7 @@ namespace Almostengr.VideoProcessor.Workers
 
         public HandyTechSubtitleWorker(ILogger<HandyTechSubtitleWorker> logger, IServiceScopeFactory factory)
         {
-            _transcriptService = factory.CreateScope().ServiceProvider.GetRequiredService<ISrtSubtitleService>();
+            _subtitleService = factory.CreateScope().ServiceProvider.GetRequiredService<ISrtSubtitleService>();
             _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _fileSystemService = factory.CreateScope().ServiceProvider.GetRequiredService<IFileSystemService>();
@@ -47,12 +47,12 @@ namespace Almostengr.VideoProcessor.Workers
             Random random = new();
             while (!stoppingToken.IsCancellationRequested)
             {
-                string transcriptFile = _transcriptService.GetIncomingTranscripts(_incomingDirectory)
+                string subtitleFile = _subtitleService.GetIncomingSubtitles(_incomingDirectory)
                     .Where(x => x.StartsWith(".") == false)
                     .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
                 bool isDiskSpaceAvailable = _fileSystemService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
 
-                if (string.IsNullOrEmpty(transcriptFile) || isDiskSpaceAvailable == false)
+                if (string.IsNullOrEmpty(subtitleFile) || isDiskSpaceAvailable == false)
                 {
                     await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), stoppingToken);
                     continue;
@@ -60,30 +60,30 @@ namespace Almostengr.VideoProcessor.Workers
 
                 try
                 {
-                    _logger.LogInformation($"Processing {transcriptFile}");
+                    _logger.LogInformation($"Processing {subtitleFile}");
 
-                    await _fileSystemService.ConfirmFileTransferCompleteAsync(transcriptFile);
+                    await _fileSystemService.ConfirmFileTransferCompleteAsync(subtitleFile);
 
-                    string fileContent = _textFileService.GetFileContents(transcriptFile);
+                    string fileContent = _textFileService.GetFileContents(subtitleFile);
 
-                    SubtitleInputDto transcriptInputDto = new SubtitleInputDto
+                    SubtitleInputDto subtitleInputDto = new SubtitleInputDto
                     {
                         Input = fileContent,
-                        VideoTitle = Path.GetFileName(transcriptFile)
+                        VideoTitle = Path.GetFileName(subtitleFile)
                     };
 
-                    if (_transcriptService.IsValidFile(transcriptInputDto) == false)
+                    if (_subtitleService.IsValidFile(subtitleInputDto) == false)
                     {
-                        _logger.LogError($"{transcriptFile} is not in a valid format");
+                        _logger.LogError($"{subtitleFile} is not in a valid format");
                         continue;
                     }
 
-                    SubtitleOutputDto transcriptOutput = _transcriptService.CleanTranscript(transcriptInputDto);
+                    SubtitleOutputDto transcriptOutput = _subtitleService.CleanSubtitle(subtitleInputDto);
 
-                    _transcriptService.SaveTranscript(transcriptOutput, _uploadDirectory);
-                    _transcriptService.ArchiveTranscript(transcriptFile, _uploadDirectory);
+                    _subtitleService.SaveSubtitleFile(transcriptOutput, _uploadDirectory);
+                    _subtitleService.ArchiveSubtitleFile(subtitleFile, _uploadDirectory);
 
-                    _logger.LogInformation($"Finished processing {transcriptFile}");
+                    _logger.LogInformation($"Finished processing {subtitleFile}");
                 }
                 catch (Exception ex)
                 {

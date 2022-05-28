@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Api.Services.TextFile;
 using Almostengr.VideoProcessor.Constants;
@@ -22,9 +23,9 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
             _fileSystem = fileSystem;
         }
 
-        public SubtitleOutputDto CleanTranscript(SubtitleInputDto inputDto)
+        public SubtitleOutputDto CleanSubtitle(SubtitleInputDto inputDto)
         {
-            _logger.LogInformation($"Cleaning transcript");
+            _logger.LogInformation($"Cleaning subtitle file");
 
             string[] inputLines = inputDto.Input.Split('\n');
             int counter = 0;
@@ -63,25 +64,27 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
             return outputDto;
         }
 
-        public void SaveTranscript(SubtitleOutputDto transcriptDto, string archiveDirectory)
+        public void SaveSubtitleFile(SubtitleOutputDto subtitleDto, string archiveDirectory)
         {
             _textFileService.SaveFileContents(
-                Path.Combine(archiveDirectory, $"{transcriptDto.VideoTitle}.{FileExtension.Srt}"),
-                transcriptDto.VideoText);
+                Path.Combine(archiveDirectory, $"{subtitleDto.VideoTitle}{FileExtension.Srt}"),
+                subtitleDto.VideoText);
 
             _textFileService.SaveFileContents(
-                Path.Combine(archiveDirectory, $"{transcriptDto.VideoTitle}.{FileExtension.Md}"),
-                transcriptDto.BlogText);
+                Path.Combine(archiveDirectory, $"{subtitleDto.VideoTitle}{FileExtension.Md}"),
+                subtitleDto.BlogText);
         }
 
-        public void ArchiveTranscript(string transcriptFilePath, string archiveDirectory)
+        public void ArchiveSubtitleFile(string transcriptFilePath, string archiveDirectory)
         {
             _fileSystem.MoveFile(transcriptFilePath, archiveDirectory);
         }
 
-        public string[] GetIncomingTranscripts(string directory)
+        public string[] GetIncomingSubtitles(string directory)
         {
-            return _fileSystem.GetDirectoryContents(directory, $"*{FileExtension.Srt}");
+            return _fileSystem.GetDirectoryContents(directory)
+                .Where(x => x.EndsWith(FileExtension.Srt))
+                .ToArray();
         }
 
         public override bool IsValidFile(SubtitleInputDto inputDto)
