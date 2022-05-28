@@ -6,17 +6,24 @@ namespace Almostengr.VideoProcessor.Api.DataTransferObjects
 {
     public class VideoPropertiesDto
     {
+        public VideoPropertiesDto(
+            string sourceFilePath, string workingDirectory, string uploadDirectory, string archiveDirectory)
+        {
+            this.SourceTarFilePath = sourceFilePath;
+            this.WorkingDirectory = workingDirectory;
+            this.ArchiveDirectory = archiveDirectory;
+            this.UploadDirectory = uploadDirectory;
+        }
+
         public string SourceTarFilePath { get; set; }
         public string VideoTitle { get { return Path.GetFileNameWithoutExtension(SourceTarFilePath).Replace(FileExtension.Tar, ""); } }
         public string ArchiveTarFile
         {
             get
             {
-                return $"{VideoTitle.Replace(FileExtension.Mp4, string.Empty).Replace(FileExtension.Mkv, string.Empty)}.{DateTime.Now.ToString("yyyyMMdd")}.{DateTime.Now.ToString("HHmmss")}.tar.xz"; 
+                return $"{VideoTitle.Replace(FileExtension.Mp4, string.Empty).Replace(FileExtension.Mkv, string.Empty)}.{DateTime.Now.ToString("yyyyMMdd")}.{DateTime.Now.ToString("HHmmss")}.tar.xz";
             }
         }
-        public string VideoDescription { get; set; }
-        public string FfmpegInputFilePath { get; set; }
         public string OutputVideoFilePath
         {
             get
@@ -24,7 +31,6 @@ namespace Almostengr.VideoProcessor.Api.DataTransferObjects
                 return Path.Combine(UploadDirectory, $"{VideoTitle.Replace(FileExtension.Mp4, string.Empty)}{FileExtension.Mp4}");
             }
         }
-        public int VideoDurationSeconds { get; set; }
         public string VideoFilter { get; set; }
         public string WorkingDirectory { get; set; }
         public string UploadDirectory { get; set; }

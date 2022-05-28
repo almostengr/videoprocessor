@@ -31,7 +31,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             base(logger, appSettings, externalProcess, fileSystem)
         {
             _streetSignBoxFilter = $", drawbox=x=0:y=in_h-200:w=in_w:h=200:color={FfMpegColors.Green}:t=fill";
-            _streetSignTextSubfilter = $"fontcolor=white:fontsize={FfMpegConstants.FontSizeLarge}:{_lowerCenter}";
+            _streetSignTextSubfilter = $"fontcolor=white:fontsize={LARGE_FONT}:{_lowerCenter}";
             _logger = logger;
             _musicService = factory.CreateScope().ServiceProvider.GetRequiredService<IMusicService>();
             _statusService = factory.CreateScope().ServiceProvider.GetRequiredService<IStatusService>();
@@ -54,41 +54,41 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             string videoFilter = string.Empty;
             videoFilter += $"drawtext=textfile:'{_channelBranding}':";
             videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={FfMpegConstants.FontSizeSmall}:";
+            videoFilter += $"fontsize={SMALL_FONT}:";
             videoFilter += $"{_upperRight}:";
             videoFilter += $"box=1:";
-            videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
+            videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
             videoFilter += $"boxcolor={FfMpegColors.Black}:";
             videoFilter += $"enable='between(t,0,{randomDuration})', ";
 
             // dimmed text - channel name
             videoFilter += $"drawtext=textfile:'{_channelBranding}':";
             videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={FfMpegConstants.FontSizeSmall}:";
+            videoFilter += $"fontsize={SMALL_FONT}:";
             videoFilter += $"{_upperRight}:";
             videoFilter += $"box=1:";
-            videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
-            videoFilter += $"boxcolor={FfMpegColors.Black}@{FfMpegConstants.DimmedBackground}:";
+            videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
+            videoFilter += $"boxcolor={FfMpegColors.Black}@{DIM_BACKGROUND}:";
             videoFilter += $"enable='gt(t,{randomDuration})', ";
 
             // solid text - video title
             videoFilter += $"drawtext=textfile:'{videoProperties.VideoTitle.Split(";")[0]}':";
             videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={FfMpegConstants.FontSizeSmall}:";
+            videoFilter += $"fontsize={SMALL_FONT}:";
             videoFilter += $"{_upperLeft}:";
             videoFilter += $"box=1:";
-            videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
+            videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
             videoFilter += $"boxcolor={FfMpegColors.Black}:";
             videoFilter += $"enable='between(t,0,{randomDuration})', ";
 
             // dimmed text - video title
             videoFilter += $"drawtext=textfile:'{videoProperties.VideoTitle.Split(";")[0]}':";
             videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={FfMpegConstants.FontSizeSmall}:";
+            videoFilter += $"fontsize={SMALL_FONT}:";
             videoFilter += $"{_upperLeft}:";
             videoFilter += $"box=1:";
-            videoFilter += $"boxborderw={FfMpegConstants.DashCamBorderWidth}:";
-            videoFilter += $"boxcolor={FfMpegColors.Black}@{FfMpegConstants.DimmedBackground}:";
+            videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
+            videoFilter += $"boxcolor={FfMpegColors.Black}@{DIM_BACKGROUND}:";
             videoFilter += $"enable='gt(t,{randomDuration})'";
 
             return videoFilter;
@@ -96,9 +96,9 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public string GetDestinationFilter(string workingDirectory)
         {
-            if (File.Exists(Path.Combine(workingDirectory, VideoTextFiles.DestinationFile)))
+            if (File.Exists(Path.Combine(workingDirectory, DESTINATION_FILE)))
             {
-                return $"{_streetSignBoxFilter}, drawtext=textfile={VideoTextFiles.DestinationFile}:${_streetSignTextSubfilter}:enable='between(t,2,12)'";
+                return $"{_streetSignBoxFilter}, drawtext=textfile={DESTINATION_FILE}:${_streetSignTextSubfilter}:enable='between(t,2,12)'";
             }
 
             return string.Empty;
@@ -106,9 +106,9 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public string GetMajorRoadsFilter(string workingDirectory)
         {
-            if (File.Exists(Path.Combine(workingDirectory, VideoTextFiles.MajorRoadsFile)))
+            if (File.Exists(Path.Combine(workingDirectory, MAJOR_ROADS_FILE)))
             {
-                return $"{_streetSignBoxFilter}, drawtext=textfile={VideoTextFiles.MajorRoadsFile}:${_streetSignTextSubfilter}:enable='between(t,12,22)'";
+                return $"{_streetSignBoxFilter}, drawtext=textfile={MAJOR_ROADS_FILE}:${_streetSignTextSubfilter}:enable='between(t,12,22)'";
             }
 
             return string.Empty;
@@ -125,9 +125,9 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Rendering);
             await _statusService.SaveChangesAsync();
 
-            await _externalProcess.RunProcessAsync(
+            await _externalProcess.RunCommandAsync(
                 ProgramPaths.FfmpegBinary,
-                $"-hide_banner -y -safe 0 -loglevel {FfMpegLogLevel.Error} -hwaccel vaapi -hwaccel_output_format vaapi -f concat -i {videoProperties.FfmpegInputFilePath} -i {_musicService.PickRandomMusicTrack()} -vf {videoProperties.VideoFilter} -vcodec h264_vaapi -b:v 5M -shortest -map 0:v:0 -map 1:a:0 {videoProperties.OutputVideoFilePath}",
+                $"-hide_banner -y -safe 0 -loglevel {LOG_ERRORS} -hwaccel vaapi -hwaccel_output_format vaapi -f concat -i {FFMPEG_INPUT_FILE} -i {_musicService.PickRandomMusicTrack()} -vf {videoProperties.VideoFilter} -vcodec h264_vaapi -b:v 5M -shortest -map 0:v:0 -map 1:a:0 {videoProperties.OutputVideoFilePath}",
                 videoProperties.WorkingDirectory,
                 cancellationToken,
                 240);

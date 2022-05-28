@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -21,6 +22,8 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         private const int PADDING = 30;
         internal readonly string _subscribeFilter;
         internal readonly string _subscribeScrollingFilter;
+
+        // ffmpeg positions
         internal readonly string _upperLeft;
         internal readonly string _upperCenter;
         internal readonly string _upperRight;
@@ -28,6 +31,25 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         internal readonly string _lowerLeft;
         internal readonly string _lowerCenter;
         internal readonly string _lowerRight;
+
+        // essential files
+        internal const string DESTINATION_FILE = "destination.txt";
+        internal const string FFMPEG_INPUT_FILE = "ffmpeginput.txt";
+        internal const string MAJOR_ROADS_FILE = "majorroads.txt";
+        internal const string SUBTITLES_FILE = "subtitles.ass";
+
+        // ffmpeg options
+        internal const string LOG_ERRORS = "-loglevel error";
+        internal const string LOG_WARNINGS = "-loglevel warning";
+        internal const string HW_OPTIONS = "-hide_banner -y -hwaccel vaapi -hwaccel_output_format vaapi";
+        internal const string HW_VCODEC = "-vcodec h264_vaapi -b:v 5M";
+
+        // ffmpeg filter attributes
+        public const int DASHCAM_BORDER_WIDTH = 10;
+        public const string DIM_BACKGROUND = "0.3";
+        public const string LARGE_FONT = "h/20";
+        public const string SMALL_FONT = "h/35";
+        public const int RHT_BORDER_WIDTH = 7;
 
         public VideoService(ILogger<VideoService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess, IFileSystemService fileSystem)
@@ -45,8 +67,8 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             _lowerCenter = $"x=(w-tw)/2:y=h-th-{PADDING}";
             _lowerRight = $"x=w-tw-{PADDING}:y=h-th-{PADDING}";
 
-            _subscribeFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={FfMpegConstants.FontSizeSmall}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
-            _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={FfMpegConstants.FontSizeSmall}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
+            _subscribeFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
+            _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
         }
 
         public abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);
@@ -55,12 +77,18 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         {
             _logger.LogInformation($"Archiving directory contents: {directoryToArchive}");
 
-            // await _externalProcess.RunProcessAsync(
-            //     ProgramPaths.BashShell,
-            //     $"-c \"cd \\\"{directoryToArchive}\\\" && tar -cvJf \\\"{Path.Combine(archiveDestination, archiveName)}\\\" *\"",
-            //     directoryToArchive,
-            //     cancellationToken,
-            //     10);
+            var result = await _externalProcess.RunCommandAsync(
+                ProgramPaths.BashShell,
+                $"-c \"cd \\\"{directoryToArchive}\\\" && tar -cvJf \\\"{archiveName}\\\" *\"",
+                directoryToArchive,
+                cancellationToken,
+                15
+            );
+
+            if (result.stdErr.Length > 0)
+            {
+                throw new ApplicationException("Error occurred when archiving files");
+            }
         }
 
         public virtual string[] GetVideoArchivesInDirectory(string directory)
@@ -70,7 +98,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public virtual string GetSubtitlesFilter(string workingDirectory)
         {
-            string subtitleFile = Path.Combine(workingDirectory, VideoTextFiles.SubtitlesFile);
+            string subtitleFile = Path.Combine(workingDirectory, SUBTITLES_FILE);
 
             if (File.Exists(subtitleFile))
             {
@@ -84,7 +112,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         {
             _logger.LogInformation($"Extracting tar file: {tarFile}");
 
-            await _externalProcess.RunProcessAsync(
+            await _externalProcess.RunCommandAsync(
                 ProgramPaths.TarBinary,
                 $"-xvf \"{tarFile}\" -C \"{workingDirectory}\"",
                 Path.GetDirectoryName(tarFile),
@@ -105,9 +133,9 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                 string outputFilename = Path.GetFileNameWithoutExtension(videoFile) + FileExtension.Mp4;
                 _logger.LogInformation($"Converting {videoFile} to {outputFilename}");
 
-                await _externalProcess.RunProcessAsync(
+                await _externalProcess.RunCommandAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"-loglevel {FfMpegLogLevel.Error} -hide_banner -y -hwaccel vaapi -hwaccel_output_format vaapi -i {Path.GetFileName(videoFile)} -f mp4 -vcodec h264_vaapi -b:v 5M {Path.GetFileName(outputFilename)}",
+                    $"{LOG_ERRORS} {HW_OPTIONS} -i {Path.GetFileName(videoFile)} -f mp4 {HW_VCODEC} {Path.GetFileName(outputFilename)}",
                     directory,
                     cancellationToken,
                     20);
@@ -135,7 +163,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public virtual void CheckOrCreateFfmpegInputFile(string workingDirectory)
         {
-            string ffmpegInputFile = Path.Combine(workingDirectory, VideoTextFiles.InputFile);
+            string ffmpegInputFile = Path.Combine(workingDirectory, FFMPEG_INPUT_FILE);
             string inputFile = Path.Combine(workingDirectory, "input.txt");
 
             if (File.Exists(inputFile))
@@ -143,14 +171,17 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                 File.Move(inputFile, ffmpegInputFile);
             }
 
-            if (File.Exists(ffmpegInputFile) == false)
+            if (File.Exists(ffmpegInputFile))
             {
-                using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
+                return;
+            }
+
+            using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
+            {
+                _logger.LogInformation("Creating FFMPEG input file");
+                foreach (string file in Directory.GetFiles(workingDirectory, $"*{FileExtension.Mp4}").OrderBy(x => x))
                 {
-                    foreach (string file in Directory.GetFiles(workingDirectory, $"*{FileExtension.Mp4}").OrderBy(x => x))
-                    {
-                        writer.WriteLine($"file '{Path.GetFileName(file)}'");
-                    }
+                    writer.WriteLine($"file '{Path.GetFileName(file)}'");
                 }
             }
         }
@@ -168,9 +199,9 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             {
                 _logger.LogInformation($"Scene change percent {sceneChangePct}%");
 
-                await _externalProcess.RunProcessAsync(
+                await _externalProcess.RunCommandAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"-hide_banner -y -loglevel {FfMpegLogLevel.Warning} -i {videoProperties.OutputVideoFilePath} -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {_appSettings.ThumbnailFrames.ToString()} -vsync vfr {videoProperties.VideoTitle}-%03d.jpg",
+                    $"-hide_banner -y {LOG_WARNINGS} -i {videoProperties.OutputVideoFilePath} -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {_appSettings.ThumbnailFrames.ToString()} -vsync vfr {videoProperties.VideoTitle}-%03d.jpg",
                     videoProperties.UploadDirectory,
                     cancellationToken,
                     240);
@@ -197,8 +228,8 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             _fileSystem.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
 
             string[] files = Directory.GetFiles(workingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Gif) || 
-                    f.EndsWith(FileExtension.Kdenlive) || 
+                .Where(f => f.EndsWith(FileExtension.Gif) ||
+                    f.EndsWith(FileExtension.Kdenlive) ||
                     f.EndsWith(FileExtension.Mp3))
                 .ToArray();
 

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Configuration;
-using Almostengr.VideoProcessor.Api.Constants;
 using Almostengr.VideoProcessor.Api.DataTransferObjects;
 using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Api.Services.Video;
@@ -24,7 +23,6 @@ namespace Almostengr.VideoProcessor.Workers
         private readonly string _archiveDirectory;
         private readonly string _uploadDirectory;
         private readonly string _workingDirectory;
-        private readonly string _ffmpegInputFilePath;
 
         public DashCamVideoWorker(ILogger<DashCamVideoWorker> logger, IServiceScopeFactory factory)
         {
@@ -36,7 +34,6 @@ namespace Almostengr.VideoProcessor.Workers
             _archiveDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "archive");
             _uploadDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "upload");
             _workingDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "working");
-            _ffmpegInputFilePath = Path.Combine(_workingDirectory, VideoTextFiles.InputFile);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -64,12 +61,8 @@ namespace Almostengr.VideoProcessor.Workers
 
                     await _fileSystemService.ConfirmFileTransferCompleteAsync(videoArchive);
 
-                    VideoPropertiesDto videoProperties = new();
-                    videoProperties.SourceTarFilePath = videoArchive;
-                    videoProperties.FfmpegInputFilePath = _ffmpegInputFilePath;
-                    videoProperties.WorkingDirectory = _workingDirectory;
-                    videoProperties.UploadDirectory = _uploadDirectory;
-                    videoProperties.ArchiveDirectory = _archiveDirectory;
+                    VideoPropertiesDto videoProperties = new VideoPropertiesDto(
+                        videoArchive, _workingDirectory, _uploadDirectory, _archiveDirectory);
 
                     await _VideoService.ExtractTarFileAsync(videoArchive, _workingDirectory, stoppingToken);
 
