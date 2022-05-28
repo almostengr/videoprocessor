@@ -127,7 +127,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
             await _externalProcess.RunCommandAsync(
                 ProgramPaths.FfmpegBinary,
-                $"-hide_banner -y -safe 0 -loglevel {LOG_ERRORS} -hwaccel vaapi -hwaccel_output_format vaapi -f concat -i {FFMPEG_INPUT_FILE} -i {_musicService.PickRandomMusicTrack()} -vf {videoProperties.VideoFilter} -vcodec h264_vaapi -b:v 5M -shortest -map 0:v:0 -map 1:a:0 {videoProperties.OutputVideoFilePath}",
+                $"-hide_banner -y -safe 0 -loglevel {LOG_ERRORS} -hwaccel vaapi -hwaccel_output_format vaapi -f concat -i {FFMPEG_INPUT_FILE} -i {_musicService.GetRandomMixTrack()} -vf {videoProperties.VideoFilter} -vcodec h264_vaapi -b:v 5M -shortest -map 0:v:0 -map 1:a:0 {videoProperties.OutputVideoFilePath}",
                 videoProperties.WorkingDirectory,
                 cancellationToken,
                 240);

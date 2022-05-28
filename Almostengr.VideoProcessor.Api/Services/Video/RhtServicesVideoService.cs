@@ -163,8 +163,8 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
             foreach (var videoFileName in goProFiles)
             {
-                string outputFileName = $"{Path.GetFileNameWithoutExtension(videoFileName)}.tmp.mp4";
-                string audioFileName = $"{Path.GetFileNameWithoutExtension(videoFileName)}.mp3";
+                string outputFileName = $"{Path.GetFileNameWithoutExtension(videoFileName)}.tmp{FileExtension.Mp4}";
+                string audioFileName = $"{Path.GetFileNameWithoutExtension(videoFileName)}{FileExtension.Mp3}";
 
                 if (File.Exists(Path.Combine(workingDirectory, audioFileName)) == false)
                 {

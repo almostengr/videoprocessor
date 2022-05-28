@@ -21,7 +21,7 @@ namespace Almostengr.VideoProcessor.Api.Services.MusicService
             _fileSystem = fileSystem;
         }
 
-        public string GetFfmpegMusicInputList()
+        public string GetRandomMusicTracks()
         {
             var musicFiles = _fileSystem.GetDirectoryContents(_appSettings.Directories.MusicDirectory, $"*{FileExtension.Mp3}")
                 .Where(x => x.ToLower().Contains("mix") == false);
@@ -41,7 +41,7 @@ namespace Almostengr.VideoProcessor.Api.Services.MusicService
             return outputString;
         }
 
-        public string PickRandomMusicTrack()
+        public string GetRandomMixTrack()
         {
             var musicMixes = _fileSystem.GetDirectoryContents(_appSettings.Directories.MusicDirectory, $"*{FileExtension.Mp3}")
                 .Where(x => x.ToLower().Contains("mix"));

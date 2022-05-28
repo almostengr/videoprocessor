@@ -21,7 +21,7 @@ namespace Almostengr.VideoProcessor.Controllers
         [Route("/music/inputlist")]
         public ActionResult<List<string>> GetFfmpegMusicInputList()
         {
-            return Ok(_musicService.GetFfmpegMusicInputList());
+            return Ok(_musicService.GetRandomMusicTracks());
         }
 
     }
