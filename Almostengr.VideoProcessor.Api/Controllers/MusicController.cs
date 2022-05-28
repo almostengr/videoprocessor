@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -19,9 +19,10 @@ namespace Almostengr.VideoProcessor.Controllers
 
         [HttpGet]
         [Route("/music/inputlist")]
-        public ActionResult<List<string>> GetFfmpegMusicInputList()
+        public async Task<IActionResult> GetFfmpegMusicInputList()
         {
-            return Ok(_musicService.GetRandomMusicTracks());
+            var tracks = await Task.Run(() => _musicService.GetRandomMusicTracks());
+            return Ok(tracks);
         }
 
     }
