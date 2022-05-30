@@ -1,6 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Api.DataTransferObjects;
 
 namespace Almostengr.VideoProcessor.Api.Services.Video
 {

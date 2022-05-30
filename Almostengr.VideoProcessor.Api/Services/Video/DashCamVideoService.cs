@@ -26,6 +26,10 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         private readonly IExternalProcessService _externalProcess;
         private const string _channelBranding = "Kenny Ram Dash Cam";
 
+        // essential files
+        internal const string DESTINATION_FILE = "destination.txt";
+        internal const string MAJOR_ROADS_FILE = "majorroads.txt";
+
         public DashCamVideoService(ILogger<DashCamVideoService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess, IFileSystemService fileSystem, IServiceScopeFactory factory) :
             base(logger, appSettings, externalProcess, fileSystem)

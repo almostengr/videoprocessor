@@ -16,12 +16,12 @@ namespace Almostengr.VideoProcessor.Api.DataTransferObjects
         }
 
         public string SourceTarFilePath { get; set; }
-        public string VideoTitle { get { return Path.GetFileNameWithoutExtension(SourceTarFilePath).Replace(FileExtension.Tar, ""); } }
+        public string VideoTitle { get { return Path.GetFileNameWithoutExtension(SourceTarFilePath).Replace(FileExtension.Tar, string.Empty); } }
         public string ArchiveTarFile
         {
             get
             {
-                return $"{VideoTitle.Replace(FileExtension.Mp4, string.Empty).Replace(FileExtension.Mkv, string.Empty)}.{DateTime.Now.ToString("yyyyMMdd")}.{DateTime.Now.ToString("HHmmss")}.tar.xz";
+                return $"{VideoTitle.Replace(FileExtension.Mp4, string.Empty).Replace(FileExtension.Mkv, string.Empty)}.{DateTime.Now.ToString("yyyyMMdd")}.{DateTime.Now.ToString("HHmmss")}{FileExtension.TarXz}";
             }
         }
         public string OutputVideoFilePath

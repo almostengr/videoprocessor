@@ -11,7 +11,6 @@ namespace Almostengr.VideoProcessor.Api.Configuration
 
     public class Directories
     {
-        public string TranscriptBaseDirectory { get; set; }
         public string DashCamBaseDirectory { get; set; }
         public string RhtBaseDirectory { get; set; }
         public string MusicDirectory { get; set; }

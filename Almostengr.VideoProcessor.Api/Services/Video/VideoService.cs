@@ -33,9 +33,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         internal readonly string _lowerRight;
 
         // essential files
-        internal const string DESTINATION_FILE = "destination.txt";
         internal const string FFMPEG_INPUT_FILE = "ffmpeginput.txt";
-        internal const string MAJOR_ROADS_FILE = "majorroads.txt";
         internal const string SUBTITLES_FILE = "subtitles.ass";
 
         // ffmpeg options
