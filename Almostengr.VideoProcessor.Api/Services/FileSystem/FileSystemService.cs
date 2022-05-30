@@ -62,7 +62,6 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
             if (File.Exists(source))
             {
                 _logger.LogInformation($"Moving file {source} to {destination}");
-                CreateDirectory(destination);
                 Directory.Move(source, destination);
             }
         }

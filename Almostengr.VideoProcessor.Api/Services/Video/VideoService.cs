@@ -45,11 +45,12 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         internal const string HW_VCODEC = "-vcodec h264_vaapi -b:v 5M";
 
         // ffmpeg filter attributes
-        public const int DASHCAM_BORDER_WIDTH = 10;
-        public const string DIM_BACKGROUND = "0.3";
-        public const string LARGE_FONT = "h/20";
-        public const string SMALL_FONT = "h/35";
-        public const int RHT_BORDER_WIDTH = 7;
+        internal const int DASHCAM_BORDER_WIDTH = 10;
+        internal const string DIM_TEXT = "0.7";
+        internal const string DIM_BACKGROUND = "0.3";
+        internal const string LARGE_FONT = "h/20";
+        internal const string SMALL_FONT = "h/35";
+        internal const int RHT_BORDER_WIDTH = 7;
 
         public VideoService(ILogger<VideoService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess, IFileSystemService fileSystem)
@@ -79,7 +80,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
             var result = await _externalProcess.RunCommandAsync(
                 ProgramPaths.BashShell,
-                $"-c \"cd \\\"{directoryToArchive}\\\" && tar -cvJf \\\"{archiveName}\\\" *\"",
+                $"-c \"cd \\\"{directoryToArchive}\\\" && tar -cvJf \\\"{Path.Combine(archiveDestination, archiveName)}\\\" *\"",
                 directoryToArchive,
                 cancellationToken,
                 15
@@ -201,7 +202,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
                 await _externalProcess.RunCommandAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"-hide_banner -y {LOG_WARNINGS} -i {videoProperties.OutputVideoFilePath} -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {_appSettings.ThumbnailFrames.ToString()} -vsync vfr {videoProperties.VideoTitle}-%03d.jpg",
+                    $"-hide_banner -y {LOG_WARNINGS} -i \"{videoProperties.OutputVideoFilePath}\" -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {_appSettings.ThumbnailFrames.ToString()} -vsync vfr \"{videoProperties.VideoTitle}-%03d.jpg\"",
                     videoProperties.UploadDirectory,
                     cancellationToken,
                     240);

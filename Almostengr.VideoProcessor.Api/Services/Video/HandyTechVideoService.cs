@@ -45,21 +45,13 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
             _logger.LogInformation($"Rendering {videoProperties.SourceTarFilePath}");
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, nameof(StatusValues.Rendering));
+            await _statusService.SaveChangesAsync();
+
+            string outputTsFile = Path.GetFileNameWithoutExtension(videoProperties.OutputVideoFilePath) + FileExtension.Ts;
 
             await _externalProcess.RunCommandAsync(
                 ProgramPaths.FfmpegBinary,
-                // $"{HW_OPTIONS} -f concat -i {FFMPEG_INPUT_FILE} -filter_complex \"[0:v]{videoProperties.VideoFilter}[v]\" -map \"[v]\" -map 0:a -c:a copy {videoProperties.OutputVideoFilePath}",
-                $"-safe 0 {LOG_ERRORS} {HW_OPTIONS} -f concat -i {FFMPEG_INPUT_FILE} -c copy -bsf:a aac_adtstoasc {videoProperties.OutputVideoFilePath}",
-                videoProperties.WorkingDirectory,
-                cancellationToken,
-                240
-            );
-
-            string brandedOutputVideo = $"{Path.GetFileNameWithoutExtension(videoProperties.OutputVideoFilePath)}.branded.mp4";
-
-            await _externalProcess.RunCommandAsync(
-                ProgramPaths.FfmpegBinary,
-                $"{LOG_ERRORS} {HW_OPTIONS} -i {videoProperties.OutputVideoFilePath} -vf {videoProperties.VideoFilter} {brandedOutputVideo}",
+                $"-y {LOG_ERRORS} -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i {FFMPEG_INPUT_FILE} -filter_hw_device foo -vf \"{videoProperties.VideoFilter}, format=vaapi|nv12,hwupload\" -c:v h264_vaapi -bsf:a aac_adtstoasc \"{videoProperties.OutputVideoFilePath}\"",
                 videoProperties.WorkingDirectory,
                 cancellationToken,
                 240
@@ -72,24 +64,16 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                 "facebook.com/rhtservicesllc",
                 "instagram.com/rhtservicesllc",
                 "rhtservices.net",
-                "rhtservices.net/facebook",
-                "rhtservices.net/instagram",
-                "rhtservices.net/nextdoor",
-                "rhtservices.net/youtube",
                 "Robinson Handy and Technology Services",
-            };
-
-            List<string> positionOptions = new List<string> {
-                _lowerRight,
-                _upperRight
+                "youtube.com/c/robinsonhandyandtechnologyservices",
             };
 
             Random random = new();
 
             string videoFilter = $"drawtext=textfile:'{socialMediaOptions[random.Next(0, socialMediaOptions.Count)]}':";
-            videoFilter += $"fontcolor={FfMpegColors.White}@{DIM_BACKGROUND}:";
+            videoFilter += $"fontcolor={FfMpegColors.White}@{DIM_TEXT}:";
             videoFilter += $"fontsize={SMALL_FONT}:";
-            videoFilter += $"{positionOptions[random.Next(0, positionOptions.Count)]}:";
+            videoFilter += $"{_upperRight}:";
             videoFilter += $"box=1:";
             videoFilter += $"boxborderw={RHT_BORDER_WIDTH.ToString()}:";
             videoFilter += $"boxcolor={FfMpegColors.Black}@{DIM_BACKGROUND}";
@@ -115,36 +99,61 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
             {
                 _logger.LogInformation("Creating FFMPEG input file");
-                foreach (string file in Directory.GetFiles(workingDirectory, $"*{FileExtension.Ts}").OrderBy(x => x))
+                var filesInDirectory = _fileSystem.GetDirectoryContents(workingDirectory);
+
+                foreach (string file in filesInDirectory.Where(x => x.EndsWith(FileExtension.Ts)).OrderBy(x => x).ToArray())
                 {
-                    writer.WriteLine($"file '{Path.GetFileName(file)}'");
+                    writer.WriteLine($"file '{Path.GetFileName(file)}'"); // add video files
+                }
+
+                foreach (string file in filesInDirectory.Where(x => x.EndsWith(FileExtension.Jpg)).OrderBy(x => x).ToArray())
+                {
+                    writer.WriteLine($"file '{Path.GetFileName(file)}'"); // add images
                 }
             }
         }
 
-        public override async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
+        public override async Task ArchiveDirectoryContentsAsync(
+            string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Archiving);
+            await _statusService.SaveChangesAsync();
+
             await base.ArchiveDirectoryContentsAsync(
-                directoryToArchive, archiveDestination, archiveDestination, cancellationToken);
+                directoryToArchive, archiveName, archiveDestination, cancellationToken);
         }
 
         public override async Task CleanUpBeforeArchivingAsync(string workingDirectory)
         {
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Archiving);
-            await base.CleanUpBeforeArchivingAsync(workingDirectory);
+            await _statusService.SaveChangesAsync();
+
+            string[] filesToRemove = _fileSystem.GetDirectoryContents(workingDirectory)
+                .Where(x =>
+                    x.EndsWith(FileExtension.Ts) == false &&
+                    x.EndsWith(FileExtension.Jpg) == false &&
+                    x.EndsWith(FFMPEG_INPUT_FILE) == false
+                )
+                .ToArray();
+
+            foreach (var file in filesToRemove)
+            {
+                _fileSystem.DeleteFile(Path.Combine(workingDirectory, file));
+            }
+
+            string[] directories = Directory.GetDirectories(workingDirectory);
+            foreach (var directory in directories)
+            {
+                _fileSystem.DeleteDirectory(directory);
+            }
         }
 
-        public override async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
-        {
-            await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.ConvertingToMp4);
-            await base.ConvertVideoFilesToMp4Async(directory, cancellationToken);
-        }
-
-        public override async Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
+        public override async Task ExtractTarFileAsync(
+            string tarFile, string workingDirectory, CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Extracting);
             await _statusService.UpsertAsync(StatusKeys.RhtFile, tarFile);
+            await _statusService.SaveChangesAsync();
             await base.ExtractTarFileAsync(tarFile, workingDirectory, cancellationToken);
         }
 
@@ -152,28 +161,31 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         {
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Idle);
             await _statusService.UpsertAsync(StatusKeys.RhtFile, string.Empty);
+            await _statusService.SaveChangesAsync();
             await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), cancellationToken);
         }
 
         public async Task AddAudioToTimelapseAsync(string workingDirectory, CancellationToken cancellationToken)
         {
-            var goProFiles = _fileSystem.GetDirectoryContents(workingDirectory, "")
-                .Where(x => x.StartsWith("gh") && x.EndsWith(FileExtension.Mp4))
+            var audioFiles = _fileSystem.GetDirectoryContents(workingDirectory)
+                .Where(x => x.EndsWith(FileExtension.Mp3))
                 .ToArray();
 
-            foreach (var videoFileName in goProFiles)
+            foreach (var file in audioFiles)
             {
-                string outputFileName = $"{Path.GetFileNameWithoutExtension(videoFileName)}.tmp{FileExtension.Mp4}";
-                string audioFileName = $"{Path.GetFileNameWithoutExtension(videoFileName)}{FileExtension.Mp3}";
+                string outputFileName = $"{Path.GetFileNameWithoutExtension(file)}.tmp{FileExtension.Mp4}";
+                string videoFileName = _fileSystem.GetDirectoryContents(workingDirectory)
+                    .Where(x => x.Contains(Path.GetFileNameWithoutExtension(file)) && x.EndsWith(FileExtension.Mp3) == false)
+                    .SingleOrDefault();
 
-                if (File.Exists(Path.Combine(workingDirectory, audioFileName)) == false)
+                if (File.Exists(Path.Combine(workingDirectory, videoFileName)) == false)
                 {
-                    throw new ArgumentNullException($"Audio file for {audioFileName} was not found");
+                    throw new ArgumentNullException($"Video file for {file} was not found");
                 }
 
                 var result = await _externalProcess.RunCommandAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"-loglevel error -hide_banner -y -hwaccel vaapi -hwaccel_output_format vaapi -i {videoFileName} -i {audioFileName} -vcodec h264_vaapi -map 0:v:0 -map 1:a:0 {outputFileName}",
+                    $"-loglevel error -hide_banner -y -hwaccel vaapi -hwaccel_output_format vaapi -i {Path.GetFileName(videoFileName)} -i {Path.GetFileName(file)} -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 {outputFileName}",
                     workingDirectory,
                     cancellationToken,
                     10);
@@ -183,13 +195,14 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                     throw new ApplicationException("Errors occurred when attempting to merge audio and video");
                 }
 
-                _fileSystem.MoveFile(outputFileName, videoFileName);
+                _fileSystem.DeleteFile(videoFileName);
+                _fileSystem.MoveFile(Path.Combine(workingDirectory, outputFileName), videoFileName);
             }
         }
 
         public async Task ConvertVideoFilesToTsAsync(string directory, CancellationToken stoppingToken)
         {
-            var videoFiles = Directory.GetFiles(directory)
+            var videoFiles = _fileSystem.GetDirectoryContents(directory)
                 .Where(x =>
                     x.EndsWith(FileExtension.Mkv) ||
                     x.EndsWith(FileExtension.Mov) ||
@@ -204,7 +217,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
                 var result = await _externalProcess.RunCommandAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"{LOG_ERRORS} {HW_OPTIONS} -i {videoFileName} -c copy -bsf:v h264_mp4toannexb -f mpegts {outputFileName}",
+                    $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -c copy -bsf:v h264_mp4toannexb -f mpegts \"{outputFileName}\"",
                     directory,
                     stoppingToken,
                     10

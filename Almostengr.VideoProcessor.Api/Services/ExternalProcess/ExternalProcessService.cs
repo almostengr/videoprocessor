@@ -18,7 +18,7 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
         public async Task<(string stdOut, string stdErr)> RunCommandAsync(
             string program, string arguments, string workingDirectory, CancellationToken cancellationToken, int alarmTime = 30)
         {
-            _logger.LogInformation($"Running command: {program} {arguments}");
+            _logger.LogInformation($"{program} {arguments}");
 
             Process process = new Process
             {
@@ -36,16 +36,12 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
 
             process.Start();
 
-            process.BeginErrorReadLine();
-            process.BeginOutputReadLine();
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
 
             await process.WaitForExitAsync();
 
-            string standardOutput = process.StandardOutput.ReadToEnd();
-
-            string[] validErrors = process.StandardError
-                .ReadToEnd()
-                .Split("\n")
+            string[] validErrors = error.Split("\n")
                 .Where(x =>
                     !x.Contains("libva: /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so init failed") &&
                     !x.Equals("")
@@ -56,7 +52,7 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
 
             process.Close();
 
-            return await Task.FromResult((standardOutput, string.Concat(validErrors)));
+            return await Task.FromResult((output, string.Concat(validErrors)));
         }
 
     }
