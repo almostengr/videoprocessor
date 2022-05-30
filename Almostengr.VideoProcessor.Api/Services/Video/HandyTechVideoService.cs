@@ -86,12 +86,12 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             string ffmpegInputFile = Path.Combine(workingDirectory, FFMPEG_INPUT_FILE);
             string inputFile = Path.Combine(workingDirectory, "input.txt");
 
-            if (File.Exists(inputFile))
+            if (_fileSystem.DoesFileExist(inputFile))
             {
-                File.Move(inputFile, ffmpegInputFile);
+                _fileSystem.MoveFile(inputFile, ffmpegInputFile);
             }
 
-            if (File.Exists(ffmpegInputFile))
+            if (_fileSystem.DoesFileExist(ffmpegInputFile))
             {
                 return;
             }
@@ -136,16 +136,10 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                 )
                 .ToArray();
 
-            foreach (var file in filesToRemove)
-            {
-                _fileSystem.DeleteFile(Path.Combine(workingDirectory, file));
-            }
+            _fileSystem.DeleteFiles(filesToRemove);
 
-            string[] directories = Directory.GetDirectories(workingDirectory);
-            foreach (var directory in directories)
-            {
-                _fileSystem.DeleteDirectory(directory);
-            }
+            string[] directoriesToRemove = Directory.GetDirectories(workingDirectory);
+            _fileSystem.DeleteDirectories(directoriesToRemove);
         }
 
         public override async Task ExtractTarFileAsync(
@@ -162,7 +156,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Idle);
             await _statusService.UpsertAsync(StatusKeys.RhtFile, string.Empty);
             await _statusService.SaveChangesAsync();
-            await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), cancellationToken);
+            await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerIdleInterval), cancellationToken);
         }
 
         public async Task AddAudioToTimelapseAsync(string workingDirectory, CancellationToken cancellationToken)

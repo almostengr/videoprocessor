@@ -171,7 +171,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Idle);
             await _statusService.UpsertAsync(StatusKeys.DashFile, string.Empty);
             await _statusService.SaveChangesAsync();
-            await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), cancellationToken);
+            await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerIdleInterval), cancellationToken);
         }
     }
 }

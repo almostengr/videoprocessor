@@ -2,7 +2,7 @@ namespace Almostengr.VideoProcessor.Api.Configuration
 {
     public class AppSettings
     {
-        public int WorkerServiceInterval { get; set; }
+        public int WorkerIdleInterval { get; set; }
         public Directories Directories { get; set; }
         public int ThumbnailFrames { get; set; }
         public bool DoRenderVideos { get; set; }

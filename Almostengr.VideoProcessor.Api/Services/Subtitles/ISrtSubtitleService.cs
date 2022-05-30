@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Threading.Tasks;
 using Almostengr.VideoProcessor.DataTransferObjects;
 
 namespace Almostengr.VideoProcessor.Api.Services.Subtitles
@@ -8,5 +10,6 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
         SubtitleOutputDto CleanSubtitle(SubtitleInputDto inputDto);
         string[] GetIncomingSubtitles(string directory);
         void SaveSubtitleFile(SubtitleOutputDto transcriptDto, string archiveDirectory);
+        Task WorkerIdleAsync(CancellationToken stoppingToken);
     }
 }

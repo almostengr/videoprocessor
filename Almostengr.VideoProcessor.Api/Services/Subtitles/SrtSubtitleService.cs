@@ -1,8 +1,10 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Services.FileSystem;
-using Almostengr.VideoProcessor.Api.Services.TextFile;
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
@@ -12,15 +14,15 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
     public class SrtSubtitleService : SubtitleService, ISrtSubtitleService
     {
         private readonly ILogger<SrtSubtitleService> _logger;
-        private readonly ITextFileService _textFileService;
         private readonly IFileSystemService _fileSystem;
+        private readonly AppSettings _appSettings;
 
-        public SrtSubtitleService(ILogger<SrtSubtitleService> logger, ITextFileService textFileService,
-        IFileSystemService fileSystem) : base(logger)
+        public SrtSubtitleService(ILogger<SrtSubtitleService> logger,
+            IFileSystemService fileSystem, AppSettings appSettings) : base(logger, fileSystem)
         {
             _logger = logger;
-            _textFileService = textFileService;
             _fileSystem = fileSystem;
+            _appSettings = appSettings;
         }
 
         public SubtitleOutputDto CleanSubtitle(SubtitleInputDto inputDto)
@@ -66,11 +68,11 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 
         public void SaveSubtitleFile(SubtitleOutputDto subtitleDto, string archiveDirectory)
         {
-            _textFileService.SaveFileContents(
+            base.SaveFileContents(
                 Path.Combine(archiveDirectory, $"{subtitleDto.VideoTitle}{FileExtension.Srt}"),
                 subtitleDto.VideoText);
 
-            _textFileService.SaveFileContents(
+            base.SaveFileContents(
                 Path.Combine(archiveDirectory, $"{subtitleDto.VideoTitle}{FileExtension.Md}"),
                 subtitleDto.BlogText);
         }
@@ -99,5 +101,9 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
             return (inputLines[0].StartsWith("1") == true && inputLines[1].StartsWith("00:") == true);
         }
 
+        public async Task WorkerIdleAsync(CancellationToken cancellationToken)
+        {
+            await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerIdleInterval), cancellationToken);
+        }
     }
 }
