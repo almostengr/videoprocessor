@@ -26,7 +26,10 @@ Link to my DIY and Tech channel is
 [https://www.youtube.com/channel/UC4HCouBLtXD1j1U_17aBqig?sub_confirmation=1](https://www.youtube.com/channel/UC4HCouBLtXD1j1U_17aBqig?sub_confirmation=1) 
 
 
+## References
+
 https://www.youtube.com/watch?v=mp3mDT_x6ho
 
 https://filme.imyfone.com/video-editing-tips/how-to-merge-or-combine-videos-using-ffmpeg/
-
+https://stackoverflow.com/questions/44280903/ffmpeg-vaapi-and-drawtext
+https://trac.ffmpeg.org/wiki/Hardware/VAAPI
