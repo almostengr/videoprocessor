@@ -12,5 +12,8 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
         string[] GetDirectoryContents(string path, string searchPattern);
         Task ConfirmFileTransferCompleteAsync(string videoArchive);
         string[] GetDirectoryContents(string path);
+        bool DoesFileExist(string filePath);
+        void DeleteFiles(string[] fileNames);
+        void DeleteDirectories(string[] directoryNames);
     }
 }

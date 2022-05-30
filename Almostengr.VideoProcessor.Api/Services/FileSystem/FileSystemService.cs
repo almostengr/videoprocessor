@@ -39,12 +39,28 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
             }
         }
 
+        public void DeleteDirectories(string[] directoryNames)
+        {
+            foreach(var directory in directoryNames)
+            {
+                DeleteDirectory(directory);
+            }
+        }
+
         public void DeleteFile(string fileName)
         {
             if (File.Exists(fileName))
             {
                 _logger.LogInformation($"Removing file {fileName}");
                 File.Delete(fileName);
+            }
+        }
+
+        public void DeleteFiles(string[] fileNames)
+        {
+            foreach(var file in fileNames)
+            {
+                DeleteFile(file);
             }
         }
 
@@ -95,6 +111,11 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
                 fileInfo.Refresh();
                 currentSize = fileInfo.Length;
             }
+        }
+
+        public bool DoesFileExist(string filePath)
+        {
+            return File.Exists(filePath) ? true : false;
         }
 
     } // end of class BaseService
