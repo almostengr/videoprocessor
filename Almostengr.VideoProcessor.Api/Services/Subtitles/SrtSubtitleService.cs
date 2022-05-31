@@ -84,7 +84,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 
         public string[] GetIncomingSubtitles(string directory)
         {
-            return _fileSystem.GetDirectoryContents(directory)
+            return _fileSystem.GetFilesInDirectory(directory)
                 .Where(x => x.EndsWith(FileExtension.Srt))
                 .ToArray();
         }

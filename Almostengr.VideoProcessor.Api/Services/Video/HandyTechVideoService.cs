@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -23,6 +22,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         private readonly AppSettings _appSettings;
         private readonly IExternalProcessService _externalProcess;
         private readonly IStatusService _statusService;
+        private readonly Random _random = new();
 
         public HandyTechVideoService(ILogger<HandyTechVideoService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess, IFileSystemService fileSystem,
@@ -60,7 +60,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
         {
-            List<string> socialMediaOptions = new List<string> {
+            string[] socialMediaOptions =  {
                 "facebook.com/rhtservicesllc",
                 "instagram.com/rhtservicesllc",
                 "rhtservices.net",
@@ -68,17 +68,30 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                 "youtube.com/c/robinsonhandyandtechnologyservices",
             };
 
-            Random random = new();
+            string boxColor = GetBoxColor(videoProperties.VideoTitle);
 
-            string videoFilter = $"drawtext=textfile:'{socialMediaOptions[random.Next(0, socialMediaOptions.Count)]}':";
+            string videoFilter = $"drawtext=textfile:'{socialMediaOptions[_random.Next(0, socialMediaOptions.Length)]}':";
             videoFilter += $"fontcolor={FfMpegColors.White}@{DIM_TEXT}:";
             videoFilter += $"fontsize={SMALL_FONT}:";
             videoFilter += $"{_upperRight}:";
             videoFilter += $"box=1:";
             videoFilter += $"boxborderw={RHT_BORDER_WIDTH.ToString()}:";
-            videoFilter += $"boxcolor={FfMpegColors.Black}@{DIM_BACKGROUND}";
+            videoFilter += $"boxcolor={boxColor}@{DIM_BACKGROUND}";
 
             return videoFilter;
+        }
+
+        private string GetBoxColor(string videoTitle)
+        {
+            videoTitle = videoTitle.ToLower();
+            bool randomBool = _random.Next(0, 50) >= 25;
+
+            if (videoTitle.Contains("christmas"))
+            {
+                return randomBool ? FfMpegColors.Green : FfMpegColors.Maroon;
+            }
+
+            return randomBool ? FfMpegColors.Black : FfMpegColors.RhtYellow;
         }
 
         public override void CheckOrCreateFfmpegInputFile(string workingDirectory)
@@ -99,7 +112,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
             {
                 _logger.LogInformation("Creating FFMPEG input file");
-                var filesInDirectory = _fileSystem.GetDirectoryContents(workingDirectory);
+                var filesInDirectory = _fileSystem.GetFilesInDirectory(workingDirectory);
 
                 foreach (string file in filesInDirectory.Where(x => x.EndsWith(FileExtension.Ts)).OrderBy(x => x).ToArray())
                 {
@@ -128,7 +141,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Archiving);
             await _statusService.SaveChangesAsync();
 
-            string[] filesToRemove = _fileSystem.GetDirectoryContents(workingDirectory)
+            string[] filesToRemove = _fileSystem.GetFilesInDirectory(workingDirectory)
                 .Where(x =>
                     x.EndsWith(FileExtension.Ts) == false &&
                     x.EndsWith(FileExtension.Jpg) == false &&
@@ -138,7 +151,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
             _fileSystem.DeleteFiles(filesToRemove);
 
-            string[] directoriesToRemove = Directory.GetDirectories(workingDirectory);
+            string[] directoriesToRemove = _fileSystem.GetDirectoriesInDirectory(workingDirectory);
             _fileSystem.DeleteDirectories(directoriesToRemove);
         }
 
@@ -161,14 +174,14 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public async Task AddAudioToTimelapseAsync(string workingDirectory, CancellationToken cancellationToken)
         {
-            var audioFiles = _fileSystem.GetDirectoryContents(workingDirectory)
+            var audioFiles = _fileSystem.GetFilesInDirectory(workingDirectory)
                 .Where(x => x.EndsWith(FileExtension.Mp3))
                 .ToArray();
 
             foreach (var file in audioFiles)
             {
                 string outputFileName = $"{Path.GetFileNameWithoutExtension(file)}.tmp{FileExtension.Mp4}";
-                string videoFileName = _fileSystem.GetDirectoryContents(workingDirectory)
+                string videoFileName = _fileSystem.GetFilesInDirectory(workingDirectory)
                     .Where(x => x.Contains(Path.GetFileNameWithoutExtension(file)) && x.EndsWith(FileExtension.Mp3) == false)
                     .SingleOrDefault();
 
@@ -196,7 +209,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public async Task ConvertVideoFilesToTsAsync(string directory, CancellationToken stoppingToken)
         {
-            var videoFiles = _fileSystem.GetDirectoryContents(directory)
+            var videoFiles = _fileSystem.GetFilesInDirectory(directory)
                 .Where(x =>
                     x.EndsWith(FileExtension.Mkv) ||
                     x.EndsWith(FileExtension.Mov) ||

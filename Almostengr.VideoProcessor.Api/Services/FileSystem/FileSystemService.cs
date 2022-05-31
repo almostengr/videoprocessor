@@ -82,14 +82,21 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
             }
         }
 
-        public string[] GetDirectoryContents(string path, string searchPattern = "*.*")
+        public string[] GetDirectoriesInDirectory(string path)
+        {
+            return Directory.GetDirectories(path)
+                .OrderBy(x => x)
+                .ToArray();
+        }
+
+        public string[] GetFilesInDirectory(string path, string searchPattern = "*.*")
         {
             return Directory.GetFiles(path, searchPattern)
                 .OrderBy(x => x)
                 .ToArray();
         }
 
-        public string[] GetDirectoryContents(string path)
+        public string[] GetFilesInDirectory(string path)
         {
             return Directory.GetFiles(path)
                 .OrderBy(x => x)
@@ -118,5 +125,5 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
             return File.Exists(filePath) ? true : false;
         }
 
-    } // end of class BaseService
+    }
 }

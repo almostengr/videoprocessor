@@ -92,7 +92,9 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public virtual string[] GetVideoArchivesInDirectory(string directory)
         {
-            return _fileSystem.GetDirectoryContents(directory, $"*{FileExtension.Tar}*");
+            return _fileSystem.GetFilesInDirectory(directory)
+                .Where(x => x.Contains(FileExtension.Tar))
+                .ToArray();
         }
 
         public virtual string GetSubtitlesFilter(string workingDirectory)
@@ -123,9 +125,10 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public virtual async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
         {
-            var nonMp4VideoFiles = Directory.GetFiles(directory)
+            var nonMp4VideoFiles = _fileSystem.GetFilesInDirectory(directory)
                 .Where(x => x.ToLower().EndsWith(FileExtension.Mkv) || x.ToLower().EndsWith(FileExtension.Mov))
-                .OrderBy(x => x).ToArray();
+                .OrderBy(x => x)
+                .ToArray();
 
             foreach (var videoFile in nonMp4VideoFiles)
             {
@@ -145,7 +148,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public virtual void PrepareFileNamesInDirectory(string directory)
         {
-            foreach (string file in Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories))
+            foreach (string file in _fileSystem.GetFilesInDirectory(directory))
             {
                 File.Move(
                     file,
@@ -178,7 +181,12 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
             {
                 _logger.LogInformation("Creating FFMPEG input file");
-                foreach (string file in Directory.GetFiles(workingDirectory, $"*{FileExtension.Mp4}").OrderBy(x => x))
+                string[] mp4Files = _fileSystem.GetFilesInDirectory(workingDirectory)
+                    .Where(x => x.EndsWith(FileExtension.Mp4))
+                    .OrderBy(x => x)
+                    .ToArray();
+
+                foreach (string file in mp4Files)
                 {
                     writer.WriteLine($"file '{Path.GetFileName(file)}'");
                 }
@@ -205,7 +213,10 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                     cancellationToken,
                     240);
 
-                int thumbnailsCreated = _fileSystem.GetDirectoryContents(videoProperties.UploadDirectory, $"{videoProperties.VideoTitle}*{FileExtension.Jpg}").Count();
+                int thumbnailsCreated = _fileSystem.GetFilesInDirectory(videoProperties.UploadDirectory)
+                    .Where(x => x.Contains(videoProperties.VideoTitle) && x.EndsWith(FileExtension.Jpg))
+                    .ToArray()
+                    .Count();
 
                 if (thumbnailsCreated >= _appSettings.ThumbnailFrames)
                 {
@@ -226,7 +237,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             _fileSystem.DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
             _fileSystem.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
 
-            string[] files = Directory.GetFiles(workingDirectory)
+            string[] files = _fileSystem.GetFilesInDirectory(workingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Gif) ||
                     f.EndsWith(FileExtension.Kdenlive) ||
                     f.EndsWith(FileExtension.Mp3))
@@ -237,7 +248,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                 _fileSystem.DeleteFile(Path.Combine(workingDirectory, file));
             }
 
-            string[] directories = Directory.GetDirectories(workingDirectory);
+            string[] directories = _fileSystem.GetDirectoriesInDirectory(workingDirectory);
             foreach (var directory in directories)
             {
                 _fileSystem.DeleteDirectory(directory);

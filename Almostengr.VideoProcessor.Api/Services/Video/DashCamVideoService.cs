@@ -47,12 +47,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         {
             Random random = new();
             int randomDuration = random.Next(5, 16);
-
-            string textColor = FfMpegColors.White;
-            if (videoProperties.VideoTitle.ToLower().Contains("night"))
-            {
-                textColor = FfMpegColors.Orange;
-            }
+            string textColor = GetTextColor(videoProperties.VideoTitle);
 
             // solid text - channel name
             string videoFilter = string.Empty;
@@ -96,6 +91,18 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             videoFilter += $"enable='gt(t,{randomDuration})'";
 
             return videoFilter;
+        }
+
+        private string GetTextColor(string videoTitle)
+        {
+            videoTitle = videoTitle.ToLower();
+
+            if (videoTitle.Contains("night"))
+            {
+                return FfMpegColors.Orange;
+            }
+
+            return FfMpegColors.White;
         }
 
         public string GetDestinationFilter(string workingDirectory)

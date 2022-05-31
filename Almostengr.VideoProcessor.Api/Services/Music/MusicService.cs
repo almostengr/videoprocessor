@@ -23,8 +23,8 @@ namespace Almostengr.VideoProcessor.Api.Services.MusicService
 
         public string GetRandomMusicTracks()
         {
-            var musicFiles = _fileSystem.GetDirectoryContents(_appSettings.Directories.MusicDirectory, $"*{FileExtension.Mp3}")
-                .Where(x => x.ToLower().Contains("mix") == false);
+            var musicFiles = _fileSystem.GetFilesInDirectory(_appSettings.Directories.MusicDirectory)
+                .Where(x => x.ToLower().Contains("mix") == false && x.ToLower().EndsWith(FileExtension.Mp3));
             string outputString = string.Empty;
 
             while (outputString.Split(Environment.NewLine).Length < musicFiles.Count())
@@ -43,8 +43,8 @@ namespace Almostengr.VideoProcessor.Api.Services.MusicService
 
         public string GetRandomMixTrack()
         {
-            var musicMixes = _fileSystem.GetDirectoryContents(_appSettings.Directories.MusicDirectory, $"*{FileExtension.Mp3}")
-                .Where(x => x.ToLower().Contains("mix"));
+            var musicMixes = _fileSystem.GetFilesInDirectory(_appSettings.Directories.MusicDirectory)
+                .Where(x => x.ToLower().Contains("mix") && x.ToLower().EndsWith(FileExtension.Mp3));
             return musicMixes.ElementAt(_random.Next(0, musicMixes.Count() - 1));
         }
 
