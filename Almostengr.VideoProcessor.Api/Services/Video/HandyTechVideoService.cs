@@ -60,6 +60,19 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
         {
+            string videoFilter = $"drawtext=textfile:'{GetBrandingText()}':";
+            videoFilter += $"fontcolor={FfMpegColors.White}@{DIM_TEXT}:";
+            videoFilter += $"fontsize={SMALL_FONT}:";
+            videoFilter += $"{_upperRight}:";
+            videoFilter += $"box=1:";
+            videoFilter += $"boxborderw={RHT_BORDER_WIDTH.ToString()}:";
+            videoFilter += $"boxcolor={GetBoxColor(videoProperties.VideoTitle)}@{DIM_BACKGROUND}";
+
+            return videoFilter;
+        }
+
+        private string GetBrandingText()
+        {
             string[] socialMediaOptions =  {
                 "facebook.com/rhtservicesllc",
                 "instagram.com/rhtservicesllc",
@@ -68,17 +81,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                 "youtube.com/c/robinsonhandyandtechnologyservices",
             };
 
-            string boxColor = GetBoxColor(videoProperties.VideoTitle);
-
-            string videoFilter = $"drawtext=textfile:'{socialMediaOptions[_random.Next(0, socialMediaOptions.Length)]}':";
-            videoFilter += $"fontcolor={FfMpegColors.White}@{DIM_TEXT}:";
-            videoFilter += $"fontsize={SMALL_FONT}:";
-            videoFilter += $"{_upperRight}:";
-            videoFilter += $"box=1:";
-            videoFilter += $"boxborderw={RHT_BORDER_WIDTH.ToString()}:";
-            videoFilter += $"boxcolor={boxColor}@{DIM_BACKGROUND}";
-
-            return videoFilter;
+            return socialMediaOptions[_random.Next(0, socialMediaOptions.Length)];
         }
 
         private string GetBoxColor(string videoTitle)
