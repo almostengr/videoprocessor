@@ -100,31 +100,32 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         public override void CheckOrCreateFfmpegInputFile(string workingDirectory)
         {
             string ffmpegInputFile = Path.Combine(workingDirectory, FFMPEG_INPUT_FILE);
-            string inputFile = Path.Combine(workingDirectory, "input.txt");
-
-            if (_fileSystem.DoesFileExist(inputFile))
-            {
-                _fileSystem.MoveFile(inputFile, ffmpegInputFile);
-            }
-
-            if (_fileSystem.DoesFileExist(ffmpegInputFile))
-            {
-                return;
-            }
+            _fileSystem.DeleteFile(ffmpegInputFile);
 
             using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
             {
                 _logger.LogInformation("Creating FFMPEG input file");
-                var filesInDirectory = _fileSystem.GetFilesInDirectory(workingDirectory);
+                // var filesInDirectory = _fileSystem.GetFilesInDirectory(workingDirectory);
+                var filesInDirectory = _fileSystem.GetFilesInDirectory(workingDirectory)
+                    .Where(x => x.EndsWith(FileExtension.Ts)).OrderBy(x => x).ToArray();
 
-                foreach (string file in filesInDirectory.Where(x => x.EndsWith(FileExtension.Ts)).OrderBy(x => x).ToArray())
-                {
-                    writer.WriteLine($"file '{Path.GetFileName(file)}'"); // add video files
-                }
+                int showIntroPosition = _random.Next(1, 3);
 
-                foreach (string file in filesInDirectory.Where(x => x.EndsWith(FileExtension.Jpg)).OrderBy(x => x).ToArray())
+                // foreach (string file in filesInDirectory.Where(x => x.EndsWith(FileExtension.Ts)).OrderBy(x => x).ToArray())
+                // {
+                //     writer.WriteLine($"file '{Path.GetFileName(file)}'"); // add video files
+                // }
+
+                // string[] files = filesInDirectory.Where(x => x.EndsWith(FileExtension.Ts)).OrderBy(x => x).ToArray();
+                for (int i = 1; i < filesInDirectory.Length; i++)
                 {
-                    writer.WriteLine($"file '{Path.GetFileName(file)}'"); // add images
+                    writer.WriteLine($"file '{Path.GetFileName(filesInDirectory[i])}'"); // add video files
+
+                    if (i == showIntroPosition)
+                    {
+                        string introClip = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/RHT Services/ytvideostructure/rhtservicesintro.ts";
+                        writer.WriteLine($"file '{Path.GetFileName(introClip)}'"); // add video files
+                    }
                 }
             }
         }
@@ -177,33 +178,47 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public async Task AddAudioToTimelapseAsync(string workingDirectory, CancellationToken cancellationToken)
         {
+            var narrationFiles = _fileSystem.GetFilesInDirectory(workingDirectory)
+                .Where(x => x.Contains("narration") && (x.EndsWith(FileExtension.Mp4) || x.EndsWith(FileExtension.Mkv)))
+                .ToArray();
+
+            foreach (var narrationFile in narrationFiles)
+            {
+                string mp3FileName = Path.GetFileNameWithoutExtension(narrationFile).Replace("narration", string.Empty) + FileExtension.Mp3;
+                _logger.LogInformation($"Converting narration file {narrationFile} to {mp3FileName}");
+
+                await _externalProcess.RunCommandAsync(
+                    ProgramPaths.FfmpegBinary,
+                    $"{LOG_ERRORS} -hide_banner -y -i \"{narrationFile}\" -vn \"{mp3FileName}\"",
+                    workingDirectory,
+                    cancellationToken,
+                    5);
+
+                _fileSystem.DeleteFile(narrationFile);
+            }
+
             var audioFiles = _fileSystem.GetFilesInDirectory(workingDirectory)
                 .Where(x => x.EndsWith(FileExtension.Mp3))
                 .ToArray();
 
-            foreach (var file in audioFiles)
+            foreach (var audioFile in audioFiles)
             {
-                string outputFileName = $"{Path.GetFileNameWithoutExtension(file)}.tmp{FileExtension.Mp4}";
+                string outputFileName = $"{Path.GetFileNameWithoutExtension(audioFile)}.tmp{FileExtension.Mp4}";
                 string videoFileName = _fileSystem.GetFilesInDirectory(workingDirectory)
-                    .Where(x => x.Contains(Path.GetFileNameWithoutExtension(file)) && x.EndsWith(FileExtension.Mp3) == false)
+                    .Where(x => x.Contains(Path.GetFileNameWithoutExtension(audioFile)) && x.EndsWith(FileExtension.Mp3) == false)
                     .SingleOrDefault();
 
                 if (File.Exists(Path.Combine(workingDirectory, videoFileName)) == false)
                 {
-                    throw new ArgumentNullException($"Video file for {file} was not found");
+                    throw new ArgumentNullException($"Video file for {audioFile} was not found");
                 }
 
-                var result = await _externalProcess.RunCommandAsync(
+                await _externalProcess.RunCommandAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"-loglevel error -hide_banner -y -hwaccel vaapi -hwaccel_output_format vaapi -i {Path.GetFileName(videoFileName)} -i {Path.GetFileName(file)} -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 {outputFileName}",
+                    $"{LOG_ERRORS} {HW_OPTIONS} -i {Path.GetFileName(videoFileName)} -i {Path.GetFileName(audioFile)} -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 {outputFileName}",
                     workingDirectory,
                     cancellationToken,
                     10);
-
-                if (result.stdErr.Length > 0)
-                {
-                    throw new ApplicationException("Errors occurred when attempting to merge audio and video");
-                }
 
                 _fileSystem.DeleteFile(videoFileName);
                 _fileSystem.MoveFile(Path.Combine(workingDirectory, outputFileName), videoFileName);
@@ -232,11 +247,6 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                     stoppingToken,
                     10
                 );
-
-                if (result.stdErr.Length > 0)
-                {
-                    throw new ApplicationException("Error occurred when converting to TS format");
-                }
 
                 _fileSystem.DeleteFile(videoFileName);
             }

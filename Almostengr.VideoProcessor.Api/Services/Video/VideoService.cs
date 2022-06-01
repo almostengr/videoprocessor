@@ -76,18 +76,13 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         {
             _logger.LogInformation($"Archiving directory contents: {directoryToArchive}");
 
-            var result = await _externalProcess.RunCommandAsync(
+            await _externalProcess.RunCommandAsync(
                 ProgramPaths.BashShell,
                 $"-c \"cd \\\"{directoryToArchive}\\\" && tar -cvJf \\\"{Path.Combine(archiveDestination, archiveName)}\\\" *\"",
                 directoryToArchive,
                 cancellationToken,
                 15
             );
-
-            if (result.stdErr.Length > 0)
-            {
-                throw new ApplicationException("Error occurred when archiving files");
-            }
         }
 
         public virtual string[] GetVideoArchivesInDirectory(string directory)
@@ -166,17 +161,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         public virtual void CheckOrCreateFfmpegInputFile(string workingDirectory)
         {
             string ffmpegInputFile = Path.Combine(workingDirectory, FFMPEG_INPUT_FILE);
-            string inputFile = Path.Combine(workingDirectory, "input.txt");
-
-            if (File.Exists(inputFile))
-            {
-                File.Move(inputFile, ffmpegInputFile);
-            }
-
-            if (File.Exists(ffmpegInputFile))
-            {
-                return;
-            }
+            _fileSystem.DeleteFile(ffmpegInputFile);
 
             using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
             {
@@ -236,6 +221,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             _fileSystem.DeleteFile(Path.Combine(workingDirectory, "services.txt"));
             _fileSystem.DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
             _fileSystem.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
+            _fileSystem.DeleteFile(Path.Combine(workingDirectory, FFMPEG_INPUT_FILE));
 
             string[] files = _fileSystem.GetFilesInDirectory(workingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Gif) ||
