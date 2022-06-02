@@ -16,5 +16,6 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
         string[] GetFilesInDirectory(string path, string searchPattern);
         bool IsDiskSpaceAvailable(string directory, double threshold);
         void MoveFile(string source, string destination);
+        void CopyFile(string sourceFile, string destinationFIle);
     }
 }

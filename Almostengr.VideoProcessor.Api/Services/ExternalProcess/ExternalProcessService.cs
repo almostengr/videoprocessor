@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Almostengr.VideoProcessor.Api.Constants;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
@@ -50,12 +51,15 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
             int errorCount = error.Split("\n")
                 .Where(x =>
                     !x.Contains("libva: /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so init failed") &&
+                    !x.Contains("Output file is empty, nothing was encoded (check -ss / -t / -frames parameters if used") &&
+                    !x.Contains("deprecated pixel format used, make sure you did set range correctly") &&
+                    
                     !x.Equals("")
                 )
                 .ToArray()
                 .Count();
 
-            if (errorCount > 0)
+            if (errorCount > 0 && program == ProgramPaths.FfprobeBinary == false)
             {
                 _logger.LogError(error);
                 throw new ApplicationException("Errors occurred when running the command");

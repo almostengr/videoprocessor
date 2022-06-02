@@ -7,5 +7,6 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
     {
         Task AddAudioToTimelapseAsync(string workingDirectory, CancellationToken cancellationToken);
         Task ConvertVideoFilesToTsAsync(string workingDirectory, CancellationToken stoppingToken);
+        void CopyShowIntroToWorkingDirectory(string introVideoPath, string workingDirectory);
     }
 }

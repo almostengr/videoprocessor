@@ -70,6 +70,8 @@ namespace Almostengr.VideoProcessor.Workers
 
                     await _videoService.AddAudioToTimelapseAsync(_workingDirectory, stoppingToken); // add audio to gopro timelapse files
 
+                    _videoService.CopyShowIntroToWorkingDirectory(_appSettings.Directories.IntroVideoPath, _workingDirectory);
+
                     await _videoService.ConvertVideoFilesToTsAsync(_workingDirectory, stoppingToken); // convert video files to TS format
 
                     _videoService.CheckOrCreateFfmpegInputFile(_workingDirectory);

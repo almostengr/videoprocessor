@@ -14,5 +14,6 @@ namespace Almostengr.VideoProcessor.Api.Configuration
         public string DashCamBaseDirectory { get; set; }
         public string RhtBaseDirectory { get; set; }
         public string MusicDirectory { get; set; }
+        public string IntroVideoPath { get; set; }
     }
 }

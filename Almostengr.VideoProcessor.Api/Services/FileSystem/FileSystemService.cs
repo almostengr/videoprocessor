@@ -125,5 +125,10 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
             return File.Exists(filePath) ? true : false;
         }
 
+        public void CopyFile(string sourceFile, string destinationFile)
+        {
+            _logger.LogInformation($"Copying {sourceFile} to {destinationFile}");
+            File.Copy(sourceFile, destinationFile);
+        }
     }
 }

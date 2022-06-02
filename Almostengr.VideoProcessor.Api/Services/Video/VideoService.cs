@@ -153,7 +153,9 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                                 .ToLower()
                                 .Replace(";", "_")
                                 .Replace(" ", "_")
-                                .Replace("__", "_"))
+                                .Replace("__", "_")
+                                .Replace("\"", string.Empty)
+                                .Replace("\'", string.Empty))
                 );
             }
         }
