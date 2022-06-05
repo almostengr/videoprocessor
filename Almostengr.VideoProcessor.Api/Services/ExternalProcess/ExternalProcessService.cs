@@ -53,7 +53,6 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
                     !x.Contains("libva: /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so init failed") &&
                     !x.Contains("Output file is empty, nothing was encoded (check -ss / -t / -frames parameters if used") &&
                     !x.Contains("deprecated pixel format used, make sure you did set range correctly") &&
-                    
                     !x.Equals("")
                 )
                 .ToArray()

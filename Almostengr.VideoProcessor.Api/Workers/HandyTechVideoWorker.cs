@@ -72,7 +72,8 @@ namespace Almostengr.VideoProcessor.Workers
 
                     _videoService.CopyShowIntroToWorkingDirectory(_appSettings.Directories.IntroVideoPath, _workingDirectory);
 
-                    await _videoService.ConvertVideoFilesToTsAsync(_workingDirectory, stoppingToken); // convert video files to TS format
+                    // await _videoService.ConvertVideoFilesToTsAsync(_workingDirectory, stoppingToken); // convert video files to TS format
+                    await _videoService.ConvertVideoFilesToCommonFormatAsync(_workingDirectory, stoppingToken);
 
                     _videoService.CheckOrCreateFfmpegInputFile(_workingDirectory);
 

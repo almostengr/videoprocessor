@@ -110,7 +110,8 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                 _logger.LogInformation("Creating FFMPEG input file");
                 // var filesInDirectory = _fileSystem.GetFilesInDirectory(workingDirectory);
                 var filesInDirectory = _fileSystem.GetFilesInDirectory(workingDirectory)
-                    .Where(x => x.EndsWith(FileExtension.Ts)).OrderBy(x => x).ToArray();
+                    .Where(x => x.EndsWith(FileExtension.Mp4)).OrderBy(x => x).ToArray();
+                // .Where(x => x.EndsWith(FileExtension.Ts)).OrderBy(x => x).ToArray();
 
                 // int showIntroPosition = _random.Next(1, 3);
 
@@ -119,10 +120,12 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                 //     writer.WriteLine($"file '{Path.GetFileName(file)}'"); // add video files
                 // }
 
+                string rhtservicesintro = "rhtservicesintro.1920x1080.mp4";
                 // string[] files = filesInDirectory.Where(x => x.EndsWith(FileExtension.Ts)).OrderBy(x => x).ToArray();
                 for (int i = 0; i < filesInDirectory.Length; i++)
                 {
-                    if (filesInDirectory[i].EndsWith(_showIntroFileNameTs))
+                    // if (filesInDirectory[i].EndsWith(_showIntroFileNameTs))
+                    if (filesInDirectory[i].Contains(rhtservicesintro))
                     {
                         continue;
                     }
@@ -131,7 +134,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                     {
                         // string introClip = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/rhtservicesintro.ts";
                         // writer.WriteLine($"file '{_appSettings.Directories.IntroVideoPath}'"); // add video files
-                        writer.WriteLine($"file '{_showIntroFileNameTs}'"); // add video files
+                        writer.WriteLine($"file '{rhtservicesintro}'"); // add video files
                     }
 
                     writer.WriteLine($"file '{Path.GetFileName(filesInDirectory[i])}'"); // add video files
@@ -151,26 +154,53 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public override async Task CleanUpBeforeArchivingAsync(string workingDirectory)
         {
+            _logger.LogInformation($"Cleaning up before archiving {workingDirectory}");
+
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Archiving);
             await _statusService.SaveChangesAsync();
 
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, _showIntroFileNameTs));
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, SHOW_INTRO_FILENAME_MP4));
+            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "dash_cam_opening.mp4"));
+            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
 
-            await base.CleanUpBeforeArchivingAsync(workingDirectory);
+            // _fileSystem.DeleteFile(Path.Combine(workingDirectory, "ae_intro.mp4"));
+            // _fileSystem.DeleteFile(Path.Combine(workingDirectory, "ae_outtro2.mp4"));
+            // _fileSystem.DeleteFile(Path.Combine(workingDirectory, "dashcam.txt"));
+            // _fileSystem.DeleteFile(Path.Combine(workingDirectory, "services.txt"));
+            // _fileSystem.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
+            // _fileSystem.DeleteFile(Path.Combine(workingDirectory, FFMPEG_INPUT_FILE));
+
+            // _fileSystem.DeleteFile(Path.Combine(workingDirectory, _showIntroFileNameTs));
+            // _fileSystem.DeleteFile(Path.Combine(workingDirectory, SHOW_INTRO_FILENAME_MP4));
+
+            // string[] files = _fileSystem.GetFilesInDirectory(workingDirectory)
+            //     .Where(f => f.EndsWith(FileExtension.Gif) ||
+            //         f.EndsWith(FileExtension.Kdenlive) ||
+            //         f.EndsWith(FileExtension.Mp3))
+            //     .ToArray();
+
+            // foreach (var file in files)
+            // {
+            //     _fileSystem.DeleteFile(Path.Combine(workingDirectory, file));
+            // }
+
+
+            // await base.CleanUpBeforeArchivingAsync(workingDirectory);
 
             string[] filesToRemove = _fileSystem.GetFilesInDirectory(workingDirectory)
-                .Where(x =>
-                    x.EndsWith(FileExtension.Ts) == false &&
-                    x.EndsWith(FileExtension.Jpg) == false &&
-                    x.EndsWith(FFMPEG_INPUT_FILE) == false
-                )
+                // .Where(x =>
+                //     x.EndsWith(FileExtension.Ts) == false &&
+                //     x.EndsWith(FileExtension.Jpg) == false &&
+                //     x.EndsWith(FFMPEG_INPUT_FILE) == false &&
+                //     x.EndsWith(FileExtension.Kdenlive) == 
+                // )
+                .Where(x => !x.EndsWith(FileExtension.Mp4) ||
+                    x.Contains("rhtservicesintro"))
                 .ToArray();
 
             _fileSystem.DeleteFiles(filesToRemove);
-
-            string[] directoriesToRemove = _fileSystem.GetDirectoriesInDirectory(workingDirectory);
-            _fileSystem.DeleteDirectories(directoriesToRemove);
+            _fileSystem.DeleteDirectories(_fileSystem.GetDirectoriesInDirectory(workingDirectory));
+            
+            await Task.CompletedTask;
         }
 
         public override async Task ExtractTarFileAsync(
@@ -193,7 +223,8 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         public async Task AddAudioToTimelapseAsync(string workingDirectory, CancellationToken cancellationToken)
         {
             var narrationFiles = _fileSystem.GetFilesInDirectory(workingDirectory)
-                .Where( (x => x.Contains("narration") || x.Contains("narrative")) && (y => y.EndsWith(FileExtension.Mp4) || y.EndsWith(FileExtension.Mkv)))
+                .Where(x => x.Contains("narration") || x.Contains("narrative"))
+                .Where(x => x.EndsWith(FileExtension.Mp4) || x.EndsWith(FileExtension.Mkv))
                 .ToArray();
 
             foreach (var narrationFile in narrationFiles)
@@ -237,6 +268,74 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
                 _fileSystem.DeleteFile(videoFileName);
                 _fileSystem.MoveFile(Path.Combine(workingDirectory, outputFileName), videoFileName);
+            }
+        }
+
+        public async Task ConvertVideoFilesToCommonFormatAsync(string directory, CancellationToken stoppingToken)
+        {
+            var videoFiles = _fileSystem.GetFilesInDirectory(directory)
+                .Where(x => x.EndsWith(FileExtension.Mkv) || x.EndsWith(FileExtension.Mov) || x.EndsWith(FileExtension.Mp4))
+                .OrderBy(x => x).ToArray();
+
+            foreach (var videoFileName in videoFiles)
+            {
+                _logger.LogInformation("Checking resolution of {videoFileName}");
+
+                var result = await _externalProcess.RunCommandAsync(
+                    ProgramPaths.FfprobeBinary,
+                    $"-hide_banner \"{videoFileName}\"",
+                    // ProgramPaths.BashShell,
+                    // $"-c \"\\\"{ProgramPaths.FfprobeBinary}\\\" -hide_banner \\\"{videoFileName}\\\" \" 2>&1",
+                    directory,
+                    stoppingToken,
+                    1
+                );
+
+                string scaleTo1080 = string.Empty;
+                string xResolution = "1920";
+                string yResolution = "1080";
+                string audioBitRate = "190000";
+                string audioSampleRate = "48000";
+
+                if (result.stdErr.Contains($"{xResolution}x{yResolution}") &&
+                    result.stdErr.Contains($"{audioBitRate} Hz") &&
+                    videoFileName.EndsWith(FileExtension.Mp4))
+                {
+                    continue;
+                }
+
+                // if (result.stdErr.Contains($"{xResolution}x{yResolution}") == false || 
+                //     result.stdErr.Contains($"{audioHz} Hz")  == false || 
+                //     videoFileName.EndsWith(FileExtension.Mp4) == false)
+                // {
+                _logger.LogInformation($"Converting video {videoFileName} to common format");
+
+                string scaledFile = $"{Path.GetFileNameWithoutExtension(videoFileName)}.{xResolution}x{yResolution}{FileExtension.Mp4}";
+
+                await _externalProcess.RunCommandAsync(
+                    ProgramPaths.FfmpegBinary,
+                    $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -vf \"scale_vaapi=w={xResolution}:h={yResolution}\" -vcodec h264_vaapi -ar {audioSampleRate} -b:a {audioBitRate} \"{scaledFile}\"",
+                    directory,
+                    stoppingToken,
+                    10
+                );
+
+                _fileSystem.DeleteFile(Path.Combine(directory, videoFileName));
+                // _fileSystem.MoveFile(Path.Combine(directory, scaledFile), Path.Combine(directory, videoFileName));
+                // }
+
+                string outputFileName = Path.GetFileNameWithoutExtension(videoFileName) + FileExtension.Mp4;
+                // _logger.LogInformation($"Converting {videoFileName} to {outputFileName}");
+
+                // await _externalProcess.RunCommandAsync(
+                //     ProgramPaths.FfmpegBinary,
+                //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -c copy -bsf:v h264_mp4toannexb -f mpegts \"{outputFileName}\"",
+                //     directory,
+                //     stoppingToken,
+                //     10
+                // );
+
+                // _fileSystem.DeleteFile(videoFileName);
             }
         }
 

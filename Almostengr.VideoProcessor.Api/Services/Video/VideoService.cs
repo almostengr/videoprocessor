@@ -143,6 +143,18 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public virtual void PrepareFileNamesInDirectory(string directory)
         {
+            foreach (string childDirectory in _fileSystem.GetDirectoriesInDirectory(directory))
+            {
+                foreach(string childFile in _fileSystem.GetFilesInDirectory(childDirectory))
+                {
+                    _fileSystem.MoveFile(
+                        Path.Combine(childDirectory, childFile),
+                        Path.Combine(directory, Path.GetFileName(childFile))
+                    );
+                }
+            }
+
+
             foreach (string file in _fileSystem.GetFilesInDirectory(directory))
             {
                 File.Move(
