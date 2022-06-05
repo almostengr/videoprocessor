@@ -69,7 +69,7 @@
             "args": [
                 "-pr",
                 "${workspaceRoot}/LinuxService/thermometerapi.service",
-                "${workspaceRoot}/Almostengr.VideoProcessor.Api/bin/Release/net5.0/linux-x64/publish/*",
+                "${workspaceRoot}/Almostengr.VideoProcessor.Api/bin/Release/net6.0/linux-x64/publish/*",
                 "iamadmin@media://home/iamadmin/videoprocessor/",
             ],
             "group": "none",
@@ -83,7 +83,7 @@
                 "-czvf",
                 "${workspaceRoot}/Almostengr.VideoProcessor.Api.tar.gz",
                 "-C",
-                "${workspaceRoot}/Almostengr.VideoProcessor.Api/bin/Release/net5.0/linux-x64/publish",
+                "${workspaceRoot}/Almostengr.VideoProcessor.Api/bin/Release/net6.0/linux-x64/publish",
                 "."
             ],
             "dependsOn": ["Publish Release"],
@@ -97,7 +97,7 @@
                 "-a",
                 "\"v5.$(date +%Y.%m.%d)\"",
                 "-m",
-                "\"version 5.$(date +%Y.%m.%d)\""
+                "\"version 6.$(date +%Y.%m.%d)\""
             ],
             "dependsOn": ["Package TAR Release"],
         }
