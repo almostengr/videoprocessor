@@ -21,6 +21,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         private readonly IFileSystemService _fileSystem;
         private const int PADDING = 30;
         internal readonly string _subscribeFilter;
+        internal readonly Random _random;
         internal readonly string _subscribeScrollingFilter;
 
         // ffmpeg positions
@@ -44,7 +45,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         // ffmpeg filter attributes
         internal const int DASHCAM_BORDER_WIDTH = 10;
-        internal const string DIM_TEXT = "0.7";
+        internal const string DIM_TEXT = "0.8";
         internal const string DIM_BACKGROUND = "0.3";
         internal const string LARGE_FONT = "h/20";
         internal const string SMALL_FONT = "h/35";
@@ -57,6 +58,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             _appSettings = appSettings;
             _externalProcess = externalProcess;
             _fileSystem = fileSystem;
+            _random = new();
 
             _upperLeft = $"x={PADDING}:y={PADDING}";
             _upperCenter = $"x=(w-tw)/2:y={PADDING}";
@@ -153,7 +155,6 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                     );
                 }
             }
-
 
             foreach (string file in _fileSystem.GetFilesInDirectory(directory))
             {

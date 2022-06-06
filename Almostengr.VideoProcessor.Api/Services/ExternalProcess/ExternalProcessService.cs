@@ -47,7 +47,6 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
 
             process.Close();
 
-            // string[] validErrors =
             int errorCount = error.Split("\n")
                 .Where(x =>
                     !x.Contains("libva: /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so init failed") &&

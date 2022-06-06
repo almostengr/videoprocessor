@@ -45,8 +45,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
         {
-            Random random = new();
-            int randomDuration = random.Next(5, 16);
+            int randomDuration = _random.Next(5, 16);
             string textColor = GetTextColor(videoProperties.VideoTitle);
 
             // solid text - channel name
