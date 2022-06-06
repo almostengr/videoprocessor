@@ -24,7 +24,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         private readonly IStatusService _statusService;
         private readonly string _xResolution = "1920";
         private readonly string _yResolution = "1080";
-        private readonly string _audioBitRate = "190000";
+        private readonly string _audioBitRate = "196000";
         private readonly string _audioSampleRate = "48000";
 
         private const string SHOW_INTRO_FILENAME_MP4 = "rhtservicesintro.mp4";
@@ -79,11 +79,11 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         private string GetBrandingText()
         {
             string[] socialMediaOptions =  {
-                "facebook.com/rhtservicesllc",
-                "instagram.com/rhtservicesllc",
-                "rhtservices.net",
                 "Robinson Handy and Technology Services",
-                "youtube.com/c/robinsonhandyandtechnologyservices",
+                "rhtservices.net",
+                "rhtservices.net/facebook",
+                "rhtservices.net/instagram",
+                "rhtservices.net/youtube",
             };
 
             return socialMediaOptions[_random.Next(0, socialMediaOptions.Length)];
@@ -157,7 +157,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
             _fileSystem.DeleteFiles(filesToRemove);
             _fileSystem.DeleteDirectories(_fileSystem.GetDirectoriesInDirectory(workingDirectory));
-            
+
             await Task.CompletedTask;
         }
 
@@ -247,20 +247,23 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                     1
                 );
 
+                string scaledFile = $"{Path.GetFileNameWithoutExtension(videoFileName)}.{_xResolution}x{_yResolution}{FileExtension.Mp4}";
+
                 if (result.stdErr.Contains($"{_xResolution}x{_yResolution}") &&
                     result.stdErr.Contains($"{_audioBitRate} Hz") &&
+                    result.stdErr.Contains($"196 kb/s") &&
                     videoFileName.EndsWith(FileExtension.Mp4))
                 {
+                    _fileSystem.MoveFile(Path.Combine(directory, videoFileName), Path.Combine(directory, scaledFile));
                     continue;
                 }
 
                 _logger.LogInformation($"Converting video {videoFileName} to common format");
 
-                string scaledFile = $"{Path.GetFileNameWithoutExtension(videoFileName)}.{_xResolution}x{_yResolution}{FileExtension.Mp4}";
 
                 await _externalProcess.RunCommandAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -vf \"scale_vaapi=w={_xResolution}:h={_yResolution}\" -vcodec h264_vaapi -ar {_audioSampleRate} -b:a {_audioBitRate} \"{scaledFile}\"",
+                    $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -r 30 -vf \"scale_vaapi=w={_xResolution}:h={_yResolution}\" -vcodec h264_vaapi -ar {_audioSampleRate} -b:a {_audioBitRate} \"{scaledFile}\"",
                     directory,
                     stoppingToken,
                     10
