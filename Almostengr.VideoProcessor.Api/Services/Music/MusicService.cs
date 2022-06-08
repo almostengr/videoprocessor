@@ -45,7 +45,14 @@ namespace Almostengr.VideoProcessor.Api.Services.MusicService
         {
             var musicMixes = _fileSystem.GetFilesInDirectory(_appSettings.Directories.MusicDirectory)
                 .Where(x => x.ToLower().Contains("mix") && x.ToLower().EndsWith(FileExtension.Mp3));
-            return musicMixes.ElementAt(_random.Next(0, musicMixes.Count() - 1));
+            return musicMixes.ElementAt(_random.Next(0, musicMixes.Count()));
+        }
+
+        public string GetRandomNonMixTrack()
+        {
+            var nonMusicMixes = _fileSystem.GetFilesInDirectory(_appSettings.Directories.MusicDirectory)
+                .Where(x => !x.ToLower().Contains("mix") && x.ToLower().EndsWith(FileExtension.Mp3));
+            return nonMusicMixes.ElementAt(_random.Next(0, nonMusicMixes.Count()));
         }
 
     }
