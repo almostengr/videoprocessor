@@ -93,7 +93,7 @@ namespace Almostengr.VideoProcessor.Workers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.InnerException, ex.Message);
+                    _logger.LogError(ex, ex.Message);
                 }
 
                 _logger.LogInformation($"Finished processing {videoArchive}");

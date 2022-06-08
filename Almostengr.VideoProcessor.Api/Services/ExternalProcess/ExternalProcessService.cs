@@ -60,7 +60,7 @@ namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
             if (errorCount > 0 && program == ProgramPaths.FfprobeBinary == false)
             {
                 _logger.LogError(error);
-                throw new ApplicationException("Errors occurred when running the command");
+                throw new ArgumentException("Errors occurred when running the command");
             }
 
             return await Task.FromResult((output, error));
