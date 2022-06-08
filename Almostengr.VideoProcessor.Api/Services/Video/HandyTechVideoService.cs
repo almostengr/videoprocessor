@@ -10,6 +10,7 @@ using Almostengr.VideoProcessor.Api.Enums;
 using Almostengr.VideoProcessor.Api.Services.Data;
 using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Almostengr.VideoProcessor.Api.Services.FileSystem;
+using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Almostengr.VideoProcessor.Constants;
 using Microsoft.Extensions.Logging;
 
@@ -22,6 +23,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         private readonly AppSettings _appSettings;
         private readonly IExternalProcessService _externalProcess;
         private readonly IStatusService _statusService;
+        private readonly IMusicService _musicService;
         private readonly string _xResolution = "1920";
         private readonly string _yResolution = "1080";
         private readonly string _audioBitRate = "196000";
@@ -31,7 +33,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public HandyTechVideoService(ILogger<HandyTechVideoService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess, IFileSystemService fileSystem,
-            IStatusService statusService) :
+            IStatusService statusService, IMusicService musicService) :
              base(logger, appSettings, externalProcess, fileSystem)
         {
             _appSettings = appSettings;
@@ -39,6 +41,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             _externalProcess = externalProcess;
             _logger = logger;
             _statusService = statusService;
+            _musicService = musicService;
         }
 
         public override async Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
@@ -81,8 +84,10 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             string[] socialMediaOptions =  {
                 "Robinson Handy and Technology Services",
                 "rhtservices.net",
+                "rhtservices.net/articles",
                 "rhtservices.net/facebook",
                 "rhtservices.net/instagram",
+                "rhtservices.net/services",
                 "rhtservices.net/youtube",
             };
 
@@ -180,46 +185,50 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
         public async Task AddAudioToTimelapseAsync(string workingDirectory, CancellationToken cancellationToken)
         {
+            var videoFiles = _fileSystem.GetFilesInDirectory(workingDirectory)
+                .Where(x => !x.Contains("narration") || !x.Contains("narrative"))
+                .Where(x => x.EndsWith(FileExtension.Mp4))
+                .ToArray();
+
             var narrationFiles = _fileSystem.GetFilesInDirectory(workingDirectory)
                 .Where(x => x.Contains("narration") || x.Contains("narrative"))
                 .Where(x => x.EndsWith(FileExtension.Mp4) || x.EndsWith(FileExtension.Mkv))
                 .ToArray();
 
-            foreach (var narrationFile in narrationFiles)
-            {
-                string mp3FileName = Path.GetFileNameWithoutExtension(narrationFile)
-                    .Replace("narration", string.Empty) + FileExtension.Mp3;
-                _logger.LogInformation($"Converting narration file {narrationFile} to {mp3FileName}");
 
-                await _externalProcess.RunCommandAsync(
-                    ProgramPaths.FfmpegBinary,
-                    $"{LOG_ERRORS} -hide_banner -y -i \"{narrationFile}\" -vn \"{mp3FileName}\"",
+            foreach (var videoFileName in videoFiles)
+            {
+                var result = await _externalProcess.RunCommandAsync(
+                    ProgramPaths.FfprobeBinary,
+                    $"-hide_banner \"{videoFileName}\"",
                     workingDirectory,
                     cancellationToken,
-                    5);
+                    1
+                );
 
-                _fileSystem.DeleteFile(narrationFile);
-            }
+                if (result.stdErr.ToLower().Contains("audio"))
+                {
+                    continue;
+                }
 
-            var audioFiles = _fileSystem.GetFilesInDirectory(workingDirectory)
-                .Where(x => x.EndsWith(FileExtension.Mp3))
-                .ToArray();
-
-            foreach (var audioFile in audioFiles)
-            {
-                string outputFileName = $"{Path.GetFileNameWithoutExtension(audioFile)}.tmp{FileExtension.Mp4}";
-                string videoFileName = _fileSystem.GetFilesInDirectory(workingDirectory)
-                    .Where(x => x.Contains(Path.GetFileNameWithoutExtension(audioFile)) && x.EndsWith(FileExtension.Mp3) == false)
+                string audioFile = narrationFiles.Where(
+                        x => x.Contains(Path.GetFileNameWithoutExtension(videoFileName))
+                    )
                     .SingleOrDefault();
 
-                if (File.Exists(Path.Combine(workingDirectory, videoFileName)) == false)
+                if (string.IsNullOrEmpty(audioFile))
                 {
-                    throw new ArgumentNullException($"Video file for {audioFile} was not found");
+                    audioFile = _musicService.GetRandomNonMixTrack();
                 }
+
+                string outputFileName = $"{Path.GetFileNameWithoutExtension(videoFileName)}.tmp{FileExtension.Mp4}";
+
+                outputFileName = outputFileName.Replace("narration", string.Empty)
+                    .Replace("narrative", string.Empty);
 
                 await _externalProcess.RunCommandAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"{LOG_ERRORS} {HW_OPTIONS} -i {Path.GetFileName(videoFileName)} -i {Path.GetFileName(audioFile)} -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 {outputFileName}",
+                    $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -i \"{audioFile}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
                     workingDirectory,
                     cancellationToken,
                     10);
@@ -227,6 +236,8 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                 _fileSystem.DeleteFile(videoFileName);
                 _fileSystem.MoveFile(Path.Combine(workingDirectory, outputFileName), videoFileName);
             }
+
+            _fileSystem.DeleteFiles(narrationFiles);
         }
 
         public async Task ConvertVideoFilesToCommonFormatAsync(string directory, CancellationToken stoppingToken)
