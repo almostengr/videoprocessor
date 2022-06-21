@@ -15,7 +15,7 @@ namespace Almostengr.VideoProcessor.Workers
 {
     public class DashCamVideoWorker : BackgroundService
     {
-        private readonly IDashCamVideoService _VideoService;
+        private readonly IDashCamVideoService _videoService;
         private readonly AppSettings _appSettings;
         private readonly IFileSystemService _fileSystemService;
         private readonly ILogger<DashCamVideoWorker> _logger;
@@ -26,7 +26,7 @@ namespace Almostengr.VideoProcessor.Workers
 
         public DashCamVideoWorker(ILogger<DashCamVideoWorker> logger, IServiceScopeFactory factory)
         {
-            _VideoService = factory.CreateScope().ServiceProvider.GetRequiredService<IDashCamVideoService>();
+            _videoService = factory.CreateScope().ServiceProvider.GetRequiredService<IDashCamVideoService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _fileSystemService = factory.CreateScope().ServiceProvider.GetRequiredService<IFileSystemService>();
             _logger = logger;
@@ -41,14 +41,14 @@ namespace Almostengr.VideoProcessor.Workers
             Random random = new();
             while (!stoppingToken.IsCancellationRequested)
             {
-                string videoArchive = _VideoService.GetVideoArchivesInDirectory(_incomingDirectory)
+                string videoArchive = _videoService.GetVideoArchivesInDirectory(_incomingDirectory)
                     .Where(x => x.StartsWith(".") == false)
                     .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
                 bool isDiskSpaceAvailable = _fileSystemService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
 
                 if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)
                 {
-                    await _VideoService.WorkerIdleAsync(stoppingToken);
+                    await _videoService.WorkerIdleAsync(stoppingToken);
                     continue;
                 }
 
@@ -64,25 +64,25 @@ namespace Almostengr.VideoProcessor.Workers
                     VideoPropertiesDto videoProperties = new VideoPropertiesDto(
                         videoArchive, _workingDirectory, _uploadDirectory, _archiveDirectory);
 
-                    await _VideoService.ExtractTarFileAsync(videoArchive, _workingDirectory, stoppingToken);
+                    await _videoService.ExtractTarFileAsync(videoArchive, _workingDirectory, stoppingToken);
 
-                    _VideoService.PrepareFileNamesInDirectory(_workingDirectory);
+                    _videoService.PrepareFileNamesInDirectory(_workingDirectory);
 
-                    await _VideoService.ConvertVideoFilesToMp4Async(_workingDirectory, stoppingToken);
+                    // await _VideoService.ConvertVideoFilesToMp4Async(_workingDirectory, stoppingToken);
 
-                    _VideoService.CheckOrCreateFfmpegInputFile(_workingDirectory);
+                    _videoService.CheckOrCreateFfmpegInputFile(_workingDirectory);
 
-                    videoProperties.VideoFilter = _VideoService.GetFfmpegVideoFilters(videoProperties);
-                    videoProperties.VideoFilter += _VideoService.GetDestinationFilter(videoProperties.WorkingDirectory);
-                    videoProperties.VideoFilter += _VideoService.GetMajorRoadsFilter(videoProperties.WorkingDirectory);
+                    videoProperties.VideoFilter = _videoService.GetFfmpegVideoFilters(videoProperties);
+                    videoProperties.VideoFilter += _videoService.GetDestinationFilter(videoProperties.WorkingDirectory);
+                    videoProperties.VideoFilter += _videoService.GetMajorRoadsFilter(videoProperties.WorkingDirectory);
 
-                    await _VideoService.RenderVideoAsync(videoProperties, stoppingToken);
+                    await _videoService.RenderVideoAsync(videoProperties, stoppingToken);
 
-                    await _VideoService.CreateThumbnailsFromFinalVideoAsync(videoProperties, stoppingToken);
+                    // await _videoService.CreateThumbnailsFromFinalVideoAsync(videoProperties, stoppingToken);
 
-                    await _VideoService.CleanUpBeforeArchivingAsync(_workingDirectory);
+                    await _videoService.CleanUpBeforeArchivingAsync(_workingDirectory);
 
-                    await _VideoService.ArchiveDirectoryContentsAsync(
+                    await _videoService.ArchiveDirectoryContentsAsync(
                         _workingDirectory, videoProperties.ArchiveTarFile, _archiveDirectory, stoppingToken);
 
                     _fileSystemService.DeleteFile(videoProperties.SourceTarFilePath);
