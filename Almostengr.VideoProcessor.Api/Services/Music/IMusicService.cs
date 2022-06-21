@@ -4,5 +4,6 @@ namespace Almostengr.VideoProcessor.Api.Services.MusicService
     {
         string GetRandomMusicTracks();
         string GetRandomMixTrack();
+        string GetRandomNonMixTrack();
     }
 }

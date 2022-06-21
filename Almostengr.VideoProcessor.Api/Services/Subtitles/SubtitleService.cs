@@ -1,3 +1,5 @@
+using System.IO;
+using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
 
@@ -5,8 +7,13 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
 {
     public abstract class SubtitleService : ISubtitleService
     {
-        protected SubtitleService(ILogger<SubtitleService> logger)
+        private readonly ILogger<SubtitleService> _logger;
+        private readonly IFileSystemService _fileSystem;
+
+        public SubtitleService(ILogger<SubtitleService> logger, IFileSystemService fileSystem)
         {
+            _logger = logger;
+            _fileSystem = fileSystem;
         }
 
         public string ConvertToSentenceCase(string input)
@@ -61,6 +68,24 @@ namespace Almostengr.VideoProcessor.Api.Services.Subtitles
         }
 
         public abstract bool IsValidFile(SubtitleInputDto inputDto);
+
+        public string GetFileContents(string filePath)
+        {
+            var fileStream = new FileStream(filePath, FileMode.Open);
+
+            using (var streamReader = new StreamReader(fileStream))
+            {
+                return streamReader.ReadToEnd();
+            }
+        }
+
+        public void SaveFileContents(string filePath, string content)
+        {
+            var directoryName = Path.GetDirectoryName(filePath);
+            _fileSystem.CreateDirectory(directoryName);
+
+            File.WriteAllText(filePath, content);
+        }
 
     } // end class
 }

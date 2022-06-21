@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Almostengr.VideoProcessor.Api/bin/Debug/net5.0/Almostengr.VideoProcessor.Api.dll",
+            "program": "${workspaceFolder}/Almostengr.VideoProcessor.Api/bin/Debug/net6.0/Almostengr.VideoProcessor.Api.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Almostengr.VideoProcessor.Api",
             "console": "internalConsole",

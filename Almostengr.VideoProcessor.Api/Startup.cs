@@ -6,7 +6,6 @@ using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
-using Almostengr.VideoProcessor.Api.Services.TextFile;
 using Almostengr.VideoProcessor.Api.Services.Video;
 using Almostengr.VideoProcessor.Workers;
 using Microsoft.AspNetCore.Builder;
@@ -57,7 +56,6 @@ namespace Almostengr.VideoProcessor.Api
             services.AddTransient<IHandyTechVideoService, HandyTechVideoService>();
             services.AddTransient<ISrtSubtitleService, SrtSubtitleService>();
             services.AddTransient<IStatusService, StatusService>();
-            services.AddTransient<ITextFileService, TextFileService>();
 
             // WORKERS ///////////////////////////////////////////////////////////////////////////////////////
 

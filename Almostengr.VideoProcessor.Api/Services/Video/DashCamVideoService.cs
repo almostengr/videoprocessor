@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Api.Configuration;
@@ -10,6 +11,7 @@ using Almostengr.VideoProcessor.Api.Services.Data;
 using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
 using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
+using Almostengr.VideoProcessor.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -23,8 +25,13 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         private readonly IMusicService _musicService;
         private readonly IStatusService _statusService;
         private readonly AppSettings _appSettings;
+        private readonly IFileSystemService _fileSystemService;
         private readonly IExternalProcessService _externalProcess;
         private const string _channelBranding = "Kenny Ram Dash Cam";
+
+        // essential files
+        private const string DESTINATION_FILE = "destination.txt";
+        private const string MAJOR_ROADS_FILE = "majorroads.txt";
 
         public DashCamVideoService(ILogger<DashCamVideoService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess, IFileSystemService fileSystem, IServiceScopeFactory factory) :
@@ -37,18 +44,13 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             _statusService = factory.CreateScope().ServiceProvider.GetRequiredService<IStatusService>();
             _externalProcess = externalProcess;
             _appSettings = appSettings;
+            _fileSystemService = fileSystem;
         }
 
         public override string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties)
         {
-            Random random = new();
-            int randomDuration = random.Next(5, 16);
-
-            string textColor = FfMpegColors.White;
-            if (videoProperties.VideoTitle.ToLower().Contains("night"))
-            {
-                textColor = FfMpegColors.Orange;
-            }
+            int randomDuration = _random.Next(5, 16);
+            string textColor = GetTextColor(videoProperties.VideoTitle);
 
             // solid text - channel name
             string videoFilter = string.Empty;
@@ -94,6 +96,18 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             return videoFilter;
         }
 
+        private string GetTextColor(string videoTitle)
+        {
+            videoTitle = videoTitle.ToLower();
+
+            if (videoTitle.Contains("night"))
+            {
+                return FfMpegColors.Orange;
+            }
+
+            return FfMpegColors.White;
+        }
+
         public string GetDestinationFilter(string workingDirectory)
         {
             if (File.Exists(Path.Combine(workingDirectory, DESTINATION_FILE)))
@@ -127,10 +141,30 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
             await _externalProcess.RunCommandAsync(
                 ProgramPaths.FfmpegBinary,
-                $"-hide_banner -y -safe 0 -loglevel {LOG_ERRORS} -hwaccel vaapi -hwaccel_output_format vaapi -f concat -i {FFMPEG_INPUT_FILE} -i {_musicService.GetRandomMixTrack()} -vf {videoProperties.VideoFilter} -vcodec h264_vaapi -b:v 5M -shortest -map 0:v:0 -map 1:a:0 {videoProperties.OutputVideoFilePath}",
+                $"-hide_banner -y -safe 0 {LOG_ERRORS} -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{FFMPEG_INPUT_FILE}\" -i \"{_musicService.GetRandomMixTrack()}\" -filter_hw_device foo -vf \"{videoProperties.VideoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{videoProperties.OutputVideoFilePath.Replace(FileExtension.Mp4, FileExtension.Mov)}\"",
                 videoProperties.WorkingDirectory,
                 cancellationToken,
                 240);
+        }
+
+        public override void CheckOrCreateFfmpegInputFile(string workingDirectory)
+        {
+            string ffmpegInputFile = Path.Combine(workingDirectory, FFMPEG_INPUT_FILE);
+            _fileSystemService.DeleteFile(ffmpegInputFile);
+
+            using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
+            {
+                _logger.LogInformation("Creating FFMPEG input file");
+                string[] mp4Files = _fileSystemService.GetFilesInDirectory(workingDirectory)
+                    .Where(x => x.EndsWith(FileExtension.Mov))
+                    .OrderBy(x => x)
+                    .ToArray();
+
+                foreach (string file in mp4Files)
+                {
+                    writer.WriteLine($"file '{Path.GetFileName(file)}'");
+                }
+            }
         }
 
         public override async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
@@ -167,7 +201,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Idle);
             await _statusService.UpsertAsync(StatusKeys.DashFile, string.Empty);
             await _statusService.SaveChangesAsync();
-            await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), cancellationToken);
+            await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerIdleInterval), cancellationToken);
         }
     }
 }

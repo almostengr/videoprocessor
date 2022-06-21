@@ -70,7 +70,9 @@ namespace Almostengr.VideoProcessor.Workers
 
                     await _videoService.AddAudioToTimelapseAsync(_workingDirectory, stoppingToken); // add audio to gopro timelapse files
 
-                    await _videoService.ConvertVideoFilesToTsAsync(_workingDirectory, stoppingToken); // convert video files to TS format
+                    _videoService.CopyShowIntroToWorkingDirectory(_appSettings.Directories.IntroVideoPath, _workingDirectory);
+
+                    await _videoService.ConvertVideoFilesToCommonFormatAsync(_workingDirectory, stoppingToken);
 
                     _videoService.CheckOrCreateFfmpegInputFile(_workingDirectory);
 
@@ -91,7 +93,7 @@ namespace Almostengr.VideoProcessor.Workers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.InnerException, ex.Message);
+                    _logger.LogError(ex, ex.Message);
                 }
 
                 _logger.LogInformation($"Finished processing {videoArchive}");

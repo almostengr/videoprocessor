@@ -39,12 +39,28 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
             }
         }
 
+        public void DeleteDirectories(string[] directoryNames)
+        {
+            foreach(var directory in directoryNames)
+            {
+                DeleteDirectory(directory);
+            }
+        }
+
         public void DeleteFile(string fileName)
         {
             if (File.Exists(fileName))
             {
                 _logger.LogInformation($"Removing file {fileName}");
                 File.Delete(fileName);
+            }
+        }
+
+        public void DeleteFiles(string[] fileNames)
+        {
+            foreach(var file in fileNames)
+            {
+                DeleteFile(file);
             }
         }
 
@@ -66,14 +82,21 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
             }
         }
 
-        public string[] GetDirectoryContents(string path, string searchPattern = "*.*")
+        public string[] GetDirectoriesInDirectory(string path)
+        {
+            return Directory.GetDirectories(path)
+                .OrderBy(x => x)
+                .ToArray();
+        }
+
+        public string[] GetFilesInDirectory(string path, string searchPattern = "*.*")
         {
             return Directory.GetFiles(path, searchPattern)
                 .OrderBy(x => x)
                 .ToArray();
         }
 
-        public string[] GetDirectoryContents(string path)
+        public string[] GetFilesInDirectory(string path)
         {
             return Directory.GetFiles(path)
                 .OrderBy(x => x)
@@ -97,5 +120,15 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
             }
         }
 
-    } // end of class BaseService
+        public bool DoesFileExist(string filePath)
+        {
+            return File.Exists(filePath) ? true : false;
+        }
+
+        public void CopyFile(string sourceFile, string destinationFile)
+        {
+            _logger.LogInformation($"Copying {sourceFile} to {destinationFile}");
+            File.Copy(sourceFile, destinationFile);
+        }
+    }
 }

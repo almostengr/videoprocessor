@@ -7,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Almostengr.VideoProcessor.Api.Configuration;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
-using Almostengr.VideoProcessor.Api.Services.TextFile;
 using System;
 using System.Linq;
 using Almostengr.VideoProcessor.Api.Services.FileSystem;
@@ -17,7 +16,6 @@ namespace Almostengr.VideoProcessor.Workers
     public class HandyTechSubtitleWorker : BackgroundService
     {
         private readonly ISrtSubtitleService _subtitleService;
-        private readonly ITextFileService _textFileService;
         private readonly AppSettings _appSettings;
         private readonly IFileSystemService _fileSystemService;
         private readonly ILogger<HandyTechSubtitleWorker> _logger;
@@ -27,7 +25,6 @@ namespace Almostengr.VideoProcessor.Workers
         public HandyTechSubtitleWorker(ILogger<HandyTechSubtitleWorker> logger, IServiceScopeFactory factory)
         {
             _subtitleService = factory.CreateScope().ServiceProvider.GetRequiredService<ISrtSubtitleService>();
-            _textFileService = factory.CreateScope().ServiceProvider.GetRequiredService<ITextFileService>();
             _appSettings = factory.CreateScope().ServiceProvider.GetRequiredService<AppSettings>();
             _fileSystemService = factory.CreateScope().ServiceProvider.GetRequiredService<IFileSystemService>();
             _logger = logger;
@@ -54,7 +51,7 @@ namespace Almostengr.VideoProcessor.Workers
 
                 if (string.IsNullOrEmpty(subtitleFile) || isDiskSpaceAvailable == false)
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerServiceInterval), stoppingToken);
+                    await _subtitleService.WorkerIdleAsync(stoppingToken);
                     continue;
                 }
 
@@ -64,7 +61,7 @@ namespace Almostengr.VideoProcessor.Workers
 
                     await _fileSystemService.ConfirmFileTransferCompleteAsync(subtitleFile);
 
-                    string fileContent = _textFileService.GetFileContents(subtitleFile);
+                    string fileContent = _subtitleService.GetFileContents(subtitleFile);
 
                     SubtitleInputDto subtitleInputDto = new SubtitleInputDto
                     {

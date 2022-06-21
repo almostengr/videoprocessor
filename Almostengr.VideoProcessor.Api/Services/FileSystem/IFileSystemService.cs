@@ -4,13 +4,18 @@ namespace Almostengr.VideoProcessor.Api.Services.FileSystem
 {
     public interface IFileSystemService
     {
-        bool IsDiskSpaceAvailable(string directory, double threshold);
-        void DeleteDirectory(string pathName);
-        void DeleteFile(string pathName);
         void CreateDirectory(string directory);
-        void MoveFile(string source, string destination);
-        string[] GetDirectoryContents(string path, string searchPattern);
         Task ConfirmFileTransferCompleteAsync(string videoArchive);
-        string[] GetDirectoryContents(string path);
+        void DeleteDirectory(string pathName);
+        void DeleteDirectories(string[] directoryNames);
+        void DeleteFiles(string[] fileNames);
+        void DeleteFile(string pathName);
+        bool DoesFileExist(string filePath);
+        string[] GetDirectoriesInDirectory(string path);
+        string[] GetFilesInDirectory(string path);
+        string[] GetFilesInDirectory(string path, string searchPattern);
+        bool IsDiskSpaceAvailable(string directory, double threshold);
+        void MoveFile(string source, string destination);
+        void CopyFile(string sourceFile, string destinationFIle);
     }
 }
