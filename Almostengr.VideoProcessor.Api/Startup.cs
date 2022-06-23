@@ -7,7 +7,7 @@ using Almostengr.VideoProcessor.Api.Services.FileSystem;
 using Almostengr.VideoProcessor.Api.Services.MusicService;
 using Almostengr.VideoProcessor.Api.Services.Subtitles;
 using Almostengr.VideoProcessor.Api.Services.Video;
-using Almostengr.VideoProcessor.Workers;
+using Almostengr.VideoProcessor.Worker;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;

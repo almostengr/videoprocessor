@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Workers
+namespace Almostengr.VideoProcessor.Worker
 {
     public class HandyTechVideoWorker : BackgroundService
     {

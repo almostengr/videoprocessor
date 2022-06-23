@@ -11,7 +11,7 @@ using System;
 using System.Linq;
 using Almostengr.VideoProcessor.Api.Services.FileSystem;
 
-namespace Almostengr.VideoProcessor.Workers
+namespace Almostengr.VideoProcessor.Worker
 {
     public class HandyTechSubtitleWorker : BackgroundService
     {

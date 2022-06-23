@@ -28,7 +28,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         private readonly string _yResolution = "1080";
         private readonly string _audioBitRate = "196000";
         private readonly string _audioSampleRate = "48000";
-
+        private const string NO_INTRO_FILE = "nointro.txt";
         private const string SHOW_INTRO_FILENAME_MP4 = "rhtservicesintro.mp4";
 
         public HandyTechVideoService(ILogger<HandyTechVideoService> logger, AppSettings appSettings,
@@ -125,7 +125,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                         continue;
                     }
 
-                    if (i == 1)
+                    if (i == 1 && _fileSystem.DoesFileExist(Path.Combine(workingDirectory, NO_INTRO_FILE)))
                     {
                         writer.WriteLine($"file '{rhtservicesintro}'"); // add video files
                     }
