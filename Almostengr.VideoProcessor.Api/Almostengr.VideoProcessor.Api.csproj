@@ -2,22 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Company>Robinson Handy and Technology Services LLC</Company>
-    <Copyright>Copyright © $([System.DateTime]::UtcNow.ToString(yyyy)) Robinson Handy and Technology Services</Copyright>
-    <Product>Video Processor</Product>
-    <Authors>Kenny Robinson</Authors>
-    <AssemblyName>Almostengr.VideoProcessor.Api</AssemblyName>
-    <RootNamespace>Almostengr.VideoProcessor.Api</RootNamespace>
-    <Version>6.$([System.DateTime]::UtcNow.ToString(yy.MM.dd))</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.57.0*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="6.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
-    <Content Include="../README.md" CopyToPublishDirectory="PreserveNewest" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Almostengr.VideoProcessor.Core\Almostengr.VideoProcessor.Core.csproj" />
   </ItemGroup>
 
 </Project>
