@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Api.DataTransferObjects;
-using Almostengr.VideoProcessor.Api.Enums;
+using Almostengr.VideoProcessor.Core.DataTransferObjects;
+using Almostengr.VideoProcessor.Core.Enums;
 
-namespace Almostengr.VideoProcessor.Api.Repository
+namespace Almostengr.VideoProcessor.Core.Repository
 {
     public interface IStatusRepository
     {

@@ -1,12 +1,6 @@
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Almostengr.VideoProcessor.Api.Services.Video
+namespace Almostengr.VideoProcessor.Core.Services.Video
 {
     public interface IHandyTechVideoService : IVideoService
     {
-        Task AddAudioToTimelapseAsync(string workingDirectory, CancellationToken cancellationToken);
-        Task ConvertVideoFilesToCommonFormatAsync(string directory, CancellationToken stoppingToken);
-        void CopyShowIntroToWorkingDirectory(string introVideoPath, string workingDirectory);
     }
 }

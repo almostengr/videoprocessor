@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Api.Enums
+namespace Almostengr.VideoProcessor.Core.Enums
 {
     public enum StatusKeys
     {

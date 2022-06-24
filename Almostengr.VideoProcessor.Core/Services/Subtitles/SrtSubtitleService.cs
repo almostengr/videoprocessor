@@ -3,13 +3,13 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Api.Configuration;
-using Almostengr.VideoProcessor.Api.Services.FileSystem;
+using Almostengr.VideoProcessor.Core.Configuration;
+using Almostengr.VideoProcessor.Core.Services.FileSystem;
 using Almostengr.VideoProcessor.Constants;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services.Subtitles
+namespace Almostengr.VideoProcessor.Core.Services.Subtitles
 {
     public class SrtSubtitleService : SubtitleService, ISrtSubtitleService
     {

@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Api.DataTransferObjects;
-using Almostengr.VideoProcessor.Api.Enums;
-using Almostengr.VideoProcessor.Api.Repository;
+using Almostengr.VideoProcessor.Core.DataTransferObjects;
+using Almostengr.VideoProcessor.Core.Enums;
+using Almostengr.VideoProcessor.Core.Repository;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services.Data
+namespace Almostengr.VideoProcessor.Core.Services.Data
 {
     public class StatusService : IStatusService
     {

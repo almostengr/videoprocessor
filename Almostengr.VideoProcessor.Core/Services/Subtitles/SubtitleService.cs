@@ -1,9 +1,9 @@
 using System.IO;
-using Almostengr.VideoProcessor.Api.Services.FileSystem;
+using Almostengr.VideoProcessor.Core.Services.FileSystem;
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services.Subtitles
+namespace Almostengr.VideoProcessor.Core.Services.Subtitles
 {
     public abstract class SubtitleService : ISubtitleService
     {

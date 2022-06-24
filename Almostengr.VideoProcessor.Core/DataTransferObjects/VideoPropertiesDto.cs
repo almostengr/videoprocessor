@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Almostengr.VideoProcessor.Constants;
 
-namespace Almostengr.VideoProcessor.Api.DataTransferObjects
+namespace Almostengr.VideoProcessor.Core.DataTransferObjects
 {
     public class VideoPropertiesDto
     {

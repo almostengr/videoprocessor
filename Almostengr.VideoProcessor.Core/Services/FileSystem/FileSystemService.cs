@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services.FileSystem
+namespace Almostengr.VideoProcessor.Core.Services.FileSystem
 {
     public class FileSystemService : IFileSystemService
     {

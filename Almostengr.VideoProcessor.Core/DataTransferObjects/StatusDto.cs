@@ -1,7 +1,7 @@
 using System;
-using Almostengr.VideoProcessor.Api.Enums;
+using Almostengr.VideoProcessor.Core.Enums;
 
-namespace Almostengr.VideoProcessor.Api.DataTransferObjects
+namespace Almostengr.VideoProcessor.Core.DataTransferObjects
 {
     public class StatusDto
     {

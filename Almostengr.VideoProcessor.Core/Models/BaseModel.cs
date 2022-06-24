@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Api.Models
+namespace Almostengr.VideoProcessor.Core.Models
 {
     public abstract class BaseModel
     {

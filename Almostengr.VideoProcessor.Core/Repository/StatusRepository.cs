@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Api.Database;
-using Almostengr.VideoProcessor.Api.DataTransferObjects;
-using Almostengr.VideoProcessor.Api.Enums;
-using Almostengr.VideoProcessor.Api.Models;
+using Almostengr.VideoProcessor.Core.Database;
+using Almostengr.VideoProcessor.Core.DataTransferObjects;
+using Almostengr.VideoProcessor.Core.Enums;
+using Almostengr.VideoProcessor.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Almostengr.VideoProcessor.Api.Repository
+namespace Almostengr.VideoProcessor.Core.Repository
 {
     public class StatusRepository : IStatusRepository
     {

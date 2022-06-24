@@ -1,15 +1,7 @@
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using Almostengr.VideoProcessor.DataTransferObjects;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Almostengr.VideoProcessor.Api.Configuration;
-using Almostengr.VideoProcessor.Api.Services.Subtitles;
-using System;
-using System.Linq;
-using Almostengr.VideoProcessor.Api.Services.FileSystem;
+using Almostengr.VideoProcessor.Core.Configuration;
+using Almostengr.VideoProcessor.Core.Services.Subtitles;
+using Almostengr.VideoProcessor.Core.Services.FileSystem;
 
 namespace Almostengr.VideoProcessor.Worker
 {

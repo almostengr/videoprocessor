@@ -1,7 +1,5 @@
-using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Api.Services.MusicService;
+using Almostengr.VideoProcessor.Core.Services.MusicService;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Controllers
 {

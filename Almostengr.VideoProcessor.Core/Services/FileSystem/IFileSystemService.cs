@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace Almostengr.VideoProcessor.Api.Services.FileSystem
+namespace Almostengr.VideoProcessor.Core.Services.FileSystem
 {
     public interface IFileSystemService
     {

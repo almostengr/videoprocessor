@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Almostengr.VideoProcessor.DataTransferObjects;
 
-namespace Almostengr.VideoProcessor.Api.Services.Subtitles
+namespace Almostengr.VideoProcessor.Core.Services.Subtitles
 {
     public interface ISrtSubtitleService : ISubtitleService
     {

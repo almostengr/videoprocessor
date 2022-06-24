@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Api.Database
+namespace Almostengr.VideoProcessor.Core.Database
 {
     public interface IVideoDbContext
     {

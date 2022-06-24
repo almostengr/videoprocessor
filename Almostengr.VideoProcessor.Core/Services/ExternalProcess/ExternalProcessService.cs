@@ -3,10 +3,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Api.Constants;
+using Almostengr.VideoProcessor.Core.Constants;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
+namespace Almostengr.VideoProcessor.Core.Services.ExternalProcess
 {
     public class ExternalProcessService : IExternalProcessService
     {

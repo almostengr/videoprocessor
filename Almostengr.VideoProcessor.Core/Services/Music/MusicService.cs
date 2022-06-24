@@ -1,12 +1,12 @@
 using System;
 using System.IO;
 using System.Linq;
-using Almostengr.VideoProcessor.Api.Configuration;
-using Almostengr.VideoProcessor.Api.Services.FileSystem;
+using Almostengr.VideoProcessor.Core.Configuration;
+using Almostengr.VideoProcessor.Core.Services.FileSystem;
 using Almostengr.VideoProcessor.Constants;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services.MusicService
+namespace Almostengr.VideoProcessor.Core.Services.MusicService
 {
     public class MusicService : IMusicService
     {

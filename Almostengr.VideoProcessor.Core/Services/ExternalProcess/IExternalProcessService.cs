@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Almostengr.VideoProcessor.Api.Services.ExternalProcess
+namespace Almostengr.VideoProcessor.Core.Services.ExternalProcess
 {
     public interface IExternalProcessService
     {

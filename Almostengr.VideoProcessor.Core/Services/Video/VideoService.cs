@@ -1,17 +1,11 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Api.Configuration;
-using Almostengr.VideoProcessor.Api.Constants;
-using Almostengr.VideoProcessor.Api.DataTransferObjects;
-using Almostengr.VideoProcessor.Api.Services.ExternalProcess;
-using Almostengr.VideoProcessor.Api.Services.FileSystem;
+using Almostengr.VideoProcessor.Core.Configuration;
+using Almostengr.VideoProcessor.Core.Constants;
+using Almostengr.VideoProcessor.Core.Services.ExternalProcess;
+using Almostengr.VideoProcessor.Core.Services.FileSystem;
 using Almostengr.VideoProcessor.Constants;
 using Microsoft.Extensions.Logging;
 
-namespace Almostengr.VideoProcessor.Api.Services.Video
+namespace Almostengr.VideoProcessor.Core.Services.Video
 {
     public abstract class VideoService : IVideoService
     {
@@ -20,36 +14,36 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
         private readonly IExternalProcessService _externalProcess;
         private readonly IFileSystemService _fileSystem;
         private const int PADDING = 30;
-        internal readonly string _subscribeFilter;
-        internal readonly Random _random;
-        internal readonly string _subscribeScrollingFilter;
+        protected readonly string _subscribeFilter;
+        protected readonly Random _random;
+        protected readonly string _subscribeScrollingFilter;
 
         // ffmpeg positions
-        internal readonly string _upperLeft;
-        internal readonly string _upperCenter;
-        internal readonly string _upperRight;
-        internal readonly string _centered;
-        internal readonly string _lowerLeft;
-        internal readonly string _lowerCenter;
-        internal readonly string _lowerRight;
+        protected readonly string _upperLeft;
+        protected readonly string _upperCenter;
+        protected readonly string _upperRight;
+        protected readonly string _centered;
+        protected readonly string _lowerLeft;
+        protected readonly string _lowerCenter;
+        protected readonly string _lowerRight;
 
         // essential files
-        internal const string FFMPEG_INPUT_FILE = "ffmpeginput.txt";
-        internal const string SUBTITLES_FILE = "subtitles.ass";
+        protected const string FFMPEG_INPUT_FILE = "ffmpeginput.txt";
+        protected const string SUBTITLES_FILE = "subtitles.ass";
 
         // ffmpeg options
-        internal const string LOG_ERRORS = "-loglevel error";
-        internal const string LOG_WARNINGS = "-loglevel warning";
-        internal const string HW_OPTIONS = "-hide_banner -y -hwaccel vaapi -hwaccel_output_format vaapi";
-        internal const string HW_VCODEC = "-vcodec h264_vaapi -b:v 5M";
+        protected const string LOG_ERRORS = "-loglevel error";
+        protected const string LOG_WARNINGS = "-loglevel warning";
+        protected const string HW_OPTIONS = "-hide_banner -y -hwaccel vaapi -hwaccel_output_format vaapi";
+        protected const string HW_VCODEC = "-vcodec h264_vaapi -b:v 5M";
 
         // ffmpeg filter attributes
-        internal const int DASHCAM_BORDER_WIDTH = 10;
-        internal const string DIM_TEXT = "0.8";
-        internal const string DIM_BACKGROUND = "0.3";
-        internal const string LARGE_FONT = "h/20";
-        internal const string SMALL_FONT = "h/35";
-        internal const int RHT_BORDER_WIDTH = 7;
+        protected const int DASHCAM_BORDER_WIDTH = 10;
+        protected const string DIM_TEXT = "0.8";
+        protected const string DIM_BACKGROUND = "0.3";
+        protected const string LARGE_FONT = "h/20";
+        protected const string SMALL_FONT = "h/35";
+        protected const int RHT_BORDER_WIDTH = 7;
 
         public VideoService(ILogger<VideoService> logger, AppSettings appSettings,
             IExternalProcessService externalProcess, IFileSystemService fileSystem)
@@ -72,9 +66,22 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
         }
 
-        public abstract string GetFfmpegVideoFilters(VideoPropertiesDto videoProperties);
+        protected abstract Task RenderVideoAsync(string videoTitle, string videoOutputPath, string videoFilter, CancellationToken cancellationToken);
+        protected abstract Task WorkerIdleAsync(CancellationToken cancellationToken);
+        protected abstract string GetFfmpegVideoFilters(string videoTitle);
+        protected abstract Task ConvertVideoFilesToCommonFormatAsync(string directory, CancellationToken cancellationToken);
+        protected abstract string GetBrandingText();
+        protected abstract void CheckOrCreateFfmpegInputFile();
 
-        public virtual async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
+        public abstract Task ExecuteAsync(CancellationToken cancellationToken);
+        public abstract Task StartAsync(CancellationToken cancellationToken);
+
+        protected virtual string GetVideoOutputPath(string uploadDirectory, string videoTitle)
+        {
+            return Path.Combine(uploadDirectory, videoTitle + FileExtension.Mp4);
+        }
+
+        protected virtual async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Archiving directory contents: {directoryToArchive}");
 
@@ -87,14 +94,16 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             );
         }
 
-        public virtual string[] GetVideoArchivesInDirectory(string directory)
+        protected virtual string GetRandomVideoArchiveInDirectory(string directory)
         {
             return _fileSystem.GetFilesInDirectory(directory)
                 .Where(x => x.Contains(FileExtension.Tar))
-                .ToArray();
+                .Where(x => x.StartsWith(".") == false)
+                .OrderBy(x => _random.Next()).Take(1)
+                .FirstOrDefault();
         }
 
-        public virtual string GetSubtitlesFilter(string workingDirectory)
+        protected virtual string GetSubtitlesFilter(string workingDirectory)
         {
             string subtitleFile = Path.Combine(workingDirectory, SUBTITLES_FILE);
 
@@ -106,7 +115,17 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             return string.Empty;
         }
 
-        public virtual async Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
+        protected string GetArchiveTarFileName(string videoTitle)
+        {
+            return $"{videoTitle.Replace(FileExtension.Mp4, string.Empty).Replace(FileExtension.Mkv, string.Empty)}.{DateTime.Now.ToString("yyyyMMdd")}.{DateTime.Now.ToString("HHmmss")}{FileExtension.TarXz}";
+        }
+
+        protected virtual string GetVideoTitleFromArchiveName(string archiveFilePath)
+        {
+            return Path.GetFileNameWithoutExtension(archiveFilePath).Replace(FileExtension.Tar, string.Empty);
+        }
+
+        protected virtual async Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Extracting tar file: {tarFile}");
 
@@ -118,9 +137,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
                 10);
         }
 
-        public abstract Task RenderVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken);
-
-        public virtual async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
+        protected virtual async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
         {
             var nonMp4VideoFiles = _fileSystem.GetFilesInDirectory(directory)
                 .Where(x => x.ToLower().EndsWith(FileExtension.Mkv) || x.ToLower().EndsWith(FileExtension.Mov))
@@ -143,11 +160,11 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             }
         }
 
-        public virtual void PrepareFileNamesInDirectory(string directory)
+        protected virtual void PrepareFileNamesInDirectory(string directory)
         {
             foreach (string childDirectory in _fileSystem.GetDirectoriesInDirectory(directory))
             {
-                foreach(string childFile in _fileSystem.GetFilesInDirectory(childDirectory))
+                foreach (string childFile in _fileSystem.GetFilesInDirectory(childDirectory))
                 {
                     _fileSystem.MoveFile(
                         Path.Combine(childDirectory, childFile),
@@ -173,7 +190,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             }
         }
 
-        public virtual void CheckOrCreateFfmpegInputFile(string workingDirectory)
+        protected virtual void CheckOrCreateFfmpegInputFile(string workingDirectory)
         {
             string ffmpegInputFile = Path.Combine(workingDirectory, FFMPEG_INPUT_FILE);
             _fileSystem.DeleteFile(ffmpegInputFile);
@@ -193,14 +210,15 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             }
         }
 
-        public virtual async Task CreateThumbnailsFromFinalVideoAsync(VideoPropertiesDto videoProperties, CancellationToken cancellationToken)
+        protected virtual async Task CreateThumbnailsFromFinalVideoAsync(
+            string outputVideoPath, string uploadDirectory, string videoTitle, CancellationToken cancellationToken)
         {
             if (_appSettings.DoRenderVideos == false)
             {
                 return;
             }
 
-            _logger.LogInformation($"Creating thumbnails for {videoProperties.OutputVideoFilePath}");
+            _logger.LogInformation($"Creating thumbnails for {outputVideoPath}");
 
             for (int sceneChangePct = 90; sceneChangePct > 0; sceneChangePct -= 10)
             {
@@ -208,13 +226,13 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
 
                 await _externalProcess.RunCommandAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"-hide_banner -y {LOG_WARNINGS} -i \"{videoProperties.OutputVideoFilePath}\" -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {_appSettings.ThumbnailFrames.ToString()} -vsync vfr \"{videoProperties.VideoTitle}-%03d.jpg\"",
-                    videoProperties.UploadDirectory,
+                    $"-hide_banner -y {LOG_WARNINGS} -i \"{outputVideoPath}\" -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {_appSettings.ThumbnailFrames.ToString()} -vsync vfr \"{videoTitle}-%03d.jpg\"",
+                    uploadDirectory,
                     cancellationToken,
                     240);
 
-                int thumbnailsCreated = _fileSystem.GetFilesInDirectory(videoProperties.UploadDirectory)
-                    .Where(x => x.Contains(videoProperties.VideoTitle) && x.EndsWith(FileExtension.Jpg))
+                int thumbnailsCreated = _fileSystem.GetFilesInDirectory(uploadDirectory)
+                    .Where(x => x.Contains(videoTitle) && x.EndsWith(FileExtension.Jpg))
                     .ToArray()
                     .Count();
 
@@ -225,7 +243,7 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             } // end for
         }
 
-        public virtual async Task CleanUpBeforeArchivingAsync(string workingDirectory)
+        protected virtual async Task CleanUpBeforeArchivingAsync(string workingDirectory)
         {
             _logger.LogInformation($"Cleaning up before archiving {workingDirectory}");
 
@@ -258,6 +276,5 @@ namespace Almostengr.VideoProcessor.Api.Services.Video
             await Task.CompletedTask;
         }
 
-        public abstract Task WorkerIdleAsync(CancellationToken cancellationToken);
     }
 }

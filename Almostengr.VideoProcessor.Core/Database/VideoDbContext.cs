@@ -1,7 +1,7 @@
-using Almostengr.VideoProcessor.Api.Models;
+using Almostengr.VideoProcessor.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Almostengr.VideoProcessor.Api.Database
+namespace Almostengr.VideoProcessor.Core.Database
 {
     public class VideoDbContext : DbContext, IVideoDbContext
     {

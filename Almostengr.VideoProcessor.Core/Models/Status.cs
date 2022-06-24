@@ -1,8 +1,8 @@
 using System;
-using Almostengr.VideoProcessor.Api.DataTransferObjects;
-using Almostengr.VideoProcessor.Api.Enums;
+using Almostengr.VideoProcessor.Core.DataTransferObjects;
+using Almostengr.VideoProcessor.Core.Enums;
 
-namespace Almostengr.VideoProcessor.Api.Models
+namespace Almostengr.VideoProcessor.Core.Models
 {
     public class Status : BaseModel
     {

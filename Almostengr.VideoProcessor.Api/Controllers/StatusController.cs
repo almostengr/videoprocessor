@@ -1,6 +1,5 @@
-using System.Threading.Tasks;
-using Almostengr.VideoProcessor.Api.Enums;
-using Almostengr.VideoProcessor.Api.Services.Data;
+using Almostengr.VideoProcessor.Core.Enums;
+using Almostengr.VideoProcessor.Core.Services.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Almostengr.VideoProcessor.Api.Controllers

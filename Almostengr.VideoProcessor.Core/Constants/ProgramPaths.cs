@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Api.Constants
+namespace Almostengr.VideoProcessor.Core.Constants
 {
     public sealed class ProgramPaths
     {
