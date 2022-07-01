@@ -60,7 +60,7 @@ namespace Almostengr.VideoProcessor.Core.Services.Video
             await Task.CompletedTask;
         }
 
-        public override async Task ExecuteAsync(CancellationToken cancellationToken)
+        public override async Task ExecuteServiceAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -92,7 +92,7 @@ namespace Almostengr.VideoProcessor.Core.Services.Video
 
                     await ConvertVideoFilesToCommonFormatAsync(_workingDirectory, cancellationToken);
 
-                    CheckOrCreateFfmpegInputFile(_workingDirectory);
+                    CheckOrCreateFfmpegInputFile();
 
                     string videoTitle = GetVideoTitleFromArchiveName(videoArchive);
                     string videoFilter = GetFfmpegVideoFilters(videoTitle);
@@ -204,7 +204,7 @@ namespace Almostengr.VideoProcessor.Core.Services.Video
                         continue;
                     }
 
-                    if (i == 1 && _fileSystem.DoesFileExist(Path.Combine(_workingDirectory, NO_INTRO_FILE)))
+                    if (i == 1 && _fileSystem.DoesFileExist(Path.Combine(_workingDirectory, NO_INTRO_FILE)) == false)
                     {
                         writer.WriteLine($"file '{rhtservicesintro}'"); // add video files
                     }

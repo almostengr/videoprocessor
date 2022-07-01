@@ -20,7 +20,7 @@ namespace Almostengr.VideoProcessor.Controllers
         [Route("/subtitle/clean")]
         public async Task<IActionResult> CleanSubtitle(SubtitleInputDto inputDto)
         {
-            if (_subtitleService.IsValidFile(inputDto) == false)
+            if (inputDto.IsValidSrtSubtitleFile() == false)
             {
                 return BadRequest("Input is not in a valid format");
             }

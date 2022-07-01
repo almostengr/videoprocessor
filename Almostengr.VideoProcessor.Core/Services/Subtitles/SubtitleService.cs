@@ -1,6 +1,4 @@
-using System.IO;
 using Almostengr.VideoProcessor.Core.Services.FileSystem;
-using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Core.Services.Subtitles
@@ -66,8 +64,6 @@ namespace Almostengr.VideoProcessor.Core.Services.Subtitles
 
             return output;
         }
-
-        public abstract bool IsValidFile(SubtitleInputDto inputDto);
 
         public string GetFileContents(string filePath)
         {

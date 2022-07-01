@@ -6,21 +6,23 @@ namespace Almostengr.VideoProcessor.Worker
     {
         private readonly IHandyTechVideoService _videoService;
 
-        public HandyTechVideoWorker(ILogger<HandyTechVideoWorker> logger, IHandyTechVideoService handyTechVideoService)
+        public HandyTechVideoWorker(IHandyTechVideoService handyTechVideoService)
         {
             _videoService = handyTechVideoService;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public override Task ExecuteTask => base.ExecuteTask;
+
+        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _videoService.ExecuteAsync(stoppingToken);
+            await _videoService.StartAsync(stoppingToken);
+            await _videoService.ExecuteServiceAsync(stoppingToken);
         }
 
-        public override async Task StartAsync(CancellationToken cancellationToken)
-        {
-            await _videoService.StartAsync(cancellationToken);
-            // return base.StartAsync(cancellationToken);
-        }
+        // public async override Task StartAsync(CancellationToken cancellationToken)
+        // {
+        //     await _videoService.StartAsync(cancellationToken);
+        // }
 
     }
 }

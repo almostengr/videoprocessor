@@ -21,7 +21,6 @@ namespace Almostengr.VideoProcessor.Core.Services.Video
         private readonly AppSettings _appSettings;
         private readonly IFileSystemService _fileSystemService;
         private readonly IExternalProcessService _externalProcess;
-
         private readonly string _channelBranding;
 
         // essential files
@@ -61,9 +60,9 @@ namespace Almostengr.VideoProcessor.Core.Services.Video
             return "Kenny Ram Dash Cam";
         }
 
-        public override async Task ExecuteAsync(CancellationToken cancellationToken)
+        public override async Task ExecuteServiceAsync(CancellationToken cancellationToken)
         {
-            while (cancellationToken.IsCancellationRequested == false)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 string videoArchivePath = GetRandomVideoArchiveInDirectory(_incomingDirectory);
                 bool isDiskSpaceAvailable = _fileSystemService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);

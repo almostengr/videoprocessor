@@ -6,20 +6,15 @@ namespace Almostengr.VideoProcessor.Worker
     {
         private readonly IDashCamVideoService _videoService;
 
-        public DashCamVideoWorker(ILogger<DashCamVideoWorker> logger, IDashCamVideoService dashCamVideoService)
+        public DashCamVideoWorker(IDashCamVideoService dashCamVideoService)
         {
             _videoService = dashCamVideoService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _videoService.ExecuteAsync(stoppingToken);
-        }
-
-        public override async Task StartAsync(CancellationToken cancellationToken)
-        {
-            await _videoService.StartAsync(cancellationToken);
-            // return base.StartAsync(cancellationToken);
+            await _videoService.StartAsync(stoppingToken);
+            await _videoService.ExecuteServiceAsync(stoppingToken);
         }
 
     }

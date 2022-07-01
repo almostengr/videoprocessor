@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Core.Database;
 using Almostengr.VideoProcessor.Core.DataTransferObjects;
 using Almostengr.VideoProcessor.Core.Enums;

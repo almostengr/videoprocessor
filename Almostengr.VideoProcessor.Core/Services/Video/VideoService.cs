@@ -73,7 +73,7 @@ namespace Almostengr.VideoProcessor.Core.Services.Video
         protected abstract string GetBrandingText();
         protected abstract void CheckOrCreateFfmpegInputFile();
 
-        public abstract Task ExecuteAsync(CancellationToken cancellationToken);
+        public abstract Task ExecuteServiceAsync(CancellationToken cancellationToken);
         public abstract Task StartAsync(CancellationToken cancellationToken);
 
         protected virtual string GetVideoOutputPath(string uploadDirectory, string videoTitle)

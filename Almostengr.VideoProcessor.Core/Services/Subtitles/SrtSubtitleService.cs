@@ -1,8 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Almostengr.VideoProcessor.Core.Configuration;
 using Almostengr.VideoProcessor.Core.Services.FileSystem;
 using Almostengr.VideoProcessor.Constants;
@@ -14,15 +9,21 @@ namespace Almostengr.VideoProcessor.Core.Services.Subtitles
     public class SrtSubtitleService : SubtitleService, ISrtSubtitleService
     {
         private readonly ILogger<SrtSubtitleService> _logger;
-        private readonly IFileSystemService _fileSystem;
+        private readonly IFileSystemService _fileSystemService;
         private readonly AppSettings _appSettings;
 
+        private readonly string _incomingDirectory;
+        private readonly string _uploadDirectory;
+
         public SrtSubtitleService(ILogger<SrtSubtitleService> logger,
-            IFileSystemService fileSystem, AppSettings appSettings) : base(logger, fileSystem)
+            IFileSystemService fileSystemService, AppSettings appSettings) : base(logger, fileSystemService)
         {
             _logger = logger;
-            _fileSystem = fileSystem;
+            _fileSystemService = fileSystemService;
             _appSettings = appSettings;
+
+            _incomingDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "incoming");
+            _uploadDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "upload");
         }
 
         public SubtitleOutputDto CleanSubtitle(SubtitleInputDto inputDto)
@@ -79,31 +80,79 @@ namespace Almostengr.VideoProcessor.Core.Services.Subtitles
 
         public void ArchiveSubtitleFile(string transcriptFilePath, string archiveDirectory)
         {
-            _fileSystem.MoveFile(transcriptFilePath, archiveDirectory);
+            _fileSystemService.MoveFile(transcriptFilePath, archiveDirectory);
         }
 
         public string[] GetIncomingSubtitles(string directory)
         {
-            return _fileSystem.GetFilesInDirectory(directory)
+            return _fileSystemService.GetFilesInDirectory(directory)
                 .Where(x => x.EndsWith(FileExtension.Srt))
                 .ToArray();
-        }
-
-        public override bool IsValidFile(SubtitleInputDto inputDto)
-        {
-            if (string.IsNullOrEmpty(inputDto.Input))
-            {
-                _logger.LogError("Input is empty");
-                return false;
-            }
-
-            string[] inputLines = inputDto.Input.Split('\n');
-            return (inputLines[0].StartsWith("1") == true && inputLines[1].StartsWith("00:") == true);
         }
 
         public async Task WorkerIdleAsync(CancellationToken cancellationToken)
         {
             await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerIdleInterval), cancellationToken);
+        }
+
+        private string GetRandomSubtitleFile(string directory)
+        {
+            Random random = new();
+            return GetIncomingSubtitles(directory)
+                .Where(x => x.StartsWith(".") == false)
+                .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
+        }
+
+        public async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                string subtitleFile = GetRandomSubtitleFile(_incomingDirectory);
+                bool isDiskSpaceAvailable = 
+                    _fileSystemService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
+
+                if (string.IsNullOrEmpty(subtitleFile) || isDiskSpaceAvailable == false)
+                {
+                    await WorkerIdleAsync(stoppingToken);
+                    continue;
+                }
+
+                try
+                {
+                    _logger.LogInformation($"Processing {subtitleFile}");
+
+                    await _fileSystemService.ConfirmFileTransferCompleteAsync(subtitleFile);
+
+                    string fileContent = GetFileContents(subtitleFile);
+
+                    SubtitleInputDto subtitleInputDto =
+                        new SubtitleInputDto(fileContent, Path.GetFileName(subtitleFile));
+
+                    if (subtitleInputDto.IsValidSrtSubtitleFile() == false)
+                    {
+                        _logger.LogError($"{subtitleFile} is not in a valid format");
+                        continue;
+                    }
+
+                    SubtitleOutputDto transcriptOutput = CleanSubtitle(subtitleInputDto);
+
+                    SaveSubtitleFile(transcriptOutput, _uploadDirectory);
+                    ArchiveSubtitleFile(subtitleFile, _uploadDirectory);
+
+                    _logger.LogInformation($"Finished processing {subtitleFile}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.InnerException, ex.Message);
+                }
+            } // end while
+        }
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            _fileSystemService.CreateDirectory(_incomingDirectory);
+            _fileSystemService.CreateDirectory(_uploadDirectory);
+            await Task.CompletedTask;
         }
     }
 }
