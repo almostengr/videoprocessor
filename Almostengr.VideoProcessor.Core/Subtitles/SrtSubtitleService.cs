@@ -8,17 +8,14 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
     public sealed class SrtSubtitleService : SubtitleService, ISrtSubtitleService
     {
         private readonly ILogger<SrtSubtitleService> _logger;
-        private readonly IBaseService _BaseService;
         private readonly AppSettings _appSettings;
 
         private readonly string _incomingDirectory;
         private readonly string _uploadDirectory;
 
-        public SrtSubtitleService(ILogger<SrtSubtitleService> logger,
-            IBaseService BaseService, AppSettings appSettings) : base(logger)
+        public SrtSubtitleService(ILogger<SrtSubtitleService> logger, AppSettings appSettings) : base(logger)
         {
             _logger = logger;
-            _BaseService = BaseService;
             _appSettings = appSettings;
 
             _incomingDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "incoming");
@@ -79,12 +76,12 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
 
         public void ArchiveSubtitleFile(string transcriptFilePath, string archiveDirectory)
         {
-            _BaseService.MoveFile(transcriptFilePath, archiveDirectory);
+            MoveFile(transcriptFilePath, archiveDirectory);
         }
 
         public string[] GetIncomingSubtitles(string directory)
         {
-            return _BaseService.GetFilesInDirectory(directory)
+            return GetFilesInDirectory(directory)
                 .Where(x => x.EndsWith(FileExtension.Srt))
                 .ToArray();
         }
@@ -108,7 +105,7 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
             {
                 string subtitleFile = GetRandomSubtitleFile(_incomingDirectory);
                 bool isDiskSpaceAvailable = 
-                    _BaseService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
+                    IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
 
                 if (string.IsNullOrEmpty(subtitleFile) || isDiskSpaceAvailable == false)
                 {
@@ -120,7 +117,7 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
                 {
                     _logger.LogInformation($"Processing {subtitleFile}");
 
-                    await _BaseService.ConfirmFileTransferCompleteAsync(subtitleFile);
+                    await ConfirmFileTransferCompleteAsync(subtitleFile);
 
                     string fileContent = GetFileContents(subtitleFile);
 
@@ -149,8 +146,8 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            _BaseService.CreateDirectory(_incomingDirectory);
-            _BaseService.CreateDirectory(_uploadDirectory);
+            CreateDirectory(_incomingDirectory);
+            CreateDirectory(_uploadDirectory);
             await Task.CompletedTask;
         }
     }

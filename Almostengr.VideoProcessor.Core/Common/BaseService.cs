@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Core.Common
 {
-    public abstract class BaseService : IBaseService
+    public abstract class BaseService
     {
         private readonly ILogger<BaseService> _logger;
 

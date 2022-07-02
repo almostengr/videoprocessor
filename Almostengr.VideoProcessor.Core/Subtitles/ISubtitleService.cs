@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Core.Common;
 
 namespace Almostengr.VideoProcessor.Core.Subtitles
 {
-    public interface ISubtitleService : IBaseService
+    public interface ISubtitleService 
     {
         string CleanBlogString(string blogText);
         string ConvertToSentenceCase(string input);

@@ -14,9 +14,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
         private readonly string _archiveDirectory;
         private readonly string _uploadDirectory;
         private readonly string _workingDirectory;
-        private readonly IBaseService _fileSystem;
         private readonly AppSettings _appSettings;
-        private readonly IBaseService _BaseService;
         private readonly IStatusService _statusService;
         private readonly IMusicService _musicService;
         private const string _xResolution = "1920";
@@ -178,12 +176,12 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
         protected override void CheckOrCreateFfmpegInputFile()
         {
             string ffmpegInputFile = Path.Combine(_workingDirectory, FFMPEG_INPUT_FILE);
-            _fileSystem.DeleteFile(ffmpegInputFile);
+            DeleteFile(ffmpegInputFile);
 
             using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
             {
                 _logger.LogInformation("Creating FFMPEG input file");
-                var filesInDirectory = _fileSystem.GetFilesInDirectory(_workingDirectory)
+                var filesInDirectory = GetFilesInDirectory(_workingDirectory)
                     .Where(x => x.EndsWith(FileExtension.Mp4)).OrderBy(x => x).ToArray();
 
                 string rhtservicesintro = "rhtservicesintro.1920x1080.mp4";
@@ -194,7 +192,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                         continue;
                     }
 
-                    if (i == 1 && _fileSystem.DoesFileExist(Path.Combine(_workingDirectory, NO_INTRO_FILE)) == false)
+                    if (i == 1 && DoesFileExist(Path.Combine(_workingDirectory, NO_INTRO_FILE)) == false)
                     {
                         writer.WriteLine($"file '{rhtservicesintro}'"); // add video files
                     }
@@ -221,16 +219,16 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Archiving);
             await _statusService.SaveChangesAsync();
 
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "dash_cam_opening.mp4"));
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
+            DeleteFile(Path.Combine(workingDirectory, "dash_cam_opening.mp4"));
+            DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
 
-            string[] filesToRemove = _fileSystem.GetFilesInDirectory(workingDirectory)
+            string[] filesToRemove = GetFilesInDirectory(workingDirectory)
                 .Where(x => !x.EndsWith(FileExtension.Mp4) ||
                     x.Contains("rhtservicesintro"))
                 .ToArray();
 
-            _fileSystem.DeleteFiles(filesToRemove);
-            _fileSystem.DeleteDirectories(_fileSystem.GetDirectoriesInDirectory(workingDirectory));
+            DeleteFiles(filesToRemove);
+            DeleteDirectories(GetDirectoriesInDirectory(workingDirectory));
 
             await Task.CompletedTask;
         }
@@ -254,12 +252,12 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
 
         protected async Task AddAudioToTimelapseAsync(string workingDirectory, CancellationToken cancellationToken)
         {
-            var videoFiles = _fileSystem.GetFilesInDirectory(workingDirectory)
+            var videoFiles = GetFilesInDirectory(workingDirectory)
                 .Where(x => !x.Contains("narration") || !x.Contains("narrative"))
                 .Where(x => x.EndsWith(FileExtension.Mp4))
                 .ToArray();
 
-            var narrationFiles = _fileSystem.GetFilesInDirectory(workingDirectory)
+            var narrationFiles = GetFilesInDirectory(workingDirectory)
                 .Where(x => x.Contains("narration") || x.Contains("narrative"))
                 .Where(x => x.EndsWith(FileExtension.Mp4) || x.EndsWith(FileExtension.Mkv))
                 .ToArray();
@@ -301,16 +299,16 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                     cancellationToken,
                     10);
 
-                _fileSystem.DeleteFile(videoFileName);
-                _fileSystem.MoveFile(Path.Combine(workingDirectory, outputFileName), videoFileName);
+                DeleteFile(videoFileName);
+                MoveFile(Path.Combine(workingDirectory, outputFileName), videoFileName);
             }
 
-            _fileSystem.DeleteFiles(narrationFiles);
+            DeleteFiles(narrationFiles);
         }
 
         protected override async Task ConvertVideoFilesToCommonFormatAsync(string directory, CancellationToken cancellationToken)
         {
-            var videoFiles = _fileSystem.GetFilesInDirectory(directory)
+            var videoFiles = GetFilesInDirectory(directory)
                 .Where(x => x.EndsWith(FileExtension.Mkv) || x.EndsWith(FileExtension.Mov) || x.EndsWith(FileExtension.Mp4))
                 .OrderBy(x => x).ToArray();
 
@@ -333,7 +331,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                     result.stdErr.Contains($"196 kb/s") &&
                     videoFileName.EndsWith(FileExtension.Mp4))
                 {
-                    _fileSystem.MoveFile(Path.Combine(directory, videoFileName), Path.Combine(directory, scaledFile));
+                    MoveFile(Path.Combine(directory, videoFileName), Path.Combine(directory, scaledFile));
                     continue;
                 }
 
@@ -347,7 +345,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                     10
                 );
 
-                _fileSystem.DeleteFile(Path.Combine(directory, videoFileName));
+                DeleteFile(Path.Combine(directory, videoFileName));
 
                 string outputFileName = Path.GetFileNameWithoutExtension(videoFileName) + FileExtension.Mp4;
             }
@@ -355,7 +353,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
 
         private void CopyShowIntroToWorkingDirectory(string introVideoPath, string workingDirectory)
         {
-            _fileSystem.CopyFile(introVideoPath, Path.Combine(workingDirectory, SHOW_INTRO_FILENAME_MP4));
+            CopyFile(introVideoPath, Path.Combine(workingDirectory, SHOW_INTRO_FILENAME_MP4));
         }
 
     }

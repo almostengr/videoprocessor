@@ -15,7 +15,6 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
         private readonly IMusicService _musicService;
         private readonly IStatusService _statusService;
         private readonly AppSettings _appSettings;
-        private readonly IBaseService _BaseService;
         private readonly string _channelBranding;
 
         // essential files

@@ -8,7 +8,6 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
     {
         private readonly ILogger<VideoService> _logger;
         private readonly AppSettings _appSettings;
-        private readonly IBaseService _fileSystem;
         private const int PADDING = 30;
         protected readonly string _subscribeFilter;
         protected readonly Random _random;
@@ -89,7 +88,7 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
 
         protected virtual string GetRandomVideoArchiveInDirectory(string directory)
         {
-            return _fileSystem.GetFilesInDirectory(directory)
+            return GetFilesInDirectory(directory)
                 .Where(x => x.Contains(FileExtension.Tar))
                 .Where(x => x.StartsWith(".") == false)
                 .OrderBy(x => _random.Next()).Take(1)
@@ -132,7 +131,7 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
 
         protected virtual async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
         {
-            var nonMp4VideoFiles = _fileSystem.GetFilesInDirectory(directory)
+            var nonMp4VideoFiles = GetFilesInDirectory(directory)
                 .Where(x => x.ToLower().EndsWith(FileExtension.Mkv) || x.ToLower().EndsWith(FileExtension.Mov))
                 .OrderBy(x => x)
                 .ToArray();
@@ -149,24 +148,24 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
                     cancellationToken,
                     20);
 
-                _fileSystem.DeleteFile(videoFile);
+                DeleteFile(videoFile);
             }
         }
 
         protected virtual void PrepareFileNamesInDirectory(string directory)
         {
-            foreach (string childDirectory in _fileSystem.GetDirectoriesInDirectory(directory))
+            foreach (string childDirectory in GetDirectoriesInDirectory(directory))
             {
-                foreach (string childFile in _fileSystem.GetFilesInDirectory(childDirectory))
+                foreach (string childFile in GetFilesInDirectory(childDirectory))
                 {
-                    _fileSystem.MoveFile(
+                    MoveFile(
                         Path.Combine(childDirectory, childFile),
                         Path.Combine(directory, Path.GetFileName(childFile))
                     );
                 }
             }
 
-            foreach (string file in _fileSystem.GetFilesInDirectory(directory))
+            foreach (string file in GetFilesInDirectory(directory))
             {
                 File.Move(
                     file,
@@ -186,12 +185,12 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
         protected virtual void CheckOrCreateFfmpegInputFile(string workingDirectory)
         {
             string ffmpegInputFile = Path.Combine(workingDirectory, FFMPEG_INPUT_FILE);
-            _fileSystem.DeleteFile(ffmpegInputFile);
+            DeleteFile(ffmpegInputFile);
 
             using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
             {
                 _logger.LogInformation("Creating FFMPEG input file");
-                string[] mp4Files = _fileSystem.GetFilesInDirectory(workingDirectory)
+                string[] mp4Files = GetFilesInDirectory(workingDirectory)
                     .Where(x => x.EndsWith(FileExtension.Mp4))
                     .OrderBy(x => x)
                     .ToArray();
@@ -224,7 +223,7 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
                     cancellationToken,
                     240);
 
-                int thumbnailsCreated = _fileSystem.GetFilesInDirectory(uploadDirectory)
+                int thumbnailsCreated = GetFilesInDirectory(uploadDirectory)
                     .Where(x => x.Contains(videoTitle) && x.EndsWith(FileExtension.Jpg))
                     .ToArray()
                     .Count();
@@ -240,16 +239,16 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
         {
             _logger.LogInformation($"Cleaning up before archiving {workingDirectory}");
 
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "ae_intro.mp4"));
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "ae_outtro2.mp4"));
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "dashcam.txt"));
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "dash_cam_opening.mp4"));
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "services.txt"));
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, "title.txt"));
-            _fileSystem.DeleteFile(Path.Combine(workingDirectory, FFMPEG_INPUT_FILE));
+            DeleteFile(Path.Combine(workingDirectory, "ae_intro.mp4"));
+            DeleteFile(Path.Combine(workingDirectory, "ae_outtro2.mp4"));
+            DeleteFile(Path.Combine(workingDirectory, "dashcam.txt"));
+            DeleteFile(Path.Combine(workingDirectory, "dash_cam_opening.mp4"));
+            DeleteFile(Path.Combine(workingDirectory, "services.txt"));
+            DeleteFile(Path.Combine(workingDirectory, "subscriber_click.mp4"));
+            DeleteFile(Path.Combine(workingDirectory, "title.txt"));
+            DeleteFile(Path.Combine(workingDirectory, FFMPEG_INPUT_FILE));
 
-            string[] files = _fileSystem.GetFilesInDirectory(workingDirectory)
+            string[] files = GetFilesInDirectory(workingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Gif) ||
                     f.EndsWith(FileExtension.Kdenlive) ||
                     f.EndsWith(FileExtension.Mp3))
@@ -257,13 +256,13 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
 
             foreach (var file in files)
             {
-                _fileSystem.DeleteFile(Path.Combine(workingDirectory, file));
+                DeleteFile(Path.Combine(workingDirectory, file));
             }
 
-            string[] directories = _fileSystem.GetDirectoriesInDirectory(workingDirectory);
+            string[] directories = GetDirectoriesInDirectory(workingDirectory);
             foreach (var directory in directories)
             {
-                _fileSystem.DeleteDirectory(directory);
+                DeleteDirectory(directory);
             }
 
             await Task.CompletedTask;
