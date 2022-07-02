@@ -1,11 +1,9 @@
+using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Configuration;
-using Almostengr.VideoProcessor.Core.Constants;
 using Almostengr.VideoProcessor.Core.Database;
-using Almostengr.VideoProcessor.Core.Repository;
-using Almostengr.VideoProcessor.Core.Services.Data;
-using Almostengr.VideoProcessor.Core.Services.FileSystem;
-using Almostengr.VideoProcessor.Core.Services.MusicService;
-using Almostengr.VideoProcessor.Core.Services.Subtitles;
+using Almostengr.VideoProcessor.Core.Music;
+using Almostengr.VideoProcessor.Core.Status;
+using Almostengr.VideoProcessor.Core.Subtitles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +37,6 @@ builder.Services.AddDbContext<IVideoDbContext, VideoDbContext>();
 
 builder.Services.AddTransient<IStatusRepository, StatusRepository>();
 
-builder.Services.AddTransient<IFileSystemService, FileSystemService>();
 builder.Services.AddTransient<IMusicService, MusicService>();
 builder.Services.AddTransient<ISrtSubtitleService, SrtSubtitleService>();
 builder.Services.AddTransient<IStatusService, StatusService>();

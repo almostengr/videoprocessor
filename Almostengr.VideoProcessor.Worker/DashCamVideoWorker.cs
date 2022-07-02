@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Core.Services.Video;
+using Almostengr.VideoProcessor.Core.VideoDashCam;
 
 namespace Almostengr.VideoProcessor.Worker
 {

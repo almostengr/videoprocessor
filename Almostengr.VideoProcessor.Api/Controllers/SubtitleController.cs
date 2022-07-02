@@ -1,6 +1,6 @@
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.AspNetCore.Mvc;
-using Almostengr.VideoProcessor.Core.Services.Subtitles;
+using Almostengr.VideoProcessor.Core.Subtitles;
 
 namespace Almostengr.VideoProcessor.Controllers
 {

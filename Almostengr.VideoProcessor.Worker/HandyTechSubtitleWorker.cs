@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Core.Services.Subtitles;
+using Almostengr.VideoProcessor.Core.Subtitles;
 
 namespace Almostengr.VideoProcessor.Worker
 {

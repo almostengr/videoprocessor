@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Core.Models;
+using Almostengr.VideoProcessor.Core.Status;
 using Microsoft.EntityFrameworkCore;
 
 namespace Almostengr.VideoProcessor.Core.Database
@@ -9,6 +9,6 @@ namespace Almostengr.VideoProcessor.Core.Database
         {
         }
 
-        public DbSet<Status> Statuses { get; set; }
+        public DbSet<StatusModel> Statuses { get; set; }
     }
 }

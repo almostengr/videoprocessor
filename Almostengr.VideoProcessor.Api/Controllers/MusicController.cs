@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Core.Services.MusicService;
+using Almostengr.VideoProcessor.Core.Music;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Almostengr.VideoProcessor.Controllers
@@ -6,12 +6,10 @@ namespace Almostengr.VideoProcessor.Controllers
     [ApiController]
     public class MusicController : ControllerBase
     {
-        private readonly ILogger<MusicController> _logger;
         private readonly IMusicService _musicService;
 
-        public MusicController(ILogger<MusicController> logger, IMusicService musicService)
+        public MusicController(IMusicService musicService)
         {
-            _logger = logger;
             _musicService = musicService;
         }
 
@@ -19,8 +17,7 @@ namespace Almostengr.VideoProcessor.Controllers
         [Route("/music/inputlist")]
         public async Task<IActionResult> GetFfmpegMusicInputList()
         {
-            var tracks = await Task.Run(() => _musicService.GetRandomMusicTracks());
-            return Ok(tracks);
+            return Ok(await Task.Run(() => _musicService.GetRandomMusicTracks()));
         }
 
     }

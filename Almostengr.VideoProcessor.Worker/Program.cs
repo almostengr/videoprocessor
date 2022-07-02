@@ -1,13 +1,11 @@
+using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Configuration;
-using Almostengr.VideoProcessor.Core.Constants;
 using Almostengr.VideoProcessor.Core.Database;
-using Almostengr.VideoProcessor.Core.Repository;
-using Almostengr.VideoProcessor.Core.Services.Data;
-using Almostengr.VideoProcessor.Core.Services.ExternalProcess;
-using Almostengr.VideoProcessor.Core.Services.FileSystem;
-using Almostengr.VideoProcessor.Core.Services.MusicService;
-using Almostengr.VideoProcessor.Core.Services.Subtitles;
-using Almostengr.VideoProcessor.Core.Services.Video;
+using Almostengr.VideoProcessor.Core.Music;
+using Almostengr.VideoProcessor.Core.Status;
+using Almostengr.VideoProcessor.Core.Subtitles;
+using Almostengr.VideoProcessor.Core.VideoDashCam;
+using Almostengr.VideoProcessor.Core.VideoHandyTech;
 using Almostengr.VideoProcessor.Worker;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,8 +31,6 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton(appSettings);
 
         services.AddTransient<IDashCamVideoService, DashCamVideoService>();
-        services.AddTransient<IExternalProcessService, ExternalProcessService>();
-        services.AddTransient<IFileSystemService, FileSystemService>();
         services.AddTransient<IHandyTechVideoService, HandyTechVideoService>();
         services.AddTransient<IMusicService, MusicService>();
         services.AddTransient<ISrtSubtitleService, SrtSubtitleService>();

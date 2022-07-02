@@ -1,5 +1,4 @@
-using Almostengr.VideoProcessor.Core.Enums;
-using Almostengr.VideoProcessor.Core.Services.Data;
+using Almostengr.VideoProcessor.Core.Status;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Almostengr.VideoProcessor.Api.Controllers
@@ -18,7 +17,7 @@ namespace Almostengr.VideoProcessor.Api.Controllers
         [Route("/status/{key}")]
         public async Task<IActionResult> GetStatusByKey(StatusKeys key)
         {
-            var response = await _statusService.GetByIdAsync(key);
+            var response = await _statusService.GetByKeyAsync(key);
             if (response == null)
             {
                 return NotFound();
