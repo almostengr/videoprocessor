@@ -91,7 +91,7 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
             await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerIdleInterval), cancellationToken);
         }
 
-        private string GetRandomSubtitleFile(string directory)
+        public string GetRandomSubtitleFile(string directory)
         {
             Random random = new();
             return GetIncomingSubtitles(directory)
@@ -99,49 +99,36 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
                 .OrderBy(x => random.Next()).Take(1).FirstOrDefault();
         }
 
-        public async Task ExecuteAsync(CancellationToken stoppingToken)
+        public async Task ExecuteServiceAsync(string subtitleFile, CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                string subtitleFile = GetRandomSubtitleFile(_incomingDirectory);
-                bool isDiskSpaceAvailable = 
-                    IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
+                _logger.LogInformation($"Processing {subtitleFile}");
 
-                if (string.IsNullOrEmpty(subtitleFile) || isDiskSpaceAvailable == false)
+                await ConfirmFileTransferCompleteAsync(subtitleFile);
+
+                string fileContent = GetFileContents(subtitleFile);
+
+                SubtitleInputDto subtitleInputDto =
+                    new SubtitleInputDto(fileContent, Path.GetFileName(subtitleFile));
+
+                if (subtitleInputDto.IsValidSrtSubtitleFile() == false)
                 {
-                    await WorkerIdleAsync(stoppingToken);
-                    continue;
+                    _logger.LogError($"{subtitleFile} is not in a valid format");
+                    return;
                 }
 
-                try
-                {
-                    _logger.LogInformation($"Processing {subtitleFile}");
+                SubtitleOutputDto transcriptOutput = CleanSubtitle(subtitleInputDto);
 
-                    await ConfirmFileTransferCompleteAsync(subtitleFile);
+                SaveSubtitleFile(transcriptOutput, _uploadDirectory);
+                ArchiveSubtitleFile(subtitleFile, _uploadDirectory);
 
-                    string fileContent = GetFileContents(subtitleFile);
-
-                    SubtitleInputDto subtitleInputDto =
-                        new SubtitleInputDto(fileContent, Path.GetFileName(subtitleFile));
-
-                    if (subtitleInputDto.IsValidSrtSubtitleFile() == false)
-                    {
-                        _logger.LogError($"{subtitleFile} is not in a valid format");
-                        continue;
-                    }
-
-                    SubtitleOutputDto transcriptOutput = CleanSubtitle(subtitleInputDto);
-
-                    SaveSubtitleFile(transcriptOutput, _uploadDirectory);
-                    ArchiveSubtitleFile(subtitleFile, _uploadDirectory);
-
-                    _logger.LogInformation($"Finished processing {subtitleFile}");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex.InnerException, ex.Message);
-                }
-            } // end while
+                _logger.LogInformation($"Finished processing {subtitleFile}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.InnerException, ex.Message);
+            }
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

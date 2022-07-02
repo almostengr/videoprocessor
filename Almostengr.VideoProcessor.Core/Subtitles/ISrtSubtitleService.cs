@@ -9,7 +9,8 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
         string[] GetIncomingSubtitles(string directory);
         void SaveSubtitleFile(SubtitleOutputDto transcriptDto, string archiveDirectory);
         Task WorkerIdleAsync(CancellationToken stoppingToken);
-        Task ExecuteAsync(CancellationToken stoppingToken);
+        Task ExecuteServiceAsync(string subtitleFile, CancellationToken stoppingToken);
         Task StartAsync(CancellationToken cancellationToken);
+        string GetRandomSubtitleFile(string directory);
     }
 }

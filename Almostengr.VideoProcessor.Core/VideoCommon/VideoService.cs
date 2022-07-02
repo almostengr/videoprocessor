@@ -59,13 +59,13 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
         }
 
         protected abstract Task RenderVideoAsync(string videoTitle, string videoOutputPath, string videoFilter, CancellationToken cancellationToken);
-        protected abstract Task WorkerIdleAsync(CancellationToken cancellationToken);
+        public abstract Task WorkerIdleAsync(CancellationToken cancellationToken);
         protected abstract string GetFfmpegVideoFilters(string videoTitle);
         protected abstract Task ConvertVideoFilesToCommonFormatAsync(string directory, CancellationToken cancellationToken);
         protected abstract string GetBrandingText();
         protected abstract void CheckOrCreateFfmpegInputFile();
 
-        public abstract Task ExecuteServiceAsync(CancellationToken cancellationToken);
+        public abstract Task ExecuteServiceAsync(string videoArchive, CancellationToken cancellationToken);
         public abstract Task StartAsync(CancellationToken cancellationToken);
 
         protected virtual string GetVideoOutputPath(string uploadDirectory, string videoTitle)
@@ -86,7 +86,7 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
             );
         }
 
-        protected virtual string GetRandomVideoArchiveInDirectory(string directory)
+        public virtual string GetRandomVideoArchiveInDirectory(string directory)
         {
             return GetFilesInDirectory(directory)
                 .Where(x => x.Contains(FileExtension.Tar))

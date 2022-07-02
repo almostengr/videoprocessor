@@ -1,5 +1,3 @@
-using Almostengr.VideoProcessor.Core.Common;
-
 namespace Almostengr.VideoProcessor.Core.Subtitles
 {
     public interface ISubtitleService 
@@ -9,5 +7,6 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
         string RemoveDuplicatesFromBlogString(string blogText);
         string GetFileContents(string filePath);
         void SaveFileContents(string filePath, string content);
+        bool IsDiskSpaceAvailable(string incomingDirectory, double threshold);
     }
 }

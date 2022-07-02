@@ -26,7 +26,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
 
         public HandyTechVideoService(ILogger<HandyTechVideoService> logger, AppSettings appSettings,
             IStatusService statusService, IMusicService musicService) :
-             base(logger, appSettings)
+            base(logger, appSettings)
         {
             _appSettings = appSettings;
             _logger = logger;
@@ -48,66 +48,54 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             await Task.CompletedTask;
         }
 
-        public override async Task ExecuteServiceAsync(CancellationToken cancellationToken)
+        public override async Task ExecuteServiceAsync(string videoArchive, CancellationToken cancellationToken)
         {
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                string videoArchive = GetRandomVideoArchiveInDirectory(_incomingDirectory);
-                bool isDiskSpaceAvailable = IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
+                _logger.LogInformation($"Processing {videoArchive}");
 
-                if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)
-                {
-                    await WorkerIdleAsync(cancellationToken);
-                    continue;
-                }
+                DeleteDirectory(_workingDirectory);
+                CreateDirectory(_workingDirectory);
 
-                try
-                {
-                    _logger.LogInformation($"Processing {videoArchive}");
+                await ConfirmFileTransferCompleteAsync(videoArchive);
 
-                    DeleteDirectory(_workingDirectory);
-                    CreateDirectory(_workingDirectory);
+                await ExtractTarFileAsync(videoArchive, _workingDirectory, cancellationToken);
 
-                    await ConfirmFileTransferCompleteAsync(videoArchive);
+                PrepareFileNamesInDirectory(_workingDirectory);
 
-                    await ExtractTarFileAsync(videoArchive, _workingDirectory, cancellationToken);
+                await AddAudioToTimelapseAsync(_workingDirectory, cancellationToken); // add audio to gopro timelapse files
 
-                    PrepareFileNamesInDirectory(_workingDirectory);
+                CopyShowIntroToWorkingDirectory(_appSettings.Directories.IntroVideoPath, _workingDirectory);
 
-                    await AddAudioToTimelapseAsync(_workingDirectory, cancellationToken); // add audio to gopro timelapse files
+                await ConvertVideoFilesToCommonFormatAsync(_workingDirectory, cancellationToken);
 
-                    CopyShowIntroToWorkingDirectory(_appSettings.Directories.IntroVideoPath, _workingDirectory);
+                CheckOrCreateFfmpegInputFile();
 
-                    await ConvertVideoFilesToCommonFormatAsync(_workingDirectory, cancellationToken);
+                string videoTitle = GetVideoTitleFromArchiveName(videoArchive);
+                string videoFilter = GetFfmpegVideoFilters(videoTitle);
 
-                    CheckOrCreateFfmpegInputFile();
+                string videoOutputPath = GetVideoOutputPath(_uploadDirectory, videoTitle);
+                await RenderVideoAsync(videoTitle, videoOutputPath, videoFilter, cancellationToken);
 
-                    string videoTitle = GetVideoTitleFromArchiveName(videoArchive);
-                    string videoFilter = GetFfmpegVideoFilters(videoTitle);
-                    
-                    string videoOutputPath = GetVideoOutputPath(_uploadDirectory, videoTitle);
-                    await RenderVideoAsync(videoTitle, videoOutputPath, videoFilter, cancellationToken);
+                await CreateThumbnailsFromFinalVideoAsync(
+                    videoOutputPath, _uploadDirectory, videoTitle, cancellationToken);
 
-                    await CreateThumbnailsFromFinalVideoAsync(
-                        videoOutputPath, _uploadDirectory, videoTitle, cancellationToken);
+                await CleanUpBeforeArchivingAsync(_workingDirectory);
 
-                    await CleanUpBeforeArchivingAsync(_workingDirectory);
+                string archiveTarFile = GetArchiveTarFileName(videoTitle);
 
-                    string archiveTarFile = GetArchiveTarFileName(videoTitle);
+                await ArchiveDirectoryContentsAsync(
+                    _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
 
-                    await ArchiveDirectoryContentsAsync(
-                        _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
+                DeleteFile(videoArchive);
 
-                    DeleteFile(videoArchive);
-
-                    DeleteDirectory(_workingDirectory);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, ex.Message);
-                }
+                DeleteDirectory(_workingDirectory);
 
                 _logger.LogInformation($"Finished processing {videoArchive}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.InnerException, ex.Message);
             }
         }
 
@@ -242,7 +230,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             await base.ExtractTarFileAsync(tarFile, workingDirectory, cancellationToken);
         }
 
-        protected override async Task WorkerIdleAsync(CancellationToken cancellationToken)
+        public override async Task WorkerIdleAsync(CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.RhtStatus, StatusValues.Idle);
             await _statusService.UpsertAsync(StatusKeys.RhtFile, string.Empty);

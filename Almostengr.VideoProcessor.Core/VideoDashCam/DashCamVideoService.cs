@@ -51,65 +51,51 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             return "Kenny Ram Dash Cam";
         }
 
-        public override async Task ExecuteServiceAsync(CancellationToken cancellationToken)
+        public override async Task ExecuteServiceAsync(string videoArchivePath, CancellationToken cancellationToken)
         {
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                string videoArchivePath = GetRandomVideoArchiveInDirectory(_incomingDirectory);
-                bool isDiskSpaceAvailable = IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
+                _logger.LogInformation($"Processing {videoArchivePath}");
 
-                if (string.IsNullOrEmpty(videoArchivePath) || isDiskSpaceAvailable == false)
-                {
-                    await WorkerIdleAsync(cancellationToken);
-                    continue;
-                }
+                DeleteDirectory(_workingDirectory);
+                CreateDirectory(_workingDirectory);
 
-                try
-                {
-                    _logger.LogInformation($"Processing {videoArchivePath}");
+                await ConfirmFileTransferCompleteAsync(videoArchivePath);
 
-                    DeleteDirectory(_workingDirectory);
-                    CreateDirectory(_workingDirectory);
+                await ExtractTarFileAsync(videoArchivePath, _workingDirectory, cancellationToken);
 
-                    await ConfirmFileTransferCompleteAsync(videoArchivePath);
+                PrepareFileNamesInDirectory(_workingDirectory);
 
-                    await ExtractTarFileAsync(videoArchivePath, _workingDirectory, cancellationToken);
+                await ConvertVideoFilesToMp4Async(_workingDirectory, cancellationToken);
 
-                    PrepareFileNamesInDirectory(_workingDirectory);
+                CheckOrCreateFfmpegInputFile(_workingDirectory);
 
-                    await ConvertVideoFilesToMp4Async(_workingDirectory, cancellationToken);
+                string videoTitle = GetVideoTitleFromArchiveName(videoArchivePath);
 
-                    CheckOrCreateFfmpegInputFile(_workingDirectory);
+                string videoFilter = GetFfmpegVideoFilters(videoTitle);
+                videoFilter += GetDestinationFilter();
+                videoFilter += GetMajorRoadsFilter();
 
-                    string videoTitle = GetVideoTitleFromArchiveName(videoArchivePath);
+                string videoOutputPath = GetVideoOutputPath(_uploadDirectory, videoTitle);
+                await RenderVideoAsync(videoTitle, videoOutputPath, videoFilter, cancellationToken);
 
-                    string videoFilter = GetFfmpegVideoFilters(videoTitle);
-                    videoFilter += GetDestinationFilter();
-                    videoFilter += GetMajorRoadsFilter();
+                await CreateThumbnailsFromFinalVideoAsync(
+                    videoOutputPath, _uploadDirectory, videoTitle, cancellationToken);
 
-                    string videoOutputPath = GetVideoOutputPath(_uploadDirectory, videoTitle);
-                    await RenderVideoAsync(videoTitle, videoOutputPath, videoFilter, cancellationToken);
+                await CleanUpBeforeArchivingAsync(_workingDirectory);
 
-                    await CreateThumbnailsFromFinalVideoAsync(
-                        videoOutputPath, _uploadDirectory, videoTitle, cancellationToken);
+                string archiveTarFile = GetArchiveTarFileName(videoTitle);
 
-                    await CleanUpBeforeArchivingAsync(_workingDirectory);
+                await ArchiveDirectoryContentsAsync(
+                  _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
 
-                    string archiveTarFile = GetArchiveTarFileName(videoTitle);
+                DeleteFile(videoArchivePath);
 
-                    await ArchiveDirectoryContentsAsync(
-                      _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
-
-                    DeleteFile(videoArchivePath);
-
-                    DeleteDirectory(_workingDirectory);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex.InnerException, ex.Message);
-                }
-
-                _logger.LogInformation($"Finished processing {videoArchivePath}");
+                DeleteDirectory(_workingDirectory);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.InnerException, ex.Message);
             }
         }
 
@@ -260,7 +246,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             await base.ExtractTarFileAsync(tarFile, workingDirectory, cancellationToken);
         }
 
-        protected override async Task WorkerIdleAsync(CancellationToken cancellationToken)
+        public override async Task WorkerIdleAsync(CancellationToken cancellationToken)
         {
             await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Idle);
             await _statusService.UpsertAsync(StatusKeys.DashFile, string.Empty);
