@@ -2,9 +2,9 @@ namespace Almostengr.VideoProcessor.Core.Status
 {
     public enum StatusKeys
     {
-        DashFile = 1,
-        DashStatus,
-        RhtFile,
-        RhtStatus,
+        DashFile = 11,
+        DashStatus = 12,
+        RhtFile = 21,
+        RhtStatus = 22,
     }
 }

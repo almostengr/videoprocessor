@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Almostengr.VideoProcessor.Core.Status
 {
-    public class StatusRepository : IStatusRepository
+    public sealed class StatusRepository : IStatusRepository
     {
         private readonly VideoDbContext _dbContext;
 

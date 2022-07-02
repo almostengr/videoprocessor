@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Core.Subtitles
 {
-    public class SrtSubtitleService : SubtitleService, ISrtSubtitleService
+    public sealed class SrtSubtitleService : SubtitleService, ISrtSubtitleService
     {
         private readonly ILogger<SrtSubtitleService> _logger;
         private readonly IBaseService _BaseService;

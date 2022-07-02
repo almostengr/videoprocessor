@@ -1,16 +1,12 @@
-using Microsoft.Extensions.Logging;
-
 namespace Almostengr.VideoProcessor.Core.Status
 {
     public class StatusService : IStatusService
     {
         private readonly IStatusRepository _statusRepository;
-        private readonly ILogger<StatusService> _logger;
 
-        public StatusService(IStatusRepository statusRepository, ILogger<StatusService> logger)
+        public StatusService(IStatusRepository statusRepository)
         {
             _statusRepository = statusRepository;
-            _logger = logger;
         }
 
         public async Task<StatusDto> GetByKeyAsync(StatusKeys key)

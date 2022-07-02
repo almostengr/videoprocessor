@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Core.Status
 {
-    public class MockStatusRepository : IStatusRepository
+    public sealed class MockStatusRepository : IStatusRepository
     {
         public async Task<List<StatusDto>> GetAllAsync()
         {

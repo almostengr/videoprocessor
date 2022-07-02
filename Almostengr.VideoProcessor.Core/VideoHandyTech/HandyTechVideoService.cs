@@ -19,10 +19,10 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
         private readonly IBaseService _BaseService;
         private readonly IStatusService _statusService;
         private readonly IMusicService _musicService;
-        private readonly string _xResolution = "1920";
-        private readonly string _yResolution = "1080";
-        private readonly string _audioBitRate = "196000";
-        private readonly string _audioSampleRate = "48000";
+        private const string _xResolution = "1920";
+        private const string _yResolution = "1080";
+        private const string _audioBitRate = "196000";
+        private const string _audioSampleRate = "48000";
         private const string NO_INTRO_FILE = "nointro.txt";
         private const string SHOW_INTRO_FILENAME_MP4 = "rhtservicesintro.mp4";
 
@@ -43,10 +43,10 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
-            _BaseService.CreateDirectory(_incomingDirectory);
-            _BaseService.CreateDirectory(_archiveDirectory);
-            _BaseService.CreateDirectory(_uploadDirectory);
-            _BaseService.CreateDirectory(_workingDirectory);
+            CreateDirectory(_incomingDirectory);
+            CreateDirectory(_archiveDirectory);
+            CreateDirectory(_uploadDirectory);
+            CreateDirectory(_workingDirectory);
             await Task.CompletedTask;
         }
 
@@ -55,7 +55,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             while (!cancellationToken.IsCancellationRequested)
             {
                 string videoArchive = GetRandomVideoArchiveInDirectory(_incomingDirectory);
-                bool isDiskSpaceAvailable = _BaseService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
+                bool isDiskSpaceAvailable = IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
 
                 if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)
                 {
@@ -67,10 +67,10 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                 {
                     _logger.LogInformation($"Processing {videoArchive}");
 
-                    _BaseService.DeleteDirectory(_workingDirectory);
-                    _BaseService.CreateDirectory(_workingDirectory);
+                    DeleteDirectory(_workingDirectory);
+                    CreateDirectory(_workingDirectory);
 
-                    await _BaseService.ConfirmFileTransferCompleteAsync(videoArchive);
+                    await ConfirmFileTransferCompleteAsync(videoArchive);
 
                     await ExtractTarFileAsync(videoArchive, _workingDirectory, cancellationToken);
 
@@ -100,9 +100,9 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                     await ArchiveDirectoryContentsAsync(
                         _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
 
-                    _BaseService.DeleteFile(videoArchive);
+                    DeleteFile(videoArchive);
 
-                    _BaseService.DeleteDirectory(_workingDirectory);
+                    DeleteDirectory(_workingDirectory);
                 }
                 catch (Exception ex)
                 {

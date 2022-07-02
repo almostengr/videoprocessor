@@ -1,6 +1,5 @@
 using Almostengr.VideoProcessor.Core.Configuration;
 using Almostengr.VideoProcessor.Core.Music;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Almostengr.VideoProcessor.Core.Status;
 using Almostengr.VideoProcessor.Core.Common;
@@ -29,7 +28,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
         private readonly string _workingDirectory;
 
         public DashCamVideoService(ILogger<DashCamVideoService> logger, AppSettings appSettings,
-           IServiceScopeFactory factory, IStatusService statusService, IMusicService musicService) :
+           IStatusService statusService, IMusicService musicService) :
           base(logger, appSettings)
         {
             _streetSignBoxFilter = $", drawbox=x=0:y=in_h-200:w=in_w:h=200:color={FfMpegColors.Green}:t=fill";
@@ -58,7 +57,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             while (!cancellationToken.IsCancellationRequested)
             {
                 string videoArchivePath = GetRandomVideoArchiveInDirectory(_incomingDirectory);
-                bool isDiskSpaceAvailable = _BaseService.IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
+                bool isDiskSpaceAvailable = IsDiskSpaceAvailable(_incomingDirectory, _appSettings.DiskSpaceThreshold);
 
                 if (string.IsNullOrEmpty(videoArchivePath) || isDiskSpaceAvailable == false)
                 {
@@ -70,10 +69,10 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
                 {
                     _logger.LogInformation($"Processing {videoArchivePath}");
 
-                    _BaseService.DeleteDirectory(_workingDirectory);
-                    _BaseService.CreateDirectory(_workingDirectory);
+                    DeleteDirectory(_workingDirectory);
+                    CreateDirectory(_workingDirectory);
 
-                    await _BaseService.ConfirmFileTransferCompleteAsync(videoArchivePath);
+                    await ConfirmFileTransferCompleteAsync(videoArchivePath);
 
                     await ExtractTarFileAsync(videoArchivePath, _workingDirectory, cancellationToken);
 
@@ -102,9 +101,9 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
                     await ArchiveDirectoryContentsAsync(
                       _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
 
-                    _BaseService.DeleteFile(videoArchivePath);
+                    DeleteFile(videoArchivePath);
 
-                    _BaseService.DeleteDirectory(_workingDirectory);
+                    DeleteDirectory(_workingDirectory);
                 }
                 catch (Exception ex)
                 {
@@ -216,12 +215,12 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
         protected override void CheckOrCreateFfmpegInputFile()
         {
             string ffmpegInputFile = Path.Combine(_workingDirectory, FFMPEG_INPUT_FILE);
-            _BaseService.DeleteFile(ffmpegInputFile);
+            DeleteFile(ffmpegInputFile);
 
             using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
             {
                 _logger.LogInformation("Creating FFMPEG input file");
-                string[] mp4Files = _BaseService.GetFilesInDirectory(_workingDirectory)
+                string[] mp4Files = GetFilesInDirectory(_workingDirectory)
                   .Where(x => x.EndsWith(FileExtension.Mov))
                   .OrderBy(x => x)
                   .ToArray();
@@ -272,10 +271,10 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
-            _BaseService.CreateDirectory(_incomingDirectory);
-            _BaseService.CreateDirectory(_archiveDirectory);
-            _BaseService.CreateDirectory(_uploadDirectory);
-            _BaseService.CreateDirectory(_workingDirectory);
+            CreateDirectory(_incomingDirectory);
+            CreateDirectory(_archiveDirectory);
+            CreateDirectory(_uploadDirectory);
+            CreateDirectory(_workingDirectory);
             await Task.CompletedTask;
         }
 

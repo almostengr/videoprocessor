@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Core.Common;
 
 namespace Almostengr.VideoProcessor.Core.Status
 {
-    public class StatusModel : BaseModel
+    public sealed class StatusModel : BaseModel
     {
         public StatusModel()
         { }
