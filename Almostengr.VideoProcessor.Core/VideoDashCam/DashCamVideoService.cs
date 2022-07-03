@@ -66,7 +66,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
 
                 PrepareFileNamesInDirectory(_workingDirectory);
 
-                await ConvertVideoFilesToMp4Async(_workingDirectory, cancellationToken);
+                await ConvertVideoFilesToCommonFormatAsync(_workingDirectory, cancellationToken);
 
                 CheckOrCreateFfmpegInputFile(_workingDirectory);
 
@@ -263,9 +263,34 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             await Task.CompletedTask;
         }
 
-        protected override Task ConvertVideoFilesToCommonFormatAsync(string directory, CancellationToken cancellationToken)
+        protected override async Task ConvertVideoFilesToCommonFormatAsync(string directory, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+
+            var videoFiles = GetFilesInDirectory(directory)
+                .Where(x => x.EndsWith(FileExtension.Mov))
+                .OrderBy(x => x).ToArray();
+
+            string _xResolution = "1920";
+            string _yResolution = "1080";
+
+            foreach (var videoFileName in videoFiles)
+            {
+                string scaledFile = $"{Path.GetFileNameWithoutExtension(videoFileName)}.{_xResolution}x{_yResolution}{FileExtension.Mp4}";
+
+                _logger.LogInformation($"Converting video {videoFileName} to common format");
+
+                await RunCommandAsync(
+                    ProgramPaths.FfmpegBinary,
+                    $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -r 30 -vf \"scale_vaapi=w={_xResolution}:h={_yResolution}\" -vcodec h264_vaapi -an \"{scaledFile}\"",
+                    directory,
+                    cancellationToken,
+                    10
+                );
+
+                DeleteFile(Path.Combine(directory, videoFileName));
+
+                string outputFileName = Path.GetFileNameWithoutExtension(videoFileName) + FileExtension.Mp4;
+            }
         }
     }
 }
