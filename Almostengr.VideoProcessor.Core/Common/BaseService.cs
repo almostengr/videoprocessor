@@ -138,7 +138,7 @@ namespace Almostengr.VideoProcessor.Core.Common
         {
             _logger.LogInformation($"{program} {arguments}");
 
-            Process process = new Process
+            using Process process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
