@@ -122,6 +122,11 @@ namespace Almostengr.VideoProcessor.Core.Common
             return File.Exists(filePath) ? true : false;
         }
 
+        public bool DoesFileExist(string directory, string fileName)
+        {
+            return DoesFileExist(Path.Combine(directory, fileName));
+        }
+
         public void CopyFile(string sourceFile, string destinationFile)
         {
             _logger.LogInformation($"Copying {sourceFile} to {destinationFile}");

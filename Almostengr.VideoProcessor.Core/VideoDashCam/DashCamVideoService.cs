@@ -10,12 +10,10 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
     public sealed class DashCamVideoService : VideoService, IDashCamVideoService
     {
         private readonly string _streetSignTextSubfilter;
-        private readonly string _streetSignBoxFilter;
         private readonly ILogger<DashCamVideoService> _logger;
         private readonly IMusicService _musicService;
         private readonly IStatusService _statusService;
         private readonly AppSettings _appSettings;
-        private readonly string _channelBranding;
 
         // essential files
         private const string DESTINATION_FILE = "destination.txt";
@@ -30,10 +28,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
            IStatusService statusService, IMusicService musicService) :
           base(logger, appSettings)
         {
-            _streetSignBoxFilter = $", drawbox=x=0:y=in_h-200:w=in_w:h=200:color={FfMpegColors.Green}:t=fill";
-            _streetSignTextSubfilter = $"fontcolor=white:fontsize={LARGE_FONT}:{_lowerCenter}";
-
-            _channelBranding = GetBrandingText();
+            _streetSignTextSubfilter = $"fontcolor=white:fontsize={LARGE_FONT}:{_lowerCenter}:box=1:boxborderw={DASHCAM_BORDER_WIDTH}:boxcolor={FfMpegColors.Green}";
 
             _logger = logger;
             _musicService = musicService;
@@ -79,15 +74,12 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
                 string videoOutputPath = GetVideoOutputPath(_uploadDirectory, videoTitle);
                 await RenderVideoAsync(videoTitle, videoOutputPath, videoFilter, cancellationToken);
 
-                await CreateThumbnailsFromFinalVideoAsync(
-                    videoOutputPath, _uploadDirectory, videoTitle, cancellationToken);
-
                 await CleanUpBeforeArchivingAsync(_workingDirectory);
 
                 string archiveTarFile = GetArchiveTarFileName(videoTitle);
 
                 await ArchiveDirectoryContentsAsync(
-                  _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
+                    _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
 
                 DeleteFile(videoArchivePath);
 
@@ -96,6 +88,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             catch (Exception ex)
             {
                 _logger.LogError(ex.InnerException, ex.Message);
+                _logger.LogError(ex.InnerException, ex.Message);
             }
         }
 
@@ -103,10 +96,11 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
         {
             int randomDuration = _random.Next(5, 16);
             string textColor = GetTextColor(videoTitle);
+            string brandingText = GetBrandingText();
 
             // solid text - channel name
             string videoFilter = string.Empty;
-            videoFilter += $"drawtext=textfile:'{_channelBranding}':";
+            videoFilter += $"drawtext=textfile:'{brandingText}':";
             videoFilter += $"fontcolor={textColor}:";
             videoFilter += $"fontsize={SMALL_FONT}:";
             videoFilter += $"{_upperRight}:";
@@ -116,7 +110,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             videoFilter += $"enable='between(t,0,{randomDuration})', ";
 
             // dimmed text - channel name
-            videoFilter += $"drawtext=textfile:'{_channelBranding}':";
+            videoFilter += $"drawtext=textfile:'{brandingText}':";
             videoFilter += $"fontcolor={textColor}:";
             videoFilter += $"fontsize={SMALL_FONT}:";
             videoFilter += $"{_upperRight}:";
@@ -160,9 +154,12 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
 
         private string GetDestinationFilter()
         {
-            if (File.Exists(Path.Combine(_workingDirectory, DESTINATION_FILE)))
+            string destinationFile = Path.Combine(_workingDirectory, DESTINATION_FILE);
+
+            if (File.Exists(destinationFile))
             {
-                return $"{_streetSignBoxFilter}, drawtext=textfile={DESTINATION_FILE}:${_streetSignTextSubfilter}:enable='between(t,2,12)'";
+                string fileContents = File.ReadAllText(destinationFile).Trim();
+                return $", drawtext=textfile:{fileContents}:{_streetSignTextSubfilter}:enable='between(t,2,12)'";
             }
 
             return string.Empty;
@@ -170,9 +167,11 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
 
         private string GetMajorRoadsFilter()
         {
-            if (File.Exists(Path.Combine(_workingDirectory, MAJOR_ROADS_FILE)))
+            string majorRoadsFile = Path.Combine(_workingDirectory, MAJOR_ROADS_FILE);
+            if (File.Exists(majorRoadsFile))
             {
-                return $"{_streetSignBoxFilter}, drawtext=textfile={MAJOR_ROADS_FILE}:${_streetSignTextSubfilter}:enable='between(t,12,22)'";
+                string fileContents = File.ReadAllText(majorRoadsFile).Trim();
+                return $", drawtext=textfile:'{fileContents}':{_streetSignTextSubfilter}:enable='between(t,12,22)'";
             }
 
             return string.Empty;
@@ -190,11 +189,11 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             await _statusService.SaveChangesAsync();
 
             await RunCommandAsync(
-              ProgramPaths.FfmpegBinary,
-              $"-hide_banner -y -safe 0 {LOG_ERRORS} -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{FFMPEG_INPUT_FILE}\" -i \"{_musicService.GetRandomMixTrack()}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{videoOutputPath}\"",
-              _workingDirectory, // videoProperties.WorkingDirectory,
-              cancellationToken,
-              240);
+                ProgramPaths.FfmpegBinary,
+                $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{FFMPEG_INPUT_FILE}\" -i \"{_musicService.GetRandomMixTrack()}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -bsf:a aac_adtstoasc -map 0:v:0 -map 1:a:0 \"{videoOutputPath}\"",
+                _workingDirectory,
+                cancellationToken,
+                240);
         }
 
         protected override void CheckOrCreateFfmpegInputFile()
@@ -205,10 +204,9 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
             {
                 _logger.LogInformation("Creating FFMPEG input file");
-                string[] mp4Files = GetFilesInDirectory(_workingDirectory)
+                var mp4Files = GetFilesInDirectory(_workingDirectory)
                   .Where(x => x.EndsWith(FileExtension.Mov))
-                  .OrderBy(x => x)
-                  .ToArray();
+                  .OrderBy(x => x);
 
                 foreach (string file in mp4Files)
                 {
@@ -229,13 +227,6 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.Archiving);
             await _statusService.SaveChangesAsync();
             await base.CleanUpBeforeArchivingAsync(workingDirectory);
-        }
-
-        protected override async Task ConvertVideoFilesToMp4Async(string directory, CancellationToken cancellationToken)
-        {
-            await _statusService.UpsertAsync(StatusKeys.DashStatus, StatusValues.ConvertingToMp4);
-            await _statusService.SaveChangesAsync();
-            await base.ConvertVideoFilesToMp4Async(directory, cancellationToken);
         }
 
         protected override async Task ExtractTarFileAsync(string tarFile, string workingDirectory, CancellationToken cancellationToken)
@@ -265,32 +256,53 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
 
         protected override async Task ConvertVideoFilesToCommonFormatAsync(string directory, CancellationToken cancellationToken)
         {
-
             var videoFiles = GetFilesInDirectory(directory)
                 .Where(x => x.EndsWith(FileExtension.Mov))
-                .OrderBy(x => x).ToArray();
-
-            string _xResolution = "1920";
-            string _yResolution = "1080";
+                .OrderBy(x => x);
 
             foreach (var videoFileName in videoFiles)
             {
-                string scaledFile = $"{Path.GetFileNameWithoutExtension(videoFileName)}.{_xResolution}x{_yResolution}{FileExtension.Mp4}";
-
                 _logger.LogInformation($"Converting video {videoFileName} to common format");
+
+                var result = await RunCommandAsync(
+                    ProgramPaths.FfprobeBinary,
+                    $"-hide_banner \"{videoFileName}\"",
+                    directory,
+                    cancellationToken,
+                    1
+                );
+
+                string xResolution = "1920";
+                string yResolution = "1080";
+
+                if (result.stdErr.Contains("1280x720"))
+                {
+                    xResolution = "1280";
+                    yResolution = "720";
+                }
+
+                string frameRate = "30";
+
+                if (result.stdErr.Contains("60 fps"))
+                {
+                    frameRate = "60";
+                }
+
+                string scaledFile = $"{Path.GetFileNameWithoutExtension(videoFileName)}.{xResolution}x{yResolution}{FileExtension.Mp4}";
+                string videoFilters = $"scale_vaapi=w={xResolution}:h={yResolution}";
 
                 await RunCommandAsync(
                     ProgramPaths.FfmpegBinary,
-                    $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -r 30 -vf \"scale_vaapi=w={_xResolution}:h={_yResolution}\" -vcodec h264_vaapi -an \"{scaledFile}\"",
+                    $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -r {frameRate} -vf \"{videoFilters}\" -vcodec h264_vaapi -an \"{scaledFile}\"",
                     directory,
                     cancellationToken,
                     10
                 );
 
                 DeleteFile(Path.Combine(directory, videoFileName));
-
-                string outputFileName = Path.GetFileNameWithoutExtension(videoFileName) + FileExtension.Mp4;
+                MoveFile(Path.Combine(directory, scaledFile), Path.Combine(directory, videoFileName.Replace(FileExtension.Mov, FileExtension.Mp4)));
             }
         }
-    }
+
+    } // end class
 }

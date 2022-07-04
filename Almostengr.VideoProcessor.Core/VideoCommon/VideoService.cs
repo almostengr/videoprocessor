@@ -133,8 +133,7 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
         {
             var nonMp4VideoFiles = GetFilesInDirectory(directory)
                 .Where(x => x.ToLower().EndsWith(FileExtension.Mkv) || x.ToLower().EndsWith(FileExtension.Mov))
-                .OrderBy(x => x)
-                .ToArray();
+                .OrderBy(x => x);
 
             foreach (var videoFile in nonMp4VideoFiles)
             {
@@ -150,6 +149,11 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
 
                 DeleteFile(videoFile);
             }
+        }
+
+        protected virtual string GetSubscribeLikeFollowFilter()
+        {
+            return "";
         }
 
         protected virtual void PrepareFileNamesInDirectory(string directory)
@@ -190,10 +194,9 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
             using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
             {
                 _logger.LogInformation("Creating FFMPEG input file");
-                string[] mp4Files = GetFilesInDirectory(workingDirectory)
+                var mp4Files = GetFilesInDirectory(workingDirectory)
                     .Where(x => x.EndsWith(FileExtension.Mp4))
-                    .OrderBy(x => x)
-                    .ToArray();
+                    .OrderBy(x => x);
 
                 foreach (string file in mp4Files)
                 {

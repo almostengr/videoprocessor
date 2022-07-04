@@ -139,9 +139,9 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             string[] socialMediaOptions =  {
                 "Robinson Handy and Technology Services",
                 "rhtservices.net",
-                "rhtservices.net/articles",
                 "rhtservices.net/facebook",
                 "rhtservices.net/instagram",
+                "rhtservices.net/recommended-tools",
                 "rhtservices.net/services",
                 "rhtservices.net/youtube",
             };
@@ -170,7 +170,9 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             {
                 _logger.LogInformation("Creating FFMPEG input file");
                 var filesInDirectory = GetFilesInDirectory(_workingDirectory)
-                    .Where(x => x.EndsWith(FileExtension.Mp4)).OrderBy(x => x).ToArray();
+                    .Where(x => x.EndsWith(FileExtension.Mp4))
+                    .OrderBy(x => x)
+                    .ToArray();
 
                 string rhtservicesintro = "rhtservicesintro.1920x1080.mp4";
                 for (int i = 0; i < filesInDirectory.Length; i++)
@@ -242,8 +244,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
         {
             var videoFiles = GetFilesInDirectory(workingDirectory)
                 .Where(x => !x.Contains("narration") || !x.Contains("narrative"))
-                .Where(x => x.EndsWith(FileExtension.Mp4))
-                .ToArray();
+                .Where(x => x.EndsWith(FileExtension.Mp4));
 
             var narrationFiles = GetFilesInDirectory(workingDirectory)
                 .Where(x => x.Contains("narration") || x.Contains("narrative"))
@@ -298,7 +299,8 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
         {
             var videoFiles = GetFilesInDirectory(directory)
                 .Where(x => x.EndsWith(FileExtension.Mkv) || x.EndsWith(FileExtension.Mov) || x.EndsWith(FileExtension.Mp4))
-                .OrderBy(x => x).ToArray();
+                .OrderBy(x => x)
+                .ToArray();
 
             foreach (var videoFileName in videoFiles)
             {
