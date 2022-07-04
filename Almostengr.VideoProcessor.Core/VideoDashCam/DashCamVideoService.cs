@@ -88,7 +88,6 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             catch (Exception ex)
             {
                 _logger.LogError(ex.InnerException, ex.Message);
-                _logger.LogError(ex.InnerException, ex.Message);
             }
         }
 
