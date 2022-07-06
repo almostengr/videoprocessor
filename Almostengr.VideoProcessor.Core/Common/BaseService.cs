@@ -161,19 +161,22 @@ namespace Almostengr.VideoProcessor.Core.Common
 
             _logger.LogInformation($"Exit code: {process.ExitCode}");
 
-            process.Close();
+            // process.Close();
 
             int errorCount = error.Split("\n")
                 .Where(x =>
                     !x.Contains("libva: /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so init failed") &&
                     !x.Contains("Output file is empty, nothing was encoded (check -ss / -t / -frames parameters if used") &&
                     !x.Contains("deprecated pixel format used, make sure you did set range correctly") &&
+                    !x.Contains("No support for codec hevc profile 1") &&
+                    !x.Contains("Failed setup for format vaapi_vld: hwaccel initialisation returned error") &&
                     !x.Equals("")
                 )
                 .ToArray()
                 .Count();
 
-            if (errorCount > 0 && program == ProgramPaths.FfprobeBinary == false)
+            // if (errorCount > 0 && program != ProgramPaths.FfprobeBinary)
+            if (process.ExitCode > 0)
             {
                 _logger.LogError(error);
                 throw new ArgumentException("Errors occurred when running the command");
