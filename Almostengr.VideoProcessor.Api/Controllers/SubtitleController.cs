@@ -1,8 +1,6 @@
 using Almostengr.VideoProcessor.DataTransferObjects;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Almostengr.VideoProcessor.Api.Services.Subtitles;
-using System.Threading.Tasks;
+using Almostengr.VideoProcessor.Core.Subtitles;
 
 namespace Almostengr.VideoProcessor.Controllers
 {
@@ -22,7 +20,7 @@ namespace Almostengr.VideoProcessor.Controllers
         [Route("/subtitle/clean")]
         public async Task<IActionResult> CleanSubtitle(SubtitleInputDto inputDto)
         {
-            if (_subtitleService.IsValidFile(inputDto) == false)
+            if (inputDto.IsValidSrtSubtitleFile() == false)
             {
                 return BadRequest("Input is not in a valid format");
             }

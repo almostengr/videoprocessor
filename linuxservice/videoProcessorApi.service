@@ -1,0 +1,12 @@
+[Unit]
+Description=Video Processor API
+Documentation=https://thealmostengineer.com/
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/home/iamadmin/videoprocessor/Almostengr.VideoProcessor.Api
+User=iamadmin
+
+[Install]
+WantedBy=multi-user.target

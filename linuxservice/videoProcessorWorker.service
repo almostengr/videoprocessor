@@ -1,0 +1,12 @@
+[Unit]
+Description=Video Processor Worker
+Documentation=https://thealmostengineer.com/
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/home/iamadmin/videoprocessor/Almostengr.VideoProcessor.Worker
+User=iamadmin
+
+[Install]
+WantedBy=multi-user.target
