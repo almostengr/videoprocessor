@@ -23,11 +23,10 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
         private readonly string _archiveDirectory;
         private readonly string _uploadDirectory;
         private readonly string _workingDirectory;
-        private readonly string _processedDirectory;
 
         public DashCamVideoService(ILogger<DashCamVideoService> logger, AppSettings appSettings,
-           IStatusService statusService, IMusicService musicService) :
-          base(logger, appSettings)
+            IStatusService statusService, IMusicService musicService) :
+            base(logger, appSettings)
         {
             _streetSignTextSubfilter = $"fontcolor=white:fontsize={LARGE_FONT}:{_lowerCenter}:box=1:boxborderw={DASHCAM_BORDER_WIDTH}:boxcolor={FfMpegColors.Green}";
 
