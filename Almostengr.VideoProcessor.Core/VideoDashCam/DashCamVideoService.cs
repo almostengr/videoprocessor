@@ -23,6 +23,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
         private readonly string _archiveDirectory;
         private readonly string _uploadDirectory;
         private readonly string _workingDirectory;
+        private readonly string _processedDirectory;
 
         public DashCamVideoService(ILogger<DashCamVideoService> logger, AppSettings appSettings,
            IStatusService statusService, IMusicService musicService) :
@@ -74,14 +75,14 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
                 string videoOutputPath = GetVideoOutputPath(_uploadDirectory, videoTitle);
                 await RenderVideoAsync(videoTitle, videoOutputPath, videoFilter, cancellationToken);
 
-                await CleanUpBeforeArchivingAsync(_workingDirectory);
+                // await CleanUpBeforeArchivingAsync(_workingDirectory);
 
-                string archiveTarFile = GetArchiveTarFileName(videoTitle);
+                // string archiveTarFile = GetArchiveTarFileName(videoTitle);
 
-                await ArchiveDirectoryContentsAsync(
-                    _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
+                // await ArchiveDirectoryContentsAsync(
+                //     _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
 
-                DeleteFile(videoArchivePath);
+                MoveFile(videoArchivePath, _archiveDirectory); // DeleteFile(videoArchivePath);
 
                 DeleteDirectory(_workingDirectory);
             }

@@ -80,14 +80,14 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                 await CreateThumbnailsFromFinalVideoAsync(
                     videoOutputPath, _uploadDirectory, videoTitle, cancellationToken);
 
-                await CleanUpBeforeArchivingAsync(_workingDirectory);
+                // await CleanUpBeforeArchivingAsync(_workingDirectory);
 
-                string archiveTarFile = GetArchiveTarFileName(videoTitle);
+                // string archiveTarFile = GetArchiveTarFileName(videoTitle);
 
-                await ArchiveDirectoryContentsAsync(
-                    _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
+                // await ArchiveDirectoryContentsAsync(
+                //     _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
 
-                DeleteFile(videoArchive);
+                MoveFile(videoArchive, _archiveDirectory); // DeleteFile(videoArchive);
 
                 DeleteDirectory(_workingDirectory);
 
