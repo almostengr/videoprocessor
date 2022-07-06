@@ -240,7 +240,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             await Task.Delay(TimeSpan.FromMinutes(_appSettings.WorkerIdleInterval), cancellationToken);
         }
 
-        protected async Task AddAudioToTimelapseAsync(string workingDirectory, CancellationToken cancellationToken)
+        private async Task AddAudioToTimelapseAsync(string workingDirectory, CancellationToken cancellationToken)
         {
             var videoFiles = GetFilesInDirectory(workingDirectory)
                 .Where(x => !x.Contains("narration") || !x.Contains("narrative"))
