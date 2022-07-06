@@ -123,8 +123,10 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
 
         protected override string GetFfmpegVideoFilters(string videoTitle)
         {
+            string textColor = GetTextColor(videoTitle);
+
             string videoFilter = $"drawtext=textfile:'{GetBrandingText()}':";
-            videoFilter += $"fontcolor={FfMpegColors.White}@{DIM_TEXT}:";
+            videoFilter += $"fontcolor={textColor}@{DIM_TEXT}:";
             videoFilter += $"fontsize={SMALL_FONT}:";
             videoFilter += $"{_upperRight}:";
             videoFilter += $"box=1:";
@@ -134,6 +136,17 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             return videoFilter;
         }
 
+        protected override string GetTextColor(string videoTitle)
+        {
+            videoTitle = videoTitle.ToLower();
+            if (videoTitle.Contains("christmas"))
+            {
+                return FfMpegColors.Green;
+            }
+
+            return FfMpegColors.White;
+        }
+
         protected override string GetBrandingText()
         {
             string[] socialMediaOptions =  {
@@ -141,7 +154,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                 "rhtservices.net",
                 "rhtservices.net/facebook",
                 "rhtservices.net/instagram",
-                "rhtservices.net/recommended-tools",
+                // "rhtservices.net/recommended-tools",
                 "rhtservices.net/services",
                 "rhtservices.net/youtube",
             };

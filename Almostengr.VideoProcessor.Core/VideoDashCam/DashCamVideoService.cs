@@ -143,7 +143,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             return videoFilter;
         }
 
-        private string GetTextColor(string videoTitle)
+        protected override string GetTextColor(string videoTitle)
         {
             videoTitle = videoTitle.ToLower();
             if (videoTitle.Contains("night"))
@@ -300,13 +300,13 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
                 if (DoesFileExist(Path.Combine(directory, Path.GetFileNameWithoutExtension(videoFileName) + ".vflip" + FileExtension.Txt)) ||
                     DoesFileExist(Path.Combine(directory, "vflip" + FileExtension.Txt)))
                 {
-                    videoFilters += ":vflip";
+                    videoFilters += ", vflip";
                 }
 
                 if (DoesFileExist(Path.Combine(directory, Path.GetFileNameWithoutExtension(videoFileName) + ".hflip" + FileExtension.Txt)) ||
                     DoesFileExist(Path.Combine(directory, "hflip" + FileExtension.Txt)))
                 {
-                    videoFilters += ":hflip";
+                    videoFilters += ", hflip";
                 }
 
                 await RunCommandAsync(

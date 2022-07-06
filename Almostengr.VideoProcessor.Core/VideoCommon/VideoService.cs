@@ -64,6 +64,7 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
         protected abstract Task ConvertVideoFilesToCommonFormatAsync(string directory, CancellationToken cancellationToken);
         protected abstract string GetBrandingText();
         protected abstract void CheckOrCreateFfmpegInputFile();
+        protected abstract string GetTextColor(string videoTitle);
 
         public abstract Task ExecuteServiceAsync(string videoArchive, CancellationToken cancellationToken);
         public abstract Task StartAsync(CancellationToken cancellationToken);
