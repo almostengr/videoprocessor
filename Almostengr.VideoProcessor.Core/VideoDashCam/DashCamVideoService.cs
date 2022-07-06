@@ -145,7 +145,8 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
 
         private string GetTextColor(string videoTitle)
         {
-            if (videoTitle.ToLower().Contains("night"))
+            videoTitle = videoTitle.ToLower();
+            if (videoTitle.Contains("night") || videoTitle.Contains("fireworks"))
             {
                 return FfMpegColors.Orange;
             }
