@@ -99,14 +99,14 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
 
             // solid text - channel name
             string videoFilter = string.Empty;
-            videoFilter += $"drawtext=textfile:'{brandingText}':";
-            videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={SMALL_FONT}:";
-            videoFilter += $"{_upperRight}:";
-            videoFilter += $"box=1:";
-            videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
-            videoFilter += $"boxcolor={FfMpegColors.Black}:";
-            videoFilter += $"enable='between(t,0,{randomDuration})', ";
+            // videoFilter += $"drawtext=textfile:'{brandingText}':";
+            // videoFilter += $"fontcolor={textColor}:";
+            // videoFilter += $"fontsize={SMALL_FONT}:";
+            // videoFilter += $"{_upperRight}:";
+            // videoFilter += $"box=1:";
+            // videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
+            // videoFilter += $"boxcolor={FfMpegColors.Black}:";
+            // videoFilter += $"enable='between(t,0,{randomDuration})', ";
 
             // dimmed text - channel name
             videoFilter += $"drawtext=textfile:'{brandingText}':";
@@ -116,17 +116,18 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             videoFilter += $"box=1:";
             videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
             videoFilter += $"boxcolor={FfMpegColors.Black}@{DIM_BACKGROUND}:";
-            videoFilter += $"enable='gt(t,{randomDuration})', ";
+            videoFilter += $"enable='gt(t,0)', ";
+            // videoFilter += $"enable='gt(t,{randomDuration})', ";
 
             // solid text - video title
-            videoFilter += $"drawtext=textfile:'{videoTitle.Split(";")[0]}':";
-            videoFilter += $"fontcolor={textColor}:";
-            videoFilter += $"fontsize={SMALL_FONT}:";
-            videoFilter += $"{_upperLeft}:";
-            videoFilter += $"box=1:";
-            videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
-            videoFilter += $"boxcolor={FfMpegColors.Black}:";
-            videoFilter += $"enable='between(t,0,{randomDuration})', ";
+            // videoFilter += $"drawtext=textfile:'{videoTitle.Split(";")[0]}':";
+            // videoFilter += $"fontcolor={textColor}:";
+            // videoFilter += $"fontsize={SMALL_FONT}:";
+            // videoFilter += $"{_upperLeft}:";
+            // videoFilter += $"box=1:";
+            // videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
+            // videoFilter += $"boxcolor={FfMpegColors.Black}:";
+            // videoFilter += $"enable='between(t,0,{randomDuration})', ";
 
             // dimmed text - video title
             videoFilter += $"drawtext=textfile:'{videoTitle.Split(";")[0]}':";
@@ -136,7 +137,8 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             videoFilter += $"box=1:";
             videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
             videoFilter += $"boxcolor={FfMpegColors.Black}@{DIM_BACKGROUND}:";
-            videoFilter += $"enable='gt(t,{randomDuration})'";
+            videoFilter += $"enable='gt(t,0)'";
+            // videoFilter += $"enable='gt(t,{randomDuration})'";
 
             return videoFilter;
         }
@@ -289,6 +291,18 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
 
                 string scaledFile = $"{Path.GetFileNameWithoutExtension(videoFileName)}.{xResolution}x{yResolution}{FileExtension.Mp4}";
                 string videoFilters = $"scale_vaapi=w={xResolution}:h={yResolution}";
+
+                if (DoesFileExist(Path.Combine(directory, Path.GetFileNameWithoutExtension(videoFileName) + ".vflip" + FileExtension.Txt)) ||
+                    DoesFileExist(Path.Combine(directory, "vflip" + FileExtension.Txt)))
+                {
+                    videoFilters += ":vflip";
+                }
+
+                if (DoesFileExist(Path.Combine(directory, Path.GetFileNameWithoutExtension(videoFileName) + ".hflip" + FileExtension.Txt)) ||
+                    DoesFileExist(Path.Combine(directory, "hflip" + FileExtension.Txt)))
+                {
+                    videoFilters += ":hflip";
+                }
 
                 await RunCommandAsync(
                     ProgramPaths.FfmpegBinary,
