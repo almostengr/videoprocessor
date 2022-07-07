@@ -81,13 +81,13 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
                 // await ArchiveDirectoryContentsAsync(
                 //     _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
 
-                MoveFile(videoArchivePath, _archiveDirectory); // DeleteFile(videoArchivePath);
+                MoveFile(videoArchivePath, Path.Combine(_archiveDirectory, Path.GetFileName(videoArchivePath))); // DeleteFile(videoArchivePath);
 
                 DeleteDirectory(_workingDirectory);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.InnerException, ex.Message);
+                _logger.LogError(ex, ex.Message);
             }
         }
 

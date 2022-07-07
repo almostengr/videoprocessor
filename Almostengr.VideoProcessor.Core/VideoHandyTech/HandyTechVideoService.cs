@@ -95,7 +95,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.InnerException, ex.Message);
+                _logger.LogError(ex, ex.Message);
             }
         }
 
