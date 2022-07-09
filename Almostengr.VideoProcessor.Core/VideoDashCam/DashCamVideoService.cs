@@ -74,20 +74,13 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
                 string videoOutputPath = GetVideoOutputPath(_uploadDirectory, videoTitle);
                 await RenderVideoAsync(videoTitle, videoOutputPath, videoFilter, cancellationToken);
 
-                // await CleanUpBeforeArchivingAsync(_workingDirectory);
-
-                // string archiveTarFile = GetArchiveTarFileName(videoTitle);
-
-                // await ArchiveDirectoryContentsAsync(
-                //     _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
-
-                MoveFile(videoArchivePath, _archiveDirectory); // DeleteFile(videoArchivePath);
+                MoveFile(videoArchivePath, Path.Combine(_archiveDirectory, Path.GetFileName(videoArchivePath))); // DeleteFile(videoArchivePath);
 
                 DeleteDirectory(_workingDirectory);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.InnerException, ex.Message);
+                _logger.LogError(ex, ex.Message);
             }
         }
 
@@ -96,17 +89,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             int randomDuration = _random.Next(5, 16);
             string textColor = GetTextColor(videoTitle);
             string brandingText = GetBrandingText();
-
-            // solid text - channel name
             string videoFilter = string.Empty;
-            // videoFilter += $"drawtext=textfile:'{brandingText}':";
-            // videoFilter += $"fontcolor={textColor}:";
-            // videoFilter += $"fontsize={SMALL_FONT}:";
-            // videoFilter += $"{_upperRight}:";
-            // videoFilter += $"box=1:";
-            // videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
-            // videoFilter += $"boxcolor={FfMpegColors.Black}:";
-            // videoFilter += $"enable='between(t,0,{randomDuration})', ";
 
             // dimmed text - channel name
             videoFilter += $"drawtext=textfile:'{brandingText}':";
@@ -117,17 +100,6 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
             videoFilter += $"boxcolor={FfMpegColors.Black}@{DIM_BACKGROUND}:";
             videoFilter += $"enable='gt(t,0)', ";
-            // videoFilter += $"enable='gt(t,{randomDuration})', ";
-
-            // solid text - video title
-            // videoFilter += $"drawtext=textfile:'{videoTitle.Split(";")[0]}':";
-            // videoFilter += $"fontcolor={textColor}:";
-            // videoFilter += $"fontsize={SMALL_FONT}:";
-            // videoFilter += $"{_upperLeft}:";
-            // videoFilter += $"box=1:";
-            // videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
-            // videoFilter += $"boxcolor={FfMpegColors.Black}:";
-            // videoFilter += $"enable='between(t,0,{randomDuration})', ";
 
             // dimmed text - video title
             videoFilter += $"drawtext=textfile:'{videoTitle.Split(";")[0]}':";
@@ -138,7 +110,6 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             videoFilter += $"boxborderw={DASHCAM_BORDER_WIDTH}:";
             videoFilter += $"boxcolor={FfMpegColors.Black}@{DIM_BACKGROUND}:";
             videoFilter += $"enable='gt(t,0)'";
-            // videoFilter += $"enable='gt(t,{randomDuration})'";
 
             return videoFilter;
         }
@@ -195,7 +166,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             await _statusService.SaveChangesAsync();
 
             await RunCommandAsync(
-                ProgramPaths.FfmpegBinary,
+                ProgramPaths.Ffmpeg,
                 $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{FFMPEG_INPUT_FILE}\" -i \"{_musicService.GetRandomMixTrack()}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -bsf:a aac_adtstoasc -map 0:v:0 -map 1:a:0 \"{videoOutputPath}\"",
                 _workingDirectory,
                 cancellationToken,
@@ -207,17 +178,16 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             string ffmpegInputFile = Path.Combine(_workingDirectory, FFMPEG_INPUT_FILE);
             DeleteFile(ffmpegInputFile);
 
-            using (StreamWriter writer = new StreamWriter(ffmpegInputFile))
-            {
-                _logger.LogInformation("Creating FFMPEG input file");
-                var mp4Files = GetFilesInDirectory(_workingDirectory)
-                  .Where(x => x.EndsWith(FileExtension.Mov))
-                  .OrderBy(x => x);
+            using StreamWriter writer = new StreamWriter(ffmpegInputFile);
+            
+            _logger.LogInformation("Creating FFMPEG input file");
+            var mp4Files = GetFilesInDirectory(_workingDirectory)
+              .Where(x => x.EndsWith(FileExtension.Mov))
+              .OrderBy(x => x);
 
-                foreach (string file in mp4Files)
-                {
-                    writer.WriteLine($"file '{Path.GetFileName(file)}'");
-                }
+            foreach (string file in mp4Files)
+            {
+                writer.WriteLine($"file '{Path.GetFileName(file)}'");
             }
         }
 
@@ -271,7 +241,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
                 _logger.LogInformation($"Converting video {videoFileName} to common format");
 
                 var result = await RunCommandAsync(
-                    ProgramPaths.FfprobeBinary,
+                    ProgramPaths.Ffprobe,
                     $"-hide_banner \"{videoFileName}\"",
                     directory,
                     cancellationToken,
@@ -310,7 +280,7 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
                 }
 
                 await RunCommandAsync(
-                    ProgramPaths.FfmpegBinary,
+                    ProgramPaths.Ffmpeg,
                     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -r {frameRate} -vf \"{videoFilters}\" -vcodec h264_vaapi -an \"{scaledFile}\"",
                     directory,
                     cancellationToken,

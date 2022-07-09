@@ -80,13 +80,6 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                 await CreateThumbnailsFromFinalVideoAsync(
                     videoOutputPath, _uploadDirectory, videoTitle, cancellationToken);
 
-                // await CleanUpBeforeArchivingAsync(_workingDirectory);
-
-                // string archiveTarFile = GetArchiveTarFileName(videoTitle);
-
-                // await ArchiveDirectoryContentsAsync(
-                //     _workingDirectory, archiveTarFile, _archiveDirectory, cancellationToken);
-
                 MoveFile(videoArchive, _archiveDirectory); // DeleteFile(videoArchive);
 
                 DeleteDirectory(_workingDirectory);
@@ -95,7 +88,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.InnerException, ex.Message);
+                _logger.LogError(ex, ex.Message);
             }
         }
 
@@ -113,7 +106,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             string outputTsFile = Path.GetFileNameWithoutExtension(videoOutputPath) + FileExtension.Ts;
 
             await RunCommandAsync(
-                ProgramPaths.FfmpegBinary,
+                ProgramPaths.Ffmpeg,
                 $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i {FFMPEG_INPUT_FILE} -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -c:v h264_vaapi -bsf:a aac_adtstoasc \"{videoOutputPath}\"",
                 _workingDirectory,
                 cancellationToken,
@@ -267,7 +260,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
             foreach (var videoFileName in videoFiles)
             {
                 var result = await RunCommandAsync(
-                    ProgramPaths.FfprobeBinary,
+                    ProgramPaths.Ffprobe,
                     $"-hide_banner \"{videoFileName}\"",
                     workingDirectory,
                     cancellationToken,
@@ -295,7 +288,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                     .Replace("narrative", string.Empty);
 
                 await RunCommandAsync(
-                    ProgramPaths.FfmpegBinary,
+                    ProgramPaths.Ffmpeg,
                     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -i \"{audioFile}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
                     workingDirectory,
                     cancellationToken,
@@ -320,7 +313,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                 _logger.LogInformation($"Checking resolution of {videoFileName}");
 
                 var result = await RunCommandAsync(
-                    ProgramPaths.FfprobeBinary,
+                    ProgramPaths.Ffprobe,
                     $"-hide_banner \"{videoFileName}\"",
                     directory,
                     cancellationToken,
@@ -341,7 +334,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                 _logger.LogInformation($"Converting video {videoFileName} to common format");
 
                 await RunCommandAsync(
-                    ProgramPaths.FfmpegBinary,
+                    ProgramPaths.Ffmpeg,
                     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -r 30 -vf \"scale_vaapi=w={_xResolution}:h={_yResolution}\" -vcodec h264_vaapi -ar {_audioSampleRate} -b:a {_audioBitRate} \"{scaledFile}\"",
                     directory,
                     cancellationToken,

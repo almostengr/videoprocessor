@@ -96,7 +96,7 @@
             "args": [
                 "tag",
                 "-a",
-                "\"v5.$(date +%Y.%m.%d)\"",
+                "\"v6.$(date +%Y.%m.%d)\"",
                 "-m",
                 "\"version 6.$(date +%Y.%m.%d)\""
             ],
