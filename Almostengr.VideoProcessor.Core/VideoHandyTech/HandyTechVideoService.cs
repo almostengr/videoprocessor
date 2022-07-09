@@ -147,6 +147,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
                 "rhtservices.net",
                 "rhtservices.net/facebook",
                 "rhtservices.net/instagram",
+                // "rhtservices.net/recommended-tools",
                 "rhtservices.net/services",
                 "rhtservices.net/youtube",
             };
