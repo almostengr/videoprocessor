@@ -6,10 +6,12 @@ namespace Almostengr.VideoProcessor.Core.Common
     public abstract class BaseService
     {
         private readonly ILogger<BaseService> _logger;
+        internal readonly Random _random;
 
         public BaseService(ILogger<BaseService> logger)
         {
             _logger = logger;
+            _random = new Random();
         }
 
         public bool IsDiskSpaceAvailable(string directory, double threshold)
@@ -161,8 +163,6 @@ namespace Almostengr.VideoProcessor.Core.Common
 
             _logger.LogInformation($"Exit code: {process.ExitCode}");
 
-            // process.Close();
-
             int errorCount = error.Split("\n")
                 .Where(x =>
                     !x.Contains("libva: /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so init failed") &&
@@ -175,7 +175,6 @@ namespace Almostengr.VideoProcessor.Core.Common
                 .ToArray()
                 .Count();
 
-            // if (errorCount > 0 && program != ProgramPaths.FfprobeBinary)
             if (process.ExitCode > 0)
             {
                 _logger.LogError(error);

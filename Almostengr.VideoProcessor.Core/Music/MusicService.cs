@@ -7,12 +7,10 @@ namespace Almostengr.VideoProcessor.Core.Music
     public class MusicService : BaseService, IMusicService
     {
         private readonly AppSettings _appSettings;
-        private readonly Random _random;
 
         public MusicService(ILogger<MusicService> logger, AppSettings appSettings)  : base(logger)
         {
             _appSettings = appSettings;
-            _random = new Random();
         }
 
         public string GetRandomMusicTracks()

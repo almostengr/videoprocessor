@@ -9,7 +9,6 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
     {
         private readonly ILogger<SrtSubtitleService> _logger;
         private readonly AppSettings _appSettings;
-
         private readonly string _incomingDirectory;
         private readonly string _uploadDirectory;
 
@@ -17,7 +16,6 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
         {
             _logger = logger;
             _appSettings = appSettings;
-
             _incomingDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "incoming");
             _uploadDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "upload");
         }

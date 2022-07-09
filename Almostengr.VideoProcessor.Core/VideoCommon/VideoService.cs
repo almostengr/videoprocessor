@@ -10,7 +10,6 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
         private readonly AppSettings _appSettings;
         private const int PADDING = 30;
         protected readonly string _subscribeFilter;
-        protected readonly Random _random;
         protected readonly string _subscribeScrollingFilter;
 
         // ffmpeg positions
@@ -44,7 +43,6 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
         {
             _logger = logger;
             _appSettings = appSettings;
-            _random = new();
 
             _upperLeft = $"x={PADDING}:y={PADDING}";
             _upperCenter = $"x=(w-tw)/2:y={PADDING}";
@@ -79,7 +77,7 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
             _logger.LogInformation($"Archiving directory contents: {directoryToArchive}");
 
             await RunCommandAsync(
-                ProgramPaths.BashShell,
+                ProgramPaths.Bash,
                 $"-c \"cd \\\"{directoryToArchive}\\\" && tar -cvJf \\\"{Path.Combine(archiveDestination, archiveName)}\\\" *\"",
                 directoryToArchive,
                 cancellationToken,
@@ -123,7 +121,7 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
             _logger.LogInformation($"Extracting tar file: {tarFile}");
 
             await RunCommandAsync(
-                ProgramPaths.TarBinary,
+                ProgramPaths.Tar,
                 $"-xvf \"{tarFile}\" -C \"{workingDirectory}\"",
                 Path.GetDirectoryName(tarFile),
                 cancellationToken,
@@ -142,7 +140,7 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
                 _logger.LogInformation($"Converting {videoFile} to {outputFilename}");
 
                 await RunCommandAsync(
-                    ProgramPaths.FfmpegBinary,
+                    ProgramPaths.Ffmpeg,
                     $"{LOG_ERRORS} {HW_OPTIONS} -i {Path.GetFileName(videoFile)} -f mp4 {HW_VCODEC} {Path.GetFileName(outputFilename)}",
                     directory,
                     cancellationToken,
@@ -221,7 +219,7 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
                 _logger.LogInformation($"Scene change percent {sceneChangePct}%");
 
                 await RunCommandAsync(
-                    ProgramPaths.FfmpegBinary,
+                    ProgramPaths.Ffmpeg,
                     $"-hide_banner -y {LOG_WARNINGS} -i \"{outputVideoPath}\" -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {_appSettings.ThumbnailFrames.ToString()} -vsync vfr \"{videoTitle}-%03d.jpg\"",
                     uploadDirectory,
                     cancellationToken,
