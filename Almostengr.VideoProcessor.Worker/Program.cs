@@ -1,7 +1,6 @@
 using Almostengr.VideoProcessor.Worker;
-using Almostengr.VideoProcessor.Application.Video.Services;
-using Almostengr.VideoProcessor.Application.Video;
 using Almostengr.VideoProcessor.Domain.Music.Services;
+using Almostengr.VideoProcessor.Domain.Videos.Services;
 
 // string environment = string.Empty;
 

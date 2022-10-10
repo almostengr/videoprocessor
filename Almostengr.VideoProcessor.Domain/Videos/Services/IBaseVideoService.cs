@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Application.Video;
+namespace Almostengr.VideoProcessor.Domain.Videos.Services;
 
 public interface IBaseVideoService 
 {

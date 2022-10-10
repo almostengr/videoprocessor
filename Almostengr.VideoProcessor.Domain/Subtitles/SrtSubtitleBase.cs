@@ -4,7 +4,7 @@ using Almostengr.VideoProcessor.Domain.Subtitles.Exceptions;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles;
 
-internal abstract record SrtSubtitleBase
+internal abstract record SrtSubtitleBase : BaseEntity
 {
     internal SrtSubtitleBase()
     {

@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Application.Video;
+using Almostengr.VideoProcessor.Domain.Videos.Services;
 
 namespace Almostengr.VideoProcessor.Worker;
 

@@ -1,7 +1,7 @@
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 
-namespace Almostengr.VideoProcessor.Application.Video;
+namespace Almostengr.VideoProcessor.Domain.Videos.Services;
 
 public abstract class BaseVideoService : IBaseVideoService
 {

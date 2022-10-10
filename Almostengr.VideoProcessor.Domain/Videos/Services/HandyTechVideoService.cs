@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 using Almostengr.VideoProcessor.Domain.Videos;
 
-namespace Almostengr.VideoProcessor.Application.Video.Services;
+namespace Almostengr.VideoProcessor.Domain.Videos.Services;
 
 public sealed class HandyTechVideoService : BaseVideoService, IHandyTechVideoService
 {
