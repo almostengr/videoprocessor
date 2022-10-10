@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Api", "Almostengr.VideoProcessor.Api\Almostengr.VideoProcessor.Api.csproj", "{839A6DBB-AE32-4E4B-9C9F-B11FD6B84A24}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Application", "Almostengr.VideoProcessor.Application\Almostengr.VideoProcessor.Application.csproj", "{6752BBBE-E495-4365-9EE8-E302D26D9FD0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Core", "Almostengr.VideoProcessor.Core\Almostengr.VideoProcessor.Core.csproj", "{2BE7A7A7-1C59-4C9D-B904-3F20E9D92CE3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Domain", "Almostengr.VideoProcessor.Domain\Almostengr.VideoProcessor.Domain.csproj", "{AB18ED55-9B55-473F-A7D7-859995B7BC63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Worker", "Almostengr.VideoProcessor.Worker\Almostengr.VideoProcessor.Worker.csproj", "{92A84DF9-63C7-4ADF-9C68-33B3F1C9AFDF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Infrastructure", "Almostengr.VideoProcessor.Infrastructure\Almostengr.VideoProcessor.Infrastructure.csproj", "{EDA0BE1C-486E-404D-842F-C93027F91346}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Worker", "Almostengr.VideoProcessor.Worker\Almostengr.VideoProcessor.Worker.csproj", "{699F8779-99FA-4712-8296-B6AC0A62FAA6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,17 +20,21 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{839A6DBB-AE32-4E4B-9C9F-B11FD6B84A24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{839A6DBB-AE32-4E4B-9C9F-B11FD6B84A24}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{839A6DBB-AE32-4E4B-9C9F-B11FD6B84A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{839A6DBB-AE32-4E4B-9C9F-B11FD6B84A24}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2BE7A7A7-1C59-4C9D-B904-3F20E9D92CE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2BE7A7A7-1C59-4C9D-B904-3F20E9D92CE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2BE7A7A7-1C59-4C9D-B904-3F20E9D92CE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2BE7A7A7-1C59-4C9D-B904-3F20E9D92CE3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{92A84DF9-63C7-4ADF-9C68-33B3F1C9AFDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{92A84DF9-63C7-4ADF-9C68-33B3F1C9AFDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{92A84DF9-63C7-4ADF-9C68-33B3F1C9AFDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{92A84DF9-63C7-4ADF-9C68-33B3F1C9AFDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6752BBBE-E495-4365-9EE8-E302D26D9FD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6752BBBE-E495-4365-9EE8-E302D26D9FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6752BBBE-E495-4365-9EE8-E302D26D9FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6752BBBE-E495-4365-9EE8-E302D26D9FD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB18ED55-9B55-473F-A7D7-859995B7BC63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB18ED55-9B55-473F-A7D7-859995B7BC63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB18ED55-9B55-473F-A7D7-859995B7BC63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB18ED55-9B55-473F-A7D7-859995B7BC63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDA0BE1C-486E-404D-842F-C93027F91346}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDA0BE1C-486E-404D-842F-C93027F91346}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDA0BE1C-486E-404D-842F-C93027F91346}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDA0BE1C-486E-404D-842F-C93027F91346}.Release|Any CPU.Build.0 = Release|Any CPU
+		{699F8779-99FA-4712-8296-B6AC0A62FAA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{699F8779-99FA-4712-8296-B6AC0A62FAA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{699F8779-99FA-4712-8296-B6AC0A62FAA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{699F8779-99FA-4712-8296-B6AC0A62FAA6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

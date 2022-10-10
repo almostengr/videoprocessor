@@ -1,38 +1,24 @@
-using Almostengr.VideoProcessor.Core.Configuration;
-using Almostengr.VideoProcessor.Core.VideoHandyTech;
+using Almostengr.VideoProcessor.Application.Video;
 
-namespace Almostengr.VideoProcessor.Worker
+namespace Almostengr.VideoProcessor.Worker;
+
+public class HandyTechVideoWorker : BackgroundService
 {
-    public class HandyTechVideoWorker : BackgroundService
+    private readonly IHandyTechVideoService _videoService;
+    private readonly ILogger<HandyTechVideoWorker> _logger;
+
+    public HandyTechVideoWorker(IHandyTechVideoService videoService, ILogger<HandyTechVideoWorker> logger)
     {
-        private readonly IHandyTechVideoService _videoService;
-        private readonly AppSettings _appSettings;
+        _videoService = videoService;
+        _logger = logger;
+    }
 
-        public HandyTechVideoWorker(IHandyTechVideoService handyTechVideoService, AppSettings appSettings)
+    protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
         {
-            _videoService = handyTechVideoService;
-            _appSettings = appSettings;
+            await _videoService.ExecuteAsync(stoppingToken);
+            await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
         }
-
-        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            await _videoService.StartAsync(stoppingToken);
-
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                var incomingDirectory = Path.Combine(_appSettings.Directories.RhtBaseDirectory, "incoming");
-                string videoArchive = _videoService.GetRandomVideoArchiveInDirectory(incomingDirectory);
-                bool isDiskSpaceAvailable = _videoService.IsDiskSpaceAvailable(incomingDirectory, _appSettings.DiskSpaceThreshold);
-
-                if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)
-                {
-                    await _videoService.WorkerIdleAsync(stoppingToken);
-                    continue;
-                }
-
-                await _videoService.ExecuteServiceAsync(videoArchive, stoppingToken);
-            }
-        }
-
     }
 }

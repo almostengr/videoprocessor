@@ -12,6 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Almostengr.VideoProcessor.Core\Almostengr.VideoProcessor.Core.csproj" />
+    <ProjectReference Include="..\Almostengr.VideoProcessor.Application\Almostengr.VideoProcessor.Application.csproj" />
   </ItemGroup>
 </Project>

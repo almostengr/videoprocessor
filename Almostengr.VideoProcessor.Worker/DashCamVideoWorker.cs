@@ -1,38 +1,23 @@
-using Almostengr.VideoProcessor.Core.Configuration;
-using Almostengr.VideoProcessor.Core.VideoDashCam;
+using Almostengr.VideoProcessor.Application.Video;
 
-namespace Almostengr.VideoProcessor.Worker
+namespace Almostengr.VideoProcessor.Worker;
+public class DashCamVideoWorker : BackgroundService
 {
-    public class DashCamVideoWorker : BackgroundService
+    private readonly IDashCamVideoService _videoService;
+    private readonly ILogger<DashCamVideoWorker> _logger;
+
+    public DashCamVideoWorker(IDashCamVideoService dashCamVideoService, ILogger<DashCamVideoWorker> logger)
     {
-        private readonly IDashCamVideoService _videoService;
-        private readonly AppSettings _appSettings;
+        _videoService = dashCamVideoService;
+        _logger = logger;
+    }
 
-        public DashCamVideoWorker(IDashCamVideoService dashCamVideoService, AppSettings appSettings)
+    protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
         {
-            _videoService = dashCamVideoService;
-            _appSettings = appSettings;
+            await _videoService.ExecuteAsync(stoppingToken);
+            await Task.Delay(TimeSpan.FromHours(2), stoppingToken);
         }
-
-        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            await _videoService.StartAsync(stoppingToken);
-
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                var incomingDirectory = Path.Combine(_appSettings.Directories.DashCamBaseDirectory, "incoming");
-                string videoArchive = _videoService.GetRandomVideoArchiveInDirectory(incomingDirectory);
-                bool isDiskSpaceAvailable = _videoService.IsDiskSpaceAvailable(incomingDirectory, _appSettings.DiskSpaceThreshold);
-
-                if (string.IsNullOrEmpty(videoArchive) || isDiskSpaceAvailable == false)
-                {
-                    await _videoService.WorkerIdleAsync(stoppingToken);
-                    continue;
-                }
-
-                await _videoService.ExecuteServiceAsync(videoArchive, stoppingToken);
-            }
-        }
-
     }
 }

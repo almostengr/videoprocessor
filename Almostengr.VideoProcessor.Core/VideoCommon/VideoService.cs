@@ -72,6 +72,30 @@ namespace Almostengr.VideoProcessor.Core.VideoCommon
             return Path.Combine(uploadDirectory, videoTitle + FileExtension.Mp4);
         }
 
+        protected virtual async Task ConvertImagesToVideo(string directory, CancellationToken cancellationToken)
+        {
+            var imageFiles = GetFilesInDirectory(directory)
+                .Where(x => x.EndsWith(FileExtension.Jpg) || x.EndsWith(FileExtension.Png))
+                .Where(x => x.StartsWith(".") == false);
+
+            foreach (var image in imageFiles)
+            {
+                string outputFile = Path.GetFileNameWithoutExtension(image) + FileExtension.Mp4;
+                int duration = 3;
+
+                // ffmpeg -framerate 1/10 -i DJI_0024.JPG -c:v libx264 -t 10 -pix_fmt yuv420p -vf scale=320:240 out.mp4
+                // ffmpeg -loop 1 -i image.png -c:v libx264 -t 15 -pix_fmt yuv420p -vf scale=320:240 out.mp4
+
+                await RunCommandAsync(
+                    ProgramPaths.Ffmpeg,
+                    $"{LOG_ERRORS} -framerate 1/{duration} -i \"{image}\" -c:v libx264 -t {duration} \"{outputFile}\"",
+                    directory,
+                    cancellationToken,
+                    1
+                );
+            }
+        }
+
         protected virtual async Task ArchiveDirectoryContentsAsync(string directoryToArchive, string archiveName, string archiveDestination, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Archiving directory contents: {directoryToArchive}");
