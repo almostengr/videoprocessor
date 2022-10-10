@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Almostengr.VideoProcessor.Application.Common;
+using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;

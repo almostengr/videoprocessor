@@ -1,5 +1,5 @@
-using Almostengr.VideoProcessor.Application.Common;
 using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 using Almostengr.VideoProcessor.Domain.Videos;
 

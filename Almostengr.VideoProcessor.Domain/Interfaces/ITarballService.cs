@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Application.Common;
+namespace Almostengr.VideoProcessor.Domain.Interfaces;
 
 public interface ITarballService
 {
