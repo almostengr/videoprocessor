@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
-public class FileSystemService : IFileSystemService
+public sealed class FileSystemService : IFileSystemService
 {
     private readonly Random _random;
 
@@ -17,32 +17,33 @@ public class FileSystemService : IFileSystemService
         Directory.CreateDirectory(directory);
     }
 
-    public string CreateFfmpegInputFile(string directory)
+    public void CopyFile(string sourceFile, string destinationDirectory)
     {
-        throw new NotImplementedException();
+        File.Copy(sourceFile, destinationDirectory);
+    }
+
+    public void DeleteFile(string filePath)
+    {
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
     }
 
     public void DeleteDirectory(string directory)
     {
-        Directory.Delete(directory, true);
-    }
-
-    public Task ExtractTarball(string tarballFilePath, string extractDirectory)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void ExtractTarballContents(string tarBall, string directory)
-    {
-        throw new NotImplementedException();
+        if (Directory.Exists(directory))
+        {
+            Directory.Delete(directory, true);
+        }
     }
 
     public string? GetRandomTarballFromDirectory(string directory)
     {
-        return Directory.GetFiles(directory)
-            .Where(x => x.Contains(FileExtension.Tar))
-            .Where(x => x.StartsWith(".") == false)
-            .OrderBy(x => _random.Next()).Take(1)
+        return GetFilesInDirectory(directory)
+            .Where(f => f.Contains(FileExtension.Tar))
+            .Where(f => f.StartsWith(".") == false)
+            .OrderBy(f => _random.Next()).Take(1)
             .FirstOrDefault();
     }
 
@@ -70,8 +71,59 @@ public class FileSystemService : IFileSystemService
         File.Move(sourceFilePath, destinationDirectory);
     }
 
-    public void RenderVideo(string directory, string ffmpegParameters)
+    public IEnumerable<string> GetFilesInDirectory(string directory)
     {
-        throw new NotImplementedException();
+        return Directory.GetFiles(directory);
     }
+
+    public IEnumerable<string> GetDirectoriesInDirectory(string directory)
+    {
+        return Directory.GetDirectories(directory);
+    }
+
+    public void PrepareAllFilesInDirectory(string directory)
+    {
+        var allFiles = GetFilesInDirectory(directory);
+
+        foreach (string childDirectory in GetDirectoriesInDirectory(directory))
+        {
+            foreach (string childFile in GetFilesInDirectory(childDirectory))
+            {
+                MoveFile(
+                    Path.Combine(childDirectory, childFile),
+                    Path.Combine(directory, Path.GetFileName(childFile))
+                );
+            }
+        }
+
+        foreach (string file in GetFilesInDirectory(directory))
+        {
+            File.Move(
+                file,
+                Path.Combine(
+                        directory,
+                        Path.GetFileName(file)
+                            .ToLower()
+                            .Replace(";", "_")
+                            .Replace(" ", "_")
+                            .Replace("__", "_")
+                            .Replace("\"", string.Empty)
+                            .Replace("\'", string.Empty))
+            );
+        }
+    }
+
+    public bool DoesFileExist(string filePath)
+    {
+        return File.Exists(filePath);
+    }
+
+    public void DeleteFiles(string[] files)
+    {
+        foreach (var file in files)
+        {
+            DeleteFile(file);
+        }
+    }
+    
 }

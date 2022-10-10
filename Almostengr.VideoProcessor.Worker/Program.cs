@@ -1,4 +1,5 @@
 using Almostengr.VideoProcessor.Worker;
+using Almostengr.VideoProcessor.Application.Video.Services;
 using Almostengr.VideoProcessor.Application.Video;
 
 // string environment = string.Empty;
@@ -22,12 +23,12 @@ IHost host = Host.CreateDefaultBuilder(args)
         // AppSettings appSettings = configuration.GetSection(nameof(AppSettings)).Get<AppSettings>();
         // services.AddSingleton(appSettings);
 
-        services.AddTransient<IDashCamVideoService, DashCamVideoService>();
+        // services.AddTransient<IDashCamVideoService, DashCamVideoService>();
         services.AddTransient<IHandyTechVideoService, HandyTechVideoService>();
         // services.AddTransient<IMusicService, MusicService>();
         // services.AddTransient<ISrtSubtitleService, SrtSubtitleService>();
 
-        services.AddHostedService<DashCamVideoWorker>();
+        // services.AddHostedService<DashCamVideoWorker>();
         services.AddHostedService<HandyTechSubtitleWorker>();
         services.AddHostedService<HandyTechVideoWorker>();
     })
