@@ -4,21 +4,17 @@ namespace Almostengr.VideoProcessor.Domain.Videos;
 
 public sealed record HandyTechVideo : VideoBase
 {
-    private const string _xResolution = "1920";
-    private const string _yResolution = "1080";
-    private const string _audioBitRate = "196000";
-    private const string _audioSampleRate = "48000";
-    private const string NO_INTRO_FILE = "nointro.txt";
-    private const string SHOW_INTRO_FILENAME_MP4 = "rhtservicesintro.mp4";
+    public readonly string xResolution = "1920";
+    public readonly string yResolution = "1080";
+    public readonly string audioBitRate = "196000";
+    public readonly string audioSampleRate = "48000";
+    public readonly string NO_INTRO_FILE = "nointro.txt";
+    public readonly string SHOW_INTRO_FILENAME_MP4 = "rhtservicesintro.mp4";
 
     public HandyTechVideo()
     {
         BaseDirectory = "/home/almostengineer";
     }
-
-    // public HandyTechVideo(string tarballFilePath) : base(tarballFilePath)
-    // {
-    // }
 
     public override string ChannelBannerText()
     {

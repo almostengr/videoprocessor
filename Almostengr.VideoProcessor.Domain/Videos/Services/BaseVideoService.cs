@@ -23,9 +23,6 @@ public abstract class BaseVideoService : IBaseVideoService
     protected const string DIM_BACKGROUND = "0.3";
     protected const string LARGE_FONT = "h/20";
     protected const string SMALL_FONT = "h/35";
-    protected const int RHT_BORDER_WIDTH = 7;
-
-
 
     // ffmpeg positions
     protected readonly string _upperLeft;
@@ -54,7 +51,6 @@ public abstract class BaseVideoService : IBaseVideoService
     }
 
     public abstract Task ExecuteAsync(CancellationToken stoppingToken);
-    // public abstract string FfmpegFilterText();
 
     protected virtual async Task ConvertImagesToVideo(string directory, CancellationToken cancellationToken)
     {
@@ -66,17 +62,6 @@ public abstract class BaseVideoService : IBaseVideoService
         {
             string outputFile = Path.GetFileNameWithoutExtension(image) + FileExtension.Mp4;
             int duration = 3;
-
-            // ffmpeg -framerate 1/10 -i DJI_0024.JPG -c:v libx264 -t 10 -pix_fmt yuv420p -vf scale=320:240 out.mp4
-            // ffmpeg -loop 1 -i image.png -c:v libx264 -t 15 -pix_fmt yuv420p -vf scale=320:240 out.mp4
-
-            // await RunCommandAsync(
-            //     ProgramPaths.Ffmpeg,
-            //     $"{LOG_ERRORS} -framerate 1/{duration} -i \"{image}\" -c:v libx264 -t {duration} \"{outputFile}\"",
-            //     directory,
-            //     cancellationToken,
-            //     1
-            // );
 
             await _ffmpegService.FfmpegAsync(
                 $"{LOG_ERRORS} -framerate 1/{duration} -i \"{image}\" -c:v libx264 -t {duration} \"{outputFile}\"",
