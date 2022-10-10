@@ -13,4 +13,7 @@ public interface IFileSystemService
     void DeleteFile(string ffmpegInputFilePath);
     bool DoesFileExist(string filePath);
     void DeleteFiles(string[] narrationFiles);
+    void SaveFileContents(string filePath, string content);
+    string GetFileContents(string filePath);
+    string? GetRandomSrtFileFromDirectory(string directory);
 }

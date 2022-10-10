@@ -47,6 +47,15 @@ public sealed class FileSystemService : IFileSystemService
             .FirstOrDefault();
     }
 
+    public string? GetRandomSrtFileFromDirectory(string directory)
+    {
+        return GetFilesInDirectory(directory)
+            .Where(f => f.EndsWith(FileExtension.Srt))
+            .Where(f => f.StartsWith(".") == false)
+            .OrderBy(f => _random.Next()).Take(1)
+            .FirstOrDefault();
+    }
+
     public bool IsDiskSpaceAvailable(string directory)
     {
         const double THRESHOLD = 2.0;
@@ -125,5 +134,23 @@ public sealed class FileSystemService : IFileSystemService
             DeleteFile(file);
         }
     }
-    
+
+    public string GetFileContents(string filePath)
+    {
+        var fileStream = new FileStream(filePath, FileMode.Open);
+
+        using (var streamReader = new StreamReader(fileStream))
+        {
+            return streamReader.ReadToEnd();
+        }
+    }
+
+    public void SaveFileContents(string filePath, string content)
+    {
+        var directoryName = Path.GetDirectoryName(filePath);
+        CreateDirectory(directoryName);
+
+        File.WriteAllText(filePath, content);
+    }
+
 }

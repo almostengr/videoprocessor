@@ -13,7 +13,7 @@ public sealed record HandyTechVideo : VideoBase
 
     public HandyTechVideo()
     {
-        BaseDirectory = "/home/almostengineer";
+        BaseDirectory = Constants.HandyTechBaseDirectory;
     }
 
     public override string ChannelBannerText()
