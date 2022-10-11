@@ -8,6 +8,13 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Company>Robinson Handy and Technology Services LLC</Company>
+    <Copyright>Copyright © $([System.DateTime]::UtcNow.ToString(yyyy)) Robinson Handy and Technology Services</Copyright>
+    <Product>Video Processor</Product>
+    <Authors>Kenny Robinson</Authors>
+    <AssemblyName>Almostengr.VideoProcessor.Infrastructure</AssemblyName>
+    <RootNamespace>Almostengr.VideoProcessor</RootNamespace>
+    <Version>6.$([System.DateTime]::UtcNow.ToString(yy.MM.dd))</Version>
   </PropertyGroup>
 
 </Project>
