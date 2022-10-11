@@ -29,7 +29,3 @@ internal sealed record HandyTechSrtSubtitle : SrtSubtitleBase
         SetBlogMarkdownText(text);
     }
 }
-
-
-// zinatta
-// red lobster

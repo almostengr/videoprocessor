@@ -9,11 +9,11 @@ internal class SrtSubtitleTextIsNullOrWhiteSpaceException : Exception
     {
     }
 
-    public SrtSubtitleTextIsNullOrWhiteSpaceException(string? message) : base(message)
+    public SrtSubtitleTextIsNullOrWhiteSpaceException(string message) : base(message)
     {
     }
 
-    public SrtSubtitleTextIsNullOrWhiteSpaceException(string? message, Exception? innerException) : base(message, innerException)
+    public SrtSubtitleTextIsNullOrWhiteSpaceException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 

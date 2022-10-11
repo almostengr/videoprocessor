@@ -9,11 +9,11 @@ internal class SrtSubtitleContentsAreInvalidException : Exception
     {
     }
 
-    public SrtSubtitleContentsAreInvalidException(string? message) : base(message)
+    public SrtSubtitleContentsAreInvalidException(string message) : base(message)
     {
     }
 
-    public SrtSubtitleContentsAreInvalidException(string? message, Exception? innerException) : base(message, innerException)
+    public SrtSubtitleContentsAreInvalidException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 

@@ -18,6 +18,9 @@ internal abstract record SrtSubtitleBase : BaseEntity
         SrtOriginalText = string.Empty;
         BlogMarkdownText = string.Empty;
         SrtVideoText = string.Empty;
+        BlogOutputFile = string.Empty;
+        SubtitleOutputFile = string.Empty;
+        SubTitleInputFile = string.Empty;
     }
 
     internal string BaseDirectory { get; init; }
@@ -25,9 +28,10 @@ internal abstract record SrtSubtitleBase : BaseEntity
     internal string IncomingDirectory { get; }
     internal string SrtOriginalText { get; private set; }
     internal string BlogMarkdownText { get; private set; }
-
     internal string SrtVideoText { get; private set; }
-    internal string SubTitleFile { get; private set; }
+    internal string SubTitleInputFile { get; private set; }
+    internal string SubtitleOutputFile { get; private set; }
+    internal string BlogOutputFile { get; private set; }
 
     internal void SetSrtSubtitleText(string text)
     {
@@ -37,7 +41,6 @@ internal abstract record SrtSubtitleBase : BaseEntity
         }
 
         string[] inputLines = SrtOriginalText.Split(Environment.NewLine);
-        // return (inputLines[0].StartsWith("1") == true && inputLines[1].StartsWith("00:") == true);
         if (inputLines[0].StartsWith("1") == true && inputLines[1].StartsWith("00:") == true)
         {
             throw new SrtSubtitleContentsAreInvalidException();
@@ -55,23 +58,6 @@ internal abstract record SrtSubtitleBase : BaseEntity
 
         BlogMarkdownText = text;
     }
-
-    // internal bool IsValidSrtSubtitleFile()
-    // {
-    //     if (string.IsNullOrEmpty(SrtSubtitleText))
-    //     {
-    //         throw new SrtSubtitleContentsAreNullOrEmptyException();
-    //     }
-
-    //     string[] inputLines = SrtSubtitleText.Split(Environment.NewLine);
-    //     // return (inputLines[0].StartsWith("1") == true && inputLines[1].StartsWith("00:") == true);
-    //     if (inputLines[0].StartsWith("1") == true && inputLines[1].StartsWith("00:") == true)
-    //     {
-    //         throw new SrtSubtitleContentsAreInvalidException();
-    //     }
-
-    //     return true;
-    // }
 
     internal virtual void CleanSubtitle()
     {
@@ -93,30 +79,16 @@ internal abstract record SrtSubtitleBase : BaseEntity
                 .Replace("all right", "alright")
                 .Trim();
 
-            // videoString += cleanedLine.ToUpper() + Environment.NewLine;
             videoSubtitle.Append(cleanedLine.ToUpper() + Environment.NewLine);
 
             if (counter == 3)
             {
                 blogPostText.Append(cleanedLine + Environment.NewLine);
-                // blogString += cleanedLine + Environment.NewLine;
             }
         }
 
         SrtVideoText = videoSubtitle.ToString();
         BlogMarkdownText = blogPostText.ToString();
-
-        // blogString = RemoveDuplicatesFromBlogString(blogString);
-        // blogString = CleanBlogString(blogString);
-        // blogString = ConvertToSentenceCase(blogString);
-
-        // SubtitleOutputDto outputDto = new();
-        // outputDto.VideoTitle = inputDto.VideoTitle.Replace(FileExtension.Srt, string.Empty);
-        // outputDto.VideoText = videoString;
-        // outputDto.BlogText = blogString;
-        // outputDto.BlogWords = blogString.Split(' ').Length;
-
-        // return outputDto;
 
         RemoveDuplicateWordsFromBlogText();
         UpdateBlogTextToSentenceCase();
@@ -125,19 +97,16 @@ internal abstract record SrtSubtitleBase : BaseEntity
     private void UpdateBlogTextToSentenceCase()
     {
         string[] inputLines = BlogMarkdownText.Split(". ");
-        // string output = string.Empty;
         StringBuilder stringBuilder = new();
 
         foreach (var line in inputLines)
         {
             if (line.Length > 0)
             {
-                // output += line.Substring(0, 1).ToUpper() + line.Substring(1);
                 stringBuilder.Append(line.Substring(0, 1).ToUpper() + line.Substring(1));
             }
         }
 
-        // return stringBuilder.ToString();
         BlogMarkdownText = stringBuilder.ToString();
     }
 
@@ -167,6 +136,10 @@ internal abstract record SrtSubtitleBase : BaseEntity
             throw new SubTitleFileIsNullOrWhiteSpaceException();
         }
 
-        SubTitleFile = srtFile;
+        SubTitleInputFile = srtFile;
+
+        string filename = Path.GetFileName(srtFile);
+        SubtitleOutputFile = Path.Combine(UploadDirectory, filename);
+        BlogOutputFile = Path.Combine(UploadDirectory, filename.Replace(FileExtension.Srt, FileExtension.Md));
     }
 }

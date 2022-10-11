@@ -10,15 +10,15 @@ internal class SrtSubtitleBaseDirectoryIsNullOrEmptyException : VideoProcessorEx
     {
     }
 
-    public SrtSubtitleBaseDirectoryIsNullOrEmptyException(string? message) : base(message)
+    public SrtSubtitleBaseDirectoryIsNullOrEmptyException(string message) : base(message)
     {
     }
 
-    public SrtSubtitleBaseDirectoryIsNullOrEmptyException(string? message, Exception? innerException) : base(message, innerException)
+    public SrtSubtitleBaseDirectoryIsNullOrEmptyException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 
-    protected SrtSubtitleBaseDirectoryIsNullOrEmptyException(SerializationInfo info, StreamingContext context) : base(info, context)
+    public SrtSubtitleBaseDirectoryIsNullOrEmptyException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }
