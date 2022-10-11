@@ -1,5 +1,6 @@
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Interfaces;
+using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
@@ -14,12 +15,22 @@ public sealed class FileSystemService : IFileSystemService
 
     public void CreateDirectory(string directory)
     {
+        if (Directory.Exists(directory))
+        {
+            return;
+        }
+
         Directory.CreateDirectory(directory);
     }
 
-    public void CopyFile(string sourceFile, string destinationDirectory)
+    public void CopyFile(string source, string destination, bool createDestinationDirectory = true)
     {
-        File.Copy(sourceFile, destinationDirectory);
+        if (createDestinationDirectory)
+        {
+            CreateDirectory(destination);
+        }
+
+        File.Copy(source, destination);
     }
 
     public void DeleteFile(string filePath)
@@ -38,22 +49,24 @@ public sealed class FileSystemService : IFileSystemService
         }
     }
 
-    public string? GetRandomTarballFromDirectory(string directory)
+    public string GetRandomTarballFromDirectory(string directory)
     {
         return GetFilesInDirectory(directory)
             .Where(f => f.Contains(FileExtension.Tar))
             .Where(f => f.StartsWith(".") == false)
             .OrderBy(f => _random.Next()).Take(1)
-            .FirstOrDefault();
+            // .FirstOrDefault();
+            .First();
     }
 
-    public string? GetRandomSrtFileFromDirectory(string directory)
+    public string GetRandomSrtFileFromDirectory(string directory)
     {
         return GetFilesInDirectory(directory)
             .Where(f => f.EndsWith(FileExtension.Srt))
             .Where(f => f.StartsWith(".") == false)
             .OrderBy(f => _random.Next()).Take(1)
-            .FirstOrDefault();
+            // .FirstOrDefault();
+            .First();
     }
 
     public bool IsDiskSpaceAvailable(string directory)
@@ -71,13 +84,17 @@ public sealed class FileSystemService : IFileSystemService
             return true;
         }
 
-        // _logger.LogError($"Disk space is too low. Disk space free: {(spaceRemaining * 100).ToString("###.##")}%"); // todo kr
-        return false;
+        throw new DiskSpaceIsLowException();
     }
 
-    public void MoveFile(string sourceFilePath, string destinationDirectory)
+    public void MoveFile(string source, string destination, bool createDestinationDirectory = true)
     {
-        File.Move(sourceFilePath, destinationDirectory);
+        if (createDestinationDirectory)
+        {
+            CreateDirectory(destination);
+        }
+
+        File.Move(source, destination);
     }
 
     public IEnumerable<string> GetFilesInDirectory(string directory)
@@ -147,7 +164,23 @@ public sealed class FileSystemService : IFileSystemService
 
     public void SaveFileContents(string filePath, string content)
     {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            throw new SaveFilePathIsNullOrEmptyException();
+        }
+
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new SaveFileContentIsNullOrEmptyException();
+        }
+
         var directoryName = Path.GetDirectoryName(filePath);
+
+        if (string.IsNullOrEmpty(directoryName))
+        {
+            throw new SaveFileDirectoryIsNullOrEmptyException();
+        }
+
         CreateDirectory(directoryName);
 
         File.WriteAllText(filePath, content);

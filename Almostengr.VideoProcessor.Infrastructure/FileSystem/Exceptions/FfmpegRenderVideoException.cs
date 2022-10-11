@@ -13,7 +13,7 @@ internal sealed class FfmpegRenderVideoException : VideoProcessorException
     {
     }
 
-    public FfmpegRenderVideoException(string? message, Exception? innerException) : base(message, innerException)
+    public FfmpegRenderVideoException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 

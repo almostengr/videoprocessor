@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
 
-public sealed class FfprobeException : VideoProcessorException
+internal sealed class FfprobeException : VideoProcessorException
 {
     public FfprobeException()
     {
@@ -13,7 +13,7 @@ public sealed class FfprobeException : VideoProcessorException
     {
     }
 
-    public FfprobeException(string? message, Exception? innerException) : base(message, innerException)
+    public FfprobeException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 
