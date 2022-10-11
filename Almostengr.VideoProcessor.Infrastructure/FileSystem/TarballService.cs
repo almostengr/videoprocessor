@@ -15,7 +15,6 @@ public sealed class TarballService : ITarballService
             StartInfo = new ProcessStartInfo
             {
                 FileName = TarBinary,
-                // Arguments = videoFileName,
                 Arguments = $"-xvf \"{tarBallFilePath}\" -C \"{directory}\"",
                 WorkingDirectory = directory,
                 UseShellExecute = false,

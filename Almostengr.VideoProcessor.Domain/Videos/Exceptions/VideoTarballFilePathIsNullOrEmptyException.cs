@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Videos;
 
-public sealed class VideoTarballFilePathIsNullOrEmptyException : VideoProcessorException
+internal sealed class VideoTarballFilePathIsNullOrEmptyException : VideoProcessorException
 {
     public VideoTarballFilePathIsNullOrEmptyException()
     {
@@ -13,7 +13,7 @@ public sealed class VideoTarballFilePathIsNullOrEmptyException : VideoProcessorE
     {
     }
 
-    public VideoTarballFilePathIsNullOrEmptyException(string? message, Exception? innerException) : base(message, innerException)
+    public VideoTarballFilePathIsNullOrEmptyException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 

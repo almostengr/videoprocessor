@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Videos;
 
-public sealed class VideoTarballFileDoesNotExistException : VideoProcessorException
+internal sealed class VideoTarballFileDoesNotExistException : VideoProcessorException
 {
     public VideoTarballFileDoesNotExistException()
     {
@@ -17,7 +17,7 @@ public sealed class VideoTarballFileDoesNotExistException : VideoProcessorExcept
     {
     }
 
-    public VideoTarballFileDoesNotExistException(string? message, Exception? innerException) : base(message, innerException)
+    public VideoTarballFileDoesNotExistException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 }

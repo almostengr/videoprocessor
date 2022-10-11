@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
 
-public sealed class TarballExtractingException : VideoProcessorException
+internal sealed class TarballExtractingException : VideoProcessorException
 {
     public TarballExtractingException()
     {
@@ -13,7 +13,7 @@ public sealed class TarballExtractingException : VideoProcessorException
     {
     }
 
-    public TarballExtractingException(string? message, Exception? innerException) : base(message, innerException)
+    public TarballExtractingException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 
