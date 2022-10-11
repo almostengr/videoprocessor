@@ -6,8 +6,6 @@ namespace Almostengr.VideoProcessor.Domain.Music.Services;
 
 public sealed class MusicService : IMusicService
 {
-    private readonly string MusicDirectory = "";
-
     private readonly IFileSystemService _fileSystemService;
     private readonly Random _random;
     private const string Mix = "mix";
@@ -20,7 +18,7 @@ public sealed class MusicService : IMusicService
 
     public string GetRandomMixTrack()
     {
-        var musicMixes = _fileSystemService.GetFilesInDirectory(MusicDirectory)
+        var musicMixes = _fileSystemService.GetFilesInDirectory(Constants.MusicBaseDirectory)
             .Where(x => x.ToLower().Contains(Mix) && x.ToLower().EndsWith(FileExtension.Mp3));
 
 
@@ -34,7 +32,7 @@ public sealed class MusicService : IMusicService
 
     public string GetRandomMusicTracks()
     {
-        var musicFiles = _fileSystemService.GetFilesInDirectory(MusicDirectory)
+        var musicFiles = _fileSystemService.GetFilesInDirectory(Constants.MusicBaseDirectory)
             .Where(x => x.ToLower().Contains(Mix) == false && x.ToLower().EndsWith(FileExtension.Mp3));
 
         if (musicFiles.Count() == 0)
@@ -59,7 +57,7 @@ public sealed class MusicService : IMusicService
 
     public string GetRandomNonMixTrack()
     {
-        var nonMusicMixes = _fileSystemService.GetFilesInDirectory(MusicDirectory)
+        var nonMusicMixes = _fileSystemService.GetFilesInDirectory(Constants.MusicBaseDirectory)
             .Where(x => !x.ToLower().Contains(Mix) && x.ToLower().EndsWith(FileExtension.Mp3));
 
         if (nonMusicMixes.Count() == 0)
