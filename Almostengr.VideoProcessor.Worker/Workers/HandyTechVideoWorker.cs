@@ -1,16 +1,14 @@
 using Almostengr.VideoProcessor.Domain.Videos.Services;
 
-namespace Almostengr.VideoProcessor.Worker;
+namespace Almostengr.VideoProcessor.Worker.Workers;
 
-public class HandyTechVideoWorker : BackgroundService
+internal sealed class HandyTechVideoWorker : BaseWorker
 {
     private readonly IHandyTechVideoService _videoService;
-    private readonly ILogger<HandyTechVideoWorker> _logger;
 
     public HandyTechVideoWorker(IHandyTechVideoService videoService, ILogger<HandyTechVideoWorker> logger)
     {
         _videoService = videoService;
-        _logger = logger;
     }
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -18,7 +16,7 @@ public class HandyTechVideoWorker : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             await _videoService.ExecuteAsync(stoppingToken);
-            await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+            await Task.Delay(WaitDelay, stoppingToken);
         }
     }
 }

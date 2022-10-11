@@ -1,6 +1,7 @@
-using Almostengr.VideoProcessor.Worker;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 using Almostengr.VideoProcessor.Domain.Videos.Services;
+using Almostengr.VideoProcessor.Domain.Subtitles.Services;
+using Almostengr.VideoProcessor.Worker.Workers;
 
 // string environment = string.Empty;
 
@@ -10,12 +11,12 @@ using Almostengr.VideoProcessor.Domain.Videos.Services;
 //     environment = AppEnvironment.Devl;
 // #endif
 
-IConfiguration configuration = new ConfigurationBuilder()
+// IConfiguration configuration = new ConfigurationBuilder()
     // .AddJsonFile(
     //     (environment == AppEnvironment.Prod) ? AppConstants.AppSettingsProdFile : AppConstants.AppSettingsDevlFile, 
     //     false, 
     //     true)
-    .Build();
+    // .Build();
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
@@ -23,15 +24,16 @@ IHost host = Host.CreateDefaultBuilder(args)
         // AppSettings appSettings = configuration.GetSection(nameof(AppSettings)).Get<AppSettings>();
         // services.AddSingleton(appSettings);
 
-        // services.AddTransient<IDashCamVideoService, DashCamVideoService>();
+        services.AddSingleton<IDashCamVideoService, DashCamVideoService>();
         services.AddSingleton<IHandyTechVideoService, HandyTechVideoService>();
         services.AddSingleton<IMusicService, MusicService>();
-        // services.AddTransient<ISrtSubtitleService, SrtSubtitleService>();
+        services.AddSingleton<IHandyTechSrtSubtitleService, HandyTechSrtSubtitleService>();
 
-        // services.AddHostedService<DashCamVideoWorker>();
+        services.AddHostedService<DashCamVideoWorker>();
         services.AddHostedService<HandyTechSubtitleWorker>();
         services.AddHostedService<HandyTechVideoWorker>();
     })
+    .UseSystemd()
     .Build();
 
 await host.RunAsync();
