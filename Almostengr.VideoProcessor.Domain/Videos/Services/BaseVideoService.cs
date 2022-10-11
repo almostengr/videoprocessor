@@ -51,6 +51,25 @@ public abstract class BaseVideoService : IBaseVideoService
     }
 
     public abstract Task ExecuteAsync(CancellationToken stoppingToken);
+    internal abstract string FfmpegVideoFilter<T>(T video) where T : VideoBase;
+
+    internal virtual void CreateFfmpegInputFile<T>(T video) where T : VideoBase
+    {
+        _fileSystemService.DeleteFile(video.FfmpegInputFilePath);
+
+        using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
+        {
+            var filesInDirectory = _fileSystemService.GetFilesInDirectory(video.WorkingDirectory)
+            .Where(f => f.EndsWith(FileExtension.Mp4))
+            .OrderBy(f => f)
+            .ToArray();
+
+            foreach(var file in filesInDirectory)
+            {
+                writer.WriteLine($"file '{file}'");
+            }
+        }
+    }
 
     protected virtual async Task ConvertImagesToVideo(string directory, CancellationToken cancellationToken)
     {

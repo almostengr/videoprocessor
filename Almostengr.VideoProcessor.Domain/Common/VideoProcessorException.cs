@@ -12,7 +12,7 @@ public abstract class VideoProcessorException : Exception
     {
     }
 
-    public VideoProcessorException(string? message, Exception? innerException) : base(message, innerException)
+    public VideoProcessorException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 

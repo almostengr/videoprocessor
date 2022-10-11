@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Videos;
 
-public sealed class VideoInvalidBaseDirectoryException : VideoProcessorException
+internal sealed class VideoInvalidBaseDirectoryException : VideoProcessorException
 {
     public VideoInvalidBaseDirectoryException()
     {
@@ -13,7 +13,7 @@ public sealed class VideoInvalidBaseDirectoryException : VideoProcessorException
     {
     }
 
-    public VideoInvalidBaseDirectoryException(string? message, Exception? innerException) : base(message, innerException)
+    public VideoInvalidBaseDirectoryException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 
