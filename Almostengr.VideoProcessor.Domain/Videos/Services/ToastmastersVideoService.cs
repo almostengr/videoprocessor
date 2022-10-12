@@ -8,14 +8,16 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
     private readonly IFfmpegService _ffmpegSerivce;
     private readonly IFileSystemService _fileSystemService;
     private readonly ITarballService _tarballService;
+    private readonly IVpLogger<ToastmastersVideoService> _logger;
 
     public ToastmastersVideoService(IFileSystemService fileSystemService, IFfmpegService ffmpegService, 
-        ITarballService tarballService
+        ITarballService tarballService, IVpLogger<ToastmastersVideoService> logger
     ) : base(fileSystemService, ffmpegService)
     {
         _fileSystemService = fileSystemService;
         _ffmpegSerivce = ffmpegService;
         _tarballService = tarballService;
+        _logger = logger;
     }
 
     public override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -53,7 +55,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            _logger.LogError(ex, ex.Message);
         }
     }
 

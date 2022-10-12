@@ -7,20 +7,21 @@ namespace Almostengr.VideoProcessor.Domain.Music.Services;
 public sealed class MusicService : IMusicService
 {
     private readonly IFileSystemService _fileSystemService;
+    private readonly IVpLogger<MusicService> _logger;
     private readonly Random _random;
     private const string Mix = "mix";
 
-    public MusicService(IFileSystemService fileSystemService)
+    public MusicService(IFileSystemService fileSystemService, IVpLogger<MusicService> logger)
     {
         _fileSystemService = fileSystemService;
         _random = new Random();
+        _logger = logger;
     }
 
     public string GetRandomMixTrack()
     {
         var musicMixes = _fileSystemService.GetFilesInDirectory(Constants.MusicBaseDirectory)
             .Where(x => x.ToLower().Contains(Mix) && x.ToLower().EndsWith(FileExtension.Mp3));
-
 
         if (musicMixes.Count() == 0)
         {

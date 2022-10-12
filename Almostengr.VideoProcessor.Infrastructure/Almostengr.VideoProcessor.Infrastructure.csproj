@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Almostengr.VideoProcessor.Domain\Almostengr.VideoProcessor.Domain.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
   </ItemGroup>
 
   <PropertyGroup>

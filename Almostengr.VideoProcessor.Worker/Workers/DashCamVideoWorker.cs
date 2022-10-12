@@ -6,7 +6,7 @@ internal sealed class DashCamVideoWorker : BaseWorker
 {
     private readonly IDashCamVideoService _videoService;
 
-    public DashCamVideoWorker(IDashCamVideoService videoService, ILogger<DashCamVideoWorker> logger)
+    public DashCamVideoWorker(IDashCamVideoService videoService)
     {
         _videoService = videoService;
     }

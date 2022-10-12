@@ -6,7 +6,7 @@ internal sealed class HandyTechSubtitleWorker : BaseWorker
 {
     private readonly IHandyTechSrtSubtitleService _subtitleService;
 
-    public HandyTechSubtitleWorker(ILogger<HandyTechSubtitleWorker> logger, IHandyTechSrtSubtitleService subtitleService)
+    public HandyTechSubtitleWorker(IHandyTechSrtSubtitleService subtitleService)
     {
         _subtitleService = subtitleService;
     }

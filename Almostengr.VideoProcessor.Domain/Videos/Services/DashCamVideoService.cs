@@ -10,15 +10,17 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     private readonly IFileSystemService _fileSystemService;
     private readonly ITarballService _tarballService;
     private readonly IMusicService _musicService;
+    private readonly IVpLogger<DashCamVideoService> _logger;
 
     public DashCamVideoService(IFileSystemService fileSystemService, IFfmpegService ffmpegService,
-        ITarballService tarballService, IMusicService musicService
+        ITarballService tarballService, IMusicService musicService, IVpLogger<DashCamVideoService> logger
     ) : base(fileSystemService, ffmpegService)
     {
         _fileSystemService = fileSystemService;
         _ffmpegService = ffmpegService;
         _tarballService = tarballService;
-        _musicService =musicService;
+        _musicService = musicService;
+        _logger = logger;
     }
 
     public override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -55,7 +57,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            _logger.LogError(ex, ex.Message);
         }
     }
 

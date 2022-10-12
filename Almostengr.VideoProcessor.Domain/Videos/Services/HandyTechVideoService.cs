@@ -11,16 +11,18 @@ public sealed class HandyTechVideoService : BaseVideoService, IHandyTechVideoSer
     private readonly IFfmpegService _ffmpegService;
     private readonly ITarballService _tarballService;
     private readonly IMusicService _musicService;
+    private readonly IVpLogger<HandyTechVideoService> _logger;
     private const int RHT_BORDER_WIDTH = 7;
 
     public HandyTechVideoService(IFileSystemService fileSystemService, IFfmpegService ffmpegService,
-        ITarballService tarballService, IMusicService musicService) :
-        base(fileSystemService, ffmpegService)
+        ITarballService tarballService, IMusicService musicService, IVpLogger<HandyTechVideoService> logger
+        ) : base(fileSystemService, ffmpegService)
     {
         _fileSystemService = fileSystemService;
         _ffmpegService = ffmpegService;
         _tarballService = tarballService;
         _musicService = musicService;
+        _logger = logger;
     }
 
     public override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -67,7 +69,7 @@ public sealed class HandyTechVideoService : BaseVideoService, IHandyTechVideoSer
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            _logger.LogError(ex, ex.Message);
         }
     }
 

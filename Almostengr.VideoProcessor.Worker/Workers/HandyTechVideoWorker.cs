@@ -6,7 +6,7 @@ internal sealed class HandyTechVideoWorker : BaseWorker
 {
     private readonly IHandyTechVideoService _videoService;
 
-    public HandyTechVideoWorker(IHandyTechVideoService videoService, ILogger<HandyTechVideoWorker> logger)
+    public HandyTechVideoWorker(IHandyTechVideoService videoService)
     {
         _videoService = videoService;
     }
