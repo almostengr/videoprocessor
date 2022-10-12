@@ -1,7 +1,7 @@
 using System.Runtime.Serialization;
 using Almostengr.VideoProcessor.Domain.Common;
 
-namespace Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
+namespace Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
 internal sealed class TarballExtractingException : VideoProcessorException
 {

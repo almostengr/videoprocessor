@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using Almostengr.VideoProcessor.Domain.Interfaces;
-using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
+using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
-namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
+namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
 public sealed class TarballService : ITarballService
 {
-    public const string TarBinary = "/bin/tar";
+    private const string TarBinary = "/bin/tar";
 
     public async Task<(string stdOut, string stdErr)> ExtractTarballContentsAsync(string tarBallFilePath, string directory, CancellationToken cancellationToken)
     {
@@ -29,7 +29,7 @@ public sealed class TarballService : ITarballService
         string output = process.StandardOutput.ReadToEnd();
         string error = process.StandardError.ReadToEnd();
 
-        await process.WaitForExitAsync();
+        await process.WaitForExitAsync(cancellationToken);
 
         if (process.ExitCode > 0)
         {
