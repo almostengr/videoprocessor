@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Domain.HandymanSubtitle;
+using Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
 
 namespace Almostengr.VideoProcessor.Worker.Workers;
 

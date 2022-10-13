@@ -4,9 +4,9 @@ using Almostengr.VideoProcessor.Worker.Workers;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem;
 using Almostengr.VideoProcessor.Infrastructure.Logging;
 using Almostengr.VideoProcessor.Infrastructure.Processes;
-using Almostengr.VideoProcessor.Domain.DashCamVideo;
-using Almostengr.VideoProcessor.Domain.HandymanSubtitle;
-using Almostengr.VideoProcessor.Domain.HandymanVideo;
+using Almostengr.VideoProcessor.Domain.Videos.DashCamVideo;
+using Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
+using Almostengr.VideoProcessor.Domain.Videos.HandymanVideo;
 using Almostengr.VideoProcessor.Domain.ToastmastersVideo;
 
 // string environment = string.Empty;
