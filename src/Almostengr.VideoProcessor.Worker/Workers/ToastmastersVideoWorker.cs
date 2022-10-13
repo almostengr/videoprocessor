@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Domain.Videos.Services;
+using Almostengr.VideoProcessor.Domain.ToastmastersVideo;
 
 namespace Almostengr.VideoProcessor.Worker.Workers;
 

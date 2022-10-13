@@ -1,11 +1,13 @@
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
-using Almostengr.VideoProcessor.Domain.Videos.Services;
-using Almostengr.VideoProcessor.Domain.Subtitles.Services;
 using Almostengr.VideoProcessor.Worker.Workers;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem;
 using Almostengr.VideoProcessor.Infrastructure.Logging;
 using Almostengr.VideoProcessor.Infrastructure.Processes;
+using Almostengr.VideoProcessor.Domain.DashCamVideo;
+using Almostengr.VideoProcessor.Domain.HandymanSubtitle;
+using Almostengr.VideoProcessor.Domain.HandymanVideo;
+using Almostengr.VideoProcessor.Domain.ToastmastersVideo;
 
 // string environment = string.Empty;
 
@@ -31,16 +33,17 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IDashCamVideoService, DashCamVideoService>();
         services.AddSingleton<IFfmpegService, FfmpegService>();
         services.AddSingleton<IFileSystemService, FileSystemService>();
-        services.AddSingleton<IHandyTechSrtSubtitleService, HandyTechSrtSubtitleService>();
-        services.AddSingleton<IHandyTechVideoService, HandyTechVideoService>();
+        services.AddSingleton<IHandymanSubtitleService, HandymanSubtitleService>();
+        services.AddSingleton<IHandymanVideoService, HandymanVideoService>();
         services.AddSingleton<IMusicService, MusicService>();
         services.AddSingleton<ITarballService, TarballService>();
         services.AddSingleton<IToastmastersVideoService, ToastmastersVideoService>();
         services.AddSingleton(typeof(IVpLogger<>), typeof(VpLogger<>));
 
         services.AddHostedService<DashCamVideoWorker>();
-        services.AddHostedService<HandyTechSubtitleWorker>();
-        services.AddHostedService<HandyTechVideoWorker>();
+        services.AddHostedService<HandymanSubtitleWorker>();
+        services.AddHostedService<HandymanVideoWorker>();
+        services.AddHostedService<TechnologyVideoWorker>();
         services.AddHostedService<ToastmastersVideoWorker>();
     })
     .UseSystemd()

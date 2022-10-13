@@ -1,12 +1,12 @@
-using Almostengr.VideoProcessor.Domain.DashCamVideo;
+using Almostengr.VideoProcessor.Domain.TechnologyVideo;
 
 namespace Almostengr.VideoProcessor.Worker.Workers;
 
-internal sealed class DashCamVideoWorker : BaseWorker
+internal sealed class TechnologyVideoWorker : BaseWorker
 {
-    private readonly IDashCamVideoService _videoService;
+    private readonly ITechnologyVideoService _videoService;
 
-    public DashCamVideoWorker(IDashCamVideoService videoService)
+    public TechnologyVideoWorker(ITechnologyVideoService videoService)
     {
         _videoService = videoService;
     }
