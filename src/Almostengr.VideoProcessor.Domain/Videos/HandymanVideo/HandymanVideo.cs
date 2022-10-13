@@ -33,13 +33,7 @@ public sealed record HandymanVideo : BaseVideo
 
     public override string TextColor()
     {
-        string title = Title.ToLower();
-        if (title.Contains("christmas"))
-        {
-            return FfMpegColors.Green;
-        }
-
-        return FfMpegColors.White;
+        return FfMpegColors.RhtYellow;
     }
 
     public override string BoxColor()

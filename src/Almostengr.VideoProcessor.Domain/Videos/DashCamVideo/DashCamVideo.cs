@@ -2,6 +2,8 @@ namespace Almostengr.VideoProcessor.Domain.Videos.DashCamVideo;
 
 public sealed record DashCamVideo : BaseVideo
 {
+    private readonly string Night = "night";
+
     public DashCamVideo()
     {
         BaseDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/Kenny Ram Dash Cam";
@@ -19,7 +21,7 @@ public sealed record DashCamVideo : BaseVideo
 
     public override string TextColor()
     {
-        if (Title.ToLower().Contains("night"))
+        if (Title.ToLower().Contains(Night))
         {
             return FfMpegColors.Orange;
         }

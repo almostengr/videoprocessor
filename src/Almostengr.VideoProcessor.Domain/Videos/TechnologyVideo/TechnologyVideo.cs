@@ -2,6 +2,7 @@ namespace Almostengr.VideoProcessor.Domain.Videos.TechnologyVideo;
 
 public sealed record TechnologyVideo : BaseVideo
 {
+    private readonly string ChristmasLightShow = "christmas light show";
     public readonly string xResolution = "1920";
     public readonly string yResolution = "1080";
     public readonly string audioBitRate = "196000";
@@ -33,18 +34,18 @@ public sealed record TechnologyVideo : BaseVideo
 
     public override string TextColor()
     {
-        string title = Title.ToLower();
-        if (title.Contains("christmas"))
-        {
-            return FfMpegColors.Green;
-        }
-
         return FfMpegColors.White;
     }
 
     public override string BoxColor()
     {
-        return FfMpegColors.Black;
+        string title = Title.ToLower();
+        if (title.Contains(ChristmasLightShow))
+        {
+            return FfMpegColors.Maroon;
+        }
+
+        return FfMpegColors.Green;
     }
 
     public string NoIntroFilePath()
