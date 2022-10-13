@@ -6,22 +6,22 @@ namespace Almostengr.VideoProcessor.Domain.Music.Services;
 
 public sealed class MusicService : IMusicService
 {
-    private readonly IFileSystemService _fileSystemService;
-    private readonly IVpLogger<MusicService> _logger;
+    private readonly IFileSystem _fileSystem;
+    private readonly ILoggerService<MusicService> _logger;
     private readonly Random _random;
     private const string Mix = "mix";
     private const string BaseDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music";
 
-    public MusicService(IFileSystemService fileSystemService, IVpLogger<MusicService> logger)
+    public MusicService(IFileSystem fileSystemService, ILoggerService<MusicService> logger)
     {
-        _fileSystemService = fileSystemService;
+        _fileSystem = fileSystemService;
         _random = new Random();
         _logger = logger;
     }
 
     public string GetRandomMixTrack()
     {
-        var musicMixes = _fileSystemService.GetFilesInDirectory(BaseDirectory)
+        var musicMixes = _fileSystem.GetFilesInDirectory(BaseDirectory)
             .Where(x => x.ToLower().Contains(Mix) && x.ToLower().EndsWith(FileExtension.Mp3));
 
         if (musicMixes.Count() == 0)
@@ -34,7 +34,7 @@ public sealed class MusicService : IMusicService
 
     public string GetRandomMusicTracks()
     {
-        var musicFiles = _fileSystemService.GetFilesInDirectory(BaseDirectory)
+        var musicFiles = _fileSystem.GetFilesInDirectory(BaseDirectory)
             .Where(x => x.ToLower().Contains(Mix) == false && x.ToLower().EndsWith(FileExtension.Mp3));
 
         if (musicFiles.Count() == 0)
@@ -59,7 +59,7 @@ public sealed class MusicService : IMusicService
 
     public string GetRandomNonMixTrack()
     {
-        var nonMusicMixes = _fileSystemService.GetFilesInDirectory(BaseDirectory)
+        var nonMusicMixes = _fileSystem.GetFilesInDirectory(BaseDirectory)
             .Where(x => !x.ToLower().Contains(Mix) && x.ToLower().EndsWith(FileExtension.Mp3));
 
         if (nonMusicMixes.Count() == 0)

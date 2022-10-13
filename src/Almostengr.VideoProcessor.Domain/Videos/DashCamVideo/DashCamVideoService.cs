@@ -6,19 +6,19 @@ namespace Almostengr.VideoProcessor.Domain.Videos.DashCamVideo;
 
 public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 {
-    private readonly IFfmpegService _ffmpegService;
-    private readonly IFileSystemService _fileSystemService;
-    private readonly ITarballService _tarballService;
+    private readonly IFfmpeg _ffmpeg;
+    private readonly IFileSystem _fileSystem;
+    private readonly ITarball _tarball;
     private readonly IMusicService _musicService;
-    private readonly IVpLogger<DashCamVideoService> _logger;
+    private readonly ILoggerService<DashCamVideoService> _logger;
 
-    public DashCamVideoService(IFileSystemService fileSystemService, IFfmpegService ffmpegService,
-        ITarballService tarballService, IMusicService musicService, IVpLogger<DashCamVideoService> logger
+    public DashCamVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
+        ITarball tarballService, IMusicService musicService, ILoggerService<DashCamVideoService> logger
     ) : base(fileSystemService, ffmpegService)
     {
-        _fileSystemService = fileSystemService;
-        _ffmpegService = ffmpegService;
-        _tarballService = tarballService;
+        _fileSystem = fileSystemService;
+        _ffmpeg = ffmpegService;
+        _tarball = tarballService;
         _musicService = musicService;
         _logger = logger;
     }
@@ -31,28 +31,31 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             {
                 DashCamVideo video = new DashCamVideo();
 
-                _fileSystemService.IsDiskSpaceAvailable(video.BaseDirectory);
+                _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
-                video.SetTarballFilePath(_fileSystemService.GetRandomTarballFromDirectory(video.IncomingDirectory));
+                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
 
-                _fileSystemService.DeleteDirectory(video.WorkingDirectory);
-                _fileSystemService.CreateDirectory(video.WorkingDirectory);
+                _fileSystem.DeleteDirectory(video.WorkingDirectory);
+                _fileSystem.CreateDirectory(video.WorkingDirectory);
 
-                await _tarballService.ExtractTarballContentsAsync(video.TarballFilePath, video.WorkingDirectory, stoppingToken);
+                await _tarball.ExtractTarballContentsAsync(video.TarballFilePath, video.WorkingDirectory, stoppingToken);
 
                 CreateFfmpegInputFile(video);
 
                 string videoFilter = FfmpegVideoFilter(video);
 
-                await _ffmpegService.FfmpegAsync(
-                    $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{FFMPEG_INPUT_FILE}\" -i \"{_musicService.GetRandomMixTrack()}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -bsf:a aac_adtstoasc -map 0:v:0 -map 1:a:0 \"{video.OutputFilePath}\"", // string.Empty,
-                    video.WorkingDirectory,
-                    stoppingToken
-                );
+                // await _ffmpeg.FfmpegAsync(
+                //     $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{FFMPEG_INPUT_FILE}\" -i \"{_musicService.GetRandomMixTrack()}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -bsf:a aac_adtstoasc -map 0:v:0 -map 1:a:0 \"{video.OutputFilePath}\"", // string.Empty,
+                //     video.WorkingDirectory,
+                //     stoppingToken
+                // );
 
-                _fileSystemService.MoveFile(video.TarballFilePath, video.ArchiveDirectory);
+                await _ffmpeg.RenderVideoAsync(
+                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, video.WorkingDirectory, stoppingToken);
 
-                _fileSystemService.DeleteDirectory(video.WorkingDirectory);
+                _fileSystem.MoveFile(video.TarballFilePath, video.ArchiveDirectory);
+
+                _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
         }
         catch (Exception ex)
@@ -63,11 +66,11 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
     // private void CreateFfmpegInputFile(DashCamVideo video)
     // {
-    //     _fileSystemService.DeleteFile(video.FfmpegInputFilePath);
+    //     _fileSystem.DeleteFile(video.FfmpegInputFilePath);
 
     //     using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
     //     {
-    //         var filesInDirectory = _fileSystemService.GetFilesInDirectory(video.WorkingDirectory)
+    //         var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
     //         .Where(f => f.EndsWith(FileExtension.Mp4))
     //         .OrderBy(f => f)
     //         .ToArray();

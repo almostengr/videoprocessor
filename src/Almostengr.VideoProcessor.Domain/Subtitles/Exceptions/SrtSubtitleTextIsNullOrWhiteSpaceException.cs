@@ -1,9 +1,10 @@
 using System.Runtime.Serialization;
+using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles.Exceptions;
 
 [Serializable]
-internal class SrtSubtitleTextIsNullOrWhiteSpaceException : Exception
+internal class SrtSubtitleTextIsNullOrWhiteSpaceException : VideoProcessorException
 {
     public SrtSubtitleTextIsNullOrWhiteSpaceException()
     {

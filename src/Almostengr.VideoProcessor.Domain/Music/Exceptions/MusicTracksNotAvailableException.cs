@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 namespace Almostengr.VideoProcessor.Domain.Music.Exceptions;
 
 [Serializable]
-internal sealed  class MusicTracksNotAvailableException : Exception
+internal sealed class MusicTracksNotAvailableException : Exception
 {
     public MusicTracksNotAvailableException()
     {

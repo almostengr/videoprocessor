@@ -17,17 +17,18 @@ public sealed record TechnologyVideo : BaseVideo
 
     public override string ChannelBannerText()
     {
-        Random random = new Random();
-        string[] bannerText = {
-                    "rhtservices.net",
-                    "Robinson Handy and Technology Services",
-                    "rhtservices.net/facebook",
-                    "rhtservices.net/instagram",
-                    "rhtservices.net/youtube",
-                    "@rhtservicesllc"
-                    };
+        // Random random = new Random();
+        // string[] bannerText = {
+        //             "rhtservices.net",
+        //             "Robinson Handy and Technology Services",
+        //             "rhtservices.net/facebook",
+        //             "rhtservices.net/instagram",
+        //             "rhtservices.net/youtube",
+        //             "@rhtservicesllc"
+        //             };
 
-        return bannerText.ElementAt(random.Next(0, bannerText.Length));
+        // return bannerText.ElementAt(random.Next(0, bannerText.Length));
+        return ChannelBannerTextHandymanTechnology();
     }
 
     public override string TextColor()

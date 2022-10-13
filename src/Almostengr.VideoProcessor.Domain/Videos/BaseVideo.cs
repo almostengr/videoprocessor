@@ -5,6 +5,8 @@ namespace Almostengr.VideoProcessor.Domain.Videos;
 
 public abstract record BaseVideo : BaseEntity
 {
+    internal readonly string RhtServicesIntroPath = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/rhtservicesintro.mp4";
+
     public BaseVideo()
     {
         if (string.IsNullOrWhiteSpace(BaseDirectory))
@@ -71,5 +73,20 @@ public abstract record BaseVideo : BaseEntity
         OutputFileName = Title + FileExtension.Mp4;
 
         OutputFilePath = Path.Combine(UploadDirectory, OutputFileName);
+    }
+
+    protected string ChannelBannerTextHandymanTechnology()
+    {
+        Random random = new Random();
+        string[] bannerText = {
+                    "rhtservices.net",
+                    "Robinson Handy and Technology Services",
+                    "rhtservices.net/facebook",
+                    "rhtservices.net/instagram",
+                    "rhtservices.net/youtube",
+                    "@rhtservicesllc"
+                    };
+
+        return bannerText.ElementAt(random.Next(0, bannerText.Length));
     }
 }

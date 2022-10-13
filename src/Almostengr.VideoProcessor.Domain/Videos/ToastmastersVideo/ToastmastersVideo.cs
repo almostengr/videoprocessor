@@ -11,7 +11,7 @@ public sealed record ToastmastersVideo : BaseVideo
 
     public override string BoxColor()
     {
-        return FfMpegColors.Black;
+        return FfMpegColors.SteelBlue;
     }
 
     public override string ChannelBannerText()

@@ -1,9 +1,10 @@
 using System.Runtime.Serialization;
+using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles.Exceptions;
 
 [Serializable]
-internal class SrtSubtitleContentsAreInvalidException : Exception
+internal class SrtSubtitleContentsAreInvalidException : VideoProcessorException
 {
     public SrtSubtitleContentsAreInvalidException()
     {

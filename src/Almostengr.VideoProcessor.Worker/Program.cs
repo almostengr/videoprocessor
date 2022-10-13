@@ -31,14 +31,14 @@ IHost host = Host.CreateDefaultBuilder(args)
         // services.AddSingleton(appSettings);
 
         services.AddSingleton<IDashCamVideoService, DashCamVideoService>();
-        services.AddSingleton<IFfmpegService, FfmpegService>();
-        services.AddSingleton<IFileSystemService, FileSystemService>();
+        services.AddSingleton<IFfmpeg, Ffmpeg>();
+        services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IHandymanSubtitleService, HandymanSubtitleService>();
         services.AddSingleton<IHandymanVideoService, HandymanVideoService>();
         services.AddSingleton<IMusicService, MusicService>();
-        services.AddSingleton<ITarballService, TarballService>();
+        services.AddSingleton<ITarball, Tarball>();
         services.AddSingleton<IToastmastersVideoService, ToastmastersVideoService>();
-        services.AddSingleton(typeof(IVpLogger<>), typeof(VpLogger<>));
+        services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
 
         services.AddHostedService<DashCamVideoWorker>();
         services.AddHostedService<HandymanSubtitleWorker>();

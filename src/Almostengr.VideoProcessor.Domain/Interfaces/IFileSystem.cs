@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Domain.Interfaces;
 
-public interface IFileSystemService
+public interface IFileSystem
 {
     bool IsDiskSpaceAvailable(string directory);
     string? GetRandomTarballFromDirectory(string directory);

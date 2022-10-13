@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Domain.Interfaces;
 
-public interface IVpLogger<T>
+public interface ILoggerService<T>
 {
     void LogInformation(string message, params object[] args);
     void LogWarning(string message, params object[] args);

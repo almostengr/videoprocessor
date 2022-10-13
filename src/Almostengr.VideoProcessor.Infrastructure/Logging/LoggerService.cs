@@ -3,11 +3,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Logging;
 
-public sealed class VpLogger<T> : IVpLogger<T>
+public sealed class LoggerService<T> : ILoggerService<T>
 {
     private readonly ILogger<T> _logger;
 
-    public VpLogger(ILogger<T> logger)
+    public LoggerService(ILogger<T> logger)
     {
         _logger = logger;
     }

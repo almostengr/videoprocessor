@@ -4,11 +4,11 @@ using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
-public sealed class FileSystemService : IFileSystemService
+public sealed class FileSystem : IFileSystem
 {
     private readonly Random _random;
 
-    public FileSystemService()
+    public FileSystem()
     {
         _random = new Random();
     }

@@ -4,11 +4,11 @@ namespace Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
 
 public sealed class HandymanSubtitleService : BaseSubtitleService, IHandymanSubtitleService
 {
-    private readonly IFileSystemService _fileSystemService;
+    private readonly IFileSystem _fileSystem;
 
-    public HandymanSubtitleService(IFileSystemService fileSystemService)
+    public HandymanSubtitleService(IFileSystem fileSystemService)
     {
-        _fileSystemService = fileSystemService;
+        _fileSystem = fileSystemService;
     }
 
     public override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -19,14 +19,14 @@ public sealed class HandymanSubtitleService : BaseSubtitleService, IHandymanSubt
             {
                 HandymanSubtitle subtitle = new();
 
-                subtitle.SetSubTitleFile(_fileSystemService.GetRandomSrtFileFromDirectory(subtitle.IncomingDirectory));
+                subtitle.SetSubTitleFile(_fileSystem.GetRandomSrtFileFromDirectory(subtitle.IncomingDirectory));
 
-                _fileSystemService.GetFileContents(subtitle.SubTitleInputFile);
+                _fileSystem.GetFileContents(subtitle.SubTitleInputFile);
 
                 subtitle.CleanSubtitle();
 
-                _fileSystemService.SaveFileContents(subtitle.SubtitleOutputFile, subtitle.SrtVideoText);
-                _fileSystemService.SaveFileContents(subtitle.BlogOutputFile, subtitle.BlogMarkdownText);
+                _fileSystem.SaveFileContents(subtitle.SubtitleOutputFile, subtitle.SrtVideoText);
+                _fileSystem.SaveFileContents(subtitle.BlogOutputFile, subtitle.BlogMarkdownText);
             }
         }
         catch (Exception ex)

@@ -6,18 +6,18 @@ namespace Almostengr.VideoProcessor.Domain.ToastmastersVideo;
 
 public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVideoService
 {
-    private readonly IFfmpegService _ffmpegSerivce;
-    private readonly IFileSystemService _fileSystemService;
-    private readonly ITarballService _tarballService;
-    private readonly IVpLogger<ToastmastersVideoService> _logger;
+    private readonly IFfmpeg _ffmpegSerivce;
+    private readonly IFileSystem _fileSystem;
+    private readonly ITarball _tarball;
+    private readonly ILoggerService<ToastmastersVideoService> _logger;
 
-    public ToastmastersVideoService(IFileSystemService fileSystemService, IFfmpegService ffmpegService, 
-        ITarballService tarballService, IVpLogger<ToastmastersVideoService> logger
+    public ToastmastersVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService, 
+        ITarball tarballService, ILoggerService<ToastmastersVideoService> logger
     ) : base(fileSystemService, ffmpegService)
     {
-        _fileSystemService = fileSystemService;
+        _fileSystem = fileSystemService;
         _ffmpegSerivce = ffmpegService;
-        _tarballService = tarballService;
+        _tarball = tarballService;
         _logger = logger;
     }
 
@@ -29,29 +29,31 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             {
                 ToastmastersVideo video = new();
 
-                _fileSystemService.IsDiskSpaceAvailable(video.BaseDirectory);
+                _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
-                video.SetTarballFilePath(_fileSystemService.GetRandomTarballFromDirectory(video.BaseDirectory));
+                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory));
 
-                _fileSystemService.DeleteDirectory(video.WorkingDirectory);
-                _fileSystemService.CreateDirectory(video.WorkingDirectory);
+                _fileSystem.DeleteDirectory(video.WorkingDirectory);
+                _fileSystem.CreateDirectory(video.WorkingDirectory);
 
-                await _tarballService.ExtractTarballContentsAsync(
+                await _tarball.ExtractTarballContentsAsync(
                     video.TarballFilePath, video.WorkingDirectory, stoppingToken);
 
                 CreateFfmpegInputFile(video);
 
                 string videoFilter = FfmpegVideoFilter(video);
 
-                await _ffmpegSerivce.FfmpegAsync(
-                    $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i {FFMPEG_INPUT_FILE} -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{video.OutputFilePath}\"", // string.Empty,
-                    video.WorkingDirectory,
-                    stoppingToken
-                );
+                // await _ffmpegSerivce.FfmpegAsync(
+                //     $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i {FFMPEG_INPUT_FILE} -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{video.OutputFilePath}\"", // string.Empty,
+                //     video.WorkingDirectory,
+                //     stoppingToken
+                // );
+                await _ffmpegSerivce.RenderVideoAsync(
+                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, video.WorkingDirectory, stoppingToken);
 
-                _fileSystemService.MoveFile(video.TarballFilePath, video.ArchiveDirectory);
+                _fileSystem.MoveFile(video.TarballFilePath, video.ArchiveDirectory);
 
-                _fileSystemService.DeleteDirectory(video.WorkingDirectory);
+                _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
         }
         catch (Exception ex)

@@ -4,7 +4,7 @@ using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
-public sealed class TarballService : ITarballService
+public sealed class Tarball : ITarball
 {
     private const string TarBinary = "/bin/tar";
 
