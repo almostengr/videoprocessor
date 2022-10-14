@@ -1,4 +1,6 @@
 using System.Text;
+using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Videos;
 
@@ -56,10 +58,19 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
         }
+        catch (NoTarballsPresentException)
+        {
+            _logger.LogInformation(ExceptionMessage.NoTarballsPresent);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
         }
+    }
+
+    internal override void CreateFfmpegInputFile<ChristmastLightVideo>(ChristmastLightVideo video)
+    {
+        base.RhtCreateFfmpegInputFile<ChristmastLightVideo>(video);
     }
 
     internal override string FfmpegVideoFilter<ToastmastersVideo>(ToastmastersVideo video)
@@ -76,8 +87,8 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         return videoFilter.ToString();
     }
 
-    internal override void CreateFfmpegInputFile<ToastmastersVideo>(ToastmastersVideo video)
-    {
-        base.CreateFfmpegInputFile(video);
-    }
+    // internal override void CreateFfmpegInputFile<ToastmastersVideo>(ToastmastersVideo video)
+    // {
+    //     base.CreateFfmpegInputFile(video);
+    // }
 }

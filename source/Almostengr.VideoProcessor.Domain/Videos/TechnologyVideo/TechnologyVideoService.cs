@@ -1,4 +1,6 @@
 using System.Text;
+using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 
@@ -65,6 +67,10 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
+        }
+        catch (NoTarballsPresentException)
+        {
+            _logger.LogInformation(ExceptionMessage.NoTarballsPresent);
         }
         catch (Exception ex)
         {

@@ -3,7 +3,7 @@ namespace Almostengr.VideoProcessor.Domain.Interfaces;
 public interface IFileSystem
 {
     bool IsDiskSpaceAvailable(string directory);
-    string? GetRandomTarballFromDirectory(string directory);
+    string GetRandomTarballFromDirectory(string directory);
     void DeleteDirectory(string directory);
     void CreateDirectory(string directory);
     void MoveFile(string sourceFilePath, string destinationDirectory, bool createDestinationDirectory = true);

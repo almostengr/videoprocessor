@@ -1,5 +1,6 @@
 using System.Text;
 using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 
@@ -75,43 +76,52 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
         }
+        catch (NoTarballsPresentException)
+        {
+            _logger.LogInformation(ExceptionMessage.NoTarballsPresent);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
         }
     }
 
-    private void CreateFfmpegInputFile(HandymanVideo video)
+    internal override void CreateFfmpegInputFile<ChristmastLightVideo>(ChristmastLightVideo video)
     {
-        _fileSystem.DeleteFile(video.FfmpegInputFilePath);
-
-        using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
-        {
-            var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-                // .Where(x => x.EndsWith(FileExtension.Mp4))
-                .Where(x => x.EndsWith(FileExtension.Ts))
-                .OrderBy(x => x)
-                .ToArray();
-
-            // const string rhtservicesintro = "rhtservicesintro.1920x1080.mp4";
-            const string rhtservicesintro = "rhtservicesintro.ts";
-            const string file = "file";
-            for (int i = 0; i < filesInDirectory.Length; i++)
-            {
-                if (filesInDirectory[i].Contains(rhtservicesintro))
-                {
-                    continue;
-                }
-
-                if (i == 1 && _fileSystem.DoesFileExist(video.NoIntroFilePath()) == false)
-                {
-                    writer.WriteLine($"{file} '{rhtservicesintro}'");
-                }
-
-                writer.WriteLine($"{file} '{Path.GetFileName(filesInDirectory[i])}'");
-            }
-        }
+        base.RhtCreateFfmpegInputFile<ChristmastLightVideo>(video);
     }
+
+    // private void CreateFfmpegInputFile(HandymanVideo video)
+    // {
+    //     _fileSystem.DeleteFile(video.FfmpegInputFilePath);
+
+    //     using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
+    //     {
+    //         var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+    //             // .Where(x => x.EndsWith(FileExtension.Mp4))
+    //             .Where(x => x.EndsWith(FileExtension.Ts))
+    //             .OrderBy(x => x)
+    //             .ToArray();
+
+    //         // const string rhtservicesintro = "rhtservicesintro.1920x1080.mp4";
+    //         const string rhtservicesintro = "rhtservicesintro.ts";
+    //         const string file = "file";
+    //         for (int i = 0; i < filesInDirectory.Length; i++)
+    //         {
+    //             if (filesInDirectory[i].Contains(rhtservicesintro))
+    //             {
+    //                 continue;
+    //             }
+
+    //             if (i == 1 && _fileSystem.DoesFileExist(video.NoIntroFilePath()) == false)
+    //             {
+    //                 writer.WriteLine($"{file} '{rhtservicesintro}'");
+    //             }
+
+    //             writer.WriteLine($"{file} '{Path.GetFileName(filesInDirectory[i])}'");
+    //         }
+    //     }
+    // }
 
     internal override string FfmpegVideoFilter<HandyTechVideo>(HandyTechVideo video)
     {

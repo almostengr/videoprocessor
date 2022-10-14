@@ -1,6 +1,7 @@
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
+using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
@@ -51,12 +52,18 @@ public sealed class FileSystem : IFileSystem
 
     public string GetRandomTarballFromDirectory(string directory)
     {
-        return GetFilesInDirectory(directory)
+        string tarballFilePath = GetFilesInDirectory(directory)
             .Where(f => f.Contains(FileExtension.Tar))
             .Where(f => f.StartsWith(".") == false)
             .OrderBy(f => _random.Next()).Take(1)
-            // .FirstOrDefault();
             .First();
+
+        if (string.IsNullOrWhiteSpace(tarballFilePath))
+        {
+            throw new NoTarballsPresentException();
+        }
+
+        return tarballFilePath;
     }
 
     public string GetRandomSrtFileFromDirectory(string directory)

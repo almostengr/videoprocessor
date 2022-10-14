@@ -2,8 +2,10 @@ using System.Text;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShow;
+using Almostengr.VideoProcessor.Domain.Common.Exceptions;
+using Almostengr.VideoProcessor.Domain.Common;
 
-namespace Almostengr.VideoProcessor.Domain.Videos.TechnologyVideo;
+namespace Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
 
 public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLightVideoService
 {
@@ -30,7 +32,7 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
         {
             while (true)
             {
-                TechnologyVideo video = new TechnologyVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ChristmasLightShow");
+                ChristmasLightVideo video = new ChristmasLightVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ChristmasLightShow");
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
@@ -67,6 +69,10 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
         }
+        catch (NoTarballsPresentException)
+        {
+            _logger.LogInformation(ExceptionMessage.NoTarballsPresent);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
@@ -102,11 +108,6 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
     //         }
     //     }
     // }
-
-    internal override void CreateFfmpegInputFile<ChristmastLightVideo>(ChristmastLightVideo video)
-    {
-        base.RhtCreateFfmpegInputFile<ChristmastLightVideo>(video);
-    }
 
     internal override string FfmpegVideoFilter<ChristmasLightVideoService>(ChristmasLightVideoService video)
     {
