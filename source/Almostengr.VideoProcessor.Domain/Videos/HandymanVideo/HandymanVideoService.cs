@@ -5,7 +5,7 @@ using Almostengr.VideoProcessor.Domain.Music.Services;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.HandymanVideo;
 
-public sealed class HandymanVideoService : RhtBaseVideoService, IHandymanVideoService
+public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoService
 {
     private readonly IFileSystem _fileSystem;
     private readonly IFfmpeg _ffmpeg;

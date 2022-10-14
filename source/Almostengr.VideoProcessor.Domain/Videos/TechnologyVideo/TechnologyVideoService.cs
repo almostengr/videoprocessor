@@ -4,7 +4,7 @@ using Almostengr.VideoProcessor.Domain.Music.Services;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.TechnologyVideo;
 
-public sealed class TechnologyVideoService : RhtBaseVideoService, ITechnologyVideoService
+public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoService
 {
     private readonly IFileSystem _fileSystem;
     private readonly IFfmpeg _ffmpeg;

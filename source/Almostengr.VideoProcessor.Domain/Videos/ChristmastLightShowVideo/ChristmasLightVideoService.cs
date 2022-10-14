@@ -1,6 +1,7 @@
 using System.Text;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
+using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShow;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.TechnologyVideo;
 
@@ -102,6 +103,11 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
     //     }
     // }
 
+    internal override void CreateFfmpegInputFile<ChristmastLightVideo>(ChristmastLightVideo video)
+    {
+        base.RhtCreateFfmpegInputFile<ChristmastLightVideo>(video);
+    }
+
     internal override string FfmpegVideoFilter<ChristmasLightVideoService>(ChristmasLightVideoService video)
     {
         StringBuilder videoFilter = new();
@@ -114,14 +120,14 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
         videoFilter.Append($"boxborderw=8:");
         videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
         
-        // todo add overlay for song title on first 5 seconds of video
-        videoFilter.Append($"drawtext=textfile:'{video.Title.Replace(Constants.ChristmasLightShow, string.Empty)}':");
+        videoFilter.Append($"drawtext=textfile:'{video.Title}':");
         videoFilter.Append($"fontcolor={video.TextColor()}:");
         videoFilter.Append($"fontsize={SMALL_FONT}:");
         videoFilter.Append($"{_lowerLeft}:");
         videoFilter.Append($"box=1:");
         videoFilter.Append($"boxborderw=10:");
-        videoFilter.Append($"boxcolor={video.BoxColor()}");
+        videoFilter.Append($"boxcolor={video.BoxColor()}:");
+        videoFilter.Append($":enable='between(t,0,5)'");
 
         return videoFilter.ToString();
     }

@@ -1,5 +1,3 @@
-using Almostengr.VideoProcessor.Domain.Common;
-
 namespace Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
 
 public sealed record ChristmasLightVIdeo : BaseVideo
