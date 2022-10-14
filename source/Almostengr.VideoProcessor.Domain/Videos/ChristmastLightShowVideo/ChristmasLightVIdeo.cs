@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
 
-public sealed record ChristmasLightVIdeo : BaseVideo
+public sealed record ChristmasLightVideo : BaseVideo
 {
     public readonly string xResolution = "1920";
     public readonly string yResolution = "1080";
@@ -10,7 +10,7 @@ public sealed record ChristmasLightVIdeo : BaseVideo
     // public readonly string SHOW_INTRO_FILENAME_MP4 = "rhtservicesintro.mp4";
     // public readonly string ShowIntroFilePath = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/rhtservicesintro.mp4";
 
-    public ChristmasLightVIdeo(string baseDirectory)
+    public ChristmasLightVideo(string baseDirectory)
     {
         BaseDirectory = baseDirectory;
     }
