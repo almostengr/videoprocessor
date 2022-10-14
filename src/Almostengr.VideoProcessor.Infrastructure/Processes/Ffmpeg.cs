@@ -83,8 +83,7 @@ public sealed class Ffmpeg : BaseProcess, IFfmpeg
     }
 
     public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
-        string videoFilePath, string outputFilePath, CancellationToken cancellationToken
-    )
+        string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory =
             Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
@@ -92,6 +91,19 @@ public sealed class Ffmpeg : BaseProcess, IFfmpeg
 
         return await FfmpegAsync(
             $"-i \"{Path.GetFileName(videoFilePath)}\" -c copy -bsf:v h264_mp4toannexb -f mpegts \"{outputFileName}\"",
+            workingDirectory,
+            cancellationToken
+        );
+    }
+
+    public async Task<(string stdout, string stdErr)> CreateThumbnailsFromVideoAsync(
+        string videoTitle, string outputVideoPath, string workingDirectory, CancellationToken cancellationToken)
+    {
+        const int sceneChangePct = 10;
+        const int extractNumberOfFrames = 30;
+
+        return await FfmpegAsync(
+            $"-i \"{outputVideoPath}\" -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {extractNumberOfFrames} -vsync vfr \"{videoTitle}-%03d.jpg\"",
             workingDirectory,
             cancellationToken
         );

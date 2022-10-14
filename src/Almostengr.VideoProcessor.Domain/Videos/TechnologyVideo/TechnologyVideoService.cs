@@ -1,11 +1,10 @@
 using System.Text;
-using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.TechnologyVideo;
 
-public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoService
+public sealed class TechnologyVideoService : RhtBaseVideoService, ITechnologyVideoService
 {
     private readonly IFileSystem _fileSystem;
     private readonly IFfmpeg _ffmpeg;
@@ -45,7 +44,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
                 _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory); // lowercase all file names
 
-                await AddAudioToTimelapseAsync(video, stoppingToken); // add audio to timelapse videos
+                await AddMusicToVideoAsync(video, stoppingToken); // add audio to timelapse videos
 
                 _fileSystem.CopyFile(video.RhtServicesIntroPath, video.WorkingDirectory);
 
@@ -73,163 +72,152 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
         }
     }
 
-    private void CreateFfmpegInputFile(TechnologyVideo video)
-    {
-        _fileSystem.DeleteFile(video.FfmpegInputFilePath);
+    // private void CreateFfmpegInputFile(TechnologyVideo video)
+    // {
+    //     _fileSystem.DeleteFile(video.FfmpegInputFilePath);
 
-        using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
-        {
-            var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-                .Where(x => x.EndsWith(FileExtension.Mp4))
-                .OrderBy(x => x)
-                .ToArray();
+    //     using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
+    //     {
+    //         var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+    //             .Where(x => x.EndsWith(FileExtension.Mp4))
+    //             .OrderBy(x => x)
+    //             .ToArray();
 
-            const string rhtservicesintro = "rhtservicesintro.1920x1080.mp4";
-            const string file = "file";
-            for (int i = 0; i < filesInDirectory.Length; i++)
-            {
-                if (filesInDirectory[i].Contains(rhtservicesintro))
-                {
-                    continue;
-                }
+    //         const string rhtservicesintro = "rhtservicesintro.1920x1080.mp4";
+    //         const string file = "file";
+    //         for (int i = 0; i < filesInDirectory.Length; i++)
+    //         {
+    //             if (filesInDirectory[i].Contains(rhtservicesintro))
+    //             {
+    //                 continue;
+    //             }
 
-                if (i == 1 && _fileSystem.DoesFileExist(video.NoIntroFilePath()) == false)
-                {
-                    writer.WriteLine($"{file} '{rhtservicesintro}'");
-                }
+    //             if (i == 1 && _fileSystem.DoesFileExist(video.NoIntroFilePath()) == false)
+    //             {
+    //                 writer.WriteLine($"{file} '{rhtservicesintro}'");
+    //             }
 
-                writer.WriteLine($"{file} '{Path.GetFileName(filesInDirectory[i])}'");
-            }
-        }
-    }
+    //             writer.WriteLine($"{file} '{Path.GetFileName(filesInDirectory[i])}'");
+    //         }
+    //     }
+    // }
 
-    internal override string FfmpegVideoFilter<HandyTechVideo>(HandyTechVideo handyTechVideo)
+    internal override string FfmpegVideoFilter<HandyTechVideo>(HandyTechVideo video)
     {
         StringBuilder videoFilter = new();
 
-        videoFilter.Append($"drawtext=textfile:'{handyTechVideo.ChannelBannerText()}':");
-        videoFilter.Append($"fontcolor={handyTechVideo.TextColor()}@{DIM_TEXT}:");
+        videoFilter.Append($"drawtext=textfile:'{video.ChannelBannerText()}':");
+        videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
         videoFilter.Append($"fontsize={SMALL_FONT}:");
         videoFilter.Append($"{_upperRight}:");
         videoFilter.Append($"box=1:");
-        videoFilter.Append($"boxborderw={RHT_BORDER_WIDTH.ToString()}:");
-        videoFilter.Append($"boxcolor={handyTechVideo.BoxColor()}@{DIM_BACKGROUND}");
+        videoFilter.Append($"boxborderw=8:");
+        videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
 
         return videoFilter.ToString();
     }
 
+    // private async Task AddMusicToVideoAsync(TechnologyVideo video, CancellationToken cancellationToken)
+    // {
+    //     const string narration = "narration";
+    //     const string narrative = "narrative";
+    //     const string audio = "audio";
 
-    private async Task AddAudioToTimelapseAsync(TechnologyVideo video, CancellationToken cancellationToken)
-    {
-        const string narration = "narration";
-        const string narrative = "narrative";
+    //     var videoFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+    //         .Where(x => !x.Contains(narration) || !x.Contains(narrative))
+    //         .Where(x => x.EndsWith(FileExtension.Mp4));
 
-        var videoFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-            .Where(x => !x.Contains(narration) || !x.Contains(narrative))
-            .Where(x => x.EndsWith(FileExtension.Mp4));
+    //     var narrationFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+    //         .Where(x => x.Contains(narration) || x.Contains(narrative))
+    //         .Where(x => x.EndsWith(FileExtension.Mp4) || x.EndsWith(FileExtension.Mkv))
+    //         .ToArray();
 
-        var narrationFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-            .Where(x => x.Contains(narration) || x.Contains(narrative))
-            .Where(x => x.EndsWith(FileExtension.Mp4) || x.EndsWith(FileExtension.Mkv))
-            .ToArray();
+    //     foreach (var videoFilePath in videoFiles)
+    //     {
+    //         // var result = await RunCommandAsync(
+    //         //     ProgramPaths.Ffprobe,
+    //         //     $"-hide_banner \"{videoFileName}\"",
+    //         //     workingDirectory,
+    //         //     cancellationToken,
+    //         //     1
+    //         // );
 
-        foreach (var videoFilePath in videoFiles)
-        {
-            // var result = await RunCommandAsync(
-            //     ProgramPaths.Ffprobe,
-            //     $"-hide_banner \"{videoFileName}\"",
-            //     workingDirectory,
-            //     cancellationToken,
-            //     1
-            // );
+    //         var result = await _ffmpeg.FfprobeAsync(videoFilePath, video.WorkingDirectory, cancellationToken);
 
-            var result = await _ffmpeg.FfprobeAsync(
-                $"-hide_banner \"{videoFilePath}\"",
-                video.WorkingDirectory,
-                cancellationToken
-            );
+    //         if (result.stdErr.ToLower().Contains(audio))
+    //         {
+    //             continue;
+    //         }
 
-            if (result.stdErr.ToLower().Contains("audio"))
-            {
-                continue;
-            }
+    //         string audioFilePath = narrationFiles.Where(
+    //                 x => x.Contains(Path.GetFileNameWithoutExtension(videoFilePath))
+    //             )
+    //             .Single();
 
-            string? audioFilePath = narrationFiles.Where(
-                    x => x.Contains(Path.GetFileNameWithoutExtension(videoFilePath))
-                )
-                .SingleOrDefault();
+    //         string outputFileName = $"{Path.GetFileNameWithoutExtension(videoFilePath)}.tmp{FileExtension.Mp4}"
+    //             .Replace(narration, string.Empty)
+    //             .Replace(narrative, string.Empty);
 
-            if (string.IsNullOrEmpty(audioFilePath))
-            {
-                audioFilePath = _musicService.GetRandomNonMixTrack();
-            }
+    //         // await RunCommandAsync(
+    //         //     ProgramPaths.Ffmpeg,
+    //         //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -i \"{audioFile}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
+    //         //     workingDirectory,
+    //         //     cancellationToken,
+    //         //     10);
 
-            string outputFileName = $"{Path.GetFileNameWithoutExtension(videoFilePath)}.tmp{FileExtension.Mp4}";
+    //         // await _ffmpeg.FfmpegAsync(
+    //         //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFilePath)}\" -i \"{audioFilePath}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
+    //         //     video.WorkingDirectory,
+    //         //     cancellationToken
+    //         // );
+    //         await _ffmpeg.AddAudioToVideoAsync(
+    //             videoFilePath, audioFilePath, video.OutputFilePath, cancellationToken);
 
-            outputFileName = outputFileName.Replace(narration, string.Empty)
-                .Replace(narrative, string.Empty);
+    //         _fileSystem.DeleteFile(videoFilePath);
+    //         _fileSystem.MoveFile(Path.Combine(video.WorkingDirectory, outputFileName), videoFilePath);
+    //     }
 
-            // await RunCommandAsync(
-            //     ProgramPaths.Ffmpeg,
-            //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -i \"{audioFile}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
-            //     workingDirectory,
-            //     cancellationToken,
-            //     10);
+    //     _fileSystem.DeleteFiles(narrationFiles);
+    // }
 
-            // await _ffmpeg.FfmpegAsync(
-            //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFilePath)}\" -i \"{audioFilePath}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
-            //     video.WorkingDirectory,
-            //     cancellationToken
-            // );
-            await _ffmpeg.AddAudioToVideoAsync(
-                videoFilePath, audioFilePath, video.OutputFilePath, cancellationToken);
+    // private async Task ConvertVideoFilesToCommonFormatAsync(TechnologyVideo video, CancellationToken cancellationToken)
+    // {
+    //     var videoFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+    //         .Where(x => x.EndsWith(FileExtension.Mkv) || x.EndsWith(FileExtension.Mp4))
+    //         .OrderBy(x => x)
+    //         .ToArray();
 
-            _fileSystem.DeleteFile(videoFilePath);
-            _fileSystem.MoveFile(Path.Combine(video.WorkingDirectory, outputFileName), videoFilePath);
-        }
+    //     foreach (var videoFileName in videoFiles)
+    //     {
+    //         //     var result = await _ffmpeg.FfprobeAsync(videoFileName, video.WorkingDirectory, cancellationToken);
 
-        _fileSystem.DeleteFiles(narrationFiles);
-    }
+    //         //     string scaledFile = 
+    //         //         $"{Path.GetFileNameWithoutExtension(videoFileName)}.{video.xResolution}x{video.yResolution}{FileExtension.Mp4}";
 
+    //         //     if (result.stdErr.Contains($"{video.xResolution}x{video.yResolution}") &&
+    //         //         result.stdErr.Contains($"{video.audioBitRate} Hz") &&
+    //         //         result.stdErr.Contains($"196 kb/s") &&
+    //         //         videoFileName.EndsWith(FileExtension.Mp4))
+    //         //     {
+    //         //         _fileSystem.MoveFile(
+    //         //             Path.Combine(video.WorkingDirectory, videoFileName),
+    //         //             Path.Combine(video.WorkingDirectory, scaledFile),
+    //         //             false);
+    //         //         continue;
+    //         //     }
 
-    private async Task ConvertVideoFilesToCommonFormatAsync(TechnologyVideo video, CancellationToken cancellationToken)
-    {
-        var videoFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-            .Where(x => x.EndsWith(FileExtension.Mkv) || x.EndsWith(FileExtension.Mov) || x.EndsWith(FileExtension.Mp4))
-            .OrderBy(x => x)
-            .ToArray();
+    //         // await _ffmpeg.FfmpegAsync(
+    //         //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -r 30 -vf \"scale_vaapi=w={handyTechVideo.xResolution}:h={handyTechVideo.yResolution}\" -vcodec h264_vaapi -ar {handyTechVideo.audioSampleRate} -b:a {handyTechVideo.audioBitRate} \"{scaledFile}\"",
+    //         //     handyTechVideo.WorkingDirectory,
+    //         //     cancellationToken);
 
-        foreach (var videoFileName in videoFiles)
-        {
-            var result = await _ffmpeg.FfprobeAsync(videoFileName, video.WorkingDirectory, cancellationToken);
+    //         await _ffmpeg.ConvertVideoFileToTsFormatAsync(
+    //             videoFileName, video.OutputFilePath, cancellationToken);
 
-            string scaledFile = 
-                $"{Path.GetFileNameWithoutExtension(videoFileName)}.{video.xResolution}x{video.yResolution}{FileExtension.Mp4}";
+    //         // _fileSystem.DeleteFile(Path.Combine(video.WorkingDirectory, videoFileName));
 
-            if (result.stdErr.Contains($"{video.xResolution}x{video.yResolution}") &&
-                result.stdErr.Contains($"{video.audioBitRate} Hz") &&
-                result.stdErr.Contains($"196 kb/s") &&
-                videoFileName.EndsWith(FileExtension.Mp4))
-            {
-                _fileSystem.MoveFile(
-                    Path.Combine(video.WorkingDirectory, videoFileName),
-                    Path.Combine(video.WorkingDirectory, scaledFile),
-                    false);
-                continue;
-            }
-
-            // await _ffmpeg.FfmpegAsync(
-            //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -r 30 -vf \"scale_vaapi=w={handyTechVideo.xResolution}:h={handyTechVideo.yResolution}\" -vcodec h264_vaapi -ar {handyTechVideo.audioSampleRate} -b:a {handyTechVideo.audioBitRate} \"{scaledFile}\"",
-            //     handyTechVideo.WorkingDirectory,
-            //     cancellationToken);
-
-            await _ffmpeg.ConvertVideoFileToTsFormatAsync(
-                videoFileName, video.OutputFilePath, cancellationToken);
-
-            _fileSystem.DeleteFile(Path.Combine(video.WorkingDirectory, videoFileName));
-
-            string outputFileName = Path.GetFileNameWithoutExtension(videoFileName) + FileExtension.Mp4;
-        }
-    }
+    //         // string outputFileName = Path.GetFileNameWithoutExtension(videoFileName) + FileExtension.Mp4;
+    //     }
+    // }
 
 }
