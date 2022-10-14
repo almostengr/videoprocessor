@@ -11,9 +11,9 @@ public sealed record TechnologyVideo : BaseVideo
     // public readonly string SHOW_INTRO_FILENAME_MP4 = "rhtservicesintro.mp4";
     public readonly string ShowIntroFilePath = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/rhtservicesintro.mp4";
     
-    public TechnologyVideo()
+    public TechnologyVideo(string baseDirectory)
     {
-        BaseDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/RhtTechnology";
+        BaseDirectory = baseDirectory;
     }
 
     public override string ChannelBannerText()

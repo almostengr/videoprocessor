@@ -13,10 +13,10 @@ public abstract class BaseVideoService : IBaseVideoService
     // protected const string SUBTITLES_FILE = "subtitles.ass";
 
     // ffmpeg options
-    protected const string LOG_ERRORS = "-loglevel error";
+    // protected const string LOG_ERRORS = "-loglevel error";
     // protected const string LOG_WARNINGS = "-loglevel warning";
-    protected const string HW_OPTIONS = "-hide_banner -y -hwaccel vaapi -hwaccel_output_format vaapi";
-    protected const string HW_VCODEC = "-vcodec h264_vaapi -b:v 5M";
+    // protected const string HW_OPTIONS = "-hide_banner -y -hwaccel vaapi -hwaccel_output_format vaapi";
+    // protected const string HW_VCODEC = "-vcodec h264_vaapi -b:v 5M";
 
     // ffmpeg filter attributes
     protected const int DASHCAM_BORDER_WIDTH = 10;
@@ -88,8 +88,7 @@ public abstract class BaseVideoService : IBaseVideoService
             //     cancellationToken
             // );
 
-            await _ffmpeg.ImagesToVideoAsync(
-                image, outputFile, directory, cancellationToken);
+            await _ffmpeg.ImagesToVideoAsync(image, outputFile, cancellationToken);
         }
     }
 }

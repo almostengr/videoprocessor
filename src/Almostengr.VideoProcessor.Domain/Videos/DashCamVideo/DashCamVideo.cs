@@ -4,9 +4,9 @@ public sealed record DashCamVideo : BaseVideo
 {
     private readonly string Night = "night";
 
-    public DashCamVideo()
+    public DashCamVideo(string baseDirectory)
     {
-        BaseDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/Kenny Ram Dash Cam";
+        BaseDirectory = baseDirectory;
     }
 
     public override string BoxColor()

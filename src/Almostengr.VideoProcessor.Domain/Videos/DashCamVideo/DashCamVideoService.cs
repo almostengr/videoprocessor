@@ -27,9 +27,11 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     {
         try
         {
+            // todo clean upload directory before starting 
+            
             while (true)
             {
-                DashCamVideo video = new DashCamVideo();
+                DashCamVideo video = new DashCamVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/Kenny Ram Dash Cam");
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
@@ -51,7 +53,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 // );
 
                 await _ffmpeg.RenderVideoAsync(
-                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, video.WorkingDirectory, stoppingToken);
+                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
                 _fileSystem.MoveFile(video.TarballFilePath, video.ArchiveDirectory);
 

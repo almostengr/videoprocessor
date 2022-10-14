@@ -11,7 +11,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
     private readonly ITarball _tarball;
     private readonly ILoggerService<ToastmastersVideoService> _logger;
 
-    public ToastmastersVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService, 
+    public ToastmastersVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarballService, ILoggerService<ToastmastersVideoService> logger
     ) : base(fileSystemService, ffmpegService)
     {
@@ -27,7 +27,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         {
             while (true)
             {
-                ToastmastersVideo video = new();
+                ToastmastersVideo video = new("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/Toastmasters");
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
@@ -49,7 +49,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 //     stoppingToken
                 // );
                 await _ffmpegSerivce.RenderVideoAsync(
-                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, video.WorkingDirectory, stoppingToken);
+                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
                 _fileSystem.MoveFile(video.TarballFilePath, video.ArchiveDirectory);
 

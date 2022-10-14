@@ -30,7 +30,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         {
             while (true)
             {
-                HandymanVideo video = new HandymanVideo();
+                HandymanVideo video = new HandymanVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/RhtHandyman");
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
@@ -61,7 +61,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 //     video.WorkingDirectory,
                 //     stoppingToken);
                 await _ffmpeg.RenderVideoAsync(
-                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, video.WorkingDirectory, stoppingToken);
+                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
                 _fileSystem.MoveFile(video.TarballFilePath, video.ArchiveDirectory);
 
@@ -164,9 +164,8 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 audioFilePath = _musicService.GetRandomNonMixTrack();
             }
 
-            string outputFileName = $"{Path.GetFileNameWithoutExtension(videoFilePath)}.tmp{FileExtension.Mp4}";
-
-            outputFileName = outputFileName.Replace(narration, string.Empty)
+            string outputFileName = $"{Path.GetFileNameWithoutExtension(videoFilePath)}.tmp{FileExtension.Mp4}"
+                .Replace(narration, string.Empty)
                 .Replace(narrative, string.Empty);
 
             // await RunCommandAsync(
@@ -176,11 +175,14 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             //     cancellationToken,
             //     10);
 
-            await _ffmpeg.FfmpegAsync(
-                $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFilePath)}\" -i \"{audioFilePath}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
-                video.WorkingDirectory,
-                cancellationToken
-            );
+            // await _ffmpeg.FfmpegAsync(
+            //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFilePath)}\" -i \"{audioFilePath}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
+            //     video.WorkingDirectory,
+            //     cancellationToken
+            // );
+
+            await _ffmpeg.AddAudioToVideoAsync(
+                videoFilePath, audioFilePath, outputFileName, cancellationToken);
 
             _fileSystem.DeleteFile(videoFilePath);
             _fileSystem.MoveFile(Path.Combine(video.WorkingDirectory, outputFileName), videoFilePath);
@@ -190,37 +192,40 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     }
 
 
-    private async Task ConvertVideoFilesToCommonFormatAsync(HandymanVideo handyTechVideo, CancellationToken cancellationToken)
+    private async Task ConvertVideoFilesToCommonFormatAsync(HandymanVideo video, CancellationToken cancellationToken)
     {
-        var videoFiles = _fileSystem.GetFilesInDirectory(handyTechVideo.WorkingDirectory)
+        var videoFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
             .Where(x => x.EndsWith(FileExtension.Mkv) || x.EndsWith(FileExtension.Mov) || x.EndsWith(FileExtension.Mp4))
             .OrderBy(x => x)
             .ToArray();
 
         foreach (var videoFileName in videoFiles)
         {
-            var result = await _ffmpeg.FfprobeAsync(videoFileName, handyTechVideo.WorkingDirectory, cancellationToken);
+            var result = await _ffmpeg.FfprobeAsync(videoFileName, video.WorkingDirectory, cancellationToken);
 
-            string scaledFile = $"{Path.GetFileNameWithoutExtension(videoFileName)}.{handyTechVideo.xResolution}x{handyTechVideo.yResolution}{FileExtension.Mp4}";
+            string scaledFile = $"{Path.GetFileNameWithoutExtension(videoFileName)}.{video.xResolution}x{video.yResolution}{FileExtension.Mp4}";
 
-            if (result.stdErr.Contains($"{handyTechVideo.xResolution}x{handyTechVideo.yResolution}") &&
-                result.stdErr.Contains($"{handyTechVideo.audioBitRate} Hz") &&
+            if (result.stdErr.Contains($"{video.xResolution}x{video.yResolution}") &&
+                result.stdErr.Contains($"{video.audioBitRate} Hz") &&
                 result.stdErr.Contains($"196 kb/s") &&
                 videoFileName.EndsWith(FileExtension.Mp4))
             {
                 _fileSystem.MoveFile(
-                    Path.Combine(handyTechVideo.WorkingDirectory, videoFileName),
-                    Path.Combine(handyTechVideo.WorkingDirectory, scaledFile),
+                    Path.Combine(video.WorkingDirectory, videoFileName),
+                    Path.Combine(video.WorkingDirectory, scaledFile),
                     false);
                 continue;
             }
 
-            await _ffmpeg.FfmpegAsync(
-                $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -r 30 -vf \"scale_vaapi=w={handyTechVideo.xResolution}:h={handyTechVideo.yResolution}\" -vcodec h264_vaapi -ar {handyTechVideo.audioSampleRate} -b:a {handyTechVideo.audioBitRate} \"{scaledFile}\"",
-                handyTechVideo.WorkingDirectory,
-                cancellationToken);
+            // await _ffmpeg.FfmpegAsync(
+            //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -r 30 -vf \"scale_vaapi=w={video.xResolution}:h={video.yResolution}\" -vcodec h264_vaapi -ar {video.audioSampleRate} -b:a {video.audioBitRate} \"{scaledFile}\"",
+            //     video.WorkingDirectory,
+            //     cancellationToken);
 
-            _fileSystem.DeleteFile(Path.Combine(handyTechVideo.WorkingDirectory, videoFileName));
+            await _ffmpeg.ConvertVideoFileToTsFormatAsync(
+                videoFileName, video.OutputFilePath, cancellationToken);
+
+            _fileSystem.DeleteFile(Path.Combine(video.WorkingDirectory, videoFileName));
 
             string outputFileName = Path.GetFileNameWithoutExtension(videoFileName) + FileExtension.Mp4;
         }

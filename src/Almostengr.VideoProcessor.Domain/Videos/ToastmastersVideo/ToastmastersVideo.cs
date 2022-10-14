@@ -4,9 +4,9 @@ namespace Almostengr.VideoProcessor.Domain.ToastmastersVideo;
 
 public sealed record ToastmastersVideo : BaseVideo
 {
-    public ToastmastersVideo()
+    public ToastmastersVideo(string baseDirectory)
     {
-        BaseDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/Toastmasters";
+        BaseDirectory = baseDirectory;
     }
 
     public override string BoxColor()
