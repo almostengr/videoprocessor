@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8214F653-A412-4D29-924B-C39586593DDF}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "source", "source", "{8214F653-A412-4D29-924B-C39586593DDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Domain", "src\Almostengr.VideoProcessor.Domain\Almostengr.VideoProcessor.Domain.csproj", "{28648209-C031-433C-A186-A1254AD6FCA6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Domain", "source\Almostengr.VideoProcessor.Domain\Almostengr.VideoProcessor.Domain.csproj", "{28648209-C031-433C-A186-A1254AD6FCA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Infrastructure", "src\Almostengr.VideoProcessor.Infrastructure\Almostengr.VideoProcessor.Infrastructure.csproj", "{026F5403-4B5F-409D-942A-91B052AD3B97}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Infrastructure", "source\Almostengr.VideoProcessor.Infrastructure\Almostengr.VideoProcessor.Infrastructure.csproj", "{026F5403-4B5F-409D-942A-91B052AD3B97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Worker", "src\Almostengr.VideoProcessor.Worker\Almostengr.VideoProcessor.Worker.csproj", "{A27F24E7-A9FB-4CCA-B97F-58E94F64A46C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Worker", "source\Almostengr.VideoProcessor.Worker\Almostengr.VideoProcessor.Worker.csproj", "{A27F24E7-A9FB-4CCA-B97F-58E94F64A46C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
