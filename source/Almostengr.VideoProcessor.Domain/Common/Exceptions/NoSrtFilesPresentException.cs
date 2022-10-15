@@ -9,11 +9,11 @@ public class NoSrtFilesPresentException : VideoProcessorException
     {
     }
 
-    public NoSrtFilesPresentException(string? message) : base(message)
+    public NoSrtFilesPresentException(string message) : base(message)
     {
     }
 
-    public NoSrtFilesPresentException(string? message, Exception? innerException) : base(message, innerException)
+    public NoSrtFilesPresentException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 
