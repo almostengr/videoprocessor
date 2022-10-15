@@ -68,12 +68,18 @@ public sealed class FileSystem : IFileSystem
 
     public string GetRandomSrtFileFromDirectory(string directory)
     {
-        return GetFilesInDirectory(directory)
+        var srtFilePath = GetFilesInDirectory(directory)
             .Where(f => f.EndsWith(FileExtension.Srt))
             .Where(f => f.StartsWith(".") == false)
             .OrderBy(f => _random.Next()).Take(1)
-            // .FirstOrDefault();
             .First();
+
+        if (string.IsNullOrWhiteSpace(srtFilePath))
+        {
+            throw new NoSrtFilesPresentException();   
+        }
+
+        return srtFilePath;
     }
 
     public bool IsDiskSpaceAvailable(string directory)
