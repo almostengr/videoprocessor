@@ -21,7 +21,7 @@ public sealed class HandymanSubtitleService : BaseSubtitleService, IHandymanSubt
         {
             while (true)
             {
-                HandymanSubtitle subtitle = new();
+                HandymanSubtitle subtitle = new(Constants.HandymanBaseDirectory);
 
                 subtitle.SetSubTitleFile(_fileSystem.GetRandomSrtFileFromDirectory(subtitle.IncomingDirectory));
 

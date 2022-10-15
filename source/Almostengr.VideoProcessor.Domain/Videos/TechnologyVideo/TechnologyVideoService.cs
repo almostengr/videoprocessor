@@ -15,8 +15,9 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
     private readonly ILoggerService<TechnologyVideoService> _logger;
 
     public TechnologyVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
-        ITarball tarballService, IMusicService musicService, ILoggerService<TechnologyVideoService> logger
-        ) : base(fileSystemService, ffmpegService)
+        ITarball tarballService, IMusicService musicService,
+        ILoggerService<TechnologyVideoService> logger, ITarball tarball
+        ) : base(fileSystemService, ffmpegService, tarball)
     {
         _fileSystem = fileSystemService;
         _ffmpeg = ffmpegService;
@@ -25,17 +26,21 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
         _logger = logger;
     }
 
-    public override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public override async Task ProcessVideosAsync(CancellationToken stoppingToken)
     {
         try
         {
             while (true)
             {
-                TechnologyVideo video = new TechnologyVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/RhtTechnology");
+                TechnologyVideo video = new TechnologyVideo(Constants.TechnologyBaseDirectory);
+                
+                CreateVideoDirectories(video);
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
-                string? tarBallFilePath = _fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory);
+                await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
+
+                string tarBallFilePath = _fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory);
 
                 video.SetTarballFilePath(tarBallFilePath);
 
@@ -46,7 +51,9 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
                 _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory); // lowercase all file names
 
-                await AddMusicToVideoAsync(video, stoppingToken); // add audio to timelapse videos
+                // await AddMusicToVideoAsync(video, stoppingToken); // add audio to timelapse videos
+
+                await _ffmpeg.CreateThumbnailsFromVideoFilesAsync(video, stoppingToken);
 
                 _fileSystem.CopyFile(video.RhtServicesIntroPath, video.WorkingDirectory);
 
@@ -54,7 +61,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
                 CreateFfmpegInputFile(video);
 
-                string videoFilter = FfmpegVideoFilter(video);
+                string videoFilter = DrawTextVideoFilter(video);
 
                 // await _ffmpeg.FfmpegAsync(
                 //     $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{FFMPEG_INPUT_FILE}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -c:v h264_vaapi -bsf:a aac_adtstoasc \"{video.OutputFilePath}\"", //string.Empty,
@@ -76,6 +83,11 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
         {
             _logger.LogError(ex, ex.Message);
         }
+    }
+
+    internal override void CreateFfmpegInputFile<TechnologyVideo>(TechnologyVideo video)
+    {
+        base.RhtCreateFfmpegInputFile<TechnologyVideo>(video);
     }
 
     // private void CreateFfmpegInputFile(TechnologyVideo video)
@@ -108,20 +120,20 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
     //     }
     // }
 
-    internal override string FfmpegVideoFilter<HandyTechVideo>(HandyTechVideo video)
-    {
-        StringBuilder videoFilter = new();
+    // internal override string ChannelBrandingVideoFilter<HandyTechVideo>(HandyTechVideo video)
+    // {
+    //     StringBuilder videoFilter = new();
 
-        videoFilter.Append($"drawtext=textfile:'{video.ChannelBannerText()}':");
-        videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
-        videoFilter.Append($"fontsize={SMALL_FONT}:");
-        videoFilter.Append($"{_upperRight}:");
-        videoFilter.Append($"box=1:");
-        videoFilter.Append($"boxborderw=8:");
-        videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
+    //     videoFilter.Append($"drawtext=textfile:'{video.ChannelBannerText()}':");
+    //     videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
+    //     videoFilter.Append($"fontsize={SMALL_FONT}:");
+    //     videoFilter.Append($"{_upperRight}:");
+    //     videoFilter.Append($"box=1:");
+    //     videoFilter.Append($"boxborderw=8:");
+    //     videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
 
-        return videoFilter.ToString();
-    }
+    //     return videoFilter.ToString();
+    // }
 
     // private async Task AddMusicToVideoAsync(TechnologyVideo video, CancellationToken cancellationToken)
     // {

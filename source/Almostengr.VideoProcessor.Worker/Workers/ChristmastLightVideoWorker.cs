@@ -1,12 +1,12 @@
-using Almostengr.VideoProcessor.Domain.ToastmastersVideo;
+using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
 
 namespace Almostengr.VideoProcessor.Worker.Workers;
 
-internal sealed class ToastmastersVideoWorker : BaseWorker
+internal sealed class ChristmasLightVideoWorker : BaseWorker
 {
-    private readonly IToastmastersVideoService _videoService;
+    private readonly IChristmasLightVideoService _videoService;
 
-    public ToastmastersVideoWorker(IToastmastersVideoService videoService)
+    public ChristmasLightVideoWorker(IChristmasLightVideoService videoService)
     {
         _videoService = videoService;
     }

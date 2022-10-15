@@ -1,3 +1,4 @@
+using System.Text;
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Videos.Exceptions;
 
@@ -14,10 +15,10 @@ public abstract record BaseVideo : BaseEntity
             throw new VideoInvalidBaseDirectoryException($"{nameof(BaseDirectory)} is invalid");
         }
 
-        IncomingDirectory = Path.Combine(BaseDirectory, "incoming");
-        UploadDirectory = Path.Combine(BaseDirectory, "upload");
-        WorkingDirectory = Path.Combine(BaseDirectory, "working");
-        ArchiveDirectory = Path.Combine(BaseDirectory, "archive");
+        IncomingDirectory = Path.Combine(BaseDirectory, DirectoryNames.Incoming);
+        UploadDirectory = Path.Combine(BaseDirectory, DirectoryNames.Upload);
+        WorkingDirectory = Path.Combine(BaseDirectory, DirectoryNames.Working);
+        ArchiveDirectory = Path.Combine(BaseDirectory, DirectoryNames.Archive);
         FfmpegInputFilePath = Path.Combine(WorkingDirectory, "ffmpeginput.txt");
 
         TarballFileName = string.Empty;
@@ -89,4 +90,5 @@ public abstract record BaseVideo : BaseEntity
 
         return bannerText.ElementAt(random.Next(0, bannerText.Length));
     }
+
 }

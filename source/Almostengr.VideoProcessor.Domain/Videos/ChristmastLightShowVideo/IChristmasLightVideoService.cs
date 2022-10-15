@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShow;
+namespace Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
 
 public interface IChristmasLightVideoService : IBaseVideoService
 {}

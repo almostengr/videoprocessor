@@ -1,3 +1,5 @@
+using Almostengr.VideoProcessor.Domain.Videos;
+
 namespace Almostengr.VideoProcessor.Domain.Interfaces;
 
 public interface IFfmpeg
@@ -8,5 +10,6 @@ public interface IFfmpeg
     Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(string videoFilePath, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> AddAudioToVideoAsync(string videoFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> ImagesToVideoAsync(string imageFilePath, string outputFilePath, CancellationToken cancellationToken);
-    Task<(string stdout, string stdErr)> CreateThumbnailsFromVideoAsync(string videoTitle, string outputVideoPath, string workingDirectory, CancellationToken cancellationToken);
+    // Task<(string stdout, string stdErr)> CreateThumbnailsFromVideoAsync(string videoTitle, string outputVideoPath, string workingDirectory, CancellationToken cancellationToken);
+    Task<(string stdout, string stdErr)> CreateThumbnailsFromVideoFilesAsync<T>(T video, CancellationToken cancellationToken) where T : BaseVideo;
 }

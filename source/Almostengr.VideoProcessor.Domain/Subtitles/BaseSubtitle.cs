@@ -4,17 +4,17 @@ using Almostengr.VideoProcessor.Domain.Subtitles.Exceptions;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles;
 
-internal abstract record BaseSrtSubtitle : BaseEntity
+internal abstract record BaseSubtitle : BaseEntity
 {
-    internal BaseSrtSubtitle()
+    internal BaseSubtitle()
     {
-        if (string.IsNullOrEmpty(BaseDirectory))
+        if (string.IsNullOrWhiteSpace(BaseDirectory))
         {
             throw new SrtSubtitleBaseDirectoryIsNullOrEmptyException();
         }
 
-        UploadDirectory = Path.Combine(BaseDirectory, "upload");
-        IncomingDirectory = Path.Combine(BaseDirectory, "incoming");
+        UploadDirectory = Path.Combine(BaseDirectory, DirectoryNames.Upload);
+        IncomingDirectory = Path.Combine(BaseDirectory, DirectoryNames.Incoming);
         SrtOriginalText = string.Empty;
         BlogMarkdownText = string.Empty;
         SrtVideoText = string.Empty;

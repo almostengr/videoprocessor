@@ -11,8 +11,12 @@ internal sealed class HandymanVideoWorker : BaseWorker
         _videoService = videoService;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        throw new NotImplementedException();
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await _videoService.ProcessVideosAsync(stoppingToken);
+            await Task.Delay(WaitDelay, stoppingToken);
+        }
     }
 }

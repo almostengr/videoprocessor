@@ -1,5 +1,6 @@
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Interfaces;
+using Almostengr.VideoProcessor.Domain.Videos;
 using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes;
@@ -96,16 +97,31 @@ public sealed class Ffmpeg : BaseProcess, IFfmpeg
         );
     }
 
-    public async Task<(string stdout, string stdErr)> CreateThumbnailsFromVideoAsync(
-        string videoTitle, string outputVideoPath, string workingDirectory, CancellationToken cancellationToken)
+    public async Task<(string stdout, string stdErr)> CreateThumbnailsFromVideoFilesAsync<T>(
+        T video, CancellationToken cancellationToken) where T : BaseVideo
+        // string videoTitle, string outputVideoPath, string workingDirectory, CancellationToken cancellationToken)
     {
         const int sceneChangePct = 10;
-        const int extractNumberOfFrames = 30;
+        const int extractNumberOfFrames = 5;
 
-        return await FfmpegAsync(
-            $"-i \"{outputVideoPath}\" -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {extractNumberOfFrames} -vsync vfr \"{videoTitle}-%03d.jpg\"",
-            workingDirectory,
-            cancellationToken
-        );
+        // foreach (var videoFile in _fileSystem.GetFilesInDirectory(video.WorkingDirectory))
+        var videoFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory);
+
+        for(int i = 0; i < videoFiles.Count(); i++)
+        {
+            await FfmpegAsync(
+               $"-i \"{videoFiles.ElementAt(i)}\" -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {extractNumberOfFrames} -vsync vfr \"{video.Title}.{i}.%03d.jpg\"",
+               video.WorkingDirectory,
+               cancellationToken
+           );
+        }
+
+        // return await FfmpegAsync(
+        //     $"-i \"{outputVideoPath}\" -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {extractNumberOfFrames} -vsync vfr \"{videoTitle}-%03d.jpg\"",
+        //     workingDirectory,
+        //     cancellationToken
+        // );
+
+        return (string.Empty, string.Empty);
     }
 }

@@ -8,6 +8,7 @@ using Almostengr.VideoProcessor.Domain.Videos.DashCamVideo;
 using Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
 using Almostengr.VideoProcessor.Domain.Videos.HandymanVideo;
 using Almostengr.VideoProcessor.Domain.ToastmastersVideo;
+using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
 
 // string environment = string.Empty;
 
@@ -30,6 +31,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         // AppSettings appSettings = configuration.GetSection(nameof(AppSettings)).Get<AppSettings>();
         // services.AddSingleton(appSettings);
 
+        services.AddSingleton<IChristmasLightVideoService, ChristmasLightVideoService>();
         services.AddSingleton<IDashCamVideoService, DashCamVideoService>();
         services.AddSingleton<IFfmpeg, Ffmpeg>();
         services.AddSingleton<IFileSystem, FileSystem>();
@@ -40,6 +42,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IToastmastersVideoService, ToastmastersVideoService>();
         services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
 
+        services.AddHostedService<ChristmasLightVideoWorker>();
         services.AddHostedService<DashCamVideoWorker>();
         services.AddHostedService<HandymanSubtitleWorker>();
         services.AddHostedService<HandymanVideoWorker>();

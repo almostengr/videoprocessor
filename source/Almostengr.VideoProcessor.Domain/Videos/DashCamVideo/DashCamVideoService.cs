@@ -1,6 +1,8 @@
 using System.Text;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
+using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.DashCamVideo;
 
@@ -13,27 +15,31 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     private readonly ILoggerService<DashCamVideoService> _logger;
 
     public DashCamVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
-        ITarball tarballService, IMusicService musicService, ILoggerService<DashCamVideoService> logger
-    ) : base(fileSystemService, ffmpegService)
+        ITarball tarball, IMusicService musicService, ILoggerService<DashCamVideoService> logger
+    ) : base(fileSystemService, ffmpegService, tarball)
     {
         _fileSystem = fileSystemService;
         _ffmpeg = ffmpegService;
-        _tarball = tarballService;
+        _tarball = tarball;
         _musicService = musicService;
         _logger = logger;
     }
 
-    public override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public override async Task ProcessVideosAsync(CancellationToken stoppingToken)
     {
         try
         {
             // todo clean upload directory before starting 
-            
+
             while (true)
             {
                 DashCamVideo video = new DashCamVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/Kenny Ram Dash Cam");
 
+                CreateVideoDirectories(video);
+
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
+
+                await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
 
                 video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
 
@@ -44,7 +50,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
                 CreateFfmpegInputFile(video);
 
-                string videoFilter = FfmpegVideoFilter(video);
+                string videoFilter = base.DrawTextVideoFilter(video);
 
                 // await _ffmpeg.FfmpegAsync(
                 //     $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{FFMPEG_INPUT_FILE}\" -i \"{_musicService.GetRandomMixTrack()}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -bsf:a aac_adtstoasc -map 0:v:0 -map 1:a:0 \"{video.OutputFilePath}\"", // string.Empty,
@@ -60,38 +66,38 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
         }
+        catch (NoTarballsPresentException)
+        {
+            _logger.LogInformation(ExceptionMessage.NoTarballsPresent);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
         }
     }
 
-    // private void CreateFfmpegInputFile(DashCamVideo video)
-    // {
-    //     _fileSystem.DeleteFile(video.FfmpegInputFilePath);
-
-    //     using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
-    //     {
-    //         var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-    //         .Where(f => f.EndsWith(FileExtension.Mp4))
-    //         .OrderBy(f => f)
-    //         .ToArray();
-
-    //         foreach(var file in filesInDirectory)
-    //         {
-    //             writer.WriteLine($"file '{file}'");
-    //         }
-    //     }
-    // }
-
     internal override void CreateFfmpegInputFile<DashCamVideo>(DashCamVideo video)
     {
-        base.CreateFfmpegInputFile(video);
+        _fileSystem.DeleteFile(video.FfmpegInputFilePath);
+
+        using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
+        {
+            var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+            .Where(f => f.EndsWith(FileExtension.Mov))
+            .OrderBy(f => f)
+            .ToArray();
+
+            foreach (var file in filesInDirectory)
+            {
+                writer.WriteLine($"file '{file}'");
+            }
+        }
     }
 
-    internal override string FfmpegVideoFilter<DashCamVideo>(DashCamVideo video)
+    internal override string DrawTextVideoFilter<DashCamVideo>(DashCamVideo video)
     {
         StringBuilder videoFilter = new();
+        videoFilter.Append(base.DrawTextVideoFilter(video));
         videoFilter.Append($"drawtext=textfile:'{video.ChannelBannerText()}':");
         videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
         videoFilter.Append($"fontsize={SMALL_FONT}:");

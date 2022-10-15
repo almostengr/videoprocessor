@@ -15,8 +15,9 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     private readonly ILoggerService<HandymanVideoService> _logger;
 
     public HandymanVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
-        ITarball tarballService, IMusicService musicService, ILoggerService<HandymanVideoService> logger
-        ) : base(fileSystemService, ffmpegService)
+        ITarball tarballService, IMusicService musicService, ILoggerService<HandymanVideoService> logger,
+         ITarball tarball
+        ) : base(fileSystemService, ffmpegService, tarball)
     {
         _fileSystem = fileSystemService;
         _ffmpeg = ffmpegService;
@@ -25,17 +26,19 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         _logger = logger;
     }
 
-    public override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public override async Task ProcessVideosAsync(CancellationToken stoppingToken)
     {
         try
         {
             while (true)
             {
-                HandymanVideo video = new HandymanVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/RhtHandyman");
+                HandymanVideo video = new HandymanVideo(Constants.HandymanBaseDirectory);
+                
+                CreateVideoDirectories(video);
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
-                string? tarBallFilePath = _fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory);
+                string tarBallFilePath = _fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory);
 
                 video.SetTarballFilePath(tarBallFilePath);
 
@@ -48,11 +51,11 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
                 await AddAudioToTimelapseAsync(video, stoppingToken); // add audio to timelapse videos
 
-                foreach (var videoFile in _fileSystem.GetFilesInDirectory(video.WorkingDirectory))
-                {
-                    await _ffmpeg.CreateThumbnailsFromVideoAsync(
-                        video.Title, video.OutputFilePath, video.WorkingDirectory, stoppingToken);
-                }
+                // foreach (var videoFile in _fileSystem.GetFilesInDirectory(video.WorkingDirectory))
+                // {
+                await _ffmpeg.CreateThumbnailsFromVideoFilesAsync(video, stoppingToken);
+                //         video.Title, video.OutputFilePath, video.WorkingDirectory, stoppingToken);
+                // }
 
                 _fileSystem.CopyFile(video.ShowIntroFilePath, video.WorkingDirectory);
 
@@ -60,7 +63,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
                 CreateFfmpegInputFile(video);
 
-                string videoFilter = FfmpegVideoFilter(video);
+                string videoFilter = DrawTextVideoFilter(video);
 
                 // await _ffmpeg.RenderVideoAsync(video.WorkingDirectory, videoFilter);
                 // await _ffmpeg.FfmpegAsync(
@@ -86,9 +89,9 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         }
     }
 
-    internal override void CreateFfmpegInputFile<ChristmastLightVideo>(ChristmastLightVideo video)
+    internal override void CreateFfmpegInputFile<HandymanVideo>(HandymanVideo video)
     {
-        base.RhtCreateFfmpegInputFile<ChristmastLightVideo>(video);
+        base.RhtCreateFfmpegInputFile<HandymanVideo>(video);
     }
 
     // private void CreateFfmpegInputFile(HandymanVideo video)
@@ -123,20 +126,20 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     //     }
     // }
 
-    internal override string FfmpegVideoFilter<HandyTechVideo>(HandyTechVideo video)
-    {
-        StringBuilder videoFilter = new();
+    // internal override string ChannelBrandingVideoFilter<HandyTechVideo>(HandyTechVideo video)
+    // {
+    //     StringBuilder videoFilter = new();
 
-        videoFilter.Append($"drawtext=textfile:'{video.ChannelBannerText()}':");
-        videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
-        videoFilter.Append($"fontsize={SMALL_FONT}:");
-        videoFilter.Append($"{_upperRight}:");
-        videoFilter.Append($"box=1:");
-        videoFilter.Append($"boxborderw=7:");
-        videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
+    //     videoFilter.Append($"drawtext=textfile:'{video.ChannelBannerText()}':");
+    //     videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
+    //     videoFilter.Append($"fontsize={SMALL_FONT}:");
+    //     videoFilter.Append($"{_upperRight}:");
+    //     videoFilter.Append($"box=1:");
+    //     videoFilter.Append($"boxborderw=7:");
+    //     videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
 
-        return videoFilter.ToString();
-    }
+    //     return videoFilter.ToString();
+    // }
 
     private async Task AddAudioToTimelapseAsync(HandymanVideo video, CancellationToken cancellationToken)
     {
@@ -247,5 +250,4 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     //         // string outputFileName = Path.GetFileNameWithoutExtension(videoFileName) + FileExtension.Mp4;
     //     }
     // }
-
 }

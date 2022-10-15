@@ -1,3 +1,4 @@
+using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
@@ -7,7 +8,26 @@ public sealed class Tarball : BaseProcess, ITarball
 {
     private const string TarBinary = "/bin/tar";
 
-    public async Task<(string stdOut, string stdErr)> ExtractTarballContentsAsync(string tarBallFilePath, string directory, CancellationToken cancellationToken)
+    public async Task<(string stdOut, string stdErr)> CreateTarballFromDirectoryAsync(
+        string workingDirectory, CancellationToken cancellationToken)
+    {
+        var result = await RunProcessAsync(
+            TarBinary, 
+            $"-c * \"{workingDirectory.Replace(Constants.Whitespace, string.Empty)}{FileExtension.Tar}\"",
+            workingDirectory,
+            cancellationToken
+        );
+
+        if (result.exitCode > 0)
+        {
+            throw new TarballCreationException();
+        }
+
+        return await Task.FromResult((result.stdOut, result.stdErr));
+    }
+
+    public async Task<(string stdOut, string stdErr)> ExtractTarballContentsAsync(
+        string tarBallFilePath, string directory, CancellationToken cancellationToken)
     {
         // using Process process = new Process
         // {

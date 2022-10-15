@@ -1,3 +1,4 @@
+using System.Text;
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 
@@ -19,7 +20,7 @@ public abstract class BaseVideoService : IBaseVideoService
     // protected const string HW_VCODEC = "-vcodec h264_vaapi -b:v 5M";
 
     // ffmpeg filter attributes
-    protected const int DASHCAM_BORDER_WIDTH = 10;
+    // protected const int DASHCAM_BORDER_WIDTH = 10;
     protected const string DIM_TEXT = "0.8";
     protected const string DIM_BACKGROUND = "0.3";
     protected const string LARGE_FONT = "h/20";
@@ -35,15 +36,21 @@ public abstract class BaseVideoService : IBaseVideoService
     protected readonly string _lowerRight;
 
     protected readonly string _subscribeFilter;
-    protected readonly string _subscribeScrollingFilter;
+    // protected readonly string _subscribeScrollingFilter;
+    protected readonly string _likeFilter;
+    // protected readonly string _facebookFilter;
+    // protected readonly string _instagramFilter;
+    // protected readonly string _youtubeFilter;
 
     private readonly IFileSystem _fileSystem;
     private readonly IFfmpeg _ffmpeg;
+    private readonly ITarball _tarball;
 
-    protected BaseVideoService(IFileSystem fileSystem, IFfmpeg ffmpeg)
+    protected BaseVideoService(IFileSystem fileSystem, IFfmpeg ffmpeg, ITarball tarball)
     {
         _fileSystem = fileSystem;
         _ffmpeg = ffmpeg;
+        _tarball = tarball;
 
         _upperLeft = $"x={PADDING}:y={PADDING}";
         _upperCenter = $"x=(w-tw)/2:y={PADDING}";
@@ -53,12 +60,23 @@ public abstract class BaseVideoService : IBaseVideoService
         _lowerCenter = $"x=(w-tw)/2:y=h-th-{PADDING}";
         _lowerRight = $"x=w-tw-{PADDING}:y=h-th-{PADDING}";
 
-        _subscribeFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
-        _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
+        const int callToActionDurationSeconds = 5;
+        string filterDuration = $"enable=lt(mod(t\\,3)\\,{callToActionDurationSeconds})";
+
+        _likeFilter = $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Blue}:box=1:boxborderw=10:{filterDuration}";
+        _subscribeFilter = $"drawtext=text:'SUBSCRIBE FOR MORE CONTENT!':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{filterDuration}";
+        // _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
     }
 
-    public abstract Task ExecuteAsync(CancellationToken stoppingToken);
-    internal abstract string FfmpegVideoFilter<T>(T video) where T : BaseVideo;
+    internal void CreateVideoDirectories<T>(T video) where T : BaseVideo
+    {
+        _fileSystem.CreateDirectory(video.IncomingDirectory);
+        _fileSystem.CreateDirectory(video.ArchiveDirectory);
+        _fileSystem.CreateDirectory(video.UploadDirectory);
+        _fileSystem.CreateDirectory(video.WorkingDirectory);
+    }
+
+    public abstract Task ProcessVideosAsync(CancellationToken stoppingToken);
 
     internal virtual void CreateFfmpegInputFile<T>(T video) where T : BaseVideo
     {
@@ -67,7 +85,7 @@ public abstract class BaseVideoService : IBaseVideoService
         using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
         {
             var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp4))
+                .Where(f => f.EndsWith(FileExtension.Ts))
                 .OrderBy(f => f)
                 .ToArray();
 
@@ -229,6 +247,28 @@ public abstract class BaseVideoService : IBaseVideoService
                 writer.WriteLine($"{file} '{Path.GetFileName(filesInDirectory[i])}'");
             }
         }
+    }
+
+    internal async Task CreateTarballsFromDirectoriesAsync(string directory, CancellationToken cancellationToken)
+    {
+        foreach (var dir in _fileSystem.GetDirectoriesInDirectory(directory))
+        {
+            await _tarball.CreateTarballFromDirectoryAsync(dir, cancellationToken);
+        }
+    }
+
+    internal virtual string DrawTextVideoFilter<T>(T video) where T : BaseVideo
+    {
+        StringBuilder videoFilter = new();
+        videoFilter.Append($"drawtext=textfile:'{video.ChannelBannerText()}':");
+        videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
+        videoFilter.Append($"fontsize={LARGE_FONT}:");
+        videoFilter.Append($"{_upperRight}");
+        videoFilter.Append($"box=1:");
+        videoFilter.Append($"boxborderw=10:");
+        videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
+
+        return videoFilter.ToString();
     }
 
 }

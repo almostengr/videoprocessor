@@ -15,7 +15,7 @@ internal sealed class DashCamVideoWorker : BaseWorker
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await _videoService.ExecuteAsync(stoppingToken);
+            await _videoService.ProcessVideosAsync(stoppingToken);
             await Task.Delay(WaitDelay, stoppingToken);
         }
     }

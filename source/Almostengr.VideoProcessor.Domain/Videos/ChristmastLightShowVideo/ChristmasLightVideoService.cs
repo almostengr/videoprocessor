@@ -1,7 +1,7 @@
 using System.Text;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
-using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShow;
+using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Common;
 
@@ -16,27 +16,32 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
     private readonly ILoggerService<ChristmasLightVideoService> _logger;
 
     public ChristmasLightVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
-        ITarball tarballService, IMusicService musicService, ILoggerService<ChristmasLightVideoService> logger
-        ) : base(fileSystemService, ffmpegService)
+        ITarball tarball, IMusicService musicService, ILoggerService<ChristmasLightVideoService> logger
+        ) : base(fileSystemService, ffmpegService, tarball)
     {
         _fileSystem = fileSystemService;
         _ffmpeg = ffmpegService;
-        _tarball = tarballService;
+        _tarball = tarball;
         _musicService = musicService;
         _logger = logger;
     }
 
-    public override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public override async Task ProcessVideosAsync(CancellationToken stoppingToken)
     {
         try
         {
             while (true)
             {
-                ChristmasLightVideo video = new ChristmasLightVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ChristmasLightShow");
+                ChristmasLightVideo video =
+                    new ChristmasLightVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ChristmasLightShow");
+                
+                CreateVideoDirectories(video);
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
-                string? tarBallFilePath = _fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory);
+                await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
+
+                string tarBallFilePath = _fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory);
 
                 video.SetTarballFilePath(tarBallFilePath);
 
@@ -47,15 +52,13 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
 
                 _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory); // lowercase all file names
 
-                await AddMusicToVideoAsync(video, stoppingToken); // add audio to timelapse videos
-
-                _fileSystem.CopyFile(video.RhtServicesIntroPath, video.WorkingDirectory);
+                await _ffmpeg.CreateThumbnailsFromVideoFilesAsync(video, stoppingToken);
 
                 await ConvertVideoFilesToCommonFormatAsync(video, stoppingToken);
 
                 CreateFfmpegInputFile(video);
 
-                string videoFilter = FfmpegVideoFilter(video);
+                string videoFilter = DrawTextVideoFilter(video);
 
                 // await _ffmpeg.FfmpegAsync(
                 //     $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{FFMPEG_INPUT_FILE}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -c:v h264_vaapi -bsf:a aac_adtstoasc \"{video.OutputFilePath}\"", //string.Empty,
@@ -109,18 +112,11 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
     //     }
     // }
 
-    internal override string FfmpegVideoFilter<ChristmasLightVideoService>(ChristmasLightVideoService video)
+    internal override string DrawTextVideoFilter<ChristmasLightVideoService>(ChristmasLightVideoService video)
     {
         StringBuilder videoFilter = new();
 
-        videoFilter.Append($"drawtext=textfile:'{video.ChannelBannerText()}':");
-        videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
-        videoFilter.Append($"fontsize={SMALL_FONT}:");
-        videoFilter.Append($"{_upperRight}:");
-        videoFilter.Append($"box=1:");
-        videoFilter.Append($"boxborderw=8:");
-        videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
-        
+        videoFilter.Append(base.DrawTextVideoFilter(video));
         videoFilter.Append($"drawtext=textfile:'{video.Title}':");
         videoFilter.Append($"fontcolor={video.TextColor()}:");
         videoFilter.Append($"fontsize={SMALL_FONT}:");

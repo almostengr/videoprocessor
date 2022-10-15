@@ -2,11 +2,11 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
 
-internal sealed record HandymanSubtitle : BaseSrtSubtitle
+internal sealed record HandymanSubtitle : BaseSubtitle
 {
-    internal HandymanSubtitle()
+    internal HandymanSubtitle(string baseDirectory)
     {
-        BaseDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/RhtHandyman";
+        BaseDirectory = baseDirectory;
     }
 
     internal override void CleanSubtitle()
