@@ -10,7 +10,7 @@ public sealed record ChristmasLightVideo : BaseVideo
     // public readonly string SHOW_INTRO_FILENAME_MP4 = "rhtservicesintro.mp4";
     // public readonly string ShowIntroFilePath = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/rhtservicesintro.mp4";
 
-    public ChristmasLightVideo(string baseDirectory)
+    public ChristmasLightVideo(string baseDirectory) : base(baseDirectory)
     {
         BaseDirectory = baseDirectory;
     }

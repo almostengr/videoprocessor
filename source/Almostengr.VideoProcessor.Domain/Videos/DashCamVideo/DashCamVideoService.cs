@@ -13,6 +13,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     private readonly ITarball _tarball;
     private readonly IMusicService _musicService;
     private readonly ILoggerService<DashCamVideoService> _logger;
+    private const string DESTINATION_FILE = "destination.txt";
 
     public DashCamVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarball, IMusicService musicService, ILoggerService<DashCamVideoService> logger
@@ -29,13 +30,12 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     {
         try
         {
-            // todo clean upload directory before starting 
-
             while (true)
             {
                 DashCamVideo video = new DashCamVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/Kenny Ram Dash Cam");
 
                 CreateVideoDirectories(video);
+                DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
@@ -98,13 +98,40 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     {
         StringBuilder videoFilter = new();
         videoFilter.Append(base.DrawTextVideoFilter(video));
-        videoFilter.Append($"drawtext=textfile:'{video.ChannelBannerText()}':");
+
+        // video title in upper left
+
+        videoFilter.Append(Constants.CommaSpace);
+        videoFilter.Append($"drawtext=textfile:'{video.Title}':");
         videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
         videoFilter.Append($"fontsize={SMALL_FONT}:");
-        videoFilter.Append($"{_upperRight}");
-        videoFilter.Append($"box=1:");
-        videoFilter.Append($"boxborderw=10:");
+        videoFilter.Append($"{_upperLeft}");
+        videoFilter.Append("box=1:");
+        videoFilter.Append("boxborderw=10:");
         videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
+
+        // mileage and roads taken
+        bool destinationFilePresent = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+            .Where(f => f.Contains(DESTINATION_FILE))
+            .Any();
+
+        if (destinationFilePresent)
+        {
+            var destinationText = _fileSystem.GetFileContents(Path.Combine(video.WorkingDirectory, DESTINATION_FILE));
+
+            videoFilter.Append(Constants.CommaSpace);
+            videoFilter.Append($"drawtext=textfile:'{destinationText}':");
+            videoFilter.Append($"fontcolor={FfMpegColors.White}:");
+            videoFilter.Append($"fontsize={SMALL_FONT}:");
+            videoFilter.Append($"{_lowerCenter}");
+            videoFilter.Append("box=1:");
+            videoFilter.Append("boxborderw=15:");
+            videoFilter.Append($"boxcolor={FfMpegColors.Green}");
+            videoFilter.Append("enable='between(t, 5, 20)'");
+        }
+
+        videoFilter.Append(Constants.CommaSpace);
+        videoFilter.Append(_subscribeFilter);
 
         return videoFilter.ToString();
     }

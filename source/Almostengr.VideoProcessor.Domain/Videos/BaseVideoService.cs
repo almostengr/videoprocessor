@@ -63,8 +63,8 @@ public abstract class BaseVideoService : IBaseVideoService
         const int callToActionDurationSeconds = 5;
         string filterDuration = $"enable=lt(mod(t\\,3)\\,{callToActionDurationSeconds})";
 
-        _likeFilter = $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Blue}:box=1:boxborderw=10:{filterDuration}";
-        _subscribeFilter = $"drawtext=text:'SUBSCRIBE FOR MORE CONTENT!':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{filterDuration}";
+        _likeFilter = $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:{_lowerCenter}:boxcolor={FfMpegColors.Blue}:box=1:boxborderw=10:{filterDuration}";
+        _subscribeFilter = $"drawtext=text:'SUBSCRIBE FOR FUTURE VIDEOS!':fontcolor={FfMpegColors.White}:fontsize={LARGE_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{filterDuration}";
         // _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
     }
 
@@ -78,6 +78,21 @@ public abstract class BaseVideoService : IBaseVideoService
 
     public abstract Task ProcessVideosAsync(CancellationToken stoppingToken);
 
+    internal void DeleteFilesOlderThanSpecifiedDays(string directory)
+    {
+        const int SPECIFIED_DAYS = 14;
+        DateTime currentDateTime = DateTime.Now;
+
+        var files = _fileSystem.GetFilesInDirectory(directory);
+        foreach(var file in files)
+        {
+            if (currentDateTime.Subtract(File.GetLastAccessTime(file)).Days > SPECIFIED_DAYS)
+            {
+                _fileSystem.DeleteFile(file);
+            }
+        }
+    }
+    
     internal virtual void CreateFfmpegInputFile<T>(T video) where T : BaseVideo
     {
         _fileSystem.DeleteFile(video.FfmpegInputFilePath);
@@ -254,6 +269,7 @@ public abstract class BaseVideoService : IBaseVideoService
         foreach (var dir in _fileSystem.GetDirectoriesInDirectory(directory))
         {
             await _tarball.CreateTarballFromDirectoryAsync(dir, cancellationToken);
+            _fileSystem.DeleteDirectory(directory);
         }
     }
 

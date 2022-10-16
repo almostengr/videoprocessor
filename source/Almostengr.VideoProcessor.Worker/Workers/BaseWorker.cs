@@ -6,6 +6,6 @@ internal abstract class BaseWorker : BackgroundService
 
     protected BaseWorker()
     {
-        WaitDelay = TimeSpan.FromMinutes(30);
+        WaitDelay = TimeSpan.FromMinutes(1);
     }
 }

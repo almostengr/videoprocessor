@@ -35,6 +35,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 HandymanVideo video = new HandymanVideo(Constants.HandymanBaseDirectory);
                 
                 CreateVideoDirectories(video);
+                DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 

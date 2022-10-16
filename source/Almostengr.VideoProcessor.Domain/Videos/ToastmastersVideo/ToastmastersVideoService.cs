@@ -1,4 +1,3 @@
-using System.Text;
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Interfaces;
@@ -32,6 +31,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 ToastmastersVideo video = new("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/Toastmasters");
 
                 CreateVideoDirectories(video);
+                DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
@@ -40,13 +40,13 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                     await _tarball.CreateTarballFromDirectoryAsync(directory, stoppingToken);
                 }
 
-                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory));
+                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
                 _fileSystem.CreateDirectory(video.WorkingDirectory);
 
-                // await _tarball.ExtractTarballContentsAsync(
-                //     video.TarballFilePath, video.WorkingDirectory, stoppingToken);
+                await _tarball.ExtractTarballContentsAsync(
+                    video.TarballFilePath, video.WorkingDirectory, stoppingToken);
 
                 CreateFfmpegInputFile(video);
 
@@ -57,10 +57,11 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 //     video.WorkingDirectory,
                 //     stoppingToken
                 // );
+
                 await _ffmpegSerivce.RenderVideoAsync(
                     video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
-                _fileSystem.MoveFile(video.TarballFilePath, video.ArchiveDirectory);
+                _fileSystem.MoveFile(video.TarballFilePath, video.UploadDirectory);
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
@@ -74,7 +75,6 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             _logger.LogError(ex, ex.Message);
         }
     }
-
 
     // internal override string ChannelBrandingVideoFilter<ToastmastersVideo>(ToastmastersVideo video)
     // {

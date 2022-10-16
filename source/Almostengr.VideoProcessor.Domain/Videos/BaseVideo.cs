@@ -8,12 +8,14 @@ public abstract record BaseVideo : BaseEntity
 {
     internal readonly string RhtServicesIntroPath = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/rhtservicesintro.mp4";
 
-    public BaseVideo()
+    public BaseVideo(string baseDirectory)
     {
-        if (string.IsNullOrWhiteSpace(BaseDirectory))
+        if (string.IsNullOrWhiteSpace(baseDirectory))
         {
             throw new VideoInvalidBaseDirectoryException($"{nameof(BaseDirectory)} is invalid");
         }
+
+        BaseDirectory = baseDirectory;
 
         IncomingDirectory = Path.Combine(BaseDirectory, DirectoryNames.Incoming);
         UploadDirectory = Path.Combine(BaseDirectory, DirectoryNames.Upload);

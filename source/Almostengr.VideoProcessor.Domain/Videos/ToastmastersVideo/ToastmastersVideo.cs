@@ -4,7 +4,7 @@ namespace Almostengr.VideoProcessor.Domain.ToastmastersVideo;
 
 public sealed record ToastmastersVideo : BaseVideo
 {
-    public ToastmastersVideo(string baseDirectory)
+    public ToastmastersVideo(string baseDirectory) : base(baseDirectory)
     {
         BaseDirectory = baseDirectory;
     }

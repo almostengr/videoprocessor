@@ -1,7 +1,6 @@
 using System.Text;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
-using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Common;
 
@@ -36,6 +35,7 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
                     new ChristmasLightVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ChristmasLightShow");
                 
                 CreateVideoDirectories(video);
+                DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 

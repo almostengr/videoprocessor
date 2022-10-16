@@ -6,21 +6,21 @@ namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
 public sealed class Tarball : BaseProcess, ITarball
 {
-    private const string TarBinary = "/bin/tar";
+    private const string TarBinary = "/usr/bin/tar";
 
     public async Task<(string stdOut, string stdErr)> CreateTarballFromDirectoryAsync(
         string workingDirectory, CancellationToken cancellationToken)
     {
         var result = await RunProcessAsync(
-            TarBinary, 
-            $"-c * \"{workingDirectory.Replace(Constants.Whitespace, string.Empty)}{FileExtension.Tar}\"",
+            BashBinary,
+            $"-c \"cd \\\"{workingDirectory}\\\" && {TarBinary} -cvJf \\\"{workingDirectory + FileExtension.TarXz}\\\" *\"",
             workingDirectory,
             cancellationToken
         );
 
         if (result.exitCode > 0)
         {
-            throw new TarballCreationException();
+            throw new TarballCreationException(result.stdErr);
         }
 
         return await Task.FromResult((result.stdOut, result.stdErr));

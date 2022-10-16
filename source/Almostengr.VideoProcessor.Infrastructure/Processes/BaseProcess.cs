@@ -5,6 +5,8 @@ namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
 public abstract class BaseProcess
 {
+    internal const string BashBinary = "/bin/bash";
+
     internal async Task<(int exitCode, string? stdOut, string? stdErr)> RunProcessAsync(
         string binary, string arguments, string workingDirectory, CancellationToken cancellationToken
     )

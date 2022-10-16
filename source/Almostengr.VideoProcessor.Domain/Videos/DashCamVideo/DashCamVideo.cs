@@ -4,7 +4,7 @@ public sealed record DashCamVideo : BaseVideo
 {
     private readonly string Night = "night";
 
-    public DashCamVideo(string baseDirectory)
+    public DashCamVideo(string baseDirectory) : base(baseDirectory)
     {
         BaseDirectory = baseDirectory;
     }

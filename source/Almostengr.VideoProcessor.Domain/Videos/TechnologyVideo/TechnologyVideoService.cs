@@ -1,4 +1,3 @@
-using System.Text;
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Interfaces;
@@ -35,6 +34,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
                 TechnologyVideo video = new TechnologyVideo(Constants.TechnologyBaseDirectory);
                 
                 CreateVideoDirectories(video);
+                DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
