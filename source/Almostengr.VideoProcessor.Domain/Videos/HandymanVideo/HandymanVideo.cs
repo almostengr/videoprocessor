@@ -17,18 +17,7 @@ internal sealed record HandymanVideo : BaseVideo
 
     public override string ChannelBannerText()
     {
-        // Random random = new Random();
-        // string[] bannerText = {
-        //             "rhtservices.net",
-        //             "Robinson Handy and Technology Services",
-        //             "rhtservices.net/facebook",
-        //             "rhtservices.net/instagram",
-        //             "rhtservices.net/youtube",
-        //             "@rhtservicesllc"
-        //             };
-
-        // return bannerText.ElementAt(random.Next(0, bannerText.Length));
-        return ChannelBannerTextHandymanTechnology();
+        return ChannelBannerTextRhtServices();
     }
 
     public override string TextColor()
@@ -40,9 +29,4 @@ internal sealed record HandymanVideo : BaseVideo
     {
         return FfMpegColors.Black;
     }
-
-    // public string NoIntroFilePath()
-    // {
-    //     return Path.Combine(WorkingDirectory, NO_INTRO_FILE);
-    // }
 }

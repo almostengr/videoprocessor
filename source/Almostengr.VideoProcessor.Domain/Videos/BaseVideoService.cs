@@ -6,25 +6,16 @@ namespace Almostengr.VideoProcessor.Domain.Videos;
 
 public abstract class BaseVideoService : IBaseVideoService
 {
-    // internal const int RHT_BORDER_WIDTH = 7;
-    private const int PADDING = 30;
-
-    // essential files
-    // protected const string FFMPEG_INPUT_FILE = "ffmpeginput.txt";
-    // protected const string SUBTITLES_FILE = "subtitles.ass";
-
-    // ffmpeg options
-    // protected const string LOG_ERRORS = "-loglevel error";
-    // protected const string LOG_WARNINGS = "-loglevel warning";
-    // protected const string HW_OPTIONS = "-hide_banner -y -hwaccel vaapi -hwaccel_output_format vaapi";
-    // protected const string HW_VCODEC = "-vcodec h264_vaapi -b:v 5M";
-
     // ffmpeg filter attributes
-    // protected const int DASHCAM_BORDER_WIDTH = 10;
     protected const string DIM_TEXT = "0.8";
     protected const string DIM_BACKGROUND = "0.3";
     protected const string LARGE_FONT = "h/20";
     protected const string SMALL_FONT = "h/35";
+
+    protected const string FILE = "file";
+    protected const string NARRATION = "narration";
+    protected const string NARRATIVE = "narrative";
+    protected const string AUDIO = "audio";
 
     // ffmpeg positions
     protected readonly string _upperLeft;
@@ -36,11 +27,8 @@ public abstract class BaseVideoService : IBaseVideoService
     protected readonly string _lowerRight;
 
     protected readonly string _subscribeFilter;
-    // protected readonly string _subscribeScrollingFilter;
     protected readonly string _likeFilter;
-    // protected readonly string _facebookFilter;
-    // protected readonly string _instagramFilter;
-    // protected readonly string _youtubeFilter;
+    protected readonly Random _random;
 
     private readonly IFileSystem _fileSystem;
     private readonly IFfmpeg _ffmpeg;
@@ -52,6 +40,7 @@ public abstract class BaseVideoService : IBaseVideoService
         _ffmpeg = ffmpeg;
         _tarball = tarball;
 
+        const int PADDING = 30;
         _upperLeft = $"x={PADDING}:y={PADDING}";
         _upperCenter = $"x=(w-tw)/2:y={PADDING}";
         _upperRight = $"x=w-tw-{PADDING}:y={PADDING}";
@@ -60,12 +49,12 @@ public abstract class BaseVideoService : IBaseVideoService
         _lowerCenter = $"x=(w-tw)/2:y=h-th-{PADDING}";
         _lowerRight = $"x=w-tw-{PADDING}:y=h-th-{PADDING}";
 
-        const int callToActionDurationSeconds = 5;
-        string filterDuration = $"enable=lt(mod(t\\,3)\\,{callToActionDurationSeconds})";
+        const int CALL_TO_ACTION_DURATION_SECONDS = 5;
+        string filterDuration = $"enable=lt(mod(t\\,3)\\,{CALL_TO_ACTION_DURATION_SECONDS})";
 
         _likeFilter = $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:{_lowerCenter}:boxcolor={FfMpegColors.Blue}:box=1:boxborderw=10:{filterDuration}";
         _subscribeFilter = $"drawtext=text:'SUBSCRIBE FOR FUTURE VIDEOS!':fontcolor={FfMpegColors.White}:fontsize={LARGE_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{filterDuration}";
-        // _subscribeScrollingFilter = $"drawtext=text:'SUBSCRIBE':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:x=w+(100*t):y=h-th-{PADDING}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10";
+        _random = new Random();
     }
 
     internal void CreateVideoDirectories<T>(T video) where T : BaseVideo
@@ -84,7 +73,7 @@ public abstract class BaseVideoService : IBaseVideoService
         DateTime currentDateTime = DateTime.Now;
 
         var files = _fileSystem.GetFilesInDirectory(directory);
-        foreach(var file in files)
+        foreach (var file in files)
         {
             if (currentDateTime.Subtract(File.GetLastAccessTime(file)).Days > SPECIFIED_DAYS)
             {
@@ -92,7 +81,7 @@ public abstract class BaseVideoService : IBaseVideoService
             }
         }
     }
-    
+
     internal virtual void CreateFfmpegInputFile<T>(T video) where T : BaseVideo
     {
         _fileSystem.DeleteFile(video.FfmpegInputFilePath);
@@ -106,7 +95,7 @@ public abstract class BaseVideoService : IBaseVideoService
 
             foreach (var file in filesInDirectory)
             {
-                writer.WriteLine($"file '{file}'");
+                writer.WriteLine($"{FILE} '{file}'");
             }
         }
     }
@@ -120,13 +109,6 @@ public abstract class BaseVideoService : IBaseVideoService
         foreach (var image in imageFiles)
         {
             string outputFile = Path.GetFileNameWithoutExtension(image) + FileExtension.Mp4;
-
-            // await _ffmpeg.FfmpegAsync(
-            //     $"{LOG_ERRORS} -framerate 1/{duration} -i \"{image}\" -c:v libx264 -t {duration} \"{outputFile}\"",
-            //     directory,
-            //     cancellationToken
-            // );
-
             await _ffmpeg.ImagesToVideoAsync(image, outputFile, cancellationToken);
         }
     }
@@ -140,65 +122,28 @@ public abstract class BaseVideoService : IBaseVideoService
 
         foreach (var videoFileName in videoFiles)
         {
-            // var result = await _ffmpeg.FfprobeAsync(videoFileName, video.WorkingDirectory, cancellationToken);
-
-            // string scaledFile = $"{Path.GetFileNameWithoutExtension(videoFileName)}.{video.xResolution}x{video.yResolution}{FileExtension.Mp4}";
-
-            // if (result.stdErr.Contains($"{video.xResolution}x{video.yResolution}") &&
-            //     result.stdErr.Contains($"{video.audioBitRate} Hz") &&
-            //     result.stdErr.Contains($"196 kb/s") &&
-            //     videoFileName.EndsWith(FileExtension.Mp4))
-            // {
-            //     _fileSystem.MoveFile(
-            //         Path.Combine(video.WorkingDirectory, videoFileName),
-            //         Path.Combine(video.WorkingDirectory, scaledFile),
-            //         false);
-            //     continue;
-            // }
-
-            // await _ffmpeg.FfmpegAsync(
-            //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -r 30 -vf \"scale_vaapi=w={video.xResolution}:h={video.yResolution}\" -vcodec h264_vaapi -ar {video.audioSampleRate} -b:a {video.audioBitRate} \"{scaledFile}\"",
-            //     video.WorkingDirectory,
-            //     cancellationToken);
-
             await _ffmpeg.ConvertVideoFileToTsFormatAsync(
                 videoFileName, video.OutputFilePath, cancellationToken);
-
-            // _fileSystem.DeleteFile(Path.Combine(video.WorkingDirectory, videoFileName));
-
-            // string outputFileName = Path.GetFileNameWithoutExtension(videoFileName) + FileExtension.Mp4;
         }
     }
 
     internal virtual async Task AddMusicToVideoAsync<T>(T video, CancellationToken cancellationToken) where T : BaseVideo
     {
-        const string narration = "narration";
-        const string narrative = "narrative";
-        const string audio = "audio";
-
         var videoFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-            .Where(x => !x.Contains(narration) || !x.Contains(narrative))
+            .Where(x => !x.Contains(NARRATION) || !x.Contains(NARRATIVE))
             .Where(x => x.EndsWith(FileExtension.Mp4));
 
         var narrationFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-            .Where(x => x.Contains(narration) || x.Contains(narrative))
+            .Where(x => x.Contains(NARRATION) || x.Contains(NARRATIVE))
             .Where(x => x.EndsWith(FileExtension.Mp4) || x.EndsWith(FileExtension.Mkv))
             .ToArray();
 
         foreach (var videoFilePath in videoFiles)
         {
-            // var result = await RunCommandAsync(
-            //     ProgramPaths.Ffprobe,
-            //     $"-hide_banner \"{videoFileName}\"",
-            //     workingDirectory,
-            //     cancellationToken,
-            //     1
-            // );
-
             var result = await _ffmpeg.FfprobeAsync(
                 $"\"{videoFilePath}\"", video.WorkingDirectory, cancellationToken);
 
-            if (result.stdErr.ToLower().Contains(audio))
+            if (result.stdErr.ToLower().Contains(AUDIO))
             {
                 continue;
             }
@@ -209,21 +154,9 @@ public abstract class BaseVideoService : IBaseVideoService
                 .Single();
 
             string outputFileName = $"{Path.GetFileNameWithoutExtension(videoFilePath)}.tmp{FileExtension.Mp4}"
-                .Replace(narration, string.Empty)
-                .Replace(narrative, string.Empty);
+                .Replace(NARRATION, string.Empty)
+                .Replace(NARRATIVE, string.Empty);
 
-            // await RunCommandAsync(
-            //     ProgramPaths.Ffmpeg,
-            //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -i \"{audioFile}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
-            //     workingDirectory,
-            //     cancellationToken,
-            //     10);
-
-            // await _ffmpeg.FfmpegAsync(
-            //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFilePath)}\" -i \"{audioFilePath}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
-            //     video.WorkingDirectory,
-            //     cancellationToken
-            // );
             await _ffmpeg.AddAudioToVideoAsync(
                 videoFilePath, audioFilePath, video.OutputFilePath, cancellationToken);
 
@@ -245,21 +178,20 @@ public abstract class BaseVideoService : IBaseVideoService
                 .OrderBy(x => x)
                 .ToArray();
 
-            const string rhtservicesintro = "rhtservicesintro.ts";
-            const string file = "file";
+            const string RHT_SERVICES_INTRO = "rhtservicesintro.ts";
             for (int i = 0; i < filesInDirectory.Length; i++)
             {
-                if (filesInDirectory[i].Contains(rhtservicesintro))
+                if (filesInDirectory[i].Contains(RHT_SERVICES_INTRO))
                 {
                     continue;
                 }
 
                 if (i == 1 && video.Title.ToLower().Contains(Constants.ChristmasLightShow) == false)
                 {
-                    writer.WriteLine($"{file} '{rhtservicesintro}'");
+                    writer.WriteLine($"{FILE} '{RHT_SERVICES_INTRO}'");
                 }
 
-                writer.WriteLine($"{file} '{Path.GetFileName(filesInDirectory[i])}'");
+                writer.WriteLine($"{FILE} '{Path.GetFileName(filesInDirectory[i])}'");
             }
         }
     }
@@ -275,13 +207,12 @@ public abstract class BaseVideoService : IBaseVideoService
 
     internal virtual string DrawTextVideoFilter<T>(T video) where T : BaseVideo
     {
-        StringBuilder videoFilter = new();
-        videoFilter.Append($"drawtext=textfile:'{video.ChannelBannerText()}':");
+        StringBuilder videoFilter = new($"drawtext=textfile:'{video.ChannelBannerText()}':");
         videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
-        videoFilter.Append($"fontsize={LARGE_FONT}:");
-        videoFilter.Append($"{_upperRight}");
-        videoFilter.Append($"box=1:");
-        videoFilter.Append($"boxborderw=10:");
+        videoFilter.Append($"fontsize={SMALL_FONT}:");
+        videoFilter.Append($"{_upperRight}:");
+        videoFilter.Append("box=1:");
+        videoFilter.Append("boxborderw=10:");
         videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
 
         return videoFilter.ToString();

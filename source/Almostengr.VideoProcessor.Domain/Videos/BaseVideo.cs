@@ -1,4 +1,3 @@
-using System.Text;
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Videos.Exceptions;
 
@@ -21,7 +20,7 @@ public abstract record BaseVideo : BaseEntity
         UploadDirectory = Path.Combine(BaseDirectory, DirectoryNames.Upload);
         WorkingDirectory = Path.Combine(BaseDirectory, DirectoryNames.Working);
         ArchiveDirectory = Path.Combine(BaseDirectory, DirectoryNames.Archive);
-        FfmpegInputFilePath = Path.Combine(WorkingDirectory, "ffmpeginput.txt");
+        FfmpegInputFilePath = Path.Combine(WorkingDirectory, Constants.FfmpegInputFileName);
 
         TarballFileName = string.Empty;
         TarballFilePath = string.Empty;
@@ -66,29 +65,37 @@ public abstract record BaseVideo : BaseEntity
         }
 
         TarballFilePath = tarballFilePath;
-
         TarballFileName = Path.GetFileName(TarballFilePath);
 
         Title = TarballFileName.Replace("/", string.Empty)
             .Replace(":", Constants.Whitespace)
             .Replace(FileExtension.Tar, Constants.Whitespace);
 
-        OutputFileName = Title + FileExtension.Mp4;
+        SetOutputFileName(Title + FileExtension.Mp4);        
+    }
 
+    internal virtual void SetOutputFileName(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            throw new VideoOutputFileNameIsNullOrWhiteSpace();
+        }
+
+        OutputFileName = fileName;
         OutputFilePath = Path.Combine(UploadDirectory, OutputFileName);
     }
 
-    protected string ChannelBannerTextHandymanTechnology()
+    protected string ChannelBannerTextRhtServices()
     {
         Random random = new Random();
         string[] bannerText = {
-                    "rhtservices.net",
-                    "Robinson Handy and Technology Services",
-                    "rhtservices.net/facebook",
-                    "rhtservices.net/instagram",
-                    "rhtservices.net/youtube",
-                    "@rhtservicesllc"
-                    };
+            "rhtservices.net",
+            "Robinson Handy and Technology Services",
+            "rhtservices.net/facebook",
+            "rhtservices.net/instagram",
+            "rhtservices.net/youtube",
+            "@rhtservicesllc"
+            };
 
         return bannerText.ElementAt(random.Next(0, bannerText.Length));
     }

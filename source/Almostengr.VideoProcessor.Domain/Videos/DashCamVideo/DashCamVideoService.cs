@@ -14,6 +14,9 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     private readonly IMusicService _musicService;
     private readonly ILoggerService<DashCamVideoService> _logger;
     private const string DESTINATION_FILE = "destination.txt";
+    private const string MAJOR_ROADS_FILE = "majorroads.txt";
+    private const string DETAILS_FILE = "details.txt";
+    private const string VFLIP_FILE = "vflip.txt";
 
     public DashCamVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarball, IMusicService musicService, ILoggerService<DashCamVideoService> logger
@@ -48,22 +51,32 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
                 await _tarball.ExtractTarballContentsAsync(video.TarballFilePath, video.WorkingDirectory, stoppingToken);
 
+                foreach (var file in _fileSystem.GetFilesInDirectory(video.WorkingDirectory))
+                {
+                    await _ffmpeg.ConvertVideoFileToTsFormatAsync(file, video.WorkingDirectory, stoppingToken);
+                }
+
                 CreateFfmpegInputFile(video);
 
                 string videoFilter = base.DrawTextVideoFilter(video);
 
-                // await _ffmpeg.FfmpegAsync(
-                //     $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{FFMPEG_INPUT_FILE}\" -i \"{_musicService.GetRandomMixTrack()}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -bsf:a aac_adtstoasc -map 0:v:0 -map 1:a:0 \"{video.OutputFilePath}\"", // string.Empty,
-                //     video.WorkingDirectory,
-                //     stoppingToken
-                // );
-
                 await _ffmpeg.RenderVideoAsync(
                     video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
-                _fileSystem.MoveFile(video.TarballFilePath, video.ArchiveDirectory);
+                _fileSystem.DeleteFiles(
+                    _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+                    .Where(f => f.EndsWith(FileExtension.Ts) == false ||
+                        f.EndsWith(DESTINATION_FILE) == false)
+                    .ToArray()
+                );
+
+                await _tarball.CreateTarballFromDirectoryAsync(
+                    Path.Combine(video.ArchiveDirectory, video.TarballFileName), 
+                    video.WorkingDirectory, 
+                    stoppingToken);
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
+                _fileSystem.DeleteFile(video.TarballFilePath);
             }
         }
         catch (NoTarballsPresentException)
@@ -82,30 +95,36 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
         using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
         {
-            var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-            .Where(f => f.EndsWith(FileExtension.Mov))
-            .OrderBy(f => f)
-            .ToArray();
+            // var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+            //     .Where(f => f.EndsWith(FileExtension.Mov))
+            //     .OrderBy(f => f)
+            //     .ToArray();
+            // DirectoryInfo directoryInfo = new DirectoryInfo(video.WorkingDirectory);
+            // var files = directoryInfo.GetFiles()
+            //     .OrderBy(f => f.FullName)
+            //     .ToArray();
+
+            var filesInDirectory = (new DirectoryInfo(video.WorkingDirectory)).GetFiles()
+                .OrderBy(f => f.Name)
+                .ToArray();                
 
             foreach (var file in filesInDirectory)
             {
-                writer.WriteLine($"file '{file}'");
+                writer.WriteLine($"{FILE} '{file}'");
             }
         }
     }
 
     internal override string DrawTextVideoFilter<DashCamVideo>(DashCamVideo video)
     {
-        StringBuilder videoFilter = new();
-        videoFilter.Append(base.DrawTextVideoFilter(video));
+        StringBuilder videoFilter = new(base.DrawTextVideoFilter(video));
 
         // video title in upper left
-
         videoFilter.Append(Constants.CommaSpace);
-        videoFilter.Append($"drawtext=textfile:'{video.Title}':");
+        videoFilter.Append($"drawtext=textfile:'{(video.Title.Split())[0]}':");
         videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
         videoFilter.Append($"fontsize={SMALL_FONT}:");
-        videoFilter.Append($"{_upperLeft}");
+        videoFilter.Append($"{_upperLeft}:");
         videoFilter.Append("box=1:");
         videoFilter.Append("boxborderw=10:");
         videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
@@ -117,17 +136,18 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
         if (destinationFilePresent)
         {
-            var destinationText = _fileSystem.GetFileContents(Path.Combine(video.WorkingDirectory, DESTINATION_FILE));
+            var destinationText = _fileSystem.GetFileContents(
+                Path.Combine(video.WorkingDirectory, DESTINATION_FILE));
 
             videoFilter.Append(Constants.CommaSpace);
             videoFilter.Append($"drawtext=textfile:'{destinationText}':");
             videoFilter.Append($"fontcolor={FfMpegColors.White}:");
             videoFilter.Append($"fontsize={SMALL_FONT}:");
-            videoFilter.Append($"{_lowerCenter}");
+            videoFilter.Append($"{_lowerLeft}:");
             videoFilter.Append("box=1:");
             videoFilter.Append("boxborderw=15:");
-            videoFilter.Append($"boxcolor={FfMpegColors.Green}");
-            videoFilter.Append("enable='between(t, 5, 20)'");
+            videoFilter.Append($"boxcolor={FfMpegColors.Green}:");
+            videoFilter.Append("enable='between(t,5,20)'");
         }
 
         videoFilter.Append(Constants.CommaSpace);

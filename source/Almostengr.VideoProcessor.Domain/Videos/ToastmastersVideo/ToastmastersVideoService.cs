@@ -35,10 +35,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
-                foreach (var directory in _fileSystem.GetDirectoriesInDirectory(video.IncomingDirectory))
-                {
-                    await _tarball.CreateTarballFromDirectoryAsync(directory, stoppingToken);
-                }
+                await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
 
                 video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
 
@@ -51,12 +48,6 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 CreateFfmpegInputFile(video);
 
                 string videoFilter = DrawTextVideoFilter(video);
-
-                // await _ffmpegSerivce.FfmpegAsync(
-                //     $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i {FFMPEG_INPUT_FILE} -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{video.OutputFilePath}\"", // string.Empty,
-                //     video.WorkingDirectory,
-                //     stoppingToken
-                // );
 
                 await _ffmpegSerivce.RenderVideoAsync(
                     video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
@@ -75,23 +66,4 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             _logger.LogError(ex, ex.Message);
         }
     }
-
-    // internal override string ChannelBrandingVideoFilter<ToastmastersVideo>(ToastmastersVideo video)
-    // {
-    //     StringBuilder videoFilter = new();
-    //     videoFilter.Append($"drawtext=textfile:'{video.ChannelBannerText()}':");
-    //     videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
-    //     videoFilter.Append($"fontsize={SMALL_FONT}:");
-    //     videoFilter.Append($"{_upperRight}");
-    //     videoFilter.Append($"box=1:");
-    //     videoFilter.Append($"boxborderw=10:");
-    //     videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
-
-    //     return videoFilter.ToString();
-    // }
-
-    // internal override void CreateFfmpegInputFile<ToastmastersVideo>(ToastmastersVideo video)
-    // {
-    //     base.CreateFfmpegInputFile(video);
-    // }
 }
