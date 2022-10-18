@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 namespace Almostengr.VideoProcessor.Domain.Common.Exceptions;
 
 [Serializable]
-public class NoSrtFilesPresentException : VideoProcessorException
+public sealed class NoSrtFilesPresentException : VideoProcessorException
 {
     public NoSrtFilesPresentException()
     {

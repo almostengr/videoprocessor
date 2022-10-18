@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 namespace Almostengr.VideoProcessor.Domain.Common.Exceptions;
 
 [Serializable]
-public class NoTarballsPresentException : VideoProcessorException
+public sealed class NoTarballsPresentException : VideoProcessorException
 {
     public NoTarballsPresentException()
     {
