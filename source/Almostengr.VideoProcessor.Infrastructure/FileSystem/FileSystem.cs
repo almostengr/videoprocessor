@@ -52,15 +52,8 @@ public sealed class FileSystem : IFileSystem
 
     public string GetRandomTarballFromDirectory(string directory)
     {
-        // string tarballFilePath = GetFilesInDirectory(directory)
-        //     .Where(f => f.Contains(FileExtension.Tar))
-        //     .Where(f => f.StartsWith(".") == false)
-        //     .OrderBy(f => _random.Next()).Take(1)
-        //     .First();
-
         IEnumerable<string> tarballPaths = GetFilesInDirectory(directory);
 
-        // if (string.IsNullOrWhiteSpace(tarballFilePath))
         if (tarballPaths.Count() == 0)
         {
             throw new NoTarballsPresentException();
@@ -71,8 +64,6 @@ public sealed class FileSystem : IFileSystem
             .OrderBy(f => _random.Next())
             .Take(1)
             .First();
-
-        // return tarballFilePath;
     }
 
     public string GetRandomSrtFileFromDirectory(string directory)
@@ -94,12 +85,8 @@ public sealed class FileSystem : IFileSystem
     public bool IsDiskSpaceAvailable(string directory)
     {
         const double THRESHOLD_PERCENTAGE = 0.01;
-
         DriveInfo driveInfo = new DriveInfo(directory);
-
-        double freeSpace = driveInfo.AvailableFreeSpace;
-        double totalSpace = driveInfo.TotalSize;
-        double spaceRemainingPercentage = (freeSpace / totalSpace);
+        double spaceRemainingPercentage = (driveInfo.AvailableFreeSpace / driveInfo.TotalSize);
 
         if (spaceRemainingPercentage > THRESHOLD_PERCENTAGE)
         {
@@ -176,12 +163,6 @@ public sealed class FileSystem : IFileSystem
 
     public string GetFileContents(string filePath)
     {
-        // var fileStream = new FileStream(filePath, FileMode.Open);
-
-        // using (var streamReader = new StreamReader(fileStream))
-        // {
-        //     return streamReader.ReadToEnd();
-        // }
         return File.ReadAllText(filePath).Trim();
     }
 
