@@ -1,0 +1,19 @@
+name: Run Tests on Push
+
+on:
+  push:
+    branches:
+      - !'main'
+
+jobs:
+  domain_tests: 
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-dotnet@v1
+      name: Setup .NET
+      with:
+        dotnet-version: '6.x'
+
+    - run: dotnet run --project tests/Almostengr.VideoProcessor.Domain.Tests/Almostengr.VideoProcessor.Domain.Tests.csproj
