@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 
-namespace Almostengr.VideoProcessor.Domain.Videos.TechnologyVideo;
+namespace Almostengr.VideoProcessor.Domain.Videos.Technology;
 
 public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoService
 {

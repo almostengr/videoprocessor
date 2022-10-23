@@ -1,8 +1,8 @@
-namespace Almostengr.VideoProcessor.Domain.Videos.TechnologyVideo;
+namespace Almostengr.VideoProcessor.Domain.Videos.Handyman;
 
-public sealed record TechnologyVideo : BaseVideo
+internal sealed record HandymanVideo : BaseVideo
 {
-    public TechnologyVideo(string baseDirectory) : base(baseDirectory)
+    public HandymanVideo(string baseDirectory) : base(baseDirectory)
     {
         BaseDirectory = baseDirectory;
     }
@@ -14,12 +14,11 @@ public sealed record TechnologyVideo : BaseVideo
 
     public override string TextColor()
     {
-        return FfMpegColors.White;
+        return FfMpegColors.RhtYellow;
     }
 
     public override string BoxColor()
     {
-        return FfMpegColors.Green;
+        return FfMpegColors.Black;
     }
-
 }

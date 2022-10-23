@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.Exceptions;
 
-internal sealed class VideoTarballFilePathIsNullOrEmptyException : VideoProcessorException
+public sealed class VideoTarballFilePathIsNullOrEmptyException : VideoProcessorException
 {
     public VideoTarballFilePathIsNullOrEmptyException()
     {

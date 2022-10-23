@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Domain.Videos.DashCamVideo;
+namespace Almostengr.VideoProcessor.Domain.Videos.DashCam;
 
 public sealed record DashCamVideo : BaseVideo
 {

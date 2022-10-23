@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles.Exceptions;
 
-internal sealed class SrtSubtitleBlogMarkdownTextIsNullOrWhiteSpaceException : VideoProcessorException
+public sealed class SrtSubtitleBlogMarkdownTextIsNullOrWhiteSpaceException : VideoProcessorException
 {
     public SrtSubtitleBlogMarkdownTextIsNullOrWhiteSpaceException()
     {

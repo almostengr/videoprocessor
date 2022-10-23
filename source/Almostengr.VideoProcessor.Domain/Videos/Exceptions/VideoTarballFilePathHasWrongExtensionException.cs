@@ -1,7 +1,7 @@
 
 namespace Almostengr.VideoProcessor.Domain.Videos.Exceptions;
 
-internal sealed class VideoTarballFilePathHasWrongExtensionException : Exception
+public sealed class VideoTarballFilePathHasWrongExtensionException : Exception
 {
     public VideoTarballFilePathHasWrongExtensionException()
     {

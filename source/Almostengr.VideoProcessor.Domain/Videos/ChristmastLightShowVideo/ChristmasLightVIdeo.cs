@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
+namespace Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShow;
 
 public sealed record ChristmasLightVideo : BaseVideo
 {

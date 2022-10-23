@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
-internal sealed class ProgramWorkingDirectoryIsInvalidException : VideoProcessorException
+public sealed class ProgramWorkingDirectoryIsInvalidException : VideoProcessorException
 {
     public ProgramWorkingDirectoryIsInvalidException()
     {

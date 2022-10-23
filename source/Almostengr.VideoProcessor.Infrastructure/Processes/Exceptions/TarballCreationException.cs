@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
-internal class TarballCreationException : Exception
+public sealed class TarballCreationException : Exception
 {
     public TarballCreationException()
     {

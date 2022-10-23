@@ -1,5 +1,5 @@
 using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.Videos.DashCamVideo;
+using Almostengr.VideoProcessor.Domain.Videos.DashCam;
 
 namespace Almostengr.VideoProcessor.Worker.Workers;
 

@@ -4,7 +4,7 @@ using Almostengr.VideoProcessor.Domain.Music.Services;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Common;
 
-namespace Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
+namespace Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShow;
 
 public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLightVideoService
 {

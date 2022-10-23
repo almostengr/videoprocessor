@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
-internal sealed class FfmpegRenderVideoException : VideoProcessorException
+public sealed class FfmpegRenderVideoException : VideoProcessorException
 {
     public FfmpegRenderVideoException()
     {

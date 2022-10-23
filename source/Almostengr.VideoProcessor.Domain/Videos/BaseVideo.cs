@@ -43,7 +43,7 @@ public abstract record BaseVideo : BaseEntity
     public abstract string TextColor();
     public abstract string BoxColor();
 
-    internal void SetTarballFilePath(string? tarballFilePath)
+    public void SetTarballFilePath(string? tarballFilePath)
     {
         if (string.IsNullOrWhiteSpace(tarballFilePath))
         {

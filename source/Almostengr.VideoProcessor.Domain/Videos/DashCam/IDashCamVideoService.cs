@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Domain.Videos.DashCamVideo;
+namespace Almostengr.VideoProcessor.Domain.Videos.DashCam;
 
 public interface IDashCamVideoService : IBaseVideoService
 {

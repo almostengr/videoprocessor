@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
  
-internal sealed class SaveFileContentIsNullOrEmptyException : VideoProcessorException
+public sealed class SaveFileContentIsNullOrEmptyException : VideoProcessorException
 {
     public SaveFileContentIsNullOrEmptyException()
     {

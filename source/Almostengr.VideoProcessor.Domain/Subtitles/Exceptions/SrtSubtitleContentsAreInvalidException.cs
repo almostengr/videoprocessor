@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles.Exceptions;
 
-internal sealed class SrtSubtitleContentsAreInvalidException : VideoProcessorException
+public sealed class SrtSubtitleContentsAreInvalidException : VideoProcessorException
 {
     public SrtSubtitleContentsAreInvalidException()
     {

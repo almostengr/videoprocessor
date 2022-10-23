@@ -1,6 +1,6 @@
 using Almostengr.VideoProcessor.Domain.Videos;
 
-namespace Almostengr.VideoProcessor.Domain.ToastmastersVideo;
+namespace Almostengr.VideoProcessor.Domain.Toastmasters;
 
 public sealed record ToastmastersVideo : BaseVideo
 {

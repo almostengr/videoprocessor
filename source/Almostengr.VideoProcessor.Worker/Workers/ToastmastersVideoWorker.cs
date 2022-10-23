@@ -1,5 +1,5 @@
 using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.ToastmastersVideo;
+using Almostengr.VideoProcessor.Domain.Toastmasters;
 
 namespace Almostengr.VideoProcessor.Worker.Workers;
 

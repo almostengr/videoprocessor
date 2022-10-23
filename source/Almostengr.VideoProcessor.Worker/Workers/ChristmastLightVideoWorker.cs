@@ -1,5 +1,5 @@
 using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
+using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShow;
 
 namespace Almostengr.VideoProcessor.Worker.Workers;
 

@@ -4,7 +4,7 @@ using Almostengr.VideoProcessor.Domain.Music.Services;
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 
-namespace Almostengr.VideoProcessor.Domain.Videos.DashCamVideo;
+namespace Almostengr.VideoProcessor.Domain.Videos.DashCam;
 
 public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 {
