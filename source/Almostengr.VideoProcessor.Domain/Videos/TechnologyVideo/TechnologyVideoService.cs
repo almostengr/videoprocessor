@@ -17,7 +17,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
     public TechnologyVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarballService, IMusicService musicService,
         ILoggerService<TechnologyVideoService> logger, ITarball tarball, AppSettings appSettings
-        ) : base(fileSystemService, ffmpegService, tarball)
+    ) : base(fileSystemService, ffmpegService, tarball, appSettings)
     {
         _fileSystem = fileSystemService;
         _ffmpeg = ffmpegService;
@@ -57,7 +57,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
                 await _ffmpeg.CreateThumbnailsFromVideoFilesAsync(video, stoppingToken);
 
-                _fileSystem.CopyFile(video.RhtServicesIntroPath, video.WorkingDirectory);
+                _fileSystem.CopyFile(_appSettings.RhtServicesIntroPath, video.WorkingDirectory);
 
                 await ConvertVideoFilesToCommonFormatAsync(video, stoppingToken);
 
@@ -65,10 +65,6 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
                 string videoFilter = DrawTextVideoFilter(video);
 
-                // await _ffmpeg.FfmpegAsync(
-                //     $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{FFMPEG_INPUT_FILE}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -c:v h264_vaapi -bsf:a aac_adtstoasc \"{video.OutputFilePath}\"", //string.Empty,
-                //     video.WorkingDirectory,
-                //     stoppingToken);
                 await _ffmpeg.RenderVideoAsync(
                     video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
@@ -91,5 +87,4 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
     {
         base.RhtCreateFfmpegInputFile<TechnologyVideo>(video);
     }
-
 }

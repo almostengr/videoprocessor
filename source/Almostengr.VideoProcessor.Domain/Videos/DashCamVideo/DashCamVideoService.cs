@@ -22,7 +22,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     public DashCamVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarball, IMusicService musicService, ILoggerService<DashCamVideoService> logger,
         AppSettings appSettings
-    ) : base(fileSystemService, ffmpegService, tarball)
+    ) : base(fileSystemService, ffmpegService, tarball, appSettings)
     {
         _fileSystem = fileSystemService;
         _ffmpeg = ffmpegService;

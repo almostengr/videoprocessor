@@ -8,10 +8,12 @@ namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 public sealed class FileSystem : IFileSystem
 {
     private readonly Random _random;
+    private readonly AppSettings _appSettings;
 
-    public FileSystem()
+    public FileSystem(AppSettings appSettings)
     {
         _random = new Random();
+        _appSettings = appSettings;
     }
 
     public void CreateDirectory(string directory)
@@ -84,13 +86,11 @@ public sealed class FileSystem : IFileSystem
 
     public bool IsDiskSpaceAvailable(string directory)
     {
-        return true; // todo issue with values result in false exceptions
-
-        const double THRESHOLD_PERCENTAGE = 0.01;
         DriveInfo driveInfo = new DriveInfo(directory);
         double spaceRemainingPercentage = (driveInfo.AvailableFreeSpace / driveInfo.TotalSize);
 
-        if (spaceRemainingPercentage > THRESHOLD_PERCENTAGE)
+        if (spaceRemainingPercentage > _appSettings.DiskSpaceThreshold ||
+            _appSettings.DiskSpaceThreshold == 0.0)
         {
             return true;
         }

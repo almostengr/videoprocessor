@@ -35,12 +35,15 @@ public abstract class BaseVideoService : IBaseVideoService
     private readonly IFileSystem _fileSystem;
     private readonly IFfmpeg _ffmpeg;
     private readonly ITarball _tarball;
+    private readonly AppSettings _appSettings;
 
-    protected BaseVideoService(IFileSystem fileSystem, IFfmpeg ffmpeg, ITarball tarball)
+    protected BaseVideoService(IFileSystem fileSystem, IFfmpeg ffmpeg, ITarball tarball,
+        AppSettings appSettings)
     {
         _fileSystem = fileSystem;
         _ffmpeg = ffmpeg;
         _tarball = tarball;
+        _appSettings = appSettings;
 
         const int PADDING = 30;
         _upperLeft = $"x={PADDING}:y={PADDING}";
@@ -71,15 +74,17 @@ public abstract class BaseVideoService : IBaseVideoService
 
     internal void DeleteFilesOlderThanSpecifiedDays(string directory)
     {
-        return; // todo test at later time
+        if (_appSettings.DeleteFilesAfterDays == 0)
+        {
+            return;
+        }
 
-        const int SPECIFIED_DAYS = 14;
         DateTime currentDateTime = DateTime.Now;
-
         var files = _fileSystem.GetFilesInDirectory(directory);
+        
         foreach (var file in files)
         {
-            if (currentDateTime.Subtract(File.GetLastAccessTime(file)).Days > SPECIFIED_DAYS)
+            if (currentDateTime.Subtract(File.GetLastAccessTime(file)).Days > _appSettings.DeleteFilesAfterDays)
             {
                 _fileSystem.DeleteFile(file);
             }

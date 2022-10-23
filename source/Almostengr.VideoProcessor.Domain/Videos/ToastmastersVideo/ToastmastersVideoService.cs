@@ -17,7 +17,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
     public ToastmastersVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarballService, ILoggerService<ToastmastersVideoService> logger, ITarball tarball,
         AppSettings appSettings
-    ) : base(fileSystemService, ffmpegService, tarball)
+    ) : base(fileSystemService, ffmpegService, tarball, appSettings)
     {
         _fileSystem = fileSystemService;
         _ffmpegSerivce = ffmpegService;

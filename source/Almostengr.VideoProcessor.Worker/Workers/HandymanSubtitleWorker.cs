@@ -20,7 +20,7 @@ internal sealed class HandymanSubtitleWorker : BaseWorker
         while (!stoppingToken.IsCancellationRequested)
         {
             await _subtitleService.ExecuteAsync(stoppingToken);
-            await Task.Delay(_appSettings.WorkerDelayMinutes, stoppingToken);
+            await Task.Delay(_appSettings.WorkerDelay, stoppingToken);
         }
     }
 

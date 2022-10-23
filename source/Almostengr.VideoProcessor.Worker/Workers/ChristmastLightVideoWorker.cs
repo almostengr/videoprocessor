@@ -20,7 +20,7 @@ internal sealed class ChristmasLightVideoWorker : BaseWorker
         while (!stoppingToken.IsCancellationRequested)
         {
             await _videoService.ProcessVideosAsync(stoppingToken);
-            await Task.Delay(_appSettings.WorkerDelayMinutes, stoppingToken);
+            await Task.Delay(_appSettings.WorkerDelay, stoppingToken);
         }
     }
 }

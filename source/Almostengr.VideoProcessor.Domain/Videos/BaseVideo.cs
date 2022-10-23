@@ -5,8 +5,6 @@ namespace Almostengr.VideoProcessor.Domain.Videos;
 
 public abstract record BaseVideo : BaseEntity
 {
-    internal readonly string RhtServicesIntroPath = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/rhtservicesintro.mp4";
-
     public BaseVideo(string baseDirectory)
     {
         if (string.IsNullOrWhiteSpace(baseDirectory))

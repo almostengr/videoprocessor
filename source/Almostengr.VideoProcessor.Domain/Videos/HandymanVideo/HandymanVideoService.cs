@@ -17,7 +17,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     public HandymanVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarballService, IMusicService musicService, ILoggerService<HandymanVideoService> logger,
          ITarball tarball, AppSettings appSettings
-        ) : base(fileSystemService, ffmpegService, tarball)
+    ) : base(fileSystemService, ffmpegService, tarball, appSettings)
     {
         _fileSystem = fileSystemService;
         _ffmpeg = ffmpegService;
@@ -56,7 +56,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
                 await _ffmpeg.CreateThumbnailsFromVideoFilesAsync(video, stoppingToken);
 
-                _fileSystem.CopyFile(video.ShowIntroFilePath, video.WorkingDirectory);
+                _fileSystem.CopyFile(_appSettings.RhtServicesIntroPath, video.WorkingDirectory);
 
                 await ConvertVideoFilesToCommonFormatAsync(video, stoppingToken);
 
