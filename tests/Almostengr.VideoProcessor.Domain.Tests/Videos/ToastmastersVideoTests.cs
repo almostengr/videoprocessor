@@ -7,7 +7,7 @@ using Almostengr.VideoProcessor.Domain.Toastmasters;
 
 namespace Almostengr.VideoProcessor.Domain.Tests;
 
-public class ToastmastersVideoServiceTests
+public class ToastmastersVideoTests
 {
     private ToastmastersVideo video;
     private const string BaseDirectory = "/tmp";
@@ -117,9 +117,6 @@ public class ToastmastersVideoServiceTests
     {
         string tarballFilePath = Path.Combine(video.IncomingDirectory, "anothertarball.tar.xz");
 
-        // video.SetTarballFilePath(tarballFilePath);
-
-        // Assert.AreEqual(tarballFilePath, video.TarballFilePath);
         Assert.Throws<VideoTarballFileDoesNotExistException>(() => 
         {
             video.SetTarballFilePath(tarballFilePath);
