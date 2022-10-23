@@ -68,10 +68,18 @@ public abstract record BaseVideo : BaseEntity
         TarballFileName = Path.GetFileName(TarballFilePath);
 
         Title = TarballFileName.Replace("/", string.Empty)
-            .Replace(":", Constants.Whitespace)
-            .Replace(FileExtension.Tar, Constants.Whitespace);
+            .Replace(":", string.Empty)
+            .Replace(FileExtension.TarXz, string.Empty)
+            .Replace(FileExtension.TarXz, string.Empty)
+            .Replace(FileExtension.Tar, string.Empty);
 
-        SetOutputFileName(Title + FileExtension.Mp4);        
+        SetOutputFileName(
+            TarballFileName.Replace("/", string.Empty)
+            .Replace(":", string.Empty)
+            .Replace(FileExtension.TarXz, string.Empty)
+            .Replace(FileExtension.TarXz, string.Empty)
+            .Replace(FileExtension.Tar, string.Empty)
+                + FileExtension.Mp4);
     }
 
     internal virtual void SetOutputFileName(string fileName)
@@ -91,6 +99,7 @@ public abstract record BaseVideo : BaseEntity
         string[] bannerText = {
             "rhtservices.net",
             "Robinson Handy and Technology Services",
+            "rhtservices.net/courses",
             "rhtservices.net/facebook",
             "rhtservices.net/instagram",
             "rhtservices.net/youtube",

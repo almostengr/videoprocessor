@@ -1,3 +1,4 @@
+using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 using Almostengr.VideoProcessor.Worker.Workers;
@@ -10,26 +11,10 @@ using Almostengr.VideoProcessor.Domain.Videos.HandymanVideo;
 using Almostengr.VideoProcessor.Domain.ToastmastersVideo;
 using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShowVideo;
 
-// string environment = string.Empty;
-
-// #if RELEASE
-//     environment = AppEnvironment.Prod;
-// #else
-//     environment = AppEnvironment.Devl;
-// #endif
-
-// IConfiguration configuration = new ConfigurationBuilder()
-// .AddJsonFile(
-//     (environment == AppEnvironment.Prod) ? AppConstants.AppSettingsProdFile : AppConstants.AppSettingsDevlFile, 
-//     false, 
-//     true)
-// .Build();
-
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
-        // AppSettings appSettings = configuration.GetSection(nameof(AppSettings)).Get<AppSettings>();
-        // services.AddSingleton(appSettings);
+        services.AddSingleton(new AppSettings());
 
         services.AddSingleton<IChristmasLightVideoService, ChristmasLightVideoService>();
         services.AddSingleton<IDashCamVideoService, DashCamVideoService>();

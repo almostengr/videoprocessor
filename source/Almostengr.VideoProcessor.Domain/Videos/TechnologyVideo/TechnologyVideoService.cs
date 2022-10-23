@@ -12,10 +12,11 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
     private readonly ITarball _tarball;
     private readonly IMusicService _musicService;
     private readonly ILoggerService<TechnologyVideoService> _logger;
+    private readonly AppSettings _appSettings;
 
     public TechnologyVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarballService, IMusicService musicService,
-        ILoggerService<TechnologyVideoService> logger, ITarball tarball
+        ILoggerService<TechnologyVideoService> logger, ITarball tarball, AppSettings appSettings
         ) : base(fileSystemService, ffmpegService, tarball)
     {
         _fileSystem = fileSystemService;
@@ -23,6 +24,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
         _tarball = tarballService;
         _musicService = musicService;
         _logger = logger;
+        _appSettings = appSettings;
     }
 
     public override async Task ProcessVideosAsync(CancellationToken stoppingToken)
@@ -31,7 +33,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
         {
             while (true)
             {
-                TechnologyVideo video = new TechnologyVideo(Constants.TechnologyBaseDirectory);
+                TechnologyVideo video = new TechnologyVideo(_appSettings.TechnologyDirectory);
                 
                 CreateVideoDirectories(video);
                 DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);

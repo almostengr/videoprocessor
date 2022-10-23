@@ -17,9 +17,11 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     private const string MAJOR_ROADS_FILE = "majorroads.txt";
     private const string DETAILS_FILE = "details.txt";
     private const string VFLIP_FILE = "vflip.txt";
+    private readonly AppSettings _appSettings;
 
     public DashCamVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
-        ITarball tarball, IMusicService musicService, ILoggerService<DashCamVideoService> logger
+        ITarball tarball, IMusicService musicService, ILoggerService<DashCamVideoService> logger,
+        AppSettings appSettings
     ) : base(fileSystemService, ffmpegService, tarball)
     {
         _fileSystem = fileSystemService;
@@ -27,6 +29,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         _tarball = tarball;
         _musicService = musicService;
         _logger = logger;
+        _appSettings = appSettings;
     }
 
     public override async Task ProcessVideosAsync(CancellationToken stoppingToken)
@@ -35,7 +38,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         {
             while (true)
             {
-                DashCamVideo video = new DashCamVideo("/mnt/d74511ce-4722-471d-8d27-05013fd521b3/Kenny Ram Dash Cam");
+                DashCamVideo video = new DashCamVideo(_appSettings.DashCamDirectory);
 
                 CreateVideoDirectories(video);
                 DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
@@ -56,6 +59,8 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                     await _ffmpeg.ConvertVideoFileToTsFormatAsync(file, video.WorkingDirectory, stoppingToken);
                 }
 
+                _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
+
                 CreateFfmpegInputFile(video);
 
                 string videoFilter = base.DrawTextVideoFilter(video);
@@ -71,8 +76,8 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 );
 
                 await _tarball.CreateTarballFromDirectoryAsync(
-                    Path.Combine(video.ArchiveDirectory, video.TarballFileName), 
-                    video.WorkingDirectory, 
+                    Path.Combine(video.ArchiveDirectory, video.TarballFileName),
+                    video.WorkingDirectory,
                     stoppingToken);
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
@@ -80,9 +85,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             }
         }
         catch (NoTarballsPresentException)
-        {
-            _logger.LogInformation(ExceptionMessage.NoTarballsPresent);
-        }
+        { }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
@@ -95,18 +98,9 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
         using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
         {
-            // var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-            //     .Where(f => f.EndsWith(FileExtension.Mov))
-            //     .OrderBy(f => f)
-            //     .ToArray();
-            // DirectoryInfo directoryInfo = new DirectoryInfo(video.WorkingDirectory);
-            // var files = directoryInfo.GetFiles()
-            //     .OrderBy(f => f.FullName)
-            //     .ToArray();
-
             var filesInDirectory = (new DirectoryInfo(video.WorkingDirectory)).GetFiles()
                 .OrderBy(f => f.Name)
-                .ToArray();                
+                .ToArray();
 
             foreach (var file in filesInDirectory)
             {
@@ -125,8 +119,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
         videoFilter.Append($"fontsize={SMALL_FONT}:");
         videoFilter.Append($"{_upperLeft}:");
-        videoFilter.Append("box=1:");
-        videoFilter.Append("boxborderw=10:");
+        videoFilter.Append(BORDER_CHANNEL_TEXT);
         videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
 
         // mileage and roads taken
@@ -142,10 +135,9 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             videoFilter.Append(Constants.CommaSpace);
             videoFilter.Append($"drawtext=textfile:'{destinationText}':");
             videoFilter.Append($"fontcolor={FfMpegColors.White}:");
-            videoFilter.Append($"fontsize={SMALL_FONT}:");
+            videoFilter.Append($"fontsize={LARGE_FONT}:");
             videoFilter.Append($"{_lowerLeft}:");
-            videoFilter.Append("box=1:");
-            videoFilter.Append("boxborderw=15:");
+            videoFilter.Append(BORDER_LOWER_THIRD);
             videoFilter.Append($"boxcolor={FfMpegColors.Green}:");
             videoFilter.Append("enable='between(t,5,20)'");
         }

@@ -4,9 +4,13 @@ using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
-public sealed class Tarball : BaseProcess, ITarball
+public sealed class Tarball : BaseProcess<Tarball>, ITarball
 {
     private const string TarBinary = "/usr/bin/tar";
+
+    public Tarball(ILoggerService<Tarball> loggerService) : base(loggerService)
+    {
+    }
 
     public async Task<(string stdOut, string stdErr)> CreateTarballFromDirectoryAsync(
         string tarballFilePath, string workingDirectory, CancellationToken cancellationToken)
@@ -52,7 +56,7 @@ public sealed class Tarball : BaseProcess, ITarball
 
         if (result.exitCode > 0)
         {
-            throw new TarballExtractingException("Errors occurred when running the command");
+            throw new TarballExtractingException(result.stdErr);
         }
 
         return await Task.FromResult((result.stdOut, result.stdErr));

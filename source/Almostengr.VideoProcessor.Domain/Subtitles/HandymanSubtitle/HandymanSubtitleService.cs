@@ -8,11 +8,14 @@ public sealed class HandymanSubtitleService : BaseSubtitleService, IHandymanSubt
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILoggerService<HandymanSubtitleService> _logger;
+    private readonly AppSettings _appSettings;
 
-    public HandymanSubtitleService(IFileSystem fileSystemService, ILoggerService<HandymanSubtitleService> logger)
+    public HandymanSubtitleService(IFileSystem fileSystemService, ILoggerService<HandymanSubtitleService> logger,
+        AppSettings appSettings)
     {
         _fileSystem = fileSystemService;
         _logger = logger;
+        _appSettings = appSettings;
     }
 
     public override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -21,7 +24,7 @@ public sealed class HandymanSubtitleService : BaseSubtitleService, IHandymanSubt
         {
             while (true)
             {
-                HandymanSubtitle subtitle = new(Constants.HandymanBaseDirectory);
+                HandymanSubtitle subtitle = new(_appSettings.HandymanDirectory);
 
                 subtitle.SetSubTitleFile(_fileSystem.GetRandomSrtFileFromDirectory(subtitle.IncomingDirectory));
 

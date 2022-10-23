@@ -4,7 +4,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 namespace Almostengr.VideoProcessor.Domain.Subtitles.Exceptions;
 
 [Serializable]
-internal class SrtSubtitleBaseDirectoryIsNullOrEmptyException : VideoProcessorException
+internal sealed class SrtSubtitleBaseDirectoryIsNullOrEmptyException : VideoProcessorException
 {
     public SrtSubtitleBaseDirectoryIsNullOrEmptyException()
     {

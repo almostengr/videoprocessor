@@ -5,14 +5,14 @@ using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
-public sealed class Ffmpeg : BaseProcess, IFfmpeg
+public sealed class Ffmpeg : BaseProcess<Ffmpeg>, IFfmpeg
 {
-    private const string LOG_ERRORS = "-loglevel error";
     private const string FfmpegBinary = "/usr/bin/ffmpeg";
     private const string FfprobeBinary = "/usr/bin/ffprobe";
     private readonly IFileSystem _fileSystem;
 
-    public Ffmpeg(IFileSystem fileSystemService) : base()
+    public Ffmpeg(IFileSystem fileSystemService, ILoggerService<Ffmpeg> loggerService) : 
+        base(loggerService)
     {
         _fileSystem = fileSystemService;
     }
@@ -25,7 +25,7 @@ public sealed class Ffmpeg : BaseProcess, IFfmpeg
 
         if (results.exitCode > 0)
         {
-            throw new FfprobeException("Errors occurred when running the command");
+            throw new FfprobeException(results.stdErr);
         }
 
         return await Task.FromResult((results.stdOut, results.stdErr));
@@ -34,7 +34,7 @@ public sealed class Ffmpeg : BaseProcess, IFfmpeg
     public async Task<(string stdOut, string stdErr)> FfmpegAsync(
         string arguments, string workingDirectory, CancellationToken cancellationToken)
     {
-        arguments = $"-y -hide_banner {LOG_ERRORS} -safe 0 \"{arguments}\"";
+        arguments = $"-y -hide_banner -loglevel error -safe 0 {arguments}";
         var results = await RunProcessAsync(FfmpegBinary, arguments, workingDirectory, cancellationToken);
 
         if (results.exitCode > 0)
@@ -105,7 +105,7 @@ public sealed class Ffmpeg : BaseProcess, IFfmpeg
 
         var videoFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory);
 
-        for(int i = 0; i < videoFiles.Count(); i++)
+        for (int i = 0; i < videoFiles.Count(); i++)
         {
             await FfmpegAsync(
                $"-i \"{videoFiles.ElementAt(i)}\" -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {extractNumberOfFrames} -vsync vfr \"{video.Title}.{i}.%03d.jpg\"",
@@ -115,5 +115,16 @@ public sealed class Ffmpeg : BaseProcess, IFfmpeg
         }
 
         return (string.Empty, string.Empty);
+    }
+
+    public async Task<(string stdout, string stdErr)> CreateTitleTextVideoAsync<T>(
+        T video, CancellationToken cancellationToken) where T : BaseVideo
+    {
+        // ffmpeg -y -lavfi "color=green:1920x1080:d=3,subtitles=subtitle.srt:force_style='Alignment=10,OutlineColour=&H100000000,BorderStyle=6,Outline=1,Shadow=1,Fontsize=40,MarginL=5,MarginV=25'"
+        return await FfmpegAsync(
+            $"-y -lavfi \"color={video.BoxColor()}:1920x1080:d=3,subtitles=title.srt:force_style='Alignment=10,OutlineColour=&H100000000,BorderStyle=6,Outline=1,Shadow=1,Fontsize=40,MarginL=5,MarginV=25'\"",
+            video.WorkingDirectory,
+            cancellationToken
+        );
     }
 }

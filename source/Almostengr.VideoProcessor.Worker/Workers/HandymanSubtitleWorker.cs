@@ -1,3 +1,4 @@
+using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
 
 namespace Almostengr.VideoProcessor.Worker.Workers;
@@ -5,10 +6,13 @@ namespace Almostengr.VideoProcessor.Worker.Workers;
 internal sealed class HandymanSubtitleWorker : BaseWorker
 {
     private readonly IHandymanSubtitleService _subtitleService;
+    private readonly AppSettings _appSettings;
 
-    public HandymanSubtitleWorker(IHandymanSubtitleService subtitleService)
+    public HandymanSubtitleWorker(IHandymanSubtitleService subtitleService,
+        AppSettings appSettings) : base(appSettings)
     {
         _subtitleService = subtitleService;
+        _appSettings = appSettings;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -16,7 +20,7 @@ internal sealed class HandymanSubtitleWorker : BaseWorker
         while (!stoppingToken.IsCancellationRequested)
         {
             await _subtitleService.ExecuteAsync(stoppingToken);
-            await Task.Delay(WaitDelay, stoppingToken);
+            await Task.Delay(_appSettings.WorkerDelayMinutes, stoppingToken);
         }
     }
 

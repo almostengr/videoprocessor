@@ -12,10 +12,11 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     private readonly ITarball _tarball;
     private readonly IMusicService _musicService;
     private readonly ILoggerService<HandymanVideoService> _logger;
+    private readonly AppSettings _appSettings;
 
     public HandymanVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarballService, IMusicService musicService, ILoggerService<HandymanVideoService> logger,
-         ITarball tarball
+         ITarball tarball, AppSettings appSettings
         ) : base(fileSystemService, ffmpegService, tarball)
     {
         _fileSystem = fileSystemService;
@@ -23,6 +24,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         _tarball = tarballService;
         _musicService = musicService;
         _logger = logger;
+        _appSettings = appSettings;
     }
 
     public override async Task ProcessVideosAsync(CancellationToken stoppingToken)
@@ -31,57 +33,50 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         {
             while (true)
             {
-                HandymanVideo video = new HandymanVideo(Constants.HandymanBaseDirectory);
+                HandymanVideo video = new HandymanVideo(_appSettings.HandymanDirectory);
                 
                 CreateVideoDirectories(video);
                 DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
                 _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
-                string tarBallFilePath = _fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory);
+                await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
 
-                video.SetTarballFilePath(tarBallFilePath);
+                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory));
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
                 _fileSystem.CreateDirectory(video.WorkingDirectory);
 
-                await _tarball.ExtractTarballContentsAsync(video.TarballFilePath, video.WorkingDirectory, stoppingToken);
+                await _tarball.ExtractTarballContentsAsync(
+                    video.TarballFilePath, video.WorkingDirectory, stoppingToken);
 
-                _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory); // lowercase all file names
+                _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
 
-                await AddAudioToTimelapseAsync(video, stoppingToken); // add audio to timelapse videos
+                await AddAudioToTimelapseAsync(video, stoppingToken);
 
-                // foreach (var videoFile in _fileSystem.GetFilesInDirectory(video.WorkingDirectory))
-                // {
                 await _ffmpeg.CreateThumbnailsFromVideoFilesAsync(video, stoppingToken);
-                //         video.Title, video.OutputFilePath, video.WorkingDirectory, stoppingToken);
-                // }
 
                 _fileSystem.CopyFile(video.ShowIntroFilePath, video.WorkingDirectory);
 
                 await ConvertVideoFilesToCommonFormatAsync(video, stoppingToken);
 
+                _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
+
                 CreateFfmpegInputFile(video);
 
                 string videoFilter = DrawTextVideoFilter(video);
 
-                // await _ffmpeg.RenderVideoAsync(video.WorkingDirectory, videoFilter);
-                // await _ffmpeg.FfmpegAsync(
-                //     $"-y {LOG_ERRORS} -safe 0 -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -i \"{video.FfmpegInputFilePath}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -c:v h264_vaapi -bsf:a aac_adtstoasc \"{video.OutputFilePath}\"", //string.Empty,
-                //     video.WorkingDirectory,
-                //     stoppingToken);
-
                 await _ffmpeg.RenderVideoAsync(
                     video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
-                _fileSystem.MoveFile(video.TarballFilePath, video.ArchiveDirectory);
+                _fileSystem.MoveFile(
+                    video.TarballFilePath, Path.Combine(video.ArchiveDirectory, video.TarballFileName));
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
         }
         catch (NoTarballsPresentException)
         {
-            _logger.LogInformation(ExceptionMessage.NoTarballsPresent);
         }
         catch (Exception ex)
         {
@@ -107,14 +102,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
         foreach (var videoFilePath in videoFiles)
         {
-            // var result = await RunCommandAsync(
-            //     ProgramPaths.Ffprobe,
-            //     $"-hide_banner \"{videoFileName}\"",
-            //     workingDirectory,
-            //     cancellationToken,
-            //     1
-            // );
-
             var result = await _ffmpeg.FfprobeAsync(
                 $"\"{videoFilePath}\"", video.WorkingDirectory, cancellationToken);
 
@@ -136,19 +123,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             string outputFileName = $"{Path.GetFileNameWithoutExtension(videoFilePath)}.tmp{FileExtension.Mp4}"
                 .Replace(NARRATION, string.Empty)
                 .Replace(NARRATIVE, string.Empty);
-
-            // await RunCommandAsync(
-            //     ProgramPaths.Ffmpeg,
-            //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFileName)}\" -i \"{audioFile}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
-            //     workingDirectory,
-            //     cancellationToken,
-            //     10);
-
-            // await _ffmpeg.FfmpegAsync(
-            //     $"{LOG_ERRORS} {HW_OPTIONS} -i \"{Path.GetFileName(videoFilePath)}\" -i \"{audioFilePath}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFileName}\"",
-            //     video.WorkingDirectory,
-            //     cancellationToken
-            // );
 
             await _ffmpeg.AddAudioToVideoAsync(
                 videoFilePath, audioFilePath, outputFileName, cancellationToken);

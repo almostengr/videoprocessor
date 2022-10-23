@@ -11,6 +11,8 @@ public abstract class BaseVideoService : IBaseVideoService
     protected const string DIM_BACKGROUND = "0.3";
     protected const string LARGE_FONT = "h/20";
     protected const string SMALL_FONT = "h/35";
+    protected const string BORDER_CHANNEL_TEXT = "box=1:boxborderw=10:";
+    protected const string BORDER_LOWER_THIRD = "box=1:boxborderw=15:";
 
     protected const string FILE = "file";
     protected const string NARRATION = "narration";
@@ -69,6 +71,8 @@ public abstract class BaseVideoService : IBaseVideoService
 
     internal void DeleteFilesOlderThanSpecifiedDays(string directory)
     {
+        return; // todo test at later time
+
         const int SPECIFIED_DAYS = 14;
         DateTime currentDateTime = DateTime.Now;
 
@@ -201,7 +205,7 @@ public abstract class BaseVideoService : IBaseVideoService
         foreach (var dir in _fileSystem.GetDirectoriesInDirectory(directory))
         {
             await _tarball.CreateTarballFromDirectoryAsync(dir, cancellationToken);
-            _fileSystem.DeleteDirectory(directory);
+            _fileSystem.DeleteDirectory(dir);
         }
     }
 
@@ -211,11 +215,24 @@ public abstract class BaseVideoService : IBaseVideoService
         videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
         videoFilter.Append($"fontsize={SMALL_FONT}:");
         videoFilter.Append($"{_upperRight}:");
-        videoFilter.Append("box=1:");
-        videoFilter.Append("boxborderw=10:");
+        videoFilter.Append(BORDER_CHANNEL_TEXT);
         videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
 
         return videoFilter.ToString();
     }
 
+    internal virtual void GenerateSubtitleFileWithTitle(string filePath, string title)
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.Append("1");
+        stringBuilder.Append("00:00:00,000 --> 00:00:03,000");
+        stringBuilder.Append(title);
+
+        _fileSystem.SaveFileContents(filePath, stringBuilder.ToString());
+    }
+
+    internal virtual void GenerateTitleTextVideo()
+    {
+        // ffmpeg -y -lavfi "color=green:1920x1080:d=3,subtitles=subtitle.srt:force_style='Alignment=10,OutlineColour=&H100000000,BorderStyle=6,Outline=1,Shadow=1,Fontsize=40,MarginL=5,MarginV=25'" -f matroska output.mp4
+    }
 }
