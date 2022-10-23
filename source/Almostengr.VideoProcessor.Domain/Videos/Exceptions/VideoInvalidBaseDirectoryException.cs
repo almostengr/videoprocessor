@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.Exceptions;
 
-internal sealed class VideoInvalidBaseDirectoryException : VideoProcessorException
+public sealed class VideoInvalidBaseDirectoryException : VideoProcessorException
 {
     public VideoInvalidBaseDirectoryException()
     {
