@@ -107,8 +107,7 @@ namespace Almostengr.VideoProcessor.Core.Subtitles
 
                 string fileContent = GetFileContents(subtitleFile);
 
-                SubtitleInputDto subtitleInputDto =
-                    new SubtitleInputDto(fileContent, Path.GetFileName(subtitleFile));
+                SubtitleInputDto subtitleInputDto = new SubtitleInputDto(fileContent, Path.GetFileName(subtitleFile));
 
                 if (subtitleInputDto.IsValidSrtSubtitleFile() == false)
                 {
