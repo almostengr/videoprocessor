@@ -1,9 +1,7 @@
-using System.Runtime.Serialization;
 using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles.Exceptions;
 
-[Serializable]
 internal sealed class SrtSubtitleBaseDirectoryIsNullOrEmptyException : VideoProcessorException
 {
     public SrtSubtitleBaseDirectoryIsNullOrEmptyException()
@@ -11,14 +9,6 @@ internal sealed class SrtSubtitleBaseDirectoryIsNullOrEmptyException : VideoProc
     }
 
     public SrtSubtitleBaseDirectoryIsNullOrEmptyException(string message) : base(message)
-    {
-    }
-
-    public SrtSubtitleBaseDirectoryIsNullOrEmptyException(string message, Exception? innerException) : base(message, innerException)
-    {
-    }
-
-    public SrtSubtitleBaseDirectoryIsNullOrEmptyException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

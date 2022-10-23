@@ -1,4 +1,3 @@
-using System.Runtime.Serialization;
 using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.Exceptions;
@@ -10,14 +9,6 @@ internal sealed class VideoTarballFileDoesNotExistException : VideoProcessorExce
     }
 
     public VideoTarballFileDoesNotExistException(string message) : base(message)
-    {
-    }
-
-    public VideoTarballFileDoesNotExistException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-    }
-
-    public VideoTarballFileDoesNotExistException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 }

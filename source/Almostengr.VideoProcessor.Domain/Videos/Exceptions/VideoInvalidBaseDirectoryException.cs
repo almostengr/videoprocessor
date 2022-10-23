@@ -1,4 +1,3 @@
-using System.Runtime.Serialization;
 using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.Exceptions;
@@ -10,14 +9,6 @@ internal sealed class VideoInvalidBaseDirectoryException : VideoProcessorExcepti
     }
 
     public VideoInvalidBaseDirectoryException(string message) : base(message)
-    {
-    }
-
-    public VideoInvalidBaseDirectoryException(string message, Exception? innerException) : base(message, innerException)
-    {
-    }
-
-    public VideoInvalidBaseDirectoryException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

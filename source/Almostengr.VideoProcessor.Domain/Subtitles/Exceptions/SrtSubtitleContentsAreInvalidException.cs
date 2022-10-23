@@ -1,9 +1,7 @@
-using System.Runtime.Serialization;
 using Almostengr.VideoProcessor.Domain.Common;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles.Exceptions;
 
-[Serializable]
 internal sealed class SrtSubtitleContentsAreInvalidException : VideoProcessorException
 {
     public SrtSubtitleContentsAreInvalidException()
@@ -11,14 +9,6 @@ internal sealed class SrtSubtitleContentsAreInvalidException : VideoProcessorExc
     }
 
     public SrtSubtitleContentsAreInvalidException(string message) : base(message)
-    {
-    }
-
-    public SrtSubtitleContentsAreInvalidException(string message, Exception? innerException) : base(message, innerException)
-    {
-    }
-
-    protected SrtSubtitleContentsAreInvalidException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }
