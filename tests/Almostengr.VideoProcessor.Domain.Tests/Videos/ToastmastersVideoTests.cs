@@ -113,13 +113,12 @@ public class ToastmastersVideoTests
     }
 
     [Test]
-    public void SetTarballFilePath_TarballFile_ThrowsException()
+    public void SetTarballFilePath_TarballFile_AreEqual()
     {
         string tarballFilePath = Path.Combine(video.IncomingDirectory, "anothertarball.tar.xz");
 
-        Assert.Throws<VideoTarballFileDoesNotExistException>(() => 
-        {
-            video.SetTarballFilePath(tarballFilePath);
-        });
+        video.SetTarballFilePath(tarballFilePath);
+
+        Assert.AreEqual(tarballFilePath, video.TarballFilePath);
     }
 }

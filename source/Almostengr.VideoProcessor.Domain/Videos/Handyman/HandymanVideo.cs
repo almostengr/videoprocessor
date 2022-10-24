@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Domain.Videos.Handyman;
 
-internal sealed record HandymanVideo : BaseVideo
+public sealed record HandymanVideo : BaseVideo
 {
     public HandymanVideo(string baseDirectory) : base(baseDirectory)
     {

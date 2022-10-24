@@ -56,25 +56,19 @@ public abstract record BaseVideo : BaseEntity
             throw new VideoTarballFilePathHasWrongExtensionException();
         }
 
-        FileInfo fileInfo = new FileInfo(tarballFilePath);
-        if (fileInfo.Exists == false)
-        {
-            throw new VideoTarballFileDoesNotExistException($"{nameof(tarballFilePath)} does not exist");
-        }
-
         TarballFilePath = tarballFilePath;
         TarballFileName = Path.GetFileName(TarballFilePath);
 
         Title = TarballFileName.Replace("/", string.Empty)
             .Replace(":", string.Empty)
-            .Replace(FileExtension.TarXz, string.Empty)
+            .Replace(FileExtension.TarGz, string.Empty)
             .Replace(FileExtension.TarXz, string.Empty)
             .Replace(FileExtension.Tar, string.Empty);
 
         SetOutputFileName(
             TarballFileName.Replace("/", string.Empty)
             .Replace(":", string.Empty)
-            .Replace(FileExtension.TarXz, string.Empty)
+            .Replace(FileExtension.TarGz, string.Empty)
             .Replace(FileExtension.TarXz, string.Empty)
             .Replace(FileExtension.Tar, string.Empty)
                 + FileExtension.Mp4);

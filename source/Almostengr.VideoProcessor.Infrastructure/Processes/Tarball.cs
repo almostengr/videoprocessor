@@ -49,10 +49,16 @@ public sealed class Tarball : BaseProcess<Tarball>, ITarball
     }
 
     public async Task<(string stdOut, string stdErr)> ExtractTarballContentsAsync(
-        string tarBallFilePath, string directory, CancellationToken cancellationToken)
+        string tarballFilePath, string directory, CancellationToken cancellationToken)
     {
+        FileInfo fileInfo = new FileInfo(tarballFilePath);
+        if (fileInfo.Exists == false)
+        {
+            throw new TarballExtractingException($"{nameof(tarballFilePath)} does not exist");
+        }
+
         var result = await RunProcessAsync(
-            TarBinary, $"-xvf \"{tarBallFilePath}\" -C \"{directory}\"", directory, cancellationToken);
+            TarBinary, $"-xvf \"{tarballFilePath}\" -C \"{directory}\"", directory, cancellationToken);
 
         if (result.exitCode > 0)
         {

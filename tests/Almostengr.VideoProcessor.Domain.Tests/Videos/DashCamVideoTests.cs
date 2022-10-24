@@ -3,13 +3,13 @@ using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Videos;
 using NUnit.Framework;
 using Almostengr.VideoProcessor.Domain.Videos.Exceptions;
-using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShow;
+using Almostengr.VideoProcessor.Domain.Videos.DashCam;
 
 namespace Almostengr.VideoProcessor.Domain.Tests;
 
-public class ChristmasLightShowVideoTests
+public class DashCamVideoTests
 {
-    private ChristmasLightVideo video;
+    private DashCamVideo video;
     private const string BaseDirectory = "/tmp";
 
     [SetUp]
@@ -21,7 +21,7 @@ public class ChristmasLightShowVideoTests
     [Test]
     public void CreateNewInstanceOfClass_EqualsBaseDirectory()
     {
-        // setup 
+        // setup
 
         // attempt
 
@@ -36,7 +36,7 @@ public class ChristmasLightShowVideoTests
         // verify
         Assert.Throws<VideoInvalidBaseDirectoryException>(() =>
         {
-            new ChristmasLightVideo(Constants.Whitespace);
+            new DashCamVideo(Constants.Whitespace);
         });
     }
 
@@ -75,11 +75,25 @@ public class ChristmasLightShowVideoTests
     }
 
     [Test]
-    public void BoxColor_ReturnsMaroon()
+    public void TextColor_TitleContainsNight_ReturnsOrange()
+    {
+        // setup
+        video.SetTarballFilePath(Path.Combine(BaseDirectory, "Driving at Night.tar.xz"));
+
+        // attempt
+        string textColor = video.TextColor();
+
+        // verify
+        Assert.True(video.Title.ToLower().Contains("night"));
+        Assert.AreEqual(textColor, FfMpegColors.Orange);
+    }
+
+    [Test]
+    public void BoxColor_ReturnsBlack()
     {
         string boxColor = video.BoxColor();
 
-        Assert.AreEqual(boxColor, FfMpegColors.Maroon);
+        Assert.AreEqual(boxColor, FfMpegColors.Black);
     }
 
     [Test]
@@ -87,7 +101,7 @@ public class ChristmasLightShowVideoTests
     {
         string channelText = video.ChannelBannerText();
 
-        Assert.True(channelText.Contains("rhtservices") || channelText.Contains("Robinson Handy and Technology Services"));
+        Assert.AreEqual("Kenny Ram Dash Cam", channelText);
     }
 
     [Test]
@@ -113,13 +127,12 @@ public class ChristmasLightShowVideoTests
     }
 
     [Test]
-    public void SetTarballFilePath_TarballFile_ThrowsException()
+    public void SetTarballFilePath_TarballFile_AreEqual()
     {
         string tarballFilePath = Path.Combine(video.IncomingDirectory, "anothertarball.tar.xz");
 
-        Assert.Throws<VideoTarballFileDoesNotExistException>(() => 
-        {
-            video.SetTarballFilePath(tarballFilePath);
-        });
+        video.SetTarballFilePath(tarballFilePath);
+
+        Assert.AreEqual(tarballFilePath, video.TarballFilePath);
     }
 }
