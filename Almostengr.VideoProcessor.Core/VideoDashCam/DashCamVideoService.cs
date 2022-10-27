@@ -181,9 +181,10 @@ namespace Almostengr.VideoProcessor.Core.VideoDashCam
             using StreamWriter writer = new StreamWriter(ffmpegInputFile);
             
             _logger.LogInformation("Creating FFMPEG input file");
-            var mp4Files = GetFilesInDirectory(_workingDirectory)
-              .Where(x => x.EndsWith(FileExtension.Mov))
-              .OrderBy(x => x);
+//             var mp4Files = GetFilesInDirectory(_workingDirectory)
+//               .Where(x => x.EndsWith(FileExtension.Mov))
+//               .OrderBy(x => x);
+            var mp4Files = (new DirectoryInfo(_workingDirectory)).GetFiles().OrderBy(f => f.CreationTime).ToArray();
 
             foreach (string file in mp4Files)
             {
