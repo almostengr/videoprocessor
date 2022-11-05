@@ -42,7 +42,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
                 await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
 
-                string tarBallFilePath = _fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory);
+                string tarBallFilePath = _fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory);
 
                 video.SetTarballFilePath(tarBallFilePath);
 
@@ -53,11 +53,13 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
                 _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory); // lowercase all file names
 
-                // await AddMusicToVideoAsync(video, stoppingToken); // add audio to timelapse videos
+                await AddMusicToVideoAsync(video, stoppingToken); // add audio to timelapse videos
 
-                await _ffmpeg.CreateThumbnailsFromVideoFilesAsync(video, stoppingToken);
+                // await _ffmpeg.CreateThumbnailsFromVideoFilesAsync(video, stoppingToken);
 
-                _fileSystem.CopyFile(_appSettings.RhtServicesIntroPath, video.WorkingDirectory);
+                _fileSystem.CopyFile(
+                    _appSettings.RhtServicesIntroPath, 
+                    Path.Combine(video.WorkingDirectory, Path.GetFileName(_appSettings.RhtServicesIntroPath)));
 
                 await ConvertVideoFilesToCommonFormatAsync(video, stoppingToken);
 
@@ -68,7 +70,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
                 await _ffmpeg.RenderVideoAsync(
                     video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
-                _fileSystem.MoveFile(video.TarballFilePath, video.ArchiveDirectory);
+                _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath);
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }

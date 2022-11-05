@@ -10,6 +10,7 @@ using Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
 using Almostengr.VideoProcessor.Domain.Videos.Handyman;
 using Almostengr.VideoProcessor.Domain.Toastmasters;
 using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShow;
+using Almostengr.VideoProcessor.Domain.Videos.Technology;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
@@ -24,6 +25,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IHandymanVideoService, HandymanVideoService>();
         services.AddSingleton<IMusicService, MusicService>();
         services.AddSingleton<ITarball, Tarball>();
+        services.AddSingleton<ITechnologyVideoService, TechnologyVideoService>();
         services.AddSingleton<IToastmastersVideoService, ToastmastersVideoService>();
         services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
 
@@ -31,8 +33,8 @@ IHost host = Host.CreateDefaultBuilder(args)
         // services.AddHostedService<DashCamVideoWorker>();
         // services.AddHostedService<HandymanSubtitleWorker>();
         // services.AddHostedService<HandymanVideoWorker>();
-        // services.AddHostedService<TechnologyVideoWorker>();
-        services.AddHostedService<ToastmastersVideoWorker>();
+        services.AddHostedService<TechnologyVideoWorker>();
+        // services.AddHostedService<ToastmastersVideoWorker>();
     })
     .UseSystemd()
     .Build();

@@ -30,7 +30,7 @@ public sealed class FileSystem : IFileSystem
     {
         if (createDestinationDirectory)
         {
-            CreateDirectory(destination);
+            CreateDirectory(Path.GetDirectoryName(destination));
         }
 
         File.Copy(source, destination);

@@ -34,7 +34,8 @@ public sealed class Ffmpeg : BaseProcess<Ffmpeg>, IFfmpeg
     public async Task<(string stdOut, string stdErr)> FfmpegAsync(
         string arguments, string workingDirectory, CancellationToken cancellationToken)
     {
-        arguments = $"-y -hide_banner -loglevel error -safe 0 {arguments}";
+        // removed -safe 0
+        arguments = $"-y -hide_banner -loglevel error {arguments}";
         var results = await RunProcessAsync(FfmpegBinary, arguments, workingDirectory, cancellationToken);
 
         if (results.exitCode > 0)
@@ -59,12 +60,12 @@ public sealed class Ffmpeg : BaseProcess<Ffmpeg>, IFfmpeg
     public async Task<(string stdout, string stdErr)> ImagesToVideoAsync(
         string imageFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
-        const int duration = 3;
+        const int DURATION = 3;
         string workingDirectory =
             Path.GetDirectoryName(imageFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
 
         return await FfmpegAsync(
-            $"-framerate 1/{duration} -i \"{imageFilePath}\" -c:v libx264 -t {duration} \"{outputFilePath}\"",
+            $"-framerate 1/{DURATION} -i \"{imageFilePath}\" -c:v libx264 -t {DURATION} \"{outputFilePath}\"",
             workingDirectory,
             cancellationToken
         );
@@ -86,9 +87,16 @@ public sealed class Ffmpeg : BaseProcess<Ffmpeg>, IFfmpeg
     public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
+        {
+            throw new InvalidPathException("Invalid paths provided");
+        }
+
         string workingDirectory =
             Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-        string outputFileName = Path.GetFileNameWithoutExtension(outputFilePath) + FileExtension.Ts;
+        // string outputFileName = Path.GetFileNameWithoutExtension(outputFilePath) + FileExtension.Ts;
+        string outputFileName = 
+            Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(videoFilePath) + FileExtension.Ts);
 
         return await FfmpegAsync(
             $"-i \"{Path.GetFileName(videoFilePath)}\" -c copy -bsf:v h264_mp4toannexb -f mpegts \"{outputFileName}\"",
@@ -100,15 +108,15 @@ public sealed class Ffmpeg : BaseProcess<Ffmpeg>, IFfmpeg
     public async Task<(string stdout, string stdErr)> CreateThumbnailsFromVideoFilesAsync<T>(
         T video, CancellationToken cancellationToken) where T : BaseVideo
     {
-        const int sceneChangePct = 10;
-        const int extractNumberOfFrames = 5;
+        const int SCENE_CHANGE_PERCENT = 10;
+        const int EXTRACT_NUMBER_OF_FRAMES = 5;
 
         var videoFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory);
 
         for (int i = 0; i < videoFiles.Count(); i++)
         {
             await FfmpegAsync(
-               $"-i \"{videoFiles.ElementAt(i)}\" -vf select=gt(scene\\,0.{sceneChangePct}) -frames:v {extractNumberOfFrames} -vsync vfr \"{video.Title}.{i}.%03d.jpg\"",
+               $"-i \"{videoFiles.ElementAt(i)}\" -vf select=gt(scene\\,0.{SCENE_CHANGE_PERCENT}) -frames:v {EXTRACT_NUMBER_OF_FRAMES} -vsync vfr \"{video.Title}.{i}.%03d.jpg\"",
                video.WorkingDirectory,
                cancellationToken
            );

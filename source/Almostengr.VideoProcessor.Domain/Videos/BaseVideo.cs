@@ -34,6 +34,7 @@ public abstract record BaseVideo : BaseEntity
     public string OutputFileName { get; private set; }
     public string IncomingDirectory { get; }
     public string ArchiveDirectory { get; }
+    public string TarballArchiveFilePath {get; private set;}
     public string WorkingDirectory { get; }
     public string UploadDirectory { get; }
     public string OutputFilePath { get; private set; }
@@ -72,6 +73,8 @@ public abstract record BaseVideo : BaseEntity
             .Replace(FileExtension.TarXz, string.Empty)
             .Replace(FileExtension.Tar, string.Empty)
                 + FileExtension.Mp4);
+
+        TarballArchiveFilePath = Path.Combine(ArchiveDirectory, TarballFileName);
     }
 
     internal virtual void SetOutputFileName(string fileName)
