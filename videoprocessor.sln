@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{EDBD548C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Domain.Tests", "tests\Almostengr.VideoProcessor.Domain.Tests\Almostengr.VideoProcessor.Domain.Tests.csproj", "{EE2FDDE9-A380-4CA1-BCBC-9D4783E28B6F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Infrastructure.UnitTests", "tests\Almostengr.VideoProcessor.Infrastructure.UnitTests\Almostengr.VideoProcessor.Infrastructure.UnitTests.csproj", "{AB4E58D1-D335-4899-BC4E-B76C7CD4E7D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,11 +42,16 @@ Global
 		{EE2FDDE9-A380-4CA1-BCBC-9D4783E28B6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE2FDDE9-A380-4CA1-BCBC-9D4783E28B6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE2FDDE9-A380-4CA1-BCBC-9D4783E28B6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB4E58D1-D335-4899-BC4E-B76C7CD4E7D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB4E58D1-D335-4899-BC4E-B76C7CD4E7D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB4E58D1-D335-4899-BC4E-B76C7CD4E7D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB4E58D1-D335-4899-BC4E-B76C7CD4E7D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{28648209-C031-433C-A186-A1254AD6FCA6} = {8214F653-A412-4D29-924B-C39586593DDF}
 		{026F5403-4B5F-409D-942A-91B052AD3B97} = {8214F653-A412-4D29-924B-C39586593DDF}
 		{A27F24E7-A9FB-4CCA-B97F-58E94F64A46C} = {8214F653-A412-4D29-924B-C39586593DDF}
 		{EE2FDDE9-A380-4CA1-BCBC-9D4783E28B6F} = {EDBD548C-8955-4E65-B54B-B1CC91AFCFDE}
+		{AB4E58D1-D335-4899-BC4E-B76C7CD4E7D5} = {EDBD548C-8955-4E65-B54B-B1CC91AFCFDE}
 	EndGlobalSection
 EndGlobal
