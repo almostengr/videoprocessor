@@ -7,7 +7,7 @@ namespace Almostengr.VideoProcessor.Domain.Videos.Technology;
 
 public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoService
 {
-    private readonly IFileSystem _fileSystem; 
+    private readonly IFileSystem _fileSystem;
     private readonly IFfmpeg _ffmpeg;
     private readonly ITarball _tarball;
     private readonly IMusicService _musicService;
@@ -34,7 +34,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
             while (true)
             {
                 TechnologyVideo video = new TechnologyVideo(_appSettings.TechnologyDirectory);
-                
+
                 CreateVideoDirectories(video);
                 DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
@@ -55,12 +55,6 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
                 await AddMusicToVideoAsync(video, stoppingToken); // add audio to timelapse videos
 
-                // await _ffmpeg.CreateThumbnailsFromVideoFilesAsync(video, stoppingToken);
-
-                _fileSystem.CopyFile(
-                    _appSettings.RhtServicesIntroPath, 
-                    Path.Combine(video.WorkingDirectory, Path.GetFileName(_appSettings.RhtServicesIntroPath)));
-
                 await ConvertVideoFilesToCommonFormatAsync(video, stoppingToken);
 
                 CreateFfmpegInputFile(video);
@@ -70,23 +64,16 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
                 await _ffmpeg.RenderVideoAsync(
                     video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
-                _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath);
+                _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
         }
         catch (NoTarballsPresentException)
-        {
-            _logger.LogInformation(ExceptionMessage.NoTarballsPresent);
-        }
+        { }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
         }
-    }
-
-    internal override void CreateFfmpegInputFile<TechnologyVideo>(TechnologyVideo video)
-    {
-        base.RhtCreateFfmpegInputFile<TechnologyVideo>(video);
     }
 }

@@ -1,4 +1,5 @@
 using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
@@ -34,7 +35,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             while (true)
             {
                 HandymanVideo video = new HandymanVideo(_appSettings.HandymanDirectory);
-                
+
                 CreateVideoDirectories(video);
                 DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
@@ -42,7 +43,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
                 await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
 
-                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory));
+                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
                 _fileSystem.CreateDirectory(video.WorkingDirectory);
@@ -53,10 +54,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
 
                 await AddAudioToTimelapseAsync(video, stoppingToken);
-
-                await _ffmpeg.CreateThumbnailsFromVideoFilesAsync(video, stoppingToken);
-
-                _fileSystem.CopyFile(_appSettings.RhtServicesIntroPath, video.WorkingDirectory);
 
                 await ConvertVideoFilesToCommonFormatAsync(video, stoppingToken);
 
@@ -69,24 +66,17 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 await _ffmpeg.RenderVideoAsync(
                     video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
-                _fileSystem.MoveFile(
-                    video.TarballFilePath, Path.Combine(video.ArchiveDirectory, video.TarballFileName));
+                _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
         }
         catch (NoTarballsPresentException)
-        {
-        }
+        { }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
         }
-    }
-
-    internal override void CreateFfmpegInputFile<HandymanVideo>(HandymanVideo video)
-    {
-        base.RhtCreateFfmpegInputFile<HandymanVideo>(video);
     }
 
     private async Task AddAudioToTimelapseAsync(HandymanVideo video, CancellationToken cancellationToken)

@@ -9,16 +9,16 @@ public sealed record ChristmasLightVideo : BaseVideo
 
     public override string ChannelBannerText()
     {
-        return ChannelBannerTextRhtServices();
+        return "rhtservices.net/christmas";
     }
 
     public override string TextColor()
     {
-        return FfMpegColors.White;
+        return FfMpegColors.Maroon;
     }
 
     public override string BoxColor()
     {
-        return FfMpegColors.Maroon;
+        return FfMpegColors.White;
     }
 }

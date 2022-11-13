@@ -1,10 +1,13 @@
 using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Domain.Videos;
 
 public abstract record BaseVideo : BaseEntity
 {
+    internal static Random _random = new Random();
+
     public BaseVideo(string baseDirectory)
     {
         if (string.IsNullOrWhiteSpace(baseDirectory))
@@ -18,10 +21,11 @@ public abstract record BaseVideo : BaseEntity
         UploadDirectory = Path.Combine(BaseDirectory, DirectoryNames.Upload);
         WorkingDirectory = Path.Combine(BaseDirectory, DirectoryNames.Working);
         ArchiveDirectory = Path.Combine(BaseDirectory, DirectoryNames.Archive);
-        FfmpegInputFilePath = Path.Combine(WorkingDirectory, Constants.FfmpegInputFileName);
+        FfmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
 
         TarballFileName = string.Empty;
         TarballFilePath = string.Empty;
+        TarballArchiveFilePath = string.Empty;
         Title = string.Empty;
         OutputFileName = string.Empty;
         OutputFilePath = string.Empty;
@@ -34,7 +38,7 @@ public abstract record BaseVideo : BaseEntity
     public string OutputFileName { get; private set; }
     public string IncomingDirectory { get; }
     public string ArchiveDirectory { get; }
-    public string TarballArchiveFilePath {get; private set;}
+    public string TarballArchiveFilePath { get; private set; }
     public string WorkingDirectory { get; }
     public string UploadDirectory { get; }
     public string OutputFilePath { get; private set; }
@@ -52,7 +56,8 @@ public abstract record BaseVideo : BaseEntity
         }
 
         if (tarballFilePath.EndsWith(FileExtension.Tar) == false &&
-            tarballFilePath.EndsWith(FileExtension.TarXz) == false)
+            tarballFilePath.EndsWith(FileExtension.TarXz) == false && 
+            tarballFilePath.EndsWith(FileExtension.TarGz) == false)
         {
             throw new VideoTarballFilePathHasWrongExtensionException();
         }
@@ -90,18 +95,17 @@ public abstract record BaseVideo : BaseEntity
 
     protected string ChannelBannerTextRhtServices()
     {
-        Random random = new Random();
         string[] bannerText = {
             "rhtservices.net",
             "Robinson Handy and Technology Services",
             "rhtservices.net/courses",
             "rhtservices.net/facebook",
             "rhtservices.net/instagram",
-            "rhtservices.net/youtube",
+            // "rhtservices.net/youtube",
             "@rhtservicesllc"
             };
 
-        return bannerText.ElementAt(random.Next(0, bannerText.Length));
+        return bannerText.ElementAt(_random.Next(0, bannerText.Length));
     }
 
 }

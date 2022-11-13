@@ -20,8 +20,7 @@ namespace Almostengr.VideoProcessor.Core.VideoHandyTech
         private const string _xResolution = "1920";
         private const string _yResolution = "1080";
         private const string _audioBitRate = "196000";
-        private const string _audioSampleRate = "48000";
-        private const string NO_INTRO_FILE = "nointro.txt";
+        private const string _audioSampleRate = "48000";        
         private const string SHOW_INTRO_FILENAME_MP4 = "rhtservicesintro.mp4";
 
         public HandyTechVideoService(ILogger<HandyTechVideoService> logger, AppSettings appSettings,

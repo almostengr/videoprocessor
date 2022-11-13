@@ -3,6 +3,7 @@ using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.DashCam;
 
@@ -114,7 +115,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         StringBuilder videoFilter = new(base.DrawTextVideoFilter(video));
 
         // video title in upper left
-        videoFilter.Append(Constants.CommaSpace);
+        videoFilter.Append(Constant.CommaSpace);
         videoFilter.Append($"drawtext=textfile:'{(video.Title.Split())[0]}':");
         videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
         videoFilter.Append($"fontsize={SMALL_FONT}:");
@@ -124,15 +125,14 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
         // mileage and roads taken
         bool destinationFilePresent = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-            .Where(f => f.Contains(DESTINATION_FILE))
-            .Any();
+            .Where(f => f.Contains(DESTINATION_FILE)).Any();
 
         if (destinationFilePresent)
         {
             var destinationText = _fileSystem.GetFileContents(
                 Path.Combine(video.WorkingDirectory, DESTINATION_FILE));
 
-            videoFilter.Append(Constants.CommaSpace);
+            videoFilter.Append(Constant.CommaSpace);
             videoFilter.Append($"drawtext=textfile:'{destinationText}':");
             videoFilter.Append($"fontcolor={FfMpegColors.White}:");
             videoFilter.Append($"fontsize={LARGE_FONT}:");
@@ -142,7 +142,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             videoFilter.Append("enable='between(t,5,20)'");
         }
 
-        videoFilter.Append(Constants.CommaSpace);
+        videoFilter.Append(Constant.CommaSpace);
         videoFilter.Append(_subscribeFilter);
 
         return videoFilter.ToString();

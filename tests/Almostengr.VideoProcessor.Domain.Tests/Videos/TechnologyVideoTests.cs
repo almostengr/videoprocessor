@@ -1,5 +1,5 @@
 using System.IO;
-using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Videos;
 using NUnit.Framework;
 using Almostengr.VideoProcessor.Domain.Videos.Exceptions;
@@ -36,7 +36,7 @@ public class TechnologyVideoTests
         // verify
         Assert.Throws<VideoInvalidBaseDirectoryException>(() =>
         {
-            new TechnologyVideo(Constants.Whitespace);
+            new TechnologyVideo(Constant.Whitespace);
         });
     }
 

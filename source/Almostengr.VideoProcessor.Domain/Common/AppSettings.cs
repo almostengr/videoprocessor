@@ -35,7 +35,7 @@ public sealed class AppSettings
         DeleteFilesAfterDays = 0; // 0 to disable
         DiskSpaceThreshold = 0; // 0.0 to disable
         HandymanDirectory = $"{baseDirectory}/RhtHandyman";
-        RhtServicesIntroPath = $"{baseDirectory}/ytvideostructure/rhtservicesintro.mp4";
+        RhtServicesIntroPath = $"{baseDirectory}/ytvideostructure/rhtservicesintro.ts";
         TechnologyDirectory = $"{baseDirectory}/RhtTechnology";
         ToastmastersDirectory = $"{baseDirectory}/Toastmasters";
         WorkerDelay = TimeSpan.FromSeconds(15);

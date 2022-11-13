@@ -16,7 +16,8 @@ public sealed record ToastmastersVideo : BaseVideo
 
     public override string ChannelBannerText()
     {
-        return "towertoastmasters.org";
+        string[] text = {"towertoastmasters.org", "Tower Toastmasters"};
+        return text[_random.Next(0, text.Count())];
     }
 
     public override string TextColor()

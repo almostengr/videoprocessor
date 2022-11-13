@@ -1,6 +1,7 @@
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
 

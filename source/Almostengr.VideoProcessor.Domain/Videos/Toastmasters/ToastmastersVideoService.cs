@@ -1,5 +1,6 @@
 using System.Text;
 using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Videos;
@@ -58,7 +59,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 await _ffmpegSerivce.RenderVideoAsync(
                     video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
-                _fileSystem.MoveFile(video.TarballFilePath, Path.Combine(video.UploadDirectory, video.TarballFileName));
+                _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }

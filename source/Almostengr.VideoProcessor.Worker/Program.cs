@@ -32,7 +32,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         // services.AddHostedService<ChristmasLightVideoWorker>();
         // services.AddHostedService<DashCamVideoWorker>();
         // services.AddHostedService<HandymanSubtitleWorker>();
-        // services.AddHostedService<HandymanVideoWorker>();
+        services.AddHostedService<HandymanVideoWorker>();
         services.AddHostedService<TechnologyVideoWorker>();
         // services.AddHostedService<ToastmastersVideoWorker>();
     })

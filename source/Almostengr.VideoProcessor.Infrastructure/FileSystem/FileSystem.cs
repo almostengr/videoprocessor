@@ -1,4 +1,5 @@
 using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
@@ -100,12 +101,15 @@ public sealed class FileSystem : IFileSystem
 
     public void MoveFile(string source, string destination, bool createDestinationDirectory = true)
     {
-        if (createDestinationDirectory)
+        try
+        {
+            File.Move(source, destination);
+        }
+        catch (DirectoryNotFoundException)
         {
             CreateDirectory(destination);
+            File.Move(source, destination);
         }
-
-        File.Move(source, destination);
     }
 
     public IEnumerable<string> GetFilesInDirectory(string directory)
@@ -120,8 +124,6 @@ public sealed class FileSystem : IFileSystem
 
     public void PrepareAllFilesInDirectory(string directory)
     {
-        var allFiles = GetFilesInDirectory(directory);
-
         foreach (string childDirectory in GetDirectoriesInDirectory(directory))
         {
             foreach (string childFile in GetFilesInDirectory(childDirectory))
@@ -188,7 +190,6 @@ public sealed class FileSystem : IFileSystem
         }
 
         CreateDirectory(directoryName);
-
         File.WriteAllText(filePath, content);
     }
 

@@ -1,5 +1,6 @@
 using System.Text;
 using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Interfaces;
 
 namespace Almostengr.VideoProcessor.Domain.Videos;
@@ -10,6 +11,7 @@ public abstract class BaseVideoService : IBaseVideoService
     protected const string DIM_TEXT = "0.8";
     protected const string DIM_BACKGROUND = "0.3";
     protected const string LARGE_FONT = "h/20";
+    protected const string MEDIUM_FONT = "h/28";
     protected const string SMALL_FONT = "h/35";
     protected const string BORDER_CHANNEL_TEXT = "box=1:boxborderw=10:";
     protected const string BORDER_LOWER_THIRD = "box=1:boxborderw=15:";
@@ -125,9 +127,8 @@ public abstract class BaseVideoService : IBaseVideoService
     internal virtual async Task ConvertVideoFilesToCommonFormatAsync<T>(T video, CancellationToken cancellationToken) where T : BaseVideo
     {
         var videoFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-            .Where(x => x.EndsWith(FileExtension.Mkv) || x.EndsWith(FileExtension.Mp4))
-            .OrderBy(x => x)
-            .ToArray();
+            .Where(x => x.EndsWith(FileExtension.Mkv) || x.EndsWith(FileExtension.Mp4) || 
+                x.EndsWith(FileExtension.Avi) || x.EndsWith(FileExtension.Mov));
 
         foreach (var videoFileName in videoFiles)
         {
@@ -188,6 +189,7 @@ public abstract class BaseVideoService : IBaseVideoService
                 .ToArray();
 
             const string RHT_SERVICES_INTRO = "rhtservicesintro.ts";
+            bool includeVideoIntro = !_fileSystem.DoesFileExist(Path.Combine(video.WorkingDirectory, "nointro.txt"));
             for (int i = 0; i < filesInDirectory.Length; i++)
             {
                 if (filesInDirectory[i].Contains(RHT_SERVICES_INTRO))
@@ -195,7 +197,7 @@ public abstract class BaseVideoService : IBaseVideoService
                     continue;
                 }
 
-                if (i == 1 && video.Title.ToLower().Contains(Constants.ChristmasLightShow) == false)
+                if (i == 1 && includeVideoIntro)
                 {
                     writer.WriteLine($"{FILE} '{RHT_SERVICES_INTRO}'");
                 }
@@ -218,7 +220,7 @@ public abstract class BaseVideoService : IBaseVideoService
     {
         StringBuilder videoFilter = new($"drawtext=textfile:'{video.ChannelBannerText()}':");
         videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
-        videoFilter.Append($"fontsize={SMALL_FONT}:");
+        videoFilter.Append($"fontsize={MEDIUM_FONT}:");
         videoFilter.Append($"{_upperRight}:");
         videoFilter.Append(BORDER_CHANNEL_TEXT);
         videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
@@ -234,10 +236,5 @@ public abstract class BaseVideoService : IBaseVideoService
         stringBuilder.Append(title);
 
         _fileSystem.SaveFileContents(filePath, stringBuilder.ToString());
-    }
-
-    internal virtual void GenerateTitleTextVideo()
-    {
-        // ffmpeg -y -lavfi "color=green:1920x1080:d=3,subtitles=subtitle.srt:force_style='Alignment=10,OutlineColour=&H100000000,BorderStyle=6,Outline=1,Shadow=1,Fontsize=40,MarginL=5,MarginV=25'" -f matroska output.mp4
     }
 }

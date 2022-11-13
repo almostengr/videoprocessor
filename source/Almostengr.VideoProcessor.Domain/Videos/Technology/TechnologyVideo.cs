@@ -21,5 +21,4 @@ public sealed record TechnologyVideo : BaseVideo
     {
         return FfMpegColors.Green;
     }
-
 }

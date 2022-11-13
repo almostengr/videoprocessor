@@ -1,4 +1,5 @@
 using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
 
@@ -16,7 +17,7 @@ internal sealed record HandymanSubtitle : BaseSubtitle
         const string rhtServicesWebsite = "[rhtservices.net](/)";
 
         string text = BlogMarkdownText
-            .Replace("  ", Constants.Whitespace)
+            .Replace("  ", Constant.Whitespace)
             .Replace("[music]", "(music)")
             .Replace("and so", string.Empty)
             .Replace("facebook", "<a href=\"https://www.facebook.com/rhtservicesllc/\" target=\"_blank\">Facebook</a>")

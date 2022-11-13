@@ -1,5 +1,6 @@
 using System.Text;
 using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Subtitles.Exceptions;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles;
@@ -112,7 +113,7 @@ internal abstract record BaseSubtitle : BaseEntity
 
     private void RemoveDuplicateWordsFromBlogText()
     {
-        string[] words = BlogMarkdownText.Split(Constants.Whitespace);
+        string[] words = BlogMarkdownText.Split(Constant.Whitespace);
         string previousWord = string.Empty;
         StringBuilder stringBuilder = new();
 
@@ -120,7 +121,7 @@ internal abstract record BaseSubtitle : BaseEntity
         {
             if (previousWord != word)
             {
-                stringBuilder.Append(word + Constants.Whitespace);
+                stringBuilder.Append(word + Constant.Whitespace);
             }
 
             previousWord = word;

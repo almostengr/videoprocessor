@@ -64,7 +64,7 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
                 await _ffmpeg.RenderVideoAsync(
                     video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
 
-                _fileSystem.MoveFile(video.TarballFilePath, Path.Combine(video.UploadDirectory, video.TarballFileName));
+                _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
@@ -86,7 +86,7 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
         videoFilter.Append($"{_lowerLeft}:");
         videoFilter.Append(BORDER_CHANNEL_TEXT);
         videoFilter.Append($"boxcolor={video.BoxColor()}:");
-        videoFilter.Append($"enable='between(t,0,5)'");
+        videoFilter.Append($"enable='between(t,0,7)'");
 
         return videoFilter.ToString();
     }
