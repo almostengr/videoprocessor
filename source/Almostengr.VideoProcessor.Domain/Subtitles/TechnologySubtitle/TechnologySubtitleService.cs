@@ -1,16 +1,17 @@
-using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
+using Almostengr.VideoProcessor.Domain.Interfaces;
+using Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
 
-namespace Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
+namespace Almostengr.VideoProcessor.Domain.Subtitles.TechnologySubtitle;
 
-public sealed class HandymanSubtitleService : BaseSubtitleService, IHandymanSubtitleService
+public sealed class TechnologySubtitleService : BaseSubtitleService, ITechnologySubtitleService
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILoggerService<HandymanSubtitleService> _logger;
     private readonly AppSettings _appSettings;
 
-    public HandymanSubtitleService(IFileSystem fileSystemService, ILoggerService<HandymanSubtitleService> logger,
+    public TechnologySubtitleService(IFileSystem fileSystemService, ILoggerService<HandymanSubtitleService> logger,
         AppSettings appSettings)
     {
         _fileSystem = fileSystemService;
@@ -24,7 +25,7 @@ public sealed class HandymanSubtitleService : BaseSubtitleService, IHandymanSubt
         {
             while (true)
             {
-                HandymanSubtitle subtitle = new(_appSettings.HandymanDirectory);
+                TechnologySubtitle subtitle = new(_appSettings.TechnologyDirectory);
 
                 subtitle.SetSubTitleFile(_fileSystem.GetRandomSrtFileFromDirectory(subtitle.IncomingDirectory));
 
@@ -45,5 +46,4 @@ public sealed class HandymanSubtitleService : BaseSubtitleService, IHandymanSubt
 
         return Task.CompletedTask;
     }
-
 }
