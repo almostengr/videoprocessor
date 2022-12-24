@@ -17,14 +17,15 @@ public sealed class AppSettings
     {
         if (IsReleaseMode())
         {
-            ChristmasLightShowDirectory = string.Empty;
-            DashCamDirectory = string.Empty;
+            const string pbaseDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3";
+            ChristmasLightShowDirectory = $"{pbaseDirectory}/ChristmasLightShow";
+            DashCamDirectory = $"{pbaseDirectory}/";
             DeleteFilesAfterDays = 30;
             DiskSpaceThreshold = 0.1;
-            HandymanDirectory = string.Empty;
+            HandymanDirectory = $"{pbaseDirectory}/RhtHandyman";
             RhtServicesIntroPath = string.Empty;
-            TechnologyDirectory = string.Empty;
-            ToastmastersDirectory = string.Empty;
+            TechnologyDirectory = $"{pbaseDirectory}/RhtTechnology";
+            ToastmastersDirectory = $"{pbaseDirectory}/Toastmasters";
             WorkerDelay = TimeSpan.FromMinutes(120);
             return;
         }
