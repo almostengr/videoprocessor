@@ -3,6 +3,7 @@ using Almostengr.VideoProcessor.Domain.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShow;
 
@@ -43,7 +44,7 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
 
                 await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
 
-                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.BaseDirectory));
+                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
 
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
                 _fileSystem.CreateDirectory(video.WorkingDirectory);
@@ -80,13 +81,13 @@ public sealed class ChristmasLightVideoService : BaseVideoService, IChristmasLig
     internal override string DrawTextVideoFilter<ChristmasLightVideoService>(ChristmasLightVideoService video)
     {
         StringBuilder videoFilter = new(base.DrawTextVideoFilter(video));
+        videoFilter.Append(Constant.CommaSpace);
         videoFilter.Append($"drawtext=textfile:'{video.Title}':");
         videoFilter.Append($"fontcolor={video.TextColor()}:");
-        videoFilter.Append($"fontsize={LARGE_FONT}:");
+        videoFilter.Append($"fontsize={MEDIUM_FONT}:");
         videoFilter.Append($"{_lowerLeft}:");
         videoFilter.Append(BORDER_CHANNEL_TEXT);
-        videoFilter.Append($"boxcolor={video.BoxColor()}:");
-        videoFilter.Append($"enable='between(t,0,7)'");
+        videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
 
         return videoFilter.ToString();
     }

@@ -9,16 +9,17 @@ public sealed record ChristmasLightVideo : BaseVideo
 
     public override string ChannelBannerText()
     {
-        return "rhtservices.net/christmas";
+        string[] text = { "rhtservices.net", "twitter.com/hplightshow" };
+        return text[_random.Next(0, text.Count())];
     }
 
     public override string TextColor()
     {
-        return FfMpegColors.Maroon;
+        return FfMpegColors.White;
     }
 
     public override string BoxColor()
     {
-        return FfMpegColors.White;
+        return FfMpegColors.Maroon;
     }
 }
