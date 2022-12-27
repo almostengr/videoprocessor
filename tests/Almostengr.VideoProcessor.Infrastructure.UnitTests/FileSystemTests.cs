@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.Interfaces;
+using Almostengr.VideoProcessor.Domain.Common.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem;
 using NUnit.Framework;
 

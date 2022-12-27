@@ -1,6 +1,6 @@
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
-using Almostengr.VideoProcessor.Domain.Interfaces;
+using Almostengr.VideoProcessor.Domain.Common.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
 using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 
@@ -71,18 +71,17 @@ public sealed class FileSystem : IFileSystem
 
     public string GetRandomSrtFileFromDirectory(string directory)
     {
-        var srtFilePath = GetFilesInDirectory(directory)
-            .Where(f => f.EndsWith(FileExtension.Srt))
-            .Where(f => f.StartsWith(".") == false)
-            .OrderBy(f => _random.Next()).Take(1)
-            .First();
+        IEnumerable<string> srtFilePaths = GetFilesInDirectory(directory);
 
-        if (string.IsNullOrWhiteSpace(srtFilePath))
+        if (srtFilePaths.Count() == 0)
         {
             throw new NoSrtFilesPresentException();
         }
 
-        return srtFilePath;
+        return srtFilePaths
+            .Where(f => f.EndsWith(FileExtension.Srt))
+            .OrderBy(f => _random.Next()).Take(1)
+            .First();
     }
 
     public bool IsDiskSpaceAvailable(string directory)

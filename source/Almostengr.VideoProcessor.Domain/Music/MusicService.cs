@@ -1,6 +1,5 @@
-using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
-using Almostengr.VideoProcessor.Domain.Interfaces;
+using Almostengr.VideoProcessor.Domain.Common.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Exceptions;
 
 namespace Almostengr.VideoProcessor.Domain.Music.Services;
