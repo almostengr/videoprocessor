@@ -26,12 +26,12 @@ public sealed class AppSettings
         }
 
         const string baseDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3";
-        DashCamDirectory = $"{baseDirectory}/Kenny Ram Dash Cam";
+        DashCamDirectory = $"{baseDirectory}/dashcam";
         DeleteFilesAfterDays = 0; // 0 to disable
         DiskSpaceThreshold = 0; // 0.0 to disable
-        HandymanDirectory = $"{baseDirectory}/RhtHandyman";
-        TechnologyDirectory = $"{baseDirectory}/RhtTechnology";
-        ToastmastersDirectory = $"{baseDirectory}/Toastmasters";
+        HandymanDirectory = $"{baseDirectory}/handyman";
+        TechnologyDirectory = $"{baseDirectory}/technology";
+        ToastmastersDirectory = $"{baseDirectory}/toastmasters";
         WorkerDelay = TimeSpan.FromSeconds(15);
     }
 
