@@ -55,7 +55,15 @@ internal abstract record BaseSrtSubtitle : BaseSubtitle
             }
         }
 
-        return stringBuilder.ToString();
+        const string rhtServicesWebsite = "[rhtservices.net](/)";
+        return stringBuilder.ToString()
+            .Replace("[music]", "(music)")
+            .Replace("facebook", "<a href=\"https://www.facebook.com/rhtservicesllc/\" target=\"_blank\">Facebook</a>")
+            .Replace("instagram", "<a href=\"https://www.instagram.com/rhtservicesllc/\" target=\"_blank\">Instagram</a>")
+            .Replace("rhtservices.net", rhtServicesWebsite)
+            .Replace("r h t services dot net", rhtServicesWebsite)
+            .Replace("rht services", "RHT Services")
+            ;
     }
 
     internal override string GetSubtitleText()
