@@ -6,6 +6,7 @@ namespace Almostengr.VideoProcessor.Domain.DashCam;
 public sealed record DashCamVideo : BaseVideo
 {
     private readonly string Night = "night";
+    private readonly string DetailsFileName = "details.txt";
 
     public DashCamVideo(string baseDirectory) : base(baseDirectory)
     {
@@ -52,31 +53,25 @@ public sealed record DashCamVideo : BaseVideo
         return FfMpegColors.White;
     }
 
-    public string GetDetailsFileName()
-    {
-        return "details.txt";
-    }
-
     public string GetDetailsFilePath()
     {
-        return Path.Combine(WorkingDirectory, GetDetailsFileName());
+        return Path.Combine(WorkingDirectory, DetailsFileName);
     }
-
 
     public void AddDetailsContentToVideoFilter(string[] fileContents)
     {
         const int DISPLAY_DURATION = 5;
         const string SPEED_LIMIT = "speed limit";
 
-        foreach (string line in fileContents)
+        for(int i = 0 ; i < fileContents.Count(); i++)
         {
-            string[] splitLine = line.Split(Constant.Pipe);
+            string[] splitLine = fileContents[i].Split(Constant.Pipe);
             int startSeconds = Int32.Parse(splitLine[0]);
             int endSeconds = startSeconds + DISPLAY_DURATION;
             string displayText = splitLine[1].Replace(":", "\\:");
 
-            string textColor = FfMpegColors.White;
-            string backgroundColor = FfMpegColors.Green;
+            string textColor = SubtitleTextColor();
+            string backgroundColor = SubtitleBackgroundColor();
 
             if (displayText.ToLower().Contains(SPEED_LIMIT))
             {
@@ -87,6 +82,12 @@ public sealed record DashCamVideo : BaseVideo
             AddDrawTextFilter(displayText, textColor, Constant.SolidText, FfmpegFontSize.Small, 
                 DrawTextPosition.LowerRight, backgroundColor, Constant.SolidBackground, 
                 $"enable='between(t,{startSeconds},{endSeconds})'");
+
+            // todo - dim text after being displayed
+            // string nextSeconds = (fileContents[i+1].Split(Constant.Pipe))[0];
+            // AddDrawTextFilter(displayText, textColor, Constant.DimText, FfmpegFontSize.Small, 
+            //     DrawTextPosition.LowerRight, backgroundColor, Constant.DimBackground, 
+            //     $"enable='between(t,{endSeconds},{nextSeconds})'");
         }
     }
 }

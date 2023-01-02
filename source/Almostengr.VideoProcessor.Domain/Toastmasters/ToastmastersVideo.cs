@@ -24,8 +24,7 @@ public sealed record ToastmastersVideo : BaseVideo
         textFilter.Append($"{DrawTextPosition.UpperRight}:");
         textFilter.Append(Constant.BorderChannelText);
         textFilter.Append($"boxcolor={BannerBackgroundColor()}@{Constant.DimBackground}");
-        // return videoFilter.ToString();
-        // VideoFilter = textFilter.ToString();
+
         AddDrawTextFilter(textFilter.ToString());
     }
 
