@@ -1,6 +1,4 @@
-using Almostengr.VideoProcessor.Domain.Common;
-
-namespace Almostengr.VideoProcessor.Domain.Common.Exceptions;
+namespace Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 
 public sealed class VideoTarballFilePathIsNullOrEmptyException : VideoProcessorException
 {

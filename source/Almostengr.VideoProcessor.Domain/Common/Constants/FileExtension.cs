@@ -15,4 +15,5 @@ public static class FileExtension
     public const string TarGz = ".tar.gz";
     public const string TarXz = ".tar.xz";
     public const string Ts = ".ts";
+    public const string Txt = ".txt";
 }

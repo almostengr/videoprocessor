@@ -1,8 +1,8 @@
 using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Common.Interfaces;
+using Almostengr.VideoProcessor.Domain.Common.Subtitles;
+using Almostengr.VideoProcessor.Domain.Common.Subtitles.Exceptions;
 using Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
-using Almostengr.VideoProcessor.Domain.Common.Services;
 
 namespace Almostengr.VideoProcessor.Domain.Technology;
 

@@ -2,13 +2,13 @@ using System.Text;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common.Interfaces;
 
-namespace Almostengr.VideoProcessor.Domain.Common.Services;
+namespace Almostengr.VideoProcessor.Domain.Common.Videos;
 
 public abstract class BaseVideoService : IBaseVideoService
 {
     // ffmpeg filter attributes
     protected const string DIM_TEXT = "0.8";
-    protected const string DIM_BACKGROUND = "0.3";
+    protected const string DIM_BACKGROUND = "0.4";
     protected const string LARGE_FONT = "h/20";
     protected const string MEDIUM_FONT = "h/28";
     protected const string SMALL_FONT = "h/35";
@@ -19,6 +19,7 @@ public abstract class BaseVideoService : IBaseVideoService
     protected const string NARRATION = "narration";
     protected const string NARRATIVE = "narrative";
     protected const string AUDIO = "audio";
+    protected const int CALL_TO_ACTION_DURATION_SECONDS = 7;
 
     // ffmpeg positions
     protected readonly string _upperLeft;
@@ -55,11 +56,10 @@ public abstract class BaseVideoService : IBaseVideoService
         _lowerCenter = $"x=(w-tw)/2:y=h-th-{PADDING}";
         _lowerRight = $"x=w-tw-{PADDING}:y=h-th-{PADDING}";
 
-        const int CALL_TO_ACTION_DURATION_SECONDS = 5;
-        string filterDuration = $"enable=lt(mod(t\\,3)\\,{CALL_TO_ACTION_DURATION_SECONDS})";
+        string filterDuration = $"enable=lt(mod(t\\,120)\\,{CALL_TO_ACTION_DURATION_SECONDS})";
 
         _likeFilter = $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:{_lowerCenter}:boxcolor={FfMpegColors.Blue}:box=1:boxborderw=10:{filterDuration}";
-        _subscribeFilter = $"drawtext=text:'SUBSCRIBE FOR FUTURE VIDEOS!':fontcolor={FfMpegColors.White}:fontsize={LARGE_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{filterDuration}";
+        _subscribeFilter = $"drawtext=text:'SUBSCRIBE for future videos':fontcolor={FfMpegColors.White}:fontsize={MEDIUM_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{filterDuration}";
         _random = new Random();
     }
 
@@ -215,14 +215,15 @@ public abstract class BaseVideoService : IBaseVideoService
         }
     }
 
+    // internal virtual string DrawTextVideoFilter<T>(T video) where T : BaseVideo
     internal virtual string DrawTextVideoFilter<T>(T video) where T : BaseVideo
     {
         StringBuilder videoFilter = new($"drawtext=textfile:'{video.ChannelBannerText()}':");
-        videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
+        videoFilter.Append($"fontcolor={video.BannerTextColor()}@{DIM_TEXT}:");
         videoFilter.Append($"fontsize={MEDIUM_FONT}:");
         videoFilter.Append($"{_upperRight}:");
         videoFilter.Append(BORDER_CHANNEL_TEXT);
-        videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
+        videoFilter.Append($"boxcolor={video.BannerBackgroundColor()}@{DIM_BACKGROUND}");
 
         return videoFilter.ToString();
     }

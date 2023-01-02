@@ -2,7 +2,7 @@ using System.IO;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common;
 using NUnit.Framework;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions;
+using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Domain.Videos.Handyman;
 
 namespace Almostengr.VideoProcessor.Domain.Tests;
@@ -68,7 +68,7 @@ public class HandymanVideoTests
     public void TextColor_ReturnsYellow()
     {
         // attempt
-        string textColor = video.TextColor();
+        string textColor = video.BannerTextColor();
 
         // verify
         Assert.AreEqual(textColor, FfMpegColors.RhtYellow);
@@ -77,7 +77,7 @@ public class HandymanVideoTests
     [Test]
     public void BoxColor_ReturnsBlack()
     {
-        string boxColor = video.BoxColor();
+        string boxColor = video.BannerBackgroundColor();
 
         Assert.AreEqual(boxColor, FfMpegColors.Black);
     }

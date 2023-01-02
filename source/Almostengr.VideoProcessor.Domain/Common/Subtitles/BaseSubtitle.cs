@@ -1,7 +1,6 @@
 using Almostengr.VideoProcessor.Domain.Common.Constants;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions.Subtitles;
 
-namespace Almostengr.VideoProcessor.Domain.Common.Entities;
+namespace Almostengr.VideoProcessor.Domain.Common.Subtitles;
 
 internal abstract record BaseSubtitle : BaseEntity
 {
@@ -29,7 +28,7 @@ internal abstract record BaseSubtitle : BaseEntity
     internal string IncomingDirectory { get; }
     internal string SubtitleText { get; private set; }
     public string SubtitleInputFilePath { get; internal set; }
-    public string SubtitleArchiveFilePath {get; internal set;}
+    public string SubtitleArchiveFilePath { get; internal set; }
     public string BlogOutputFilePath { get; internal set; }
     public string SubtitleOutputFilePath { get; internal set; }
 

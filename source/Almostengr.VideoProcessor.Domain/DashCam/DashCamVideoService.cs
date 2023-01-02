@@ -2,9 +2,9 @@ using System.Text;
 using Almostengr.VideoProcessor.Domain.Common.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
 using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
-using Almostengr.VideoProcessor.Domain.Common.Services;
+using Almostengr.VideoProcessor.Domain.Common.Videos;
+using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Domain.DashCam;
 
@@ -15,10 +15,6 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     private readonly ITarball _tarball;
     private readonly IMusicService _musicService;
     private readonly ILoggerService<DashCamVideoService> _logger;
-    private const string DESTINATION_FILE = "destination.txt";
-    private const string MAJOR_ROADS_FILE = "majorroads.txt";
-    private const string DETAILS_FILE = "details.txt";
-    private const string VFLIP_FILE = "vflip.txt";
     private readonly AppSettings _appSettings;
 
     public DashCamVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
@@ -65,25 +61,17 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
                 CreateFfmpegInputFile(video);
 
-                string videoFilter = base.DrawTextVideoFilter(video);
+                video.SetSubtitleFilePath(_fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+                    .Where(f => f.EndsWith(FileExtension.Srt))
+                    .SingleOrDefault());
 
-                await _ffmpeg.RenderVideoAsync(
-                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
+                string videoFilter = DashCamVideoFilter(video);
 
-                _fileSystem.DeleteFiles(
-                    _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-                    .Where(f => f.EndsWith(FileExtension.Ts) == false ||
-                        f.EndsWith(DESTINATION_FILE) == false)
-                    .ToArray()
-                );
+                await _ffmpeg.RenderVideoWithMixTrackAsync(
+                    video.FfmpegInputFilePath, _musicService.GetRandomMixTrack(), videoFilter, video.OutputFilePath, stoppingToken);
 
-                await _tarball.CreateTarballFromDirectoryAsync(
-                    Path.Combine(video.ArchiveDirectory, video.TarballFileName),
-                    video.WorkingDirectory,
-                    stoppingToken);
-
+                _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
-                _fileSystem.DeleteFile(video.TarballFilePath);
             }
         }
         catch (NoTarballsPresentException)
@@ -101,51 +89,111 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
         {
             var filesInDirectory = (new DirectoryInfo(video.WorkingDirectory)).GetFiles()
-                .OrderBy(f => f.Name)
+                .OrderBy(f => f.CreationTimeUtc)
                 .ToArray();
 
             foreach (var file in filesInDirectory)
             {
+                if (file.Name.EndsWith(FileExtension.Md) ||
+                    file.Name.EndsWith(FileExtension.Srt) ||
+                    file.Name.EndsWith(FileExtension.Txt))
+                {
+                    continue;
+                }
+
                 writer.WriteLine($"{FILE} '{file}'");
             }
         }
     }
 
-    internal override string DrawTextVideoFilter<DashCamVideo>(DashCamVideo video)
+    private string DashCamVideoFilter(DashCamVideo video)
     {
         StringBuilder videoFilter = new(base.DrawTextVideoFilter(video));
 
         // video title in upper left
         videoFilter.Append(Constant.CommaSpace);
         videoFilter.Append($"drawtext=textfile:'{(video.Title.Split())[0]}':");
-        videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
+        videoFilter.Append($"fontcolor={video.BannerTextColor()}@{DIM_TEXT}:");
         videoFilter.Append($"fontsize={SMALL_FONT}:");
         videoFilter.Append($"{_upperLeft}:");
         videoFilter.Append(BORDER_CHANNEL_TEXT);
-        videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
+        videoFilter.Append($"boxcolor={video.BannerBackgroundColor()}@{DIM_BACKGROUND}");
 
-        // mileage and roads taken
-        bool destinationFilePresent = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-            .Where(f => f.Contains(DESTINATION_FILE)).Any();
-
-        if (destinationFilePresent)
-        {
-            var destinationText = _fileSystem.GetFileContents(
-                Path.Combine(video.WorkingDirectory, DESTINATION_FILE));
-
-            videoFilter.Append(Constant.CommaSpace);
-            videoFilter.Append($"drawtext=textfile:'{destinationText}':");
-            videoFilter.Append($"fontcolor={FfMpegColors.White}:");
-            videoFilter.Append($"fontsize={LARGE_FONT}:");
-            videoFilter.Append($"{_lowerLeft}:");
-            videoFilter.Append(BORDER_LOWER_THIRD);
-            videoFilter.Append($"boxcolor={FfMpegColors.Green}:");
-            videoFilter.Append("enable='between(t,5,20)'");
-        }
+        // // mileage and roads taken
+        bool detailFilesPresent = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+            .Where(f => f.EndsWith(video.GetDetailsFileName())).Any();
 
         videoFilter.Append(Constant.CommaSpace);
         videoFilter.Append(_subscribeFilter);
 
+        if (detailFilesPresent)
+        {
+            const int DISPLAY_DURATION = 5;
+            string[] fileContents = _fileSystem.GetFileContents(video.GetDetailsFilePath()).Split(Environment.NewLine);
+
+            foreach (string content in fileContents)
+            {
+                string[] parseContent = content.Split("|");
+                int startSeconds = Int32.Parse(parseContent[0]);
+                int endSeconds = startSeconds + DISPLAY_DURATION;
+                string displayText = parseContent[1].Replace(":", "\\:");
+
+                videoFilter.Append(Constant.CommaSpace);
+                videoFilter.Append($"drawtext=textfile:'{displayText.ToUpper()}':");
+                videoFilter.Append($"fontcolor={video.SubtitleTextColor()}:");
+                videoFilter.Append($"fontsize={SMALL_FONT}:");
+                videoFilter.Append($"{_lowerRight}:");
+                videoFilter.Append(BORDER_LOWER_THIRD);
+                videoFilter.Append($"boxcolor={video.SubtitleBackgroundColor()}:");
+                videoFilter.Append($"enable='between(t,{startSeconds},{endSeconds})'");
+            }
+        }
+
         return videoFilter.ToString();
     }
+
+    // internal override string DrawTextVideoFilter<DashCamVideo>(DashCamVideo video)
+    // {
+    //     StringBuilder videoFilter = new(base.DrawTextVideoFilter(video));
+
+    //     // video title in upper left
+    //     videoFilter.Append(Constant.CommaSpace);
+    //     videoFilter.Append($"drawtext=textfile:'{(video.Title.Split())[0]}':");
+    //     videoFilter.Append($"fontcolor={video.BannerTextColor()}@{DIM_TEXT}:");
+    //     videoFilter.Append($"fontsize={SMALL_FONT}:");
+    //     videoFilter.Append($"{_upperLeft}:");
+    //     videoFilter.Append(BORDER_CHANNEL_TEXT);
+    //     videoFilter.Append($"boxcolor={video.BannerBackgroundColor()}@{DIM_BACKGROUND}");
+
+    //     // // mileage and roads taken
+    //     bool detailFilesPresent = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+    //         .Where(f => f.EndsWith("details.txt")).Any();
+
+    //     videoFilter.Append(Constant.CommaSpace);
+    //     videoFilter.Append(_subscribeFilter);
+
+    //     if (detailFilesPresent)
+    //     {
+    //         const int DISPLAY_DURATION = 5;
+    //         string detailsFilePath = Path.Combine(video.WorkingDirectory, "details.txt");
+    //         string[] fileContents = _fileSystem.GetFileContents(detailsFilePath).Split(Environment.NewLine);
+
+    //         for (int i = 0; i < fileContents.Count(); i++)
+    //         {
+    //             int startSeconds = i * DISPLAY_DURATION;
+    //             int endSeconds = startSeconds + DISPLAY_DURATION;
+
+    //             videoFilter.Append(Constant.CommaSpace);
+    //             videoFilter.Append($"drawtext=textfile:'{fileContents[i].Replace(":", "\\:")}':");
+    //             videoFilter.Append($"fontcolor={FfMpegColors.White}:");
+    //             videoFilter.Append($"fontsize={MEDIUM_FONT}:");
+    //             videoFilter.Append($"{_lowerRight}:");
+    //             videoFilter.Append(BORDER_LOWER_THIRD);
+    //             videoFilter.Append($"boxcolor={FfMpegColors.Green}:");
+    //             videoFilter.Append($"enable='between(t,{startSeconds},{endSeconds})'");
+    //         }
+    //     }
+
+    //     return videoFilter.ToString();
+    // }
 }

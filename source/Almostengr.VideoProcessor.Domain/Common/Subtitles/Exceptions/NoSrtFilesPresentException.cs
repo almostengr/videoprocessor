@@ -1,8 +1,8 @@
-namespace Almostengr.VideoProcessor.Domain.Common.Exceptions;
+namespace Almostengr.VideoProcessor.Domain.Common.Subtitles.Exceptions;
 
 public sealed class NoSrtFilesPresentException : VideoProcessorException
 {
-    public NoSrtFilesPresentException()
+    public NoSrtFilesPresentException() : base()
     {
     }
 

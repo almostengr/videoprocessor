@@ -1,5 +1,4 @@
-namespace Almostengr.VideoProcessor.Domain.Common.Services;
-
+namespace Almostengr.VideoProcessor.Domain.Common.Subtitles;
 public interface IBaseSubtitleService
 {
     abstract Task ExecuteAsync(CancellationToken cancellationToken);

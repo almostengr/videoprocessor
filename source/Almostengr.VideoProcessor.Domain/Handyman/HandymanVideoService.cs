@@ -1,9 +1,9 @@
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Common.Interfaces;
+using Almostengr.VideoProcessor.Domain.Common.Videos;
+using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Domain.Music.Services;
-using Almostengr.VideoProcessor.Domain.Common.Services;
 
 namespace Almostengr.VideoProcessor.Domain.Videos.Handyman;
 

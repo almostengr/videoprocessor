@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Domain.Common.Services;
+using Almostengr.VideoProcessor.Domain.Common.Subtitles;
 
 namespace Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
 

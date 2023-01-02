@@ -1,8 +1,7 @@
 using System.Text;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions.Subtitles;
 
-namespace Almostengr.VideoProcessor.Domain.Common.Entities;
+namespace Almostengr.VideoProcessor.Domain.Common.Subtitles;
 
 internal abstract record BaseSrtSubtitle : BaseSubtitle
 {

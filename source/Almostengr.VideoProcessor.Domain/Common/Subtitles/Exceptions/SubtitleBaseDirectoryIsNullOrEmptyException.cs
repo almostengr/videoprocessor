@@ -1,8 +1,8 @@
-namespace Almostengr.VideoProcessor.Domain.Common.Exceptions.Subtitles;
+namespace Almostengr.VideoProcessor.Domain.Common.Subtitles;
 
 public sealed class SubtitleBaseDirectoryIsNullOrEmptyException : VideoProcessorException
 {
-    public SubtitleBaseDirectoryIsNullOrEmptyException()
+    public SubtitleBaseDirectoryIsNullOrEmptyException() : base()
     {
     }
 

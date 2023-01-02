@@ -1,5 +1,5 @@
 
-namespace Almostengr.VideoProcessor.Domain.Common.Exceptions;
+namespace Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 
 public sealed class VideoTarballFilePathHasWrongExtensionException : Exception
 {

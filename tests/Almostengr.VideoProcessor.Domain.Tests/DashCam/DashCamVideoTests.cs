@@ -2,7 +2,7 @@ using System.IO;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common;
 using NUnit.Framework;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions;
+using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Domain.DashCam;
 
 namespace Almostengr.VideoProcessor.Domain.Tests;
@@ -68,7 +68,7 @@ public class DashCamVideoTests
     public void TextColor_ReturnsWhite()
     {
         // attempt
-        string textColor = video.TextColor();
+        string textColor = video.BannerTextColor();
 
         // verify
         Assert.AreEqual(textColor, FfMpegColors.White);
@@ -81,7 +81,7 @@ public class DashCamVideoTests
         video.SetTarballFilePath(Path.Combine(BaseDirectory, "Driving at Night.tar.xz"));
 
         // attempt
-        string textColor = video.TextColor();
+        string textColor = video.BannerTextColor();
 
         // verify
         Assert.True(video.Title.ToLower().Contains("night"));
@@ -91,7 +91,7 @@ public class DashCamVideoTests
     [Test]
     public void BoxColor_ReturnsBlack()
     {
-        string boxColor = video.BoxColor();
+        string boxColor = video.BannerBackgroundColor();
 
         Assert.AreEqual(boxColor, FfMpegColors.Black);
     }

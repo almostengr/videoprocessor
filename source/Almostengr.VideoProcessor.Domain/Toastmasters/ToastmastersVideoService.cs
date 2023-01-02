@@ -1,9 +1,9 @@
 using System.Text;
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Common.Interfaces;
-using Almostengr.VideoProcessor.Domain.Common.Services;
+using Almostengr.VideoProcessor.Domain.Common.Videos;
+using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Domain.Toastmasters;
 
@@ -94,11 +94,11 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
     internal override string DrawTextVideoFilter<ToastmastersVideo>(ToastmastersVideo video)
     {
         StringBuilder videoFilter = new($"drawtext=textfile:'{video.ChannelBannerText()}':");
-        videoFilter.Append($"fontcolor={video.TextColor()}@{DIM_TEXT}:");
+        videoFilter.Append($"fontcolor={video.BannerTextColor()}@{DIM_TEXT}:");
         videoFilter.Append($"fontsize={LARGE_FONT}:");
         videoFilter.Append($"{_upperRight}:");
         videoFilter.Append(BORDER_CHANNEL_TEXT);
-        videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
+        videoFilter.Append($"boxcolor={video.BannerBackgroundColor()}@{DIM_BACKGROUND}");
 
         return videoFilter.ToString();
     }

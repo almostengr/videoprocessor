@@ -1,7 +1,7 @@
 using Almostengr.VideoProcessor.Domain.Common.Constants;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions;
+using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 
-namespace Almostengr.VideoProcessor.Domain.Common;
+namespace Almostengr.VideoProcessor.Domain.Common.Videos;
 
 public abstract record BaseVideo : BaseEntity
 {
@@ -28,6 +28,7 @@ public abstract record BaseVideo : BaseEntity
         Title = string.Empty;
         OutputFileName = string.Empty;
         OutputFilePath = string.Empty;
+        SubtitleFilePath = string.Empty;
     }
 
     public string BaseDirectory { get; init; }
@@ -42,10 +43,24 @@ public abstract record BaseVideo : BaseEntity
     public string UploadDirectory { get; }
     public string OutputFilePath { get; private set; }
     public string FfmpegInputFilePath { get; }
+    public string SubtitleFilePath { get; private set; }
 
     public abstract string ChannelBannerText();
-    public abstract string TextColor();
-    public abstract string BoxColor();
+    public abstract string BannerTextColor();
+    public abstract string BannerBackgroundColor();
+    public abstract string SubtitleTextColor();
+    public abstract string SubtitleBackgroundColor();
+
+    public void SetSubtitleFilePath(string? subtitleFilePath)
+    {
+        if (string.IsNullOrWhiteSpace(subtitleFilePath))
+        {
+            // throw new SubtitleFilePathIsNullOrWhiteSpaceException();
+            return;
+        }
+
+        SubtitleFilePath = subtitleFilePath;
+    }
 
     public void SetTarballFilePath(string? tarballFilePath)
     {
@@ -55,7 +70,7 @@ public abstract record BaseVideo : BaseEntity
         }
 
         if (tarballFilePath.EndsWith(FileExtension.Tar) == false &&
-            tarballFilePath.EndsWith(FileExtension.TarXz) == false && 
+            tarballFilePath.EndsWith(FileExtension.TarXz) == false &&
             tarballFilePath.EndsWith(FileExtension.TarGz) == false)
         {
             throw new VideoTarballFilePathHasWrongExtensionException();

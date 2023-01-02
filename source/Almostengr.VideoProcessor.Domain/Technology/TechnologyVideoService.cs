@@ -1,10 +1,10 @@
 using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions;
 using Almostengr.VideoProcessor.Domain.Common.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
-using Almostengr.VideoProcessor.Domain.Common.Services;
 using System.Text;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
+using Almostengr.VideoProcessor.Domain.Common.Videos;
+using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Domain.Technology;
 
@@ -94,11 +94,11 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
         {
             videoFilter.Append(Constant.CommaSpace);
             videoFilter.Append($"drawtext=textfile:'{video.Title}':");
-            videoFilter.Append($"fontcolor={video.TextColor()}:");
+            videoFilter.Append($"fontcolor={video.BannerTextColor()}:");
             videoFilter.Append($"fontsize={MEDIUM_FONT}:");
             videoFilter.Append($"{_lowerLeft}:");
             videoFilter.Append(BORDER_CHANNEL_TEXT);
-            videoFilter.Append($"boxcolor={video.BoxColor()}@{DIM_BACKGROUND}");
+            videoFilter.Append($"boxcolor={video.BannerBackgroundColor()}@{DIM_BACKGROUND}");
         }
 
         return videoFilter.ToString();

@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Domain.Common.Services;
+namespace Almostengr.VideoProcessor.Domain.Common.Subtitles;
 
 public abstract class BaseSubtitleService : IBaseSubtitleService
 {

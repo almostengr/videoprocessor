@@ -2,7 +2,7 @@ using System.IO;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common;
 using NUnit.Framework;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions;
+using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Domain.Technology;
 
 namespace Almostengr.VideoProcessor.Domain.Tests;
@@ -69,7 +69,7 @@ public class ChristmasLightVideoTests
     public void TextColor_ReturnsWhite()
     {
         // attempt
-        string textColor = video.TextColor();
+        string textColor = video.BannerTextColor();
 
         // verify
         Assert.AreEqual(textColor, FfMpegColors.White);
@@ -78,7 +78,7 @@ public class ChristmasLightVideoTests
     [Test]
     public void BoxColor_ReturnsMaroon()
     {
-        string boxColor = video.BoxColor();
+        string boxColor = video.BannerBackgroundColor();
 
         Assert.AreEqual(boxColor, FfMpegColors.Maroon);
     }

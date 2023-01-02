@@ -29,7 +29,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IToastmastersVideoService, ToastmastersVideoService>();
         services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
 
-        // services.AddHostedService<DashCamVideoWorker>();
+        services.AddHostedService<DashCamVideoWorker>();
         services.AddHostedService<HandymanSubtitleWorker>();
         // services.AddHostedService<HandymanVideoWorker>();
         // services.AddHostedService<TechnologyVideoWorker>();

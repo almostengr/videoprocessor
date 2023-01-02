@@ -1,8 +1,8 @@
-namespace Almostengr.VideoProcessor.Domain.Common.Exceptions.Subtitles;
+namespace Almostengr.VideoProcessor.Domain.Common.Subtitles;
 
 public sealed class SrtSubtitleContentsAreInvalidException : VideoProcessorException
 {
-    public SrtSubtitleContentsAreInvalidException()
+    public SrtSubtitleContentsAreInvalidException() : base()
     {
     }
 

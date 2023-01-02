@@ -1,4 +1,5 @@
-using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Domain.Common.Constants;
+using Almostengr.VideoProcessor.Domain.Common.Videos;
 
 namespace Almostengr.VideoProcessor.Domain.Technology;
 
@@ -31,12 +32,12 @@ public sealed record TechnologyVideo : BaseVideo
         return ChannelBannerTextRhtServices();
     }
 
-    public override string TextColor()
+    public override string BannerTextColor()
     {
         return FfMpegColors.White;
     }
 
-    public override string BoxColor()
+    public override string BannerBackgroundColor()
     {
         if (IsChristmasVideo)
         {
@@ -44,5 +45,15 @@ public sealed record TechnologyVideo : BaseVideo
         }
 
         return FfMpegColors.Green;
+    }
+
+    public override string SubtitleBackgroundColor()
+    {
+        return BannerBackgroundColor();
+    }
+
+    public override string SubtitleTextColor()
+    {
+        return BannerTextColor();
     }
 }

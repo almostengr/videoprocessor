@@ -2,7 +2,8 @@ using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions;
+using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
+using Almostengr.VideoProcessor.Domain.Common.Subtitles.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
