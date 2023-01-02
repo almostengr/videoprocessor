@@ -5,7 +5,6 @@ namespace Almostengr.VideoProcessor.Domain.DashCam;
 
 public sealed record DashCamVideo : BaseVideo
 {
-    public IEnumerable<DashCamVideoSubtitle> Subtitles;    
     private readonly string Night = "night";
 
     public DashCamVideo(string baseDirectory) : base(baseDirectory)
@@ -63,26 +62,31 @@ public sealed record DashCamVideo : BaseVideo
         return Path.Combine(WorkingDirectory, GetDetailsFileName());
     }
 
-    public void SetSubtitles(string text)
+
+    public void AddDetailsContentToVideoFilter(string[] fileContents)
     {
+        const int DISPLAY_DURATION = 5;
+        const string SPEED_LIMIT = "speed limit";
 
+        foreach (string line in fileContents)
+        {
+            string[] splitLine = line.Split(Constant.Pipe);
+            int startSeconds = Int32.Parse(splitLine[0]);
+            int endSeconds = startSeconds + DISPLAY_DURATION;
+            string displayText = splitLine[1].Replace(":", "\\:");
+
+            string textColor = FfMpegColors.White;
+            string backgroundColor = FfMpegColors.Green;
+
+            if (displayText.ToLower().Contains(SPEED_LIMIT))
+            {
+                textColor = FfMpegColors.Black;
+                backgroundColor = FfMpegColors.White;
+            }
+
+            AddDrawTextFilter(displayText, textColor, Constant.SolidText, FfmpegFontSize.Small, 
+                DrawTextPosition.LowerRight, backgroundColor, Constant.SolidBackground, 
+                $"enable='between(t,{startSeconds},{endSeconds})'");
+        }
     }
-}
-
-public sealed record DashCamVideoSubtitle
-{
-    public DashCamVideoSubtitle(string input)
-    {
-        string[] splitInput = input.Split(Constant.Comma);
-
-
-
-
-    }
-
-    public int StartSeconds { get; init; }
-    // public int EndSeconds { get; private set; }
-    public string Text { get; init; }
-
-
 }

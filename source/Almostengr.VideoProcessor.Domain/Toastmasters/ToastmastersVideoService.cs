@@ -1,4 +1,3 @@
-using System.Text;
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common.Interfaces;
@@ -54,13 +53,12 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
                 CreateFfmpegInputFile(video);
 
-                string videoFilter = DrawTextVideoFilter(video);
+                video.AddChannelBannerTextFilter();
 
                 await _ffmpegSerivce.RenderVideoAsync(
-                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
+                    video.FfmpegInputFilePath, video.VideoFilter, video.OutputFilePath, stoppingToken);
 
                 _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
-
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
         }
@@ -89,17 +87,5 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 writer.WriteLine($"{FILE} '{file}'");
             }
         }
-    }
-
-    internal override string DrawTextVideoFilter<ToastmastersVideo>(ToastmastersVideo video)
-    {
-        StringBuilder videoFilter = new($"drawtext=textfile:'{video.ChannelBannerText()}':");
-        videoFilter.Append($"fontcolor={video.BannerTextColor()}@{DIM_TEXT}:");
-        videoFilter.Append($"fontsize={LARGE_FONT}:");
-        videoFilter.Append($"{_upperRight}:");
-        videoFilter.Append(BORDER_CHANNEL_TEXT);
-        videoFilter.Append($"boxcolor={video.BannerBackgroundColor()}@{DIM_BACKGROUND}");
-
-        return videoFilter.ToString();
     }
 }

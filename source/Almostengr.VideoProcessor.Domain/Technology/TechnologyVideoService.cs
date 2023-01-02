@@ -1,7 +1,6 @@
 using Almostengr.VideoProcessor.Domain.Common;
 using Almostengr.VideoProcessor.Domain.Common.Interfaces;
 using Almostengr.VideoProcessor.Domain.Music.Services;
-using System.Text;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common.Videos;
 using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
@@ -67,14 +66,22 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
                 CreateFfmpegInputFile(video);
 
-                // string videoFilter = DrawTextVideoFilter(video); // todo 
-                string videoFilter = VideoFilter(video);
+                if (video.IsChristmasVideo)
+                {
+                    video.AddDrawTextFilter(
+                        video.Title,
+                        FfMpegColors.White,
+                        Constant.SolidText,
+                        FfmpegFontSize.Medium,
+                        DrawTextPosition.LowerLeft,
+                        FfMpegColors.Maroon,
+                        Constant.SolidBackground);
+                }
 
                 await _ffmpeg.RenderVideoAsync(
-                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
+                    video.FfmpegInputFilePath, video.VideoFilter, video.OutputFilePath, stoppingToken);
 
                 _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
-
                 _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
         }
@@ -84,23 +91,5 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
         {
             _logger.LogError(ex, ex.Message);
         }
-    }
-
-    private string VideoFilter(TechnologyVideo video)
-    {
-        StringBuilder videoFilter = new(base.DrawTextVideoFilter<TechnologyVideo>(video));
-
-        if (video.IsChristmasVideo)
-        {
-            videoFilter.Append(Constant.CommaSpace);
-            videoFilter.Append($"drawtext=textfile:'{video.Title}':");
-            videoFilter.Append($"fontcolor={video.BannerTextColor()}:");
-            videoFilter.Append($"fontsize={MEDIUM_FONT}:");
-            videoFilter.Append($"{_lowerLeft}:");
-            videoFilter.Append(BORDER_CHANNEL_TEXT);
-            videoFilter.Append($"boxcolor={video.BannerBackgroundColor()}@{DIM_BACKGROUND}");
-        }
-
-        return videoFilter.ToString();
     }
 }

@@ -1,3 +1,4 @@
+using System.Text;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common.Videos;
 
@@ -8,6 +9,24 @@ public sealed record ToastmastersVideo : BaseVideo
     public ToastmastersVideo(string baseDirectory) : base(baseDirectory)
     {
         BaseDirectory = baseDirectory;
+    }
+
+    public override void AddChannelBannerTextFilter()
+    {
+        if (VideoFilter.Contains(ChannelBannerText()))
+        {
+            return;
+        }
+
+        StringBuilder textFilter = new($"drawtext=textfile:'{ChannelBannerText()}':");
+        textFilter.Append($"fontcolor={BannerTextColor()}:");
+        textFilter.Append($"fontsize={FfmpegFontSize.Large}:");
+        textFilter.Append($"{DrawTextPosition.UpperRight}:");
+        textFilter.Append(Constant.BorderChannelText);
+        textFilter.Append($"boxcolor={BannerBackgroundColor()}@{Constant.DimBackground}");
+        // return videoFilter.ToString();
+        // VideoFilter = textFilter.ToString();
+        AddDrawTextFilter(textFilter.ToString());
     }
 
     public override string BannerBackgroundColor()

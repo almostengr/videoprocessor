@@ -1,3 +1,4 @@
+using System.Text;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 
@@ -29,6 +30,9 @@ public abstract record BaseVideo : BaseEntity
         OutputFileName = string.Empty;
         OutputFilePath = string.Empty;
         SubtitleFilePath = string.Empty;
+        VideoFilter = string.Empty;
+
+        AddChannelBannerTextFilter();
     }
 
     public string BaseDirectory { get; init; }
@@ -44,6 +48,7 @@ public abstract record BaseVideo : BaseEntity
     public string OutputFilePath { get; private set; }
     public string FfmpegInputFilePath { get; }
     public string SubtitleFilePath { get; private set; }
+    public string VideoFilter { get; private set; }
 
     public abstract string ChannelBannerText();
     public abstract string BannerTextColor();
@@ -51,11 +56,77 @@ public abstract record BaseVideo : BaseEntity
     public abstract string SubtitleTextColor();
     public abstract string SubtitleBackgroundColor();
 
+    public virtual void AddChannelBannerTextFilter()
+    {
+        if (VideoFilter.Contains(ChannelBannerText()))
+        {
+            return;
+        }
+
+        StringBuilder textFilter = new($"drawtext=textfile:'{ChannelBannerText()}':");
+        textFilter.Append($"fontcolor={BannerTextColor()}:");
+        textFilter.Append($"fontsize={FfmpegFontSize.Medium}:");
+        textFilter.Append($"{DrawTextPosition.UpperRight}:");
+        textFilter.Append(Constant.BorderChannelText);
+        textFilter.Append($"boxcolor={BannerBackgroundColor()}@{Constant.DimBackground}");
+        VideoFilter += textFilter.ToString();
+    }
+
+    private string FilterDuration()
+    {
+        return $"enable=lt(mod(t\\,120)\\,{Constant.CALL_TO_ACTION_DURATION_SECONDS})";
+    }
+
+    public string GetSubscribeTextFilter()
+    {
+        return $"drawtext=text:'SUBSCRIBE for future videos':fontcolor={FfMpegColors.White}:fontsize={FfmpegFontSize.Medium}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{FilterDuration()}";
+    }
+
+    public void AddSubscribeTextFilter()
+    {
+        VideoFilter += Constant.Comma;
+        VideoFilter += GetSubscribeTextFilter();
+    }
+
+    public string GetLikeTextFilter()
+    {
+        return $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColors.White}:fontsize={FfmpegFontSize.Medium}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColors.Blue}:box=1:boxborderw=10:{FilterDuration()}";
+    }
+
+    public virtual void AddDrawTextFilter(
+        string text, string textColor, string textBrightness, string fontSize, string position,
+        string backgroundColor, string backgroundBrightness, string duration = "")
+    {
+        StringBuilder textFilter = new();
+        textFilter.Append(Constant.CommaSpace);
+        textFilter.Append($"drawtext=textfile:'{text}':");
+        textFilter.Append($"fontcolor={textColor}@{textBrightness}:");
+        textFilter.Append($"fontsize={fontSize}:");
+        textFilter.Append($"{position}:");
+        textFilter.Append(Constant.BorderChannelText);
+        textFilter.Append($"boxcolor={backgroundColor}@{backgroundBrightness}");
+
+        if (duration.Length > 0)
+        {
+            textFilter.Append(":");
+            textFilter.Append(duration);
+        }
+
+        VideoFilter += textFilter.ToString();
+    }
+
+    public virtual void AddDrawTextFilter(string filter)
+    {
+        StringBuilder textFilter = new();
+        textFilter.Append(Constant.CommaSpace);
+        textFilter.Append(filter);
+        VideoFilter += textFilter.ToString();
+    }
+
     public void SetSubtitleFilePath(string? subtitleFilePath)
     {
         if (string.IsNullOrWhiteSpace(subtitleFilePath))
         {
-            // throw new SubtitleFilePathIsNullOrWhiteSpaceException();
             return;
         }
 

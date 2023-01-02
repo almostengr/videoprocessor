@@ -7,11 +7,11 @@ namespace Almostengr.VideoProcessor.Domain.Common.Videos;
 public abstract class BaseVideoService : IBaseVideoService
 {
     // ffmpeg filter attributes
-    protected const string DIM_TEXT = "0.8";
-    protected const string DIM_BACKGROUND = "0.4";
-    protected const string LARGE_FONT = "h/20";
-    protected const string MEDIUM_FONT = "h/28";
-    protected const string SMALL_FONT = "h/35";
+    // protected const string DIM_TEXT = "0.8";
+    // protected const string DIM_BACKGROUND = "0.4";
+    // protected const string LARGE_FONT = "h/20";
+    // protected const string MEDIUM_FONT = "h/28";
+    // protected const string SMALL_FONT = "h/35";
     protected const string BORDER_CHANNEL_TEXT = "box=1:boxborderw=10:";
     protected const string BORDER_LOWER_THIRD = "box=1:boxborderw=15:";
 
@@ -22,16 +22,16 @@ public abstract class BaseVideoService : IBaseVideoService
     protected const int CALL_TO_ACTION_DURATION_SECONDS = 7;
 
     // ffmpeg positions
-    protected readonly string _upperLeft;
-    protected readonly string _upperCenter;
-    protected readonly string _upperRight;
-    protected readonly string _centered;
-    protected readonly string _lowerLeft;
-    protected readonly string _lowerCenter;
-    protected readonly string _lowerRight;
+    // protected readonly string _upperLeft;
+    // protected readonly string _upperCenter;
+    // protected readonly string _upperRight;
+    // protected readonly string _centered;
+    // protected readonly string _lowerLeft;
+    // protected readonly string _lowerCenter;
+    // protected readonly string _lowerRight;
 
-    protected readonly string _subscribeFilter;
-    protected readonly string _likeFilter;
+    // protected readonly string _subscribeFilter;
+    // protected readonly string _likeFilter;
     protected readonly Random _random;
 
     private readonly IFileSystem _fileSystem;
@@ -47,19 +47,19 @@ public abstract class BaseVideoService : IBaseVideoService
         _tarball = tarball;
         _appSettings = appSettings;
 
-        const int PADDING = 30;
-        _upperLeft = $"x={PADDING}:y={PADDING}";
-        _upperCenter = $"x=(w-tw)/2:y={PADDING}";
-        _upperRight = $"x=w-tw-{PADDING}:y={PADDING}";
-        _centered = $"x=(w-tw)/2:y=(h-th)/2";
-        _lowerLeft = $"x={PADDING}:y=h-th-{PADDING}";
-        _lowerCenter = $"x=(w-tw)/2:y=h-th-{PADDING}";
-        _lowerRight = $"x=w-tw-{PADDING}:y=h-th-{PADDING}";
+        // const int PADDING = 30;
+        // _upperLeft = $"x={PADDING}:y={PADDING}";
+        // _upperCenter = $"x=(w-tw)/2:y={PADDING}";
+        // _upperRight = $"x=w-tw-{PADDING}:y={PADDING}";
+        // _centered = $"x=(w-tw)/2:y=(h-th)/2";
+        // _lowerLeft = $"x={PADDING}:y=h-th-{PADDING}";
+        // _lowerCenter = $"x=(w-tw)/2:y=h-th-{PADDING}";
+        // _lowerRight = $"x=w-tw-{PADDING}:y=h-th-{PADDING}";
 
-        string filterDuration = $"enable=lt(mod(t\\,120)\\,{CALL_TO_ACTION_DURATION_SECONDS})";
+        // string filterDuration = $"enable=lt(mod(t\\,120)\\,{CALL_TO_ACTION_DURATION_SECONDS})";
 
-        _likeFilter = $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:{_lowerCenter}:boxcolor={FfMpegColors.Blue}:box=1:boxborderw=10:{filterDuration}";
-        _subscribeFilter = $"drawtext=text:'SUBSCRIBE for future videos':fontcolor={FfMpegColors.White}:fontsize={MEDIUM_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{filterDuration}";
+        // _likeFilter = $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColors.White}:fontsize={SMALL_FONT}:{_lowerCenter}:boxcolor={FfMpegColors.Blue}:box=1:boxborderw=10:{filterDuration}";
+        // _subscribeFilter = $"drawtext=text:'SUBSCRIBE for future videos':fontcolor={FfMpegColors.White}:fontsize={MEDIUM_FONT}:{_lowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{filterDuration}";
         _random = new Random();
     }
 
@@ -176,35 +176,35 @@ public abstract class BaseVideoService : IBaseVideoService
         _fileSystem.DeleteFiles(narrationFiles);
     }
 
-    internal void RhtCreateFfmpegInputFile<T>(T video) where T : BaseVideo
-    {
-        _fileSystem.DeleteFile(video.FfmpegInputFilePath);
+    // internal void RhtCreateFfmpegInputFile<T>(T video) where T : BaseVideo
+    // {
+    //     _fileSystem.DeleteFile(video.FfmpegInputFilePath);
 
-        using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
-        {
-            var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
-                .Where(x => x.EndsWith(FileExtension.Ts))
-                .OrderBy(x => x)
-                .ToArray();
+    //     using (StreamWriter writer = new StreamWriter(video.FfmpegInputFilePath))
+    //     {
+    //         var filesInDirectory = _fileSystem.GetFilesInDirectory(video.WorkingDirectory)
+    //             .Where(x => x.EndsWith(FileExtension.Ts))
+    //             .OrderBy(x => x)
+    //             .ToArray();
 
-            const string RHT_SERVICES_INTRO = "rhtservicesintro.ts";
-            bool includeVideoIntro = !_fileSystem.DoesFileExist(Path.Combine(video.WorkingDirectory, "nointro.txt"));
-            for (int i = 0; i < filesInDirectory.Length; i++)
-            {
-                if (filesInDirectory[i].Contains(RHT_SERVICES_INTRO))
-                {
-                    continue;
-                }
+    //         const string RHT_SERVICES_INTRO = "rhtservicesintro.ts";
+    //         bool includeVideoIntro = !_fileSystem.DoesFileExist(Path.Combine(video.WorkingDirectory, "nointro.txt"));
+    //         for (int i = 0; i < filesInDirectory.Length; i++)
+    //         {
+    //             if (filesInDirectory[i].Contains(RHT_SERVICES_INTRO))
+    //             {
+    //                 continue;
+    //             }
 
-                if (i == 1 && includeVideoIntro)
-                {
-                    writer.WriteLine($"{FILE} '{RHT_SERVICES_INTRO}'");
-                }
+    //             if (i == 1 && includeVideoIntro)
+    //             {
+    //                 writer.WriteLine($"{FILE} '{RHT_SERVICES_INTRO}'");
+    //             }
 
-                writer.WriteLine($"{FILE} '{Path.GetFileName(filesInDirectory[i])}'");
-            }
-        }
-    }
+    //             writer.WriteLine($"{FILE} '{Path.GetFileName(filesInDirectory[i])}'");
+    //         }
+    //     }
+    // }
 
     internal async Task CreateTarballsFromDirectoriesAsync(string directory, CancellationToken cancellationToken)
     {
@@ -216,17 +216,17 @@ public abstract class BaseVideoService : IBaseVideoService
     }
 
     // internal virtual string DrawTextVideoFilter<T>(T video) where T : BaseVideo
-    internal virtual string DrawTextVideoFilter<T>(T video) where T : BaseVideo
-    {
-        StringBuilder videoFilter = new($"drawtext=textfile:'{video.ChannelBannerText()}':");
-        videoFilter.Append($"fontcolor={video.BannerTextColor()}@{DIM_TEXT}:");
-        videoFilter.Append($"fontsize={MEDIUM_FONT}:");
-        videoFilter.Append($"{_upperRight}:");
-        videoFilter.Append(BORDER_CHANNEL_TEXT);
-        videoFilter.Append($"boxcolor={video.BannerBackgroundColor()}@{DIM_BACKGROUND}");
+    // internal virtual string DrawTextVideoFilter<T>(T video) where T : BaseVideo
+    // {
+    //     StringBuilder videoFilter = new($"drawtext=textfile:'{video.ChannelBannerText()}':");
+    //     videoFilter.Append($"fontcolor={video.BannerTextColor()}@{DIM_TEXT}:");
+    //     videoFilter.Append($"fontsize={MEDIUM_FONT}:");
+    //     videoFilter.Append($"{_upperRight}:");
+    //     videoFilter.Append(BORDER_CHANNEL_TEXT);
+    //     videoFilter.Append($"boxcolor={video.BannerBackgroundColor()}@{DIM_BACKGROUND}");
 
-        return videoFilter.ToString();
-    }
+    //     return videoFilter.ToString();
+    // }
 
     internal virtual void GenerateSubtitleFileWithTitle(string filePath, string title)
     {

@@ -62,10 +62,8 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
                 CreateFfmpegInputFile(video);
 
-                string videoFilter = DrawTextVideoFilter(video);
-
                 await _ffmpeg.RenderVideoAsync(
-                    video.FfmpegInputFilePath, videoFilter, video.OutputFilePath, stoppingToken);
+                    video.FfmpegInputFilePath, video.VideoFilter, video.OutputFilePath, stoppingToken);
 
                 _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
 
