@@ -21,6 +21,7 @@ public abstract record BaseVideo : BaseEntity
         UploadDirectory = Path.Combine(BaseDirectory, DirectoryNames.Upload);
         WorkingDirectory = Path.Combine(BaseDirectory, DirectoryNames.Working);
         ArchiveDirectory = Path.Combine(BaseDirectory, DirectoryNames.Archive);
+        ErrorDirectory = Path.Combine(baseDirectory, DirectoryNames.Error);
         FfmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
 
         TarballFileName = string.Empty;
@@ -42,6 +43,7 @@ public abstract record BaseVideo : BaseEntity
     public string OutputFileName { get; private set; }
     public string IncomingDirectory { get; }
     public string ArchiveDirectory { get; }
+    public string ErrorDirectory { get; }
     public string TarballArchiveFilePath { get; private set; }
     public string WorkingDirectory { get; }
     public string UploadDirectory { get; }
@@ -49,6 +51,8 @@ public abstract record BaseVideo : BaseEntity
     public string FfmpegInputFilePath { get; }
     public string SubtitleFilePath { get; private set; }
     public string VideoFilter { get; private set; }
+    public string TarballErrorFilePath { get; private set; }
+    public string ErrorLogFilePath {get; private set;}
 
     public abstract string ChannelBannerText();
     public abstract string BannerTextColor();
@@ -165,6 +169,8 @@ public abstract record BaseVideo : BaseEntity
                 + FileExtension.Mp4);
 
         TarballArchiveFilePath = Path.Combine(ArchiveDirectory, TarballFileName);
+        TarballErrorFilePath = Path.Combine(ErrorDirectory, TarballFileName);
+        ErrorLogFilePath = Path.Combine(ErrorDirectory, TarballFileName + FileExtension.Txt);
     }
 
     internal virtual void SetOutputFileName(string fileName)

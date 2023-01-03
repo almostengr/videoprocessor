@@ -31,10 +31,10 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
     public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
     {
+        DashCamVideo video = new DashCamVideo(_appSettings.DashCamDirectory);
+
         try
         {
-            DashCamVideo video = new DashCamVideo(_appSettings.DashCamDirectory);
-
             CreateVideoDirectories(video);
             DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
@@ -89,8 +89,10 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
+            _fileSystem.MoveFile(video.TarballFilePath, video.TarballErrorFilePath, false);
+            _fileSystem.SaveFileContents(video.ErrorLogFilePath, ex.Message);
         }
-        
+
         return false;
     }
 

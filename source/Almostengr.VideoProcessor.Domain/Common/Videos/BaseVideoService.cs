@@ -34,6 +34,7 @@ public abstract class BaseVideoService : IBaseVideoService
         _fileSystem.CreateDirectory(video.ArchiveDirectory);
         _fileSystem.CreateDirectory(video.UploadDirectory);
         _fileSystem.CreateDirectory(video.WorkingDirectory);
+        _fileSystem.CreateDirectory(video.ErrorDirectory);
     }
 
     public abstract Task<bool> ProcessVideosAsync(CancellationToken stoppingToken);

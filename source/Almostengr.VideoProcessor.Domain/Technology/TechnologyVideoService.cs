@@ -31,10 +31,10 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
     public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
     {
+        TechnologyVideo video = new TechnologyVideo(_appSettings.TechnologyDirectory);
+
         try
         {
-            TechnologyVideo video = new TechnologyVideo(_appSettings.TechnologyDirectory);
-
             CreateVideoDirectories(video);
             DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
@@ -89,6 +89,8 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
+            _fileSystem.MoveFile(video.TarballFilePath, video.TarballErrorFilePath, false);
+            _fileSystem.SaveFileContents(video.ErrorLogFilePath, ex.Message);
         }
 
         return false;

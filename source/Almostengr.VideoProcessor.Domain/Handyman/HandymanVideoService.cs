@@ -31,10 +31,10 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
     public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
     {
+        HandymanVideo video = new HandymanVideo(_appSettings.HandymanDirectory);
+
         try
         {
-            HandymanVideo video = new HandymanVideo(_appSettings.HandymanDirectory);
-
             CreateVideoDirectories(video);
             DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
@@ -74,6 +74,8 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
+            _fileSystem.MoveFile(video.TarballFilePath, video.TarballErrorFilePath, false);
+            _fileSystem.SaveFileContents(video.ErrorLogFilePath, ex.Message);
         }
 
         return false;

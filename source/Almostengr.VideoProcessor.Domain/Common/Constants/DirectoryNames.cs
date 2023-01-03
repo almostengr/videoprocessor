@@ -6,4 +6,5 @@ public static class DirectoryNames
     public const string Working = "working";
     public const string Archive = "archive";
     public const string Upload = "upload";
+    public const string Error = "error";
 }
