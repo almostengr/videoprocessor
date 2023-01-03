@@ -14,42 +14,37 @@ public sealed record DashCamVideo : BaseVideo
 
     public override string BannerBackgroundColor()
     {
-        return FfMpegColors.Black;
+        return FfMpegColor.Black;
     }
-
-    // public override string ChannelBannerText()
-    // {
-    //     return "Kenny Ram Dash Cam";
-    // }
 
     public override string BannerTextColor()
     {
         if (Title.ToLower().Contains(Night))
         {
-            return FfMpegColors.Orange;
+            return FfMpegColor.Orange;
         }
 
-        return FfMpegColors.White;
+        return FfMpegColor.White;
     }
 
     public override string SubtitleBackgroundColor()
     {
         if (Title.ToLower().Contains(Night))
         {
-            return FfMpegColors.DarkGreen;
+            return FfMpegColor.DarkGreen;
         }
 
-        return FfMpegColors.Green;
+        return FfMpegColor.Green;
     }
 
     public override string SubtitleTextColor()
     {
         if (Title.ToLower().Contains(Night))
         {
-            return FfMpegColors.GhostWhite;
+            return FfMpegColor.GhostWhite;
         }
 
-        return FfMpegColors.White;
+        return FfMpegColor.White;
     }
 
     public string GetDetailsFilePath()
@@ -85,24 +80,18 @@ public sealed record DashCamVideo : BaseVideo
 
             if (displayTextLowered.Contains("speed limit"))
             {
-                textColor = FfMpegColors.Black;
-                backgroundColor = FfMpegColors.White;
+                textColor = FfMpegColor.Black;
+                backgroundColor = FfMpegColor.White;
             }
             else if (displayTextLowered.Contains("national forest"))
             {
-                textColor = FfMpegColors.White;
-                backgroundColor = FfMpegColors.SaddleBrown;
+                textColor = FfMpegColor.White;
+                backgroundColor = FfMpegColor.SaddleBrown;
             }
 
             AddDrawTextFilter(displayText, textColor, Constant.SolidText, FfmpegFontSize.Medium, 
                 DrawTextPosition.LowerRight, backgroundColor, Constant.SolidBackground, 
                 $"enable='between(t,{startSeconds},{endSeconds})'");
-
-            // todo - dim text after being displayed
-            // string nextSeconds = (fileContents[i+1].Split(Constant.Pipe))[0];
-            // AddDrawTextFilter(displayText, textColor, Constant.DimText, FfmpegFontSize.Small, 
-            //     DrawTextPosition.LowerRight, backgroundColor, Constant.DimBackground, 
-            //     $"enable='between(t,{endSeconds},{nextSeconds})'");
         }
     }
 

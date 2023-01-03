@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Domain.Common.Constants;
 
-public static class FfMpegColors
+public static class FfMpegColor
 {
     public const string Black = "black";
     public const string Blue = "blue";
@@ -13,5 +13,5 @@ public static class FfMpegColors
     public const string RhtYellow = "0xffc107";
     public const string SteelBlue = "steelblue";
     public const string White = "white";
-    public static string SaddleBrown = "SaddleBrown";
+    public const string SaddleBrown = "SaddleBrown";
 }

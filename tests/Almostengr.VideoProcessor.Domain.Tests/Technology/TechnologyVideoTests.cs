@@ -71,7 +71,7 @@ public class TechnologyVideoTests
         string textColor = video.BannerTextColor();
 
         // verify
-        Assert.AreEqual(textColor, FfMpegColors.White);
+        Assert.AreEqual(textColor, FfMpegColor.White);
     }
 
     [Test]
@@ -79,7 +79,7 @@ public class TechnologyVideoTests
     {
         string boxColor = video.BannerBackgroundColor();
 
-        Assert.AreEqual(boxColor, FfMpegColors.Green);
+        Assert.AreEqual(boxColor, FfMpegColor.Green);
     }
 
     // [Test]

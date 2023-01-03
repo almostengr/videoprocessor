@@ -71,7 +71,7 @@ public class DashCamVideoTests
         string textColor = video.BannerTextColor();
 
         // verify
-        Assert.AreEqual(textColor, FfMpegColors.White);
+        Assert.AreEqual(textColor, FfMpegColor.White);
     }
 
     [Test]
@@ -85,7 +85,7 @@ public class DashCamVideoTests
 
         // verify
         Assert.True(video.Title.ToLower().Contains("night"));
-        Assert.AreEqual(textColor, FfMpegColors.Orange);
+        Assert.AreEqual(textColor, FfMpegColor.Orange);
     }
 
     [Test]
@@ -93,7 +93,7 @@ public class DashCamVideoTests
     {
         string boxColor = video.BannerBackgroundColor();
 
-        Assert.AreEqual(boxColor, FfMpegColors.Black);
+        Assert.AreEqual(boxColor, FfMpegColor.Black);
     }
 
     // [Test]

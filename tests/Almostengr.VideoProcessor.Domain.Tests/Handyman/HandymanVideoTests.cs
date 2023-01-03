@@ -71,7 +71,7 @@ public class HandymanVideoTests
         string textColor = video.BannerTextColor();
 
         // verify
-        Assert.AreEqual(textColor, FfMpegColors.RhtYellow);
+        Assert.AreEqual(textColor, FfMpegColor.RhtYellow);
     }
 
     [Test]
@@ -79,7 +79,7 @@ public class HandymanVideoTests
     {
         string boxColor = video.BannerBackgroundColor();
 
-        Assert.AreEqual(boxColor, FfMpegColors.Black);
+        Assert.AreEqual(boxColor, FfMpegColor.Black);
     }
 
     // [Test]

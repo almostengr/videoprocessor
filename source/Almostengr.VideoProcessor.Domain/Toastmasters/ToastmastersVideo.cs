@@ -23,12 +23,12 @@ public sealed record ToastmastersVideo : BaseVideo
 
     public override string BannerBackgroundColor()
     {
-        return FfMpegColors.SteelBlue;
+        return FfMpegColor.SteelBlue;
     }
 
     public override string BannerTextColor()
     {
-        return FfMpegColors.White;
+        return FfMpegColor.White;
     }
 
     public override string SubtitleBackgroundColor()

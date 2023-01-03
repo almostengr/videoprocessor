@@ -20,31 +20,20 @@ public sealed record TechnologyVideo : BaseVideo
             IsChristmasVideo = true;
         }
     }
-    
-    // public override string ChannelBannerText()
-    // {
-    //     if (IsChristmasVideo)
-    //     {
-    //         string[] text = { "rhtservices.net", "twitter.com/hplightshow" };
-    //         return text[_random.Next(0, text.Count())];
-    //     }
-
-    //     return ChannelBannerTextRhtServices();
-    // }
 
     public override string BannerTextColor()
     {
-        return FfMpegColors.White;
+        return FfMpegColor.White;
     }
 
     public override string BannerBackgroundColor()
     {
         if (IsChristmasVideo)
         {
-            return FfMpegColors.Maroon;
+            return FfMpegColor.Maroon;
         }
 
-        return FfMpegColors.Green;
+        return FfMpegColor.Green;
     }
 
     public override string SubtitleBackgroundColor()

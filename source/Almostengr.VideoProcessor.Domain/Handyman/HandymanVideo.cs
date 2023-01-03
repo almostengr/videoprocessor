@@ -12,12 +12,12 @@ public sealed record HandymanVideo : BaseVideo
 
     public override string BannerTextColor()
     {
-        return FfMpegColors.RhtYellow;
+        return FfMpegColor.RhtYellow;
     }
 
     public override string BannerBackgroundColor()
     {
-        return FfMpegColors.Black;
+        return FfMpegColor.Black;
     }
 
     public override string SubtitleBackgroundColor()

@@ -57,22 +57,6 @@ public abstract record BaseVideo : BaseEntity
     public abstract string SubtitleTextColor();
     public abstract string SubtitleBackgroundColor();
 
-    // internal virtual void AddChannelBannerTextFilter(string text)
-    // {
-    //     if (string.IsNullOrWhiteSpace(text))
-    //     {
-    //         throw new ChannelBannerTextIsNullOrWhiteSpaceException();
-    //     }
-
-    //     StringBuilder textFilter = new($"drawtext=textfile:'{text}':");
-    //     textFilter.Append($"fontcolor={BannerTextColor()}:");
-    //     textFilter.Append($"fontsize={FfmpegFontSize.Medium}:");
-    //     textFilter.Append($"{DrawTextPosition.UpperRight}:");
-    //     textFilter.Append(Constant.BorderChannelText);
-    //     textFilter.Append($"boxcolor={BannerBackgroundColor()}@{Constant.DimBackground}");
-    //     VideoFilter += textFilter.ToString();
-    // }
-
     internal virtual void SetChannelBannerText(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -101,7 +85,7 @@ public abstract record BaseVideo : BaseEntity
 
     public string GetSubscribeTextFilter()
     {
-        return $"drawtext=text:'SUBSCRIBE for future videos':fontcolor={FfMpegColors.White}:fontsize={FfmpegFontSize.Large}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{FilterDuration()}";
+        return $"drawtext=text:'SUBSCRIBE for future videos':fontcolor={FfMpegColor.White}:fontsize={FfmpegFontSize.Large}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColor.Red}:box=1:boxborderw=10:{FilterDuration()}";
     }
 
     public void AddSubscribeTextFilter()
@@ -112,7 +96,7 @@ public abstract record BaseVideo : BaseEntity
 
     public string GetLikeTextFilter()
     {
-        return $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColors.White}:fontsize={FfmpegFontSize.Large}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColors.Blue}:box=1:boxborderw=10:{FilterDuration()}";
+        return $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColor.White}:fontsize={FfmpegFontSize.Large}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColor.Blue}:box=1:boxborderw=10:{FilterDuration()}";
     }
 
     public virtual void AddDrawTextFilter(

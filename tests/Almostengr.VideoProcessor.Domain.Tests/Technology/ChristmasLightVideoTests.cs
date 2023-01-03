@@ -72,7 +72,7 @@ public class ChristmasLightVideoTests
         string textColor = video.BannerTextColor();
 
         // verify
-        Assert.AreEqual(textColor, FfMpegColors.White);
+        Assert.AreEqual(textColor, FfMpegColor.White);
     }
 
     [Test]
@@ -80,7 +80,7 @@ public class ChristmasLightVideoTests
     {
         string boxColor = video.BannerBackgroundColor();
 
-        Assert.AreEqual(boxColor, FfMpegColors.Maroon);
+        Assert.AreEqual(boxColor, FfMpegColor.Maroon);
     }
 
     // [Test]

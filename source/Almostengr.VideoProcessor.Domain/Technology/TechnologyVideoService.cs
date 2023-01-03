@@ -80,11 +80,11 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
             {
                 video.AddDrawTextFilter(
                     video.Title,
-                    FfMpegColors.White,
+                    FfMpegColor.White,
                     Constant.SolidText,
                     FfmpegFontSize.Large,
                     DrawTextPosition.LowerLeft,
-                    FfMpegColors.Maroon,
+                    FfMpegColor.Maroon,
                     Constant.SolidBackground);
             }
 

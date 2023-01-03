@@ -71,7 +71,7 @@ public class ToastmastersVideoTests
         string textColor = video.BannerTextColor();
 
         // verify
-        Assert.AreEqual(textColor, FfMpegColors.White);
+        Assert.AreEqual(textColor, FfMpegColor.White);
     }
 
     [Test]
@@ -79,7 +79,7 @@ public class ToastmastersVideoTests
     {
         string boxColor = video.BannerBackgroundColor();
 
-        Assert.AreEqual(boxColor, FfMpegColors.SteelBlue);
+        Assert.AreEqual(boxColor, FfMpegColor.SteelBlue);
     }
 
     // [Test]
