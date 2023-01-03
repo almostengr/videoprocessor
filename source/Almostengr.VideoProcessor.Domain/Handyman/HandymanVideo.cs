@@ -10,11 +10,6 @@ public sealed record HandymanVideo : BaseVideo
         BaseDirectory = baseDirectory;
     }
 
-    public override string ChannelBannerText()
-    {
-        return ChannelBannerTextRhtServices();
-    }
-
     public override string BannerTextColor()
     {
         return FfMpegColors.RhtYellow;

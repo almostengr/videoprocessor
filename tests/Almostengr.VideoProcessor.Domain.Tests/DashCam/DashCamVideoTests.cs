@@ -96,13 +96,13 @@ public class DashCamVideoTests
         Assert.AreEqual(boxColor, FfMpegColors.Black);
     }
 
-    [Test]
-    public void ChannelBannerText_ReturnsRhtServices()
-    {
-        string channelText = video.ChannelBannerText();
+    // [Test]
+    // public void ChannelBannerText_ReturnsRhtServices()
+    // {
+    //     string channelText = video.ChannelBannerText();
 
-        Assert.AreEqual("Kenny Ram Dash Cam", channelText);
-    }
+    //     Assert.AreEqual("Kenny Ram Dash Cam", channelText);
+    // }
 
     [Test]
     public void SetTarballFilePath_EmptyString_ThrowsException()

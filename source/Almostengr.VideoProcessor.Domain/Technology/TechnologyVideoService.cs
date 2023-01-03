@@ -15,10 +15,12 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
     private readonly IMusicService _musicService;
     private readonly ILoggerService<TechnologyVideoService> _logger;
     private readonly AppSettings _appSettings;
+    private readonly IRandomService _randomService;
 
     public TechnologyVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarballService, IMusicService musicService,
-        ILoggerService<TechnologyVideoService> logger, ITarball tarball, AppSettings appSettings
+        ILoggerService<TechnologyVideoService> logger, ITarball tarball, AppSettings appSettings,
+        IRandomService randomService
     ) : base(fileSystemService, ffmpegService, tarball, appSettings)
     {
         _fileSystem = fileSystemService;
@@ -27,6 +29,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
         _musicService = musicService;
         _logger = logger;
         _appSettings = appSettings;
+        _randomService = randomService;
     }
 
     public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
@@ -53,7 +56,16 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
 
             video.ConfirmChristmasVideo();
 
-            _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory); // lowercase all file names
+            _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
+
+            if (video.IsChristmasVideo)
+            {
+                video.SetChannelBannerText(SelectChristmasChannelBannerText());
+            }
+            else
+            {
+                video.SetChannelBannerText(SelectChannelBannerText());
+            }
 
             if (!video.IsChristmasVideo)
             {
@@ -94,5 +106,17 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
         }
 
         return false;
+    }
+
+    internal override string SelectChannelBannerText()
+    {
+        var options = RhtServicesBannerTextOptions();
+        return options.ElementAt(_randomService.Next(0, options.Count()));
+    }
+
+    private string SelectChristmasChannelBannerText()
+    {
+        string[] text = { "rhtservices.net", "twitter.com/hplightshow" };
+        return text[_randomService.Next(0, text.Count())];
     }
 }

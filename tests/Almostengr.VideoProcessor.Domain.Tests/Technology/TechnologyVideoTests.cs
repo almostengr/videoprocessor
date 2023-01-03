@@ -82,13 +82,13 @@ public class TechnologyVideoTests
         Assert.AreEqual(boxColor, FfMpegColors.Green);
     }
 
-    [Test]
-    public void ChannelBannerText_ReturnsRhtServices()
-    {
-        string channelText = video.ChannelBannerText();
+    // [Test]
+    // public void ChannelBannerText_ReturnsRhtServices()
+    // {
+    //     string channelText = video.ChannelBannerText();
 
-        Assert.True(channelText.Contains("rhtservices") || channelText.Contains("Robinson Handy and Technology Services"));
-    }
+    //     Assert.True(channelText.Contains("rhtservices") || channelText.Contains("Robinson Handy and Technology Services"));
+    // }
 
     [Test]
     public void SetTarballFilePath_EmptyString_ThrowsException()

@@ -50,6 +50,8 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             await _tarball.ExtractTarballContentsAsync(video.TarballFilePath, video.WorkingDirectory, stoppingToken);
 
             _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
+            
+            video.SetChannelBannerText(SelectChannelBannerText());
 
             if (_fileSystem.DoesFileExist(video.GetDetailsFilePath()))
             {
@@ -57,7 +59,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 video.AddDetailsContentToVideoFilter(fileContents);
             }
 
-            CreateFfmpegInputFile(video);
+            CreateFfmpegInputFile(video);            
 
             video.AddSubscribeTextFilter();
             video.AddDrawTextFilter(
@@ -118,5 +120,10 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 writer.WriteLine($"{FILE} '{file}'");
             }
         }
+    }
+
+    internal override string SelectChannelBannerText()
+    {
+        return "Kenny Ram Dash Cam";
     }
 }

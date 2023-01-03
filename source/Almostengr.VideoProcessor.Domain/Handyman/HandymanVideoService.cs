@@ -15,10 +15,11 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     private readonly IMusicService _musicService;
     private readonly ILoggerService<HandymanVideoService> _logger;
     private readonly AppSettings _appSettings;
+    private readonly IRandomService _randomService;
 
     public HandymanVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarballService, IMusicService musicService, ILoggerService<HandymanVideoService> logger,
-         ITarball tarball, AppSettings appSettings
+         ITarball tarball, AppSettings appSettings, IRandomService randomService
     ) : base(fileSystemService, ffmpegService, tarball, appSettings)
     {
         _fileSystem = fileSystemService;
@@ -27,6 +28,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         _musicService = musicService;
         _logger = logger;
         _appSettings = appSettings;
+        _randomService = randomService;
     }
 
     public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
@@ -57,6 +59,8 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             await ConvertVideoFilesToCommonFormatAsync(video, stoppingToken);
 
             _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
+
+            video.SetChannelBannerText(SelectChannelBannerText());
 
             CreateFfmpegInputFile(video);
 
@@ -124,5 +128,11 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         }
 
         _fileSystem.DeleteFiles(narrationFiles);
+    }
+
+    internal override string SelectChannelBannerText()
+    {
+        var options = RhtServicesBannerTextOptions();
+        return options.ElementAt(_randomService.Next(0, options.Count()));
     }
 }

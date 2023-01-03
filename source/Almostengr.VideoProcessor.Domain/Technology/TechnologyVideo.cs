@@ -21,16 +21,16 @@ public sealed record TechnologyVideo : BaseVideo
         }
     }
     
-    public override string ChannelBannerText()
-    {
-        if (IsChristmasVideo)
-        {
-            string[] text = { "rhtservices.net", "twitter.com/hplightshow" };
-            return text[_random.Next(0, text.Count())];
-        }
+    // public override string ChannelBannerText()
+    // {
+    //     if (IsChristmasVideo)
+    //     {
+    //         string[] text = { "rhtservices.net", "twitter.com/hplightshow" };
+    //         return text[_random.Next(0, text.Count())];
+    //     }
 
-        return ChannelBannerTextRhtServices();
-    }
+    //     return ChannelBannerTextRhtServices();
+    // }
 
     public override string BannerTextColor()
     {

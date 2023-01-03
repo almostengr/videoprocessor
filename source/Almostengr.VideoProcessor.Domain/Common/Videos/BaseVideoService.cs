@@ -11,8 +11,6 @@ public abstract class BaseVideoService : IBaseVideoService
     protected const string NARRATIVE = "narrative";
     protected const string AUDIO = "audio";
 
-    protected readonly Random _random;
-
     private readonly IFileSystem _fileSystem;
     private readonly IFfmpeg _ffmpeg;
     private readonly ITarball _tarball;
@@ -25,7 +23,6 @@ public abstract class BaseVideoService : IBaseVideoService
         _ffmpeg = ffmpeg;
         _tarball = tarball;
         _appSettings = appSettings;
-        _random = new Random();
     }
 
     internal void CreateVideoDirectories<T>(T video) where T : BaseVideo
@@ -38,6 +35,7 @@ public abstract class BaseVideoService : IBaseVideoService
     }
 
     public abstract Task<bool> ProcessVideosAsync(CancellationToken stoppingToken);
+    internal abstract string SelectChannelBannerText();
 
     internal void DeleteFilesOlderThanSpecifiedDays(string directory)
     {
@@ -159,5 +157,20 @@ public abstract class BaseVideoService : IBaseVideoService
         stringBuilder.Append(title);
 
         _fileSystem.SaveFileContents(filePath, stringBuilder.ToString());
+    }
+
+    protected string[] RhtServicesBannerTextOptions()
+    {
+        return new string[] {
+            "rhtservices.net",
+            "Robinson Handy and Technology Services",
+            "rhtservices.net/courses",
+            "rhtservices.net/facebook",
+            "rhtservices.net/instagram",
+            // "rhtservices.net/youtube",
+            "@rhtservicesllc"
+            };
+
+        // return bannerText.ElementAt(_random.Next(0, bannerText.Length));
     }
 }

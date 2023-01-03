@@ -10,7 +10,7 @@ using Almostengr.VideoProcessor.Domain.Videos.Handyman;
 using Almostengr.VideoProcessor.Domain.Toastmasters;
 using Almostengr.VideoProcessor.Domain.Technology;
 using Almostengr.VideoProcessor.Worker.Workers;
-
+using Almostengr.VideoProcessor.Infrastructure.Common;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
@@ -23,6 +23,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IHandymanSubtitleService, HandymanSubtitleService>();
         services.AddSingleton<IHandymanVideoService, HandymanVideoService>();
         services.AddSingleton<IMusicService, MusicService>();
+        services.AddSingleton<IRandomService, RandomService>();
         services.AddSingleton<ITarball, Tarball>();
         services.AddSingleton<ITechnologySubtitleService, TechnologySubtitleService>();
         services.AddSingleton<ITechnologyVideoService, TechnologyVideoService>();

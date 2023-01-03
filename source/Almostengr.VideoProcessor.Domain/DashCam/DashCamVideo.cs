@@ -17,10 +17,10 @@ public sealed record DashCamVideo : BaseVideo
         return FfMpegColors.Black;
     }
 
-    public override string ChannelBannerText()
-    {
-        return "Kenny Ram Dash Cam";
-    }
+    // public override string ChannelBannerText()
+    // {
+    //     return "Kenny Ram Dash Cam";
+    // }
 
     public override string BannerTextColor()
     {

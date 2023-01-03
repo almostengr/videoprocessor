@@ -6,8 +6,6 @@ namespace Almostengr.VideoProcessor.Domain.Common.Videos;
 
 public abstract record BaseVideo : BaseEntity
 {
-    internal static Random _random = new Random();
-
     public BaseVideo(string baseDirectory)
     {
         if (string.IsNullOrWhiteSpace(baseDirectory))
@@ -32,8 +30,7 @@ public abstract record BaseVideo : BaseEntity
         OutputFilePath = string.Empty;
         SubtitleFilePath = string.Empty;
         VideoFilter = string.Empty;
-
-        AddChannelBannerTextFilter();
+        ChannelBannerText = string.Empty;
     }
 
     public string BaseDirectory { get; init; }
@@ -52,22 +49,43 @@ public abstract record BaseVideo : BaseEntity
     public string SubtitleFilePath { get; private set; }
     public string VideoFilter { get; private set; }
     public string TarballErrorFilePath { get; private set; }
-    public string ErrorLogFilePath {get; private set;}
+    public string ErrorLogFilePath { get; private set; }
+    public string ChannelBannerText { get; private set; }
 
-    public abstract string ChannelBannerText();
     public abstract string BannerTextColor();
     public abstract string BannerBackgroundColor();
     public abstract string SubtitleTextColor();
     public abstract string SubtitleBackgroundColor();
 
-    public virtual void AddChannelBannerTextFilter()
+    // internal virtual void AddChannelBannerTextFilter(string text)
+    // {
+    //     if (string.IsNullOrWhiteSpace(text))
+    //     {
+    //         throw new ChannelBannerTextIsNullOrWhiteSpaceException();
+    //     }
+
+    //     StringBuilder textFilter = new($"drawtext=textfile:'{text}':");
+    //     textFilter.Append($"fontcolor={BannerTextColor()}:");
+    //     textFilter.Append($"fontsize={FfmpegFontSize.Medium}:");
+    //     textFilter.Append($"{DrawTextPosition.UpperRight}:");
+    //     textFilter.Append(Constant.BorderChannelText);
+    //     textFilter.Append($"boxcolor={BannerBackgroundColor()}@{Constant.DimBackground}");
+    //     VideoFilter += textFilter.ToString();
+    // }
+
+    internal virtual void SetChannelBannerText(string text)
     {
-        if (VideoFilter.Contains(ChannelBannerText()))
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new ChannelBannerTextIsNullOrWhiteSpaceException();
+        }
+
+        if (ChannelBannerText != string.Empty)
         {
             return;
         }
 
-        StringBuilder textFilter = new($"drawtext=textfile:'{ChannelBannerText()}':");
+        StringBuilder textFilter = new($"drawtext=textfile:'{text}':");
         textFilter.Append($"fontcolor={BannerTextColor()}:");
         textFilter.Append($"fontsize={FfmpegFontSize.Medium}:");
         textFilter.Append($"{DrawTextPosition.UpperRight}:");
@@ -183,20 +201,4 @@ public abstract record BaseVideo : BaseEntity
         OutputFileName = fileName;
         OutputFilePath = Path.Combine(UploadDirectory, OutputFileName);
     }
-
-    protected string ChannelBannerTextRhtServices()
-    {
-        string[] bannerText = {
-            "rhtservices.net",
-            "Robinson Handy and Technology Services",
-            "rhtservices.net/courses",
-            "rhtservices.net/facebook",
-            "rhtservices.net/instagram",
-            // "rhtservices.net/youtube",
-            "@rhtservicesllc"
-            };
-
-        return bannerText.ElementAt(_random.Next(0, bannerText.Length));
-    }
-
 }

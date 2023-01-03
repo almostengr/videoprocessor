@@ -13,10 +13,11 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
     private readonly ITarball _tarball;
     private readonly ILoggerService<ToastmastersVideoService> _logger;
     private readonly AppSettings _appSettings;
+    private readonly IRandomService _randomService;
 
     public ToastmastersVideoService(IFileSystem fileSystemService, IFfmpeg ffmpegService,
         ITarball tarballService, ILoggerService<ToastmastersVideoService> logger, ITarball tarball,
-        AppSettings appSettings
+        AppSettings appSettings, IRandomService randomService
     ) : base(fileSystemService, ffmpegService, tarball, appSettings)
     {
         _fileSystem = fileSystemService;
@@ -24,6 +25,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         _tarball = tarballService;
         _logger = logger;
         _appSettings = appSettings;
+        _randomService = randomService;
     }
 
     public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
@@ -49,9 +51,9 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
             _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
 
-            CreateFfmpegInputFile(video);
+            video.SetChannelBannerText(SelectChannelBannerText());
 
-            video.AddChannelBannerTextFilter();
+            CreateFfmpegInputFile(video);
 
             await _ffmpegSerivce.RenderVideoAsync(
                 video.FfmpegInputFilePath, video.VideoFilter, video.OutputFilePath, stoppingToken);
@@ -89,5 +91,11 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 writer.WriteLine($"{FILE} '{file}'");
             }
         }
+    }
+
+    internal override string SelectChannelBannerText()
+    {
+        var options = new string[] { "towertoastmasters.org", "Tower Toastmasters" };
+        return options.ElementAt(_randomService.Next(0, options.Count()));
     }
 }

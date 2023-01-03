@@ -82,13 +82,13 @@ public class ToastmastersVideoTests
         Assert.AreEqual(boxColor, FfMpegColors.SteelBlue);
     }
 
-    [Test]
-    public void ChannelBannerText_ReturnEqualsTowerToastmastersDotOrg()
-    {
-        string channelText = video.ChannelBannerText();
+    // [Test]
+    // public void ChannelBannerText_ReturnEqualsTowerToastmastersDotOrg()
+    // {
+    //     string channelText = video.ChannelBannerText();
 
-        Assert.AreEqual(channelText, "towertoastmasters.org");
-    }
+    //     Assert.AreEqual(channelText, "towertoastmasters.org");
+    // }
 
     [Test]
     public void SetTarballFilePath_EmptyString_ThrowsException()

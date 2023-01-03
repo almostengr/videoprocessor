@@ -1,4 +1,3 @@
-using System.Text;
 using Almostengr.VideoProcessor.Domain.Common.Constants;
 using Almostengr.VideoProcessor.Domain.Common.Videos;
 
@@ -11,32 +10,20 @@ public sealed record ToastmastersVideo : BaseVideo
         BaseDirectory = baseDirectory;
     }
 
-    public override void AddChannelBannerTextFilter()
+    internal override void SetChannelBannerText(string text)
     {
-        if (VideoFilter.Contains(ChannelBannerText()))
-        {
-            return;
-        }
-
-        StringBuilder textFilter = new($"drawtext=textfile:'{ChannelBannerText()}':");
-        textFilter.Append($"fontcolor={BannerTextColor()}:");
-        textFilter.Append($"fontsize={FfmpegFontSize.XLarge}:");
-        textFilter.Append($"{DrawTextPosition.UpperRight}:");
-        textFilter.Append(Constant.BorderChannelText);
-        textFilter.Append($"boxcolor={BannerBackgroundColor()}@{Constant.DimBackground}");
-
-        AddDrawTextFilter(textFilter.ToString());
+        AddDrawTextFilter(text, 
+            BannerTextColor(), 
+            Constant.SolidText,
+            FfmpegFontSize.XLarge, 
+            DrawTextPosition.UpperRight, 
+            BannerBackgroundColor(), 
+            Constant.SolidBackground);
     }
 
     public override string BannerBackgroundColor()
     {
         return FfMpegColors.SteelBlue;
-    }
-
-    public override string ChannelBannerText()
-    {
-        string[] text = {"towertoastmasters.org", "Tower Toastmasters"};
-        return text[_random.Next(0, text.Count())];
     }
 
     public override string BannerTextColor()
