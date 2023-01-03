@@ -20,7 +20,7 @@ public sealed record ToastmastersVideo : BaseVideo
 
         StringBuilder textFilter = new($"drawtext=textfile:'{ChannelBannerText()}':");
         textFilter.Append($"fontcolor={BannerTextColor()}:");
-        textFilter.Append($"fontsize={FfmpegFontSize.Large}:");
+        textFilter.Append($"fontsize={FfmpegFontSize.XLarge}:");
         textFilter.Append($"{DrawTextPosition.UpperRight}:");
         textFilter.Append(Constant.BorderChannelText);
         textFilter.Append($"boxcolor={BannerBackgroundColor()}@{Constant.DimBackground}");

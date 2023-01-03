@@ -6,7 +6,6 @@ namespace Almostengr.VideoProcessor.Domain.DashCam;
 public sealed record DashCamVideo : BaseVideo
 {
     private readonly string Night = "night";
-    private readonly string DetailsFileName = "details.txt";
 
     public DashCamVideo(string baseDirectory) : base(baseDirectory)
     {
@@ -55,31 +54,47 @@ public sealed record DashCamVideo : BaseVideo
 
     public string GetDetailsFilePath()
     {
-        return Path.Combine(WorkingDirectory, DetailsFileName);
+        return Path.Combine(WorkingDirectory, "details.txt");
+    }
+
+    public string GetNoMusicFilePath()
+    {
+        return Path.Combine(WorkingDirectory, "nomusic.txt");
     }
 
     public void AddDetailsContentToVideoFilter(string[] fileContents)
     {
         const int DISPLAY_DURATION = 5;
-        const string SPEED_LIMIT = "speed limit";
+
+        string separator = Constant.SemiColon;
+        if (fileContents[0].Contains(Constant.Pipe))
+        {
+            separator = Constant.Pipe;
+        }
 
         for(int i = 0 ; i < fileContents.Count(); i++)
         {
-            string[] splitLine = fileContents[i].Split(Constant.Pipe);
+            string[] splitLine = fileContents[i].Split(separator);
             int startSeconds = Int32.Parse(splitLine[0]);
             int endSeconds = startSeconds + DISPLAY_DURATION;
             string displayText = splitLine[1].Replace(":", "\\:");
+            string displayTextLowered = displayText.ToLower();
 
             string textColor = SubtitleTextColor();
             string backgroundColor = SubtitleBackgroundColor();
 
-            if (displayText.ToLower().Contains(SPEED_LIMIT))
+            if (displayTextLowered.Contains("speed limit"))
             {
                 textColor = FfMpegColors.Black;
                 backgroundColor = FfMpegColors.White;
             }
+            else if (displayTextLowered.Contains("national forest"))
+            {
+                textColor = FfMpegColors.White;
+                backgroundColor = FfMpegColors.SaddleBrown;
+            }
 
-            AddDrawTextFilter(displayText, textColor, Constant.SolidText, FfmpegFontSize.Small, 
+            AddDrawTextFilter(displayText, textColor, Constant.SolidText, FfmpegFontSize.Medium, 
                 DrawTextPosition.LowerRight, backgroundColor, Constant.SolidBackground, 
                 $"enable='between(t,{startSeconds},{endSeconds})'");
 
@@ -89,5 +104,11 @@ public sealed record DashCamVideo : BaseVideo
             //     DrawTextPosition.LowerRight, backgroundColor, Constant.DimBackground, 
             //     $"enable='between(t,{endSeconds},{nextSeconds})'");
         }
+    }
+
+    public string GetStrippedTitle()
+    {
+        return (Title.Split(Constant.SemiColon))[0]
+            .Replace(", Bad Drivers of Montgomery", string.Empty);
     }
 }

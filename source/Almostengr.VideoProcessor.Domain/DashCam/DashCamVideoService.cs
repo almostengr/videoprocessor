@@ -29,66 +29,69 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         _appSettings = appSettings;
     }
 
-    public override async Task ProcessVideosAsync(CancellationToken stoppingToken)
+    public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
     {
         try
         {
-            while (true)
+            DashCamVideo video = new DashCamVideo(_appSettings.DashCamDirectory);
+
+            CreateVideoDirectories(video);
+            DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
+
+            _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
+
+            await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
+
+            video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
+
+            _fileSystem.DeleteDirectory(video.WorkingDirectory);
+            _fileSystem.CreateDirectory(video.WorkingDirectory);
+
+            await _tarball.ExtractTarballContentsAsync(video.TarballFilePath, video.WorkingDirectory, stoppingToken);
+
+            _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
+
+            if (_fileSystem.DoesFileExist(video.GetDetailsFilePath()))
             {
-                DashCamVideo video = new DashCamVideo(_appSettings.DashCamDirectory);
+                string[] fileContents = _fileSystem.GetFileContents(video.GetDetailsFilePath()).Split(Environment.NewLine);
+                video.AddDetailsContentToVideoFilter(fileContents);
+            }
 
-                CreateVideoDirectories(video);
-                DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
+            CreateFfmpegInputFile(video);
 
-                _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
+            video.AddSubscribeTextFilter();
+            video.AddDrawTextFilter(
+                video.GetStrippedTitle(), video.BannerTextColor(),
+                Constant.DimText,
+                FfmpegFontSize.Small,
+                DrawTextPosition.UpperLeft,
+                video.BannerBackgroundColor(),
+                Constant.DimBackground); // video title filter
 
-                await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
-
-                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
-
-                _fileSystem.DeleteDirectory(video.WorkingDirectory);
-                _fileSystem.CreateDirectory(video.WorkingDirectory);
-
-                await _tarball.ExtractTarballContentsAsync(video.TarballFilePath, video.WorkingDirectory, stoppingToken);
-
-                _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
-
-                if (_fileSystem.DoesFileExist(video.GetDetailsFilePath()))
-                {
-                    string[] fileContents = _fileSystem.GetFileContents(video.GetDetailsFilePath()).Split(Environment.NewLine);
-                    video.AddDetailsContentToVideoFilter(fileContents);
-                }
-
-                foreach (var file in _fileSystem.GetFilesInDirectory(video.WorkingDirectory))
-                {
-                    await _ffmpeg.ConvertVideoFileToTsFormatAsync(file, video.WorkingDirectory, stoppingToken);
-                }
-
-                CreateFfmpegInputFile(video);
-                video.AddSubscribeTextFilter();
-
-                // video title filter
-                video.AddDrawTextFilter(
-                    video.Title,video.BannerTextColor(),
-                    Constant.DimText,
-                    FfmpegFontSize.Small,
-                    DrawTextPosition.UpperLeft,
-                    video.BannerBackgroundColor(),
-                    Constant.DimBackground);
-
+            if (_fileSystem.DoesFileExist(video.GetNoMusicFilePath()))
+            {
+                await _ffmpeg.RenderVideoAsync(
+                    video.FfmpegInputFilePath, video.VideoFilter, video.OutputFilePath, stoppingToken);
+            }
+            else
+            {
                 await _ffmpeg.RenderVideoWithMixTrackAsync(
                     video.FfmpegInputFilePath, _musicService.GetRandomMixTrack(), video.VideoFilter, video.OutputFilePath, stoppingToken);
-
-                _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
-                _fileSystem.DeleteDirectory(video.WorkingDirectory);
             }
+
+            _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
+            _fileSystem.DeleteDirectory(video.WorkingDirectory);
         }
         catch (NoTarballsPresentException)
-        { }
+        {
+            return true;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
         }
+        
+        return false;
     }
 
     internal override void CreateFfmpegInputFile<DashCamVideo>(DashCamVideo video)

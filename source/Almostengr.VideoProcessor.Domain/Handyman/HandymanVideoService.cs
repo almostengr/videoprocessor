@@ -29,53 +29,54 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         _appSettings = appSettings;
     }
 
-    public override async Task ProcessVideosAsync(CancellationToken stoppingToken)
+    public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
     {
         try
         {
-            while (true)
-            {
-                HandymanVideo video = new HandymanVideo(_appSettings.HandymanDirectory);
+            HandymanVideo video = new HandymanVideo(_appSettings.HandymanDirectory);
 
-                CreateVideoDirectories(video);
-                DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
+            CreateVideoDirectories(video);
+            DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
-                _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
+            _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
-                await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
+            await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
 
-                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
+            video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
 
-                _fileSystem.DeleteDirectory(video.WorkingDirectory);
-                _fileSystem.CreateDirectory(video.WorkingDirectory);
+            _fileSystem.DeleteDirectory(video.WorkingDirectory);
+            _fileSystem.CreateDirectory(video.WorkingDirectory);
 
-                await _tarball.ExtractTarballContentsAsync(
-                    video.TarballFilePath, video.WorkingDirectory, stoppingToken);
+            await _tarball.ExtractTarballContentsAsync(
+                video.TarballFilePath, video.WorkingDirectory, stoppingToken);
 
-                _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
+            _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
 
-                await AddAudioToTimelapseAsync(video, stoppingToken);
+            await AddAudioToTimelapseAsync(video, stoppingToken);
 
-                await ConvertVideoFilesToCommonFormatAsync(video, stoppingToken);
+            await ConvertVideoFilesToCommonFormatAsync(video, stoppingToken);
 
-                _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
+            _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
 
-                CreateFfmpegInputFile(video);
+            CreateFfmpegInputFile(video);
 
-                await _ffmpeg.RenderVideoAsync(
-                    video.FfmpegInputFilePath, video.VideoFilter, video.OutputFilePath, stoppingToken);
+            await _ffmpeg.RenderVideoAsync(
+                video.FfmpegInputFilePath, video.VideoFilter, video.OutputFilePath, stoppingToken);
 
-                _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
+            _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
 
-                _fileSystem.DeleteDirectory(video.WorkingDirectory);
-            }
+            _fileSystem.DeleteDirectory(video.WorkingDirectory);
         }
         catch (NoTarballsPresentException)
-        { }
+        {
+            return true;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
         }
+
+        return false;
     }
 
     private async Task AddAudioToTimelapseAsync(HandymanVideo video, CancellationToken cancellationToken)

@@ -19,8 +19,12 @@ internal sealed class HandymanVideoWorker : BaseWorker
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await _videoService.ProcessVideosAsync(stoppingToken);
-            await Task.Delay(_appSettings.WorkerDelay, stoppingToken);
+            bool doSleep = await _videoService.ProcessVideosAsync(stoppingToken);
+
+            if (doSleep)
+            {
+                await Task.Delay(_appSettings.WorkerDelay, stoppingToken);
+            }
         }
     }
 }

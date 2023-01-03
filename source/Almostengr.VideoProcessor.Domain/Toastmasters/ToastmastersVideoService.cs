@@ -26,48 +26,49 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         _appSettings = appSettings;
     }
 
-    public override async Task ProcessVideosAsync(CancellationToken stoppingToken)
+    public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
     {
         try
         {
-            while (true)
-            {
-                ToastmastersVideo video = new(_appSettings.ToastmastersDirectory);
+            ToastmastersVideo video = new(_appSettings.ToastmastersDirectory);
 
-                CreateVideoDirectories(video);
-                DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
+            CreateVideoDirectories(video);
+            DeleteFilesOlderThanSpecifiedDays(video.UploadDirectory);
 
-                _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
+            _fileSystem.IsDiskSpaceAvailable(video.BaseDirectory);
 
-                await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
+            await CreateTarballsFromDirectoriesAsync(video.IncomingDirectory, stoppingToken);
 
-                video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
+            video.SetTarballFilePath(_fileSystem.GetRandomTarballFromDirectory(video.IncomingDirectory));
 
-                _fileSystem.DeleteDirectory(video.WorkingDirectory);
-                _fileSystem.CreateDirectory(video.WorkingDirectory);
+            _fileSystem.DeleteDirectory(video.WorkingDirectory);
+            _fileSystem.CreateDirectory(video.WorkingDirectory);
 
-                await _tarball.ExtractTarballContentsAsync(
-                    video.TarballFilePath, video.WorkingDirectory, stoppingToken);
+            await _tarball.ExtractTarballContentsAsync(
+                video.TarballFilePath, video.WorkingDirectory, stoppingToken);
 
-                _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
+            _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
 
-                CreateFfmpegInputFile(video);
+            CreateFfmpegInputFile(video);
 
-                video.AddChannelBannerTextFilter();
+            video.AddChannelBannerTextFilter();
 
-                await _ffmpegSerivce.RenderVideoAsync(
-                    video.FfmpegInputFilePath, video.VideoFilter, video.OutputFilePath, stoppingToken);
+            await _ffmpegSerivce.RenderVideoAsync(
+                video.FfmpegInputFilePath, video.VideoFilter, video.OutputFilePath, stoppingToken);
 
-                _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
-                _fileSystem.DeleteDirectory(video.WorkingDirectory);
-            }
+            _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
+            _fileSystem.DeleteDirectory(video.WorkingDirectory);
         }
         catch (NoTarballsPresentException)
-        { }
+        {
+            return true;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
         }
+
+        return false;
     }
 
 

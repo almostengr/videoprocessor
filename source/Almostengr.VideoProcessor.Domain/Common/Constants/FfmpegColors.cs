@@ -13,4 +13,5 @@ public static class FfMpegColors
     public const string RhtYellow = "0xffc107";
     public const string SteelBlue = "steelblue";
     public const string White = "white";
+    public static string SaddleBrown = "SaddleBrown";
 }

@@ -36,7 +36,7 @@ public abstract class BaseVideoService : IBaseVideoService
         _fileSystem.CreateDirectory(video.WorkingDirectory);
     }
 
-    public abstract Task ProcessVideosAsync(CancellationToken stoppingToken);
+    public abstract Task<bool> ProcessVideosAsync(CancellationToken stoppingToken);
 
     internal void DeleteFilesOlderThanSpecifiedDays(string directory)
     {

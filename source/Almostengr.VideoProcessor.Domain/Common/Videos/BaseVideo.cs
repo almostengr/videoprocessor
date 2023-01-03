@@ -79,7 +79,7 @@ public abstract record BaseVideo : BaseEntity
 
     public string GetSubscribeTextFilter()
     {
-        return $"drawtext=text:'SUBSCRIBE for future videos':fontcolor={FfMpegColors.White}:fontsize={FfmpegFontSize.Medium}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{FilterDuration()}";
+        return $"drawtext=text:'SUBSCRIBE for future videos':fontcolor={FfMpegColors.White}:fontsize={FfmpegFontSize.Large}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColors.Red}:box=1:boxborderw=10:{FilterDuration()}";
     }
 
     public void AddSubscribeTextFilter()
@@ -90,7 +90,7 @@ public abstract record BaseVideo : BaseEntity
 
     public string GetLikeTextFilter()
     {
-        return $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColors.White}:fontsize={FfmpegFontSize.Medium}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColors.Blue}:box=1:boxborderw=10:{FilterDuration()}";
+        return $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColors.White}:fontsize={FfmpegFontSize.Large}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColors.Blue}:box=1:boxborderw=10:{FilterDuration()}";
     }
 
     public virtual void AddDrawTextFilter(
@@ -99,7 +99,7 @@ public abstract record BaseVideo : BaseEntity
     {
         StringBuilder textFilter = new();
         textFilter.Append(Constant.CommaSpace);
-        textFilter.Append($"drawtext=textfile:'{text}':");
+        textFilter.Append($"drawtext=textfile:'{text.Trim()}':");
         textFilter.Append($"fontcolor={textColor}@{textBrightness}:");
         textFilter.Append($"fontsize={fontSize}:");
         textFilter.Append($"{position}:");
