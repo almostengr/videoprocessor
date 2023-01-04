@@ -45,6 +45,17 @@ public sealed class Ffmpeg : BaseProcess<Ffmpeg>, IFfmpeg
         return await Task.FromResult((results.stdOut, results.stdErr));
     }
 
+    public async Task<(string stdOut, string stdErr)> RenderVideoAsCopyAsync(
+        string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken)
+    {
+        string workingDirectory =
+            Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+        string arguments =
+            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -filter_hw_device foo -c copy \"{outputFilePath}\"";
+
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
     public async Task<(string stdOut, string stdErr)> RenderVideoAsync(
         string ffmpegInputFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
     {

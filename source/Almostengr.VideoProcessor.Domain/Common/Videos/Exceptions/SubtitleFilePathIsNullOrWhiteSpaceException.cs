@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
 
-internal class SubtitleFilePathIsNullOrWhiteSpaceException : VideoProcessorException
+internal sealed class SubtitleFilePathIsNullOrWhiteSpaceException : VideoProcessorException
 {
     public SubtitleFilePathIsNullOrWhiteSpaceException() : base()
     {

@@ -14,11 +14,11 @@ public sealed record ToastmastersVideo : BaseVideo
     {
         AddDrawTextFilter(text, 
             BannerTextColor(), 
-            Constant.SolidText,
+            Opacity.Full,
             FfmpegFontSize.XLarge, 
             DrawTextPosition.UpperRight, 
             BannerBackgroundColor(), 
-            Constant.SolidBackground);
+            Opacity.Full);
     }
 
     public override string BannerBackgroundColor()

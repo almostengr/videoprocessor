@@ -20,11 +20,13 @@ public abstract record BaseVideo : BaseEntity
         WorkingDirectory = Path.Combine(BaseDirectory, DirectoryNames.Working);
         ArchiveDirectory = Path.Combine(BaseDirectory, DirectoryNames.Archive);
         ErrorDirectory = Path.Combine(baseDirectory, DirectoryNames.Error);
-        FfmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
+        FfmpegInputFilePath = Path.Combine(WorkingDirectory, "ffmpeginput.txt");
 
         TarballFileName = string.Empty;
         TarballFilePath = string.Empty;
         TarballArchiveFilePath = string.Empty;
+        TarballErrorFilePath = string.Empty;
+        ErrorLogFilePath = string.Empty;
         Title = string.Empty;
         OutputFileName = string.Empty;
         OutputFilePath = string.Empty;
@@ -74,7 +76,7 @@ public abstract record BaseVideo : BaseEntity
         textFilter.Append($"fontsize={FfmpegFontSize.Medium}:");
         textFilter.Append($"{DrawTextPosition.UpperRight}:");
         textFilter.Append(Constant.BorderChannelText);
-        textFilter.Append($"boxcolor={BannerBackgroundColor()}@{Constant.DimBackground}");
+        textFilter.Append($"boxcolor={BannerBackgroundColor()}@{Opacity.Light}");
         VideoFilter += textFilter.ToString();
     }
 
@@ -90,7 +92,7 @@ public abstract record BaseVideo : BaseEntity
 
     public void AddSubscribeTextFilter()
     {
-        VideoFilter += Constant.Comma;
+        VideoFilter += Constant.CommaSpace;
         VideoFilter += GetSubscribeTextFilter();
     }
 
@@ -104,7 +106,12 @@ public abstract record BaseVideo : BaseEntity
         string backgroundColor, string backgroundBrightness, string duration = "")
     {
         StringBuilder textFilter = new();
-        textFilter.Append(Constant.CommaSpace);
+
+        if (VideoFilter.Length > 0)
+        {
+            textFilter.Append(Constant.CommaSpace);
+        }
+
         textFilter.Append($"drawtext=textfile:'{text.Trim()}':");
         textFilter.Append($"fontcolor={textColor}@{textBrightness}:");
         textFilter.Append($"fontsize={fontSize}:");
@@ -118,14 +125,6 @@ public abstract record BaseVideo : BaseEntity
             textFilter.Append(duration);
         }
 
-        VideoFilter += textFilter.ToString();
-    }
-
-    public virtual void AddDrawTextFilter(string filter)
-    {
-        StringBuilder textFilter = new();
-        textFilter.Append(Constant.CommaSpace);
-        textFilter.Append(filter);
         VideoFilter += textFilter.ToString();
     }
 

@@ -6,6 +6,10 @@ namespace Almostengr.VideoProcessor.Domain.DashCam;
 public sealed record DashCamVideo : BaseVideo
 {
     private readonly string Night = "night";
+    public string OutputDraftFilePath
+    {
+        get { return OutputFilePath.Replace(FileExtension.Mp4, ".draft" + FileExtension.Mp4); }
+    }
 
     public DashCamVideo(string baseDirectory) : base(baseDirectory)
     {
@@ -67,7 +71,7 @@ public sealed record DashCamVideo : BaseVideo
             separator = Constant.Pipe;
         }
 
-        for(int i = 0 ; i < fileContents.Count(); i++)
+        for (int i = 0; i < fileContents.Count(); i++)
         {
             string[] splitLine = fileContents[i].Split(separator);
             int startSeconds = Int32.Parse(splitLine[0]);
@@ -80,17 +84,17 @@ public sealed record DashCamVideo : BaseVideo
 
             if (displayTextLowered.Contains("speed limit"))
             {
-                textColor = FfMpegColor.Black;
                 backgroundColor = FfMpegColor.White;
+                textColor = FfMpegColor.Black;
             }
             else if (displayTextLowered.Contains("national forest"))
             {
-                textColor = FfMpegColor.White;
                 backgroundColor = FfMpegColor.SaddleBrown;
+                textColor = FfMpegColor.White;
             }
 
-            AddDrawTextFilter(displayText, textColor, Constant.SolidText, FfmpegFontSize.Medium, 
-                DrawTextPosition.LowerRight, backgroundColor, Constant.SolidBackground, 
+            AddDrawTextFilter(displayText, textColor, Opacity.Full, FfmpegFontSize.XLarge,
+                DrawTextPosition.LowerRight, backgroundColor, Opacity.Full,
                 $"enable='between(t,{startSeconds},{endSeconds})'");
         }
     }

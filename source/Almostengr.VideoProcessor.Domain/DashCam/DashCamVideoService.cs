@@ -50,25 +50,35 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             await _tarball.ExtractTarballContentsAsync(video.TarballFilePath, video.WorkingDirectory, stoppingToken);
 
             _fileSystem.PrepareAllFilesInDirectory(video.WorkingDirectory);
-            
+
             video.SetChannelBannerText(SelectChannelBannerText());
 
-            if (_fileSystem.DoesFileExist(video.GetDetailsFilePath()))
+            CreateFfmpegInputFile(video);
+
+            if (_fileSystem.DoesFileExist(video.GetDetailsFilePath()) == false)
             {
-                string[] fileContents = _fileSystem.GetFileContents(video.GetDetailsFilePath()).Split(Environment.NewLine);
-                video.AddDetailsContentToVideoFilter(fileContents);
+                await _ffmpeg.RenderVideoAsCopyAsync(
+                    video.FfmpegInputFilePath, video.OutputDraftFilePath, stoppingToken);
+
+                _fileSystem.MoveFile(video.TarballFilePath, video.TarballArchiveFilePath, false);
+                _fileSystem.DeleteDirectory(video.WorkingDirectory);
+                return false;
             }
 
-            CreateFfmpegInputFile(video);            
+            string[] fileContents = _fileSystem.GetFileContents(video.GetDetailsFilePath()).Split(Environment.NewLine);
+            if (fileContents.Count() > 0)
+            {
+                video.AddDetailsContentToVideoFilter(fileContents);
+            }
 
             video.AddSubscribeTextFilter();
             video.AddDrawTextFilter(
                 video.GetStrippedTitle(), video.BannerTextColor(),
-                Constant.DimText,
+                Opacity.Full,
                 FfmpegFontSize.Small,
                 DrawTextPosition.UpperLeft,
                 video.BannerBackgroundColor(),
-                Constant.DimBackground); // video title filter
+                Opacity.Light); // video title filter
 
             if (_fileSystem.DoesFileExist(video.GetNoMusicFilePath()))
             {

@@ -81,11 +81,11 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
                 video.AddDrawTextFilter(
                     video.Title,
                     FfMpegColor.White,
-                    Constant.SolidText,
+                    Opacity.Full,
                     FfmpegFontSize.Large,
                     DrawTextPosition.LowerLeft,
                     FfMpegColor.Maroon,
-                    Constant.SolidBackground);
+                    Opacity.Full);
             }
 
             await _ffmpeg.RenderVideoAsync(
