@@ -82,7 +82,7 @@ public abstract record BaseVideo : BaseEntity
 
     private string FilterDuration()
     {
-        return $"enable=lt(mod(t\\,120)\\,{Constant.CALL_TO_ACTION_DURATION_SECONDS})";
+        return $"enable=lt(mod(t\\,120)\\,{Constant.CallToActionDuration})";
     }
 
     public string GetSubscribeTextFilter()
