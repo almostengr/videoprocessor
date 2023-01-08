@@ -31,7 +31,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         _randomService = randomService;
     }
 
-    public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
+    public override async Task<bool> ProcessVideoAsync(CancellationToken stoppingToken)
     {
         HandymanVideo video = new HandymanVideo(_appSettings.HandymanDirectory);
 

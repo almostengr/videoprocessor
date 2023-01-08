@@ -19,7 +19,7 @@ internal sealed class ToastmastersVideoWorker : BaseWorker
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            bool doSleep = await _videoService.ProcessVideosAsync(stoppingToken);
+            bool doSleep = await _videoService.ProcessVideoAsync(stoppingToken);
 
             if (doSleep)
             {

@@ -19,7 +19,7 @@ internal sealed class TechnologyVideoWorker : BaseWorker
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            bool doSleep = await _videoService.ProcessVideosAsync(stoppingToken);
+            bool doSleep = await _videoService.ProcessVideoAsync(stoppingToken);
 
             if (doSleep)
             {

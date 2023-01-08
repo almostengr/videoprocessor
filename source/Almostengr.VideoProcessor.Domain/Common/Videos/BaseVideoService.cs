@@ -34,7 +34,7 @@ public abstract class BaseVideoService : IBaseVideoService
         _fileSystem.CreateDirectory(video.ErrorDirectory);
     }
 
-    public abstract Task<bool> ProcessVideosAsync(CancellationToken stoppingToken);
+    public abstract Task<bool> ProcessVideoAsync(CancellationToken stoppingToken);
     internal abstract string SelectChannelBannerText();
 
     internal void DeleteFilesOlderThanSpecifiedDays(string directory)
@@ -170,7 +170,5 @@ public abstract class BaseVideoService : IBaseVideoService
             // "rhtservices.net/youtube",
             "@rhtservicesllc"
             };
-
-        // return bannerText.ElementAt(_random.Next(0, bannerText.Length));
     }
 }

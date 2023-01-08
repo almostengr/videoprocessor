@@ -56,7 +56,8 @@ public sealed class FileSystem : IFileSystem
 
     public string GetRandomTarballFromDirectory(string directory)
     {
-        IEnumerable<string> tarballPaths = GetFilesInDirectory(directory);
+        IEnumerable<string> tarballPaths = GetFilesInDirectory(directory)
+            .Where(f => f.Contains(FileExtension.Tar));
 
         if (tarballPaths.Count() == 0)
         {
@@ -72,11 +73,12 @@ public sealed class FileSystem : IFileSystem
 
     public string GetRandomSrtFileFromDirectory(string directory)
     {
-        IEnumerable<string> srtFilePaths = GetFilesInDirectory(directory);
+        IEnumerable<string> srtFilePaths = GetFilesInDirectory(directory)
+            .Where(f => f.EndsWith(FileExtension.Srt));
 
         if (srtFilePaths.Count() == 0)
         {
-            throw new NoSrtFilesPresentException();
+            throw new NoSubtitleFilesPresentException();
         }
 
         return srtFilePaths

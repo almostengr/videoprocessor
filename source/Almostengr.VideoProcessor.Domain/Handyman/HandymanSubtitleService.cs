@@ -19,27 +19,26 @@ public sealed class HandymanSubtitleService : BaseSubtitleService, IHandymanSubt
         _appSettings = appSettings;
     }
 
-    public override Task ExecuteAsync(CancellationToken stoppingToken)
+    public override async Task<bool> ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
-            while (true)
-            {
-                HandymanSubtitle subtitle = new(_appSettings.HandymanDirectory);
-                subtitle.SetSubtitleFilePath(_fileSystem.GetRandomSrtFileFromDirectory(subtitle.IncomingDirectory));
-                subtitle.SetSubtitleText(_fileSystem.GetFileContents(subtitle.SubtitleInputFilePath));
-                _fileSystem.SaveFileContents(subtitle.SubtitleOutputFilePath, subtitle.GetSubtitleText());
-                _fileSystem.SaveFileContents(subtitle.BlogOutputFilePath, subtitle.GetBlogPostText());
-                _fileSystem.MoveFile(subtitle.SubtitleInputFilePath, subtitle.SubtitleArchiveFilePath);
-            }
+            HandymanSubtitle subtitle = new(_appSettings.HandymanDirectory);
+            subtitle.SetSubtitleFilePath(_fileSystem.GetRandomSrtFileFromDirectory(subtitle.IncomingDirectory));
+            subtitle.SetSubtitleText(_fileSystem.GetFileContents(subtitle.SubtitleInputFilePath));
+            _fileSystem.SaveFileContents(subtitle.SubtitleOutputFilePath, subtitle.GetSubtitleText());
+            _fileSystem.SaveFileContents(subtitle.BlogOutputFilePath, subtitle.GetBlogPostText());
+            _fileSystem.MoveFile(subtitle.SubtitleInputFilePath, subtitle.SubtitleArchiveFilePath);
         }
-        catch (NoSrtFilesPresentException)
-        { }
+        catch (NoSubtitleFilesPresentException)
+        {
+            return true;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
         }
 
-        return Task.CompletedTask;
+        return false;
     }
 }

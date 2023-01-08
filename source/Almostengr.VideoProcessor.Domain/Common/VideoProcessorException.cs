@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Domain.Common;
 
-public abstract class VideoProcessorException : Exception
+public class VideoProcessorException : Exception
 {
     protected VideoProcessorException() : base()
     {

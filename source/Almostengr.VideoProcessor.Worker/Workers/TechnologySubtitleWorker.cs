@@ -19,8 +19,12 @@ internal sealed class TechnologySubtitleWorker : BaseWorker
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await _service.ExecuteAsync(stoppingToken);
-            await Task.Delay(_appSettings.WorkerDelay, stoppingToken);
+            bool doDelay = await _service.ExecuteAsync(stoppingToken);
+            
+            if (doDelay)
+            {
+                await Task.Delay(_appSettings.WorkerDelay, stoppingToken);
+            }
         }
     }
 }

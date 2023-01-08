@@ -28,7 +28,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         _randomService = randomService;
     }
 
-    public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
+    public override async Task<bool> ProcessVideoAsync(CancellationToken stoppingToken)
     {
         ToastmastersVideo video = new(_appSettings.ToastmastersDirectory);
 

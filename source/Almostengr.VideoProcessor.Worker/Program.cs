@@ -20,6 +20,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IDashCamVideoService, DashCamVideoService>();
         services.AddSingleton<IFfmpeg, Ffmpeg>();
         services.AddSingleton<IFileSystem, FileSystem>();
+        services.AddSingleton<IGzipService, GzipService>();
         services.AddSingleton<IHandymanSubtitleService, HandymanSubtitleService>();
         services.AddSingleton<IHandymanVideoService, HandymanVideoService>();
         services.AddSingleton<IMusicService, MusicService>();

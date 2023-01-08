@@ -18,7 +18,8 @@ public sealed record ToastmastersVideo : BaseVideo
             FfmpegFontSize.XLarge, 
             DrawTextPosition.UpperRight, 
             BannerBackgroundColor(), 
-            Opacity.Full);
+            Opacity.Full,
+            Constant.BorderBoxWidthLarge);
     }
 
     public override string BannerBackgroundColor()

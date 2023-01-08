@@ -32,7 +32,7 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
         _randomService = randomService;
     }
 
-    public override async Task<bool> ProcessVideosAsync(CancellationToken stoppingToken)
+    public override async Task<bool> ProcessVideoAsync(CancellationToken stoppingToken)
     {
         TechnologyVideo video = new TechnologyVideo(_appSettings.TechnologyDirectory);
 
@@ -85,7 +85,8 @@ public sealed class TechnologyVideoService : BaseVideoService, ITechnologyVideoS
                     FfmpegFontSize.Large,
                     DrawTextPosition.LowerLeft,
                     FfMpegColor.Maroon,
-                    Opacity.Full);
+                    Opacity.Full,
+                    Constant.BorderBoxWidthLarge);
             }
 
             await _ffmpeg.RenderVideoAsync(

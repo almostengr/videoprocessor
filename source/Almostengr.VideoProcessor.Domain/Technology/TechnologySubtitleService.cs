@@ -20,30 +20,29 @@ public sealed class TechnologySubtitleService : BaseSubtitleService, ITechnology
         _appSettings = appSettings;
     }
 
-    public override Task ExecuteAsync(CancellationToken stoppingToken)
+    public override async Task<bool> ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
-            while (true)
-            {
-                TechnologySubtitle subtitle = new(_appSettings.TechnologyDirectory);
+            TechnologySubtitle subtitle = new(_appSettings.TechnologyDirectory);
 
-                subtitle.SetSubtitleFilePath(_fileSystem.GetRandomSrtFileFromDirectory(subtitle.IncomingDirectory));
+            subtitle.SetSubtitleFilePath(_fileSystem.GetRandomSrtFileFromDirectory(subtitle.IncomingDirectory));
 
-                string contents = _fileSystem.GetFileContents(subtitle.SubtitleInputFilePath);
-                subtitle.SetSubtitleText(contents);
+            string contents = _fileSystem.GetFileContents(subtitle.SubtitleInputFilePath);
+            subtitle.SetSubtitleText(contents);
 
-                _fileSystem.SaveFileContents(subtitle.SubtitleOutputFilePath, subtitle.GetSubtitleText());
-                _fileSystem.SaveFileContents(subtitle.BlogOutputFilePath, subtitle.GetBlogPostText());
-            }
+            _fileSystem.SaveFileContents(subtitle.SubtitleOutputFilePath, subtitle.GetSubtitleText());
+            _fileSystem.SaveFileContents(subtitle.BlogOutputFilePath, subtitle.GetBlogPostText());
         }
-        catch (NoSrtFilesPresentException)
-        { }
+        catch (NoSubtitleFilesPresentException)
+        {
+            return true;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
         }
 
-        return Task.CompletedTask;
+        return false;
     }
 }

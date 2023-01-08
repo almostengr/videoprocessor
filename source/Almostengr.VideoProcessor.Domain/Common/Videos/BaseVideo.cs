@@ -71,13 +71,8 @@ public abstract record BaseVideo : BaseEntity
             return;
         }
 
-        StringBuilder textFilter = new($"drawtext=textfile:'{text}':");
-        textFilter.Append($"fontcolor={BannerTextColor()}:");
-        textFilter.Append($"fontsize={FfmpegFontSize.Medium}:");
-        textFilter.Append($"{DrawTextPosition.UpperRight}:");
-        textFilter.Append(Constant.BorderChannelText);
-        textFilter.Append($"boxcolor={BannerBackgroundColor()}@{Opacity.Light}");
-        VideoFilter += textFilter.ToString();
+        AddDrawTextFilter(text, BannerTextColor(), Opacity.Full, FfmpegFontSize.Medium, 
+            DrawTextPosition.UpperRight, BannerBackgroundColor(), Opacity.Light, Constant.BorderBoxWidthLarge);
     }
 
     private string FilterDuration()
@@ -103,7 +98,7 @@ public abstract record BaseVideo : BaseEntity
 
     public virtual void AddDrawTextFilter(
         string text, string textColor, string textBrightness, string fontSize, string position,
-        string backgroundColor, string backgroundBrightness, string duration = "")
+        string backgroundColor, string backgroundBrightness, int borderWidth = 5, string duration = "")
     {
         StringBuilder textFilter = new();
 
@@ -116,7 +111,8 @@ public abstract record BaseVideo : BaseEntity
         textFilter.Append($"fontcolor={textColor}@{textBrightness}:");
         textFilter.Append($"fontsize={fontSize}:");
         textFilter.Append($"{position}:");
-        textFilter.Append(Constant.BorderChannelText);
+        textFilter.Append(Constant.BorderBox);
+        textFilter.Append($"boxborderw={borderWidth.ToString()}:");
         textFilter.Append($"boxcolor={backgroundColor}@{backgroundBrightness}");
 
         if (duration.Length > 0)
@@ -171,7 +167,9 @@ public abstract record BaseVideo : BaseEntity
 
         TarballArchiveFilePath = Path.Combine(ArchiveDirectory, TarballFileName);
         TarballErrorFilePath = Path.Combine(ErrorDirectory, TarballFileName);
-        ErrorLogFilePath = Path.Combine(ErrorDirectory, TarballFileName + FileExtension.Txt);
+        ErrorLogFilePath = 
+            Path.Combine(ErrorDirectory, 
+                Path.GetFileNameWithoutExtension(TarballFileName) + DateTime.Now.ToString(".yyyyMMdd.HHMMss") +  FileExtension.Txt);
     }
 
     internal virtual void SetOutputFileName(string fileName)

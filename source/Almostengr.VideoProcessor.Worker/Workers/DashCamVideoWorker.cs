@@ -19,10 +19,11 @@ internal sealed class DashCamVideoWorker : BaseWorker
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            bool doSleep = await _videoService.ProcessVideosAsync(stoppingToken);
+            bool doSleep = await _videoService.ProcessVideoAsync(stoppingToken);
 
             if (doSleep)
             {
+                await _videoService.CompressTarballsInArchiveFolderAsync(stoppingToken);
                 await Task.Delay(_appSettings.WorkerDelay, stoppingToken);
             }
         }

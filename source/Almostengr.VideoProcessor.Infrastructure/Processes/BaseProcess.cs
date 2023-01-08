@@ -8,6 +8,7 @@ public abstract class BaseProcess<T>
 {
     private readonly ILoggerService<T> _loggerService;
     internal const string BashBinary = "/bin/bash";
+    internal const string GrepBinary = "/usr/bin/grep";
 
     protected BaseProcess(ILoggerService<T> loggerService)
     {
