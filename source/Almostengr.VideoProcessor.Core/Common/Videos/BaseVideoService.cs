@@ -33,7 +33,10 @@ public abstract class BaseVideoService : IBaseVideoService
     internal abstract string GetChannelBrandingText(string[] options);
     public abstract Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken);
     public abstract Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
-    public abstract Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken);
+    public virtual Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
     
     internal async Task CompressTarballsInArchiveFolderAsync(
         string archiveDirectory, CancellationToken cancellationToken)

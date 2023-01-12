@@ -1,42 +1,41 @@
-using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Constants;
 
-namespace Almostengr.VideoProcessor.Core.Videos;
+namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-internal abstract record BaseSubtitle
+public abstract record BaseSubtitle
 {
-    internal BaseSubtitle(string baseDirectory)
+    protected BaseSubtitle(string baseDirectory, string filePath)
     {
-        if (string.IsNullOrWhiteSpace(baseDirectory))
+        if (string.IsNullOrWhiteSpace(baseDirectory) || string.IsNullOrWhiteSpace(filePath))
         {
-            throw new SubtitleBaseDirectoryIsNullOrEmptyException();
+            throw new VideoProcessorException("Subtitle arguments are not valid");
         }
 
         BaseDirectory = baseDirectory;
-        ArchiveDirectory = Path.Combine(BaseDirectory, DirectoryName.Archive);
-        UploadDirectory = Path.Combine(BaseDirectory, DirectoryName.Upload);
-        IncomingDirectory = Path.Combine(BaseDirectory, DirectoryName.Incoming);
-        SubtitleText = string.Empty;
-        SubtitleInputFilePath = string.Empty;
-        SubtitleOutputFilePath = string.Empty;
-        BlogOutputFilePath = string.Empty;
-        SubtitleArchiveFilePath = string.Empty;
+        FilePath = filePath;
+        FileContents = string.Empty;
     }
 
-    internal string BaseDirectory { get; init; }
-    internal string ArchiveDirectory { get; }
-    internal string UploadDirectory { get; }
-    internal string IncomingDirectory { get; }
-    internal string SubtitleText { get; private set; }
-    public string SubtitleInputFilePath { get; internal set; }
-    public string SubtitleArchiveFilePath { get; internal set; }
-    public string BlogOutputFilePath { get; internal set; }
-    public string SubtitleOutputFilePath { get; internal set; }
+    public string FilePath { get; init; }
+    public string FileContents { get; private set; }
+    public string BaseDirectory { get; init; }
 
-    abstract internal string GetBlogPostText();
-    abstract internal string GetSubtitleText();
+    internal abstract string SubtitleOutputFilePath();
+    internal abstract string BlogPostText();
+    internal abstract string SubtitleText();
+    internal abstract string BlogOutputFilePath();
+    
+    internal virtual string IncomingFilePath()
+    {
+        return Path.Combine(BaseDirectory, DirectoryName.Incoming, FileName());
+    }
 
+    internal virtual string ArchiveFilePath()
+    {
+        return Path.Combine(BaseDirectory, DirectoryName.Archive, FileName());
+    }
+    
     internal virtual void SetSubtitleText(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
@@ -44,7 +43,12 @@ internal abstract record BaseSubtitle
             throw new SubtitleTextIsNullOrWhitespaceException();
         }
 
-        SubtitleText = input;
+        FileContents = input;
+    }
+
+    internal string FileName()
+    {
+        return Path.GetFileName(FilePath);
     }
 
     internal string FixMisspellings(string input)
@@ -56,19 +60,5 @@ internal abstract record BaseSubtitle
             .Replace(Constant.DoubleWhitespace, Constant.Whitespace)
             .Replace("all right", "alright")
             .Trim();
-    }
-
-    internal void SetSubtitleFilePath(string filePath)
-    {
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            throw new InvalidSubtitleFileException();
-        }
-
-        SubtitleInputFilePath = filePath;
-        SubtitleOutputFilePath = Path.Combine(UploadDirectory, Path.GetFileName(filePath));
-        BlogOutputFilePath =
-            Path.Combine(UploadDirectory, Path.GetFileNameWithoutExtension(filePath) + FileExtension.Md);
-        SubtitleArchiveFilePath = Path.Combine(ArchiveDirectory, Path.GetFileName(filePath));
     }
 }

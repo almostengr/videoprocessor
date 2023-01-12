@@ -2,6 +2,7 @@ using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Common.Videos;
+using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Constants;
 using Almostengr.VideoProcessor.Core.Music.Services;
 
@@ -160,8 +161,27 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         return options.ElementAt(_randomService.Next(0, options.Count()));
     }
 
-    public override async Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
+    public override Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            string filePath = _fileSystemService.GetRandomSrtFileFromDirectory(IncomingDirectory);
+
+            HandymanSrtSubtitle subtitle = new(_appSettings.TechnologyDirectory, filePath);
+
+            subtitle.SetSubtitleText(_fileSystemService.GetFileContents(subtitle.IncomingFilePath()));
+
+            _fileSystemService.SaveFileContents(subtitle.SubtitleOutputFilePath(), subtitle.SubtitleText());
+            _fileSystemService.SaveFileContents(subtitle.BlogOutputFilePath(), subtitle.BlogPostText());
+            _fileSystemService.MoveFile(subtitle.IncomingFilePath(), subtitle.ArchiveFilePath());
+        }
+        catch (NoSubtitleFilesPresentException)
+        { }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
+
+        return Task.CompletedTask;
     }
 }

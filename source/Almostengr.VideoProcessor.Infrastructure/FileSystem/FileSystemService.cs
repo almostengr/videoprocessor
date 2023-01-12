@@ -6,19 +6,24 @@ using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
-public sealed class FileSystem : IFileSystemService
+public sealed class FileSystemService : IFileSystemService
 {
-    private readonly Random _random;
+    private readonly IRandomService _randomService;
     private readonly AppSettings _appSettings;
 
-    public FileSystem(AppSettings appSettings)
+    public FileSystemService(AppSettings appSettings, IRandomService randomService)
     {
-        _random = new Random();
+        _randomService = randomService;
         _appSettings = appSettings;
     }
 
     public void CreateDirectory(string directory)
     {
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            throw new VideoProcessorException("Directory cannot be null or whitespace");
+        }
+
         if (Directory.Exists(directory))
         {
             return;
@@ -27,15 +32,15 @@ public sealed class FileSystem : IFileSystemService
         Directory.CreateDirectory(directory);
     }
 
-    public void CopyFile(string source, string destination, bool createDestinationDirectory = true)
-    {
-        if (createDestinationDirectory)
-        {
-            CreateDirectory(Path.GetDirectoryName(destination));
-        }
+    // public void CopyFile(string source, string destination, bool createDestinationDirectory = true)
+    // {
+    //     if (createDestinationDirectory)
+    //     {
+    //         CreateDirectory(Path.GetDirectoryName(destination));
+    //     }
 
-        File.Copy(source, destination);
-    }
+    //     File.Copy(source, destination);
+    // }
 
     public void DeleteFile(string filePath)
     {
@@ -65,26 +70,26 @@ public sealed class FileSystem : IFileSystemService
 
         return tarballPaths.Where(f => f.Contains(FileExtension.Tar))
             .Where(f => f.StartsWith(".") == false)
-            .OrderBy(f => _random.Next())
+            .OrderBy(f => _randomService.Next())
             .Take(1)
             .First();
     }
 
-    // public string GetRandomSrtFileFromDirectory(string directory)
-    // {
-    //     IEnumerable<string> srtFilePaths = GetFilesInDirectory(directory)
-    //         .Where(f => f.EndsWith(FileExtension.Srt));
+    public string GetRandomSrtFileFromDirectory(string directory)
+    {
+        IEnumerable<string> srtFilePaths = GetFilesInDirectory(directory)
+            .Where(f => f.EndsWith(FileExtension.Srt));
 
-    //     if (srtFilePaths.Count() == 0)
-    //     {
-    //         throw new NoSubtitleFilesPresentException();
-    //     }
+        if (srtFilePaths.Count() == 0)
+        {
+            throw new NoSubtitleFilesPresentException();
+        }
 
-    //     return srtFilePaths
-    //         .Where(f => f.EndsWith(FileExtension.Srt))
-    //         .OrderBy(f => _random.Next()).Take(1)
-    //         .First();
-    // }
+        return srtFilePaths
+            .Where(f => f.EndsWith(FileExtension.Srt))
+            .OrderBy(f => _randomService.Next()).Take(1)
+            .First();
+    }
 
     public bool IsDiskSpaceAvailable(string directory)
     {

@@ -166,8 +166,4 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         return options[0];
     }
 
-    public override async Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
 }

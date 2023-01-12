@@ -147,8 +147,4 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         return options.ElementAt(_randomService.Next(0, options.Count()));
     }
 
-    public override async Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
 }

@@ -1,18 +1,60 @@
 using System.Text;
+using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Constants;
 
-namespace Almostengr.VideoProcessor.Core.Videos;
+namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-internal abstract record BaseSrtSubtitle : BaseSubtitle
+public abstract record BaseSrtSubtitle : BaseSubtitle
 {
-    internal BaseSrtSubtitle(string baseDirectory) : base(baseDirectory)
+    protected BaseSrtSubtitle(string baseDirectory, string filePath) :
+        base(baseDirectory, filePath)
     {
+        if (filePath.EndsWith(FileExtension.Srt) == false)
+        {
+            throw new InvalidSubtitleFileException("File extension does not match expected type");
+        }
     }
 
-    internal override string GetBlogPostText()
+    internal override string SubtitleText()
     {
-        string[] subtitleLines = SubtitleText.Split('\n');
+        string[] inputLines = FileContents.Split(Environment.NewLine);
+        StringBuilder videoSubtitle = new();
+
+        foreach (var line in inputLines)
+        {
+            videoSubtitle.Append(FixMisspellings(line).ToUpper() + Environment.NewLine);
+        }
+
+        return videoSubtitle.ToString();
+    }
+
+    internal override string BlogOutputFilePath()
+    {
+        return Path.Combine(BaseDirectory, DirectoryName.Upload, FilePath.Replace(FileExtension.Srt, FileExtension.Md));
+    }
+
+    internal override string SubtitleOutputFilePath()
+    {
+        return Path.Combine(BaseDirectory, DirectoryName.Upload, FilePath);
+    }
+
+    internal override void SetSubtitleText(string text)
+    {
+        string[] inputLines = text.Split(Environment.NewLine);
+        if (inputLines[0].StartsWith("1") == false ||
+            inputLines[1].StartsWith("00:") == false ||
+            string.IsNullOrWhiteSpace(inputLines[2]))
+        {
+            throw new SrtSubtitleContentsAreInvalidException();
+        }
+
+        base.SetSubtitleText(text);
+    }
+
+    internal override string BlogPostText()
+    {
+        string[] subtitleLines = FileContents.Split(Environment.NewLine);
         int counter = 0;
         StringBuilder stringBuilder = new();
 
@@ -64,31 +106,5 @@ internal abstract record BaseSrtSubtitle : BaseSubtitle
             .Replace("r h t services dot net", rhtServicesWebsite)
             .Replace("rht services", "RHT Services")
             ;
-    }
-
-    internal override string GetSubtitleText()
-    {
-        string[] inputLines = SubtitleText.Split('\n');
-        StringBuilder videoSubtitle = new();
-
-        foreach (var line in inputLines)
-        {
-            videoSubtitle.Append(FixMisspellings(line).ToUpper() + Environment.NewLine);
-        }
-
-        return videoSubtitle.ToString();
-    }
-
-    internal override void SetSubtitleText(string text)
-    {
-        string[] inputLines = text.Split(Environment.NewLine);
-        if (inputLines[0].StartsWith("1") == false ||
-            inputLines[1].StartsWith("00:") == false ||
-            string.IsNullOrWhiteSpace(inputLines[2]))
-        {
-            throw new SrtSubtitleContentsAreInvalidException();
-        }
-
-        base.SetSubtitleText(text);
     }
 }
