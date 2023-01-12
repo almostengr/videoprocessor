@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Almostengr.VideoProcessor.Domain\Almostengr.VideoProcessor.Domain.csproj" />
     <ProjectReference Include="..\Almostengr.VideoProcessor.Infrastructure\Almostengr.VideoProcessor.Infrastructure.csproj" />
+    <ProjectReference Include="..\Almostengr.VideoProcessor.Core\Almostengr.VideoProcessor.Core.csproj" />
   </ItemGroup>
 </Project>

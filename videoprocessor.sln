@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "source", "source", "{8214F653-A412-4D29-924B-C39586593DDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Domain", "source\Almostengr.VideoProcessor.Domain\Almostengr.VideoProcessor.Domain.csproj", "{28648209-C031-433C-A186-A1254AD6FCA6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Infrastructure", "source\Almostengr.VideoProcessor.Infrastructure\Almostengr.VideoProcessor.Infrastructure.csproj", "{026F5403-4B5F-409D-942A-91B052AD3B97}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Worker", "source\Almostengr.VideoProcessor.Worker\Almostengr.VideoProcessor.Worker.csproj", "{A27F24E7-A9FB-4CCA-B97F-58E94F64A46C}"
@@ -17,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Infrastructure.UnitTests", "tests\Almostengr.VideoProcessor.Infrastructure.UnitTests\Almostengr.VideoProcessor.Infrastructure.UnitTests.csproj", "{AB4E58D1-D335-4899-BC4E-B76C7CD4E7D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Core", "source\Almostengr.VideoProcessor.Core\Almostengr.VideoProcessor.Core.csproj", "{4E9146FE-E05F-44B0-B695-E930D1B04B43}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,10 +26,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{28648209-C031-433C-A186-A1254AD6FCA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{28648209-C031-433C-A186-A1254AD6FCA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{28648209-C031-433C-A186-A1254AD6FCA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{28648209-C031-433C-A186-A1254AD6FCA6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{026F5403-4B5F-409D-942A-91B052AD3B97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{026F5403-4B5F-409D-942A-91B052AD3B97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{026F5403-4B5F-409D-942A-91B052AD3B97}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -46,12 +42,16 @@ Global
 		{AB4E58D1-D335-4899-BC4E-B76C7CD4E7D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB4E58D1-D335-4899-BC4E-B76C7CD4E7D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB4E58D1-D335-4899-BC4E-B76C7CD4E7D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E9146FE-E05F-44B0-B695-E930D1B04B43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E9146FE-E05F-44B0-B695-E930D1B04B43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E9146FE-E05F-44B0-B695-E930D1B04B43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E9146FE-E05F-44B0-B695-E930D1B04B43}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{28648209-C031-433C-A186-A1254AD6FCA6} = {8214F653-A412-4D29-924B-C39586593DDF}
 		{026F5403-4B5F-409D-942A-91B052AD3B97} = {8214F653-A412-4D29-924B-C39586593DDF}
 		{A27F24E7-A9FB-4CCA-B97F-58E94F64A46C} = {8214F653-A412-4D29-924B-C39586593DDF}
 		{EE2FDDE9-A380-4CA1-BCBC-9D4783E28B6F} = {EDBD548C-8955-4E65-B54B-B1CC91AFCFDE}
 		{AB4E58D1-D335-4899-BC4E-B76C7CD4E7D5} = {EDBD548C-8955-4E65-B54B-B1CC91AFCFDE}
+		{4E9146FE-E05F-44B0-B695-E930D1B04B43} = {8214F653-A412-4D29-924B-C39586593DDF}
 	EndGlobalSection
 EndGlobal
