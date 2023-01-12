@@ -5,6 +5,8 @@ public static class FileExtension
     public static readonly string AudioMkv = ".audio.mkv";
     public static readonly string AudioMp4 = ".audio.mp4";
     public static readonly string Avi = ".avi";
+    public static readonly string DraftTar = ".draft.tar";
+    public static readonly string DraftTarGz = ".draft.tar";
     public static readonly string GraphicsAss = ".graphics.ass";
     public static readonly string InfoAss = ".info.ass";
     public static readonly string Jpg = ".jpg";

@@ -6,6 +6,7 @@ public sealed class AppSettings
     public string HandymanDirectory { get; init; }
     public string TechnologyDirectory { get; init; }
     public string ToastmastersDirectory { get; init; }
+    public string MusicDirectory {get; init;}
     public TimeSpan WorkerDelay { get; init; }
     public double DiskSpaceThreshold { get; init; }
     public int DeleteFilesAfterDays { get; init; }
@@ -19,6 +20,7 @@ public sealed class AppSettings
             DeleteFilesAfterDays = 30;
             DiskSpaceThreshold = 0.1;
             HandymanDirectory = $"{pbaseDirectory}/handyman";
+            MusicDirectory = string.Empty;
             TechnologyDirectory = $"{pbaseDirectory}/technology";
             ToastmastersDirectory = $"{pbaseDirectory}/toastmasters";
             WorkerDelay = TimeSpan.FromMinutes(120);
@@ -30,6 +32,7 @@ public sealed class AppSettings
         DeleteFilesAfterDays = 0; // 0 to disable
         DiskSpaceThreshold = 0; // 0.0 to disable
         HandymanDirectory = $"{baseDirectory}/handyman";
+        MusicDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music";
         TechnologyDirectory = $"{baseDirectory}/technology";
         ToastmastersDirectory = $"{baseDirectory}/toastmasters";
         WorkerDelay = TimeSpan.FromSeconds(15);

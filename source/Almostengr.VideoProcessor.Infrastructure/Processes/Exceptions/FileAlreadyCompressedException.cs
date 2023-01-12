@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Domain.Common;
+using Almostengr.VideoProcessor.Core.Common;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 

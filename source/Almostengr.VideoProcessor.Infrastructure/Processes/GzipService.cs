@@ -1,7 +1,7 @@
-using Almostengr.VideoProcessor.Domain.Common.Constants;
-using Almostengr.VideoProcessor.Domain.Common.Interfaces;
+using Almostengr.VideoProcessor.Core.Common.Constants;
+using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
-using Almostengr.VideoProcessor.Domain.Common.Exceptions;
+using Almostengr.VideoProcessor.Core.Common.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 

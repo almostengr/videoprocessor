@@ -1,5 +1,6 @@
-using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.DashCam;
+using Almostengr.VideoProcessor.Core.Common;
+using Almostengr.VideoProcessor.Core.DashCam;
+using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Worker.Workers;
 
@@ -15,16 +16,18 @@ internal sealed class DashCamVideoWorker : BaseWorker
         _appSettings = appSettings;
     }
 
-    protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected async override Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
-            bool doSleep = await _videoService.ProcessVideoAsync(stoppingToken);
-
-            if (doSleep)
+            try
             {
-                await _videoService.CompressTarballsInArchiveFolderAsync(stoppingToken);
-                await Task.Delay(_appSettings.WorkerDelay, stoppingToken);
+                await _videoService.ProcessIncomingVideoTarballsAsync(cancellationToken);
+            }
+            catch (NoTarballsPresentException)
+            {
+                await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
+                await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
             }
         }
     }

@@ -1,13 +1,12 @@
-using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.Common.Constants;
-using Almostengr.VideoProcessor.Domain.Common.Interfaces;
+using Almostengr.VideoProcessor.Core.Common;
+using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
-using Almostengr.VideoProcessor.Domain.Common.Videos.Exceptions;
-using Almostengr.VideoProcessor.Domain.Common.Subtitles.Exceptions;
+using Almostengr.VideoProcessor.Core.Common.Interfaces;
+using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
-public sealed class FileSystem : IFileSystem
+public sealed class FileSystem : IFileSystemService
 {
     private readonly Random _random;
     private readonly AppSettings _appSettings;
@@ -71,21 +70,21 @@ public sealed class FileSystem : IFileSystem
             .First();
     }
 
-    public string GetRandomSrtFileFromDirectory(string directory)
-    {
-        IEnumerable<string> srtFilePaths = GetFilesInDirectory(directory)
-            .Where(f => f.EndsWith(FileExtension.Srt));
+    // public string GetRandomSrtFileFromDirectory(string directory)
+    // {
+    //     IEnumerable<string> srtFilePaths = GetFilesInDirectory(directory)
+    //         .Where(f => f.EndsWith(FileExtension.Srt));
 
-        if (srtFilePaths.Count() == 0)
-        {
-            throw new NoSubtitleFilesPresentException();
-        }
+    //     if (srtFilePaths.Count() == 0)
+    //     {
+    //         throw new NoSubtitleFilesPresentException();
+    //     }
 
-        return srtFilePaths
-            .Where(f => f.EndsWith(FileExtension.Srt))
-            .OrderBy(f => _random.Next()).Take(1)
-            .First();
-    }
+    //     return srtFilePaths
+    //         .Where(f => f.EndsWith(FileExtension.Srt))
+    //         .OrderBy(f => _random.Next()).Take(1)
+    //         .First();
+    // }
 
     public bool IsDiskSpaceAvailable(string directory)
     {
@@ -117,6 +116,7 @@ public sealed class FileSystem : IFileSystem
     public IEnumerable<string> GetFilesInDirectory(string directory)
     {
         return Directory.GetFiles(directory);
+        // return (new DirectoryInfo(directory)).GetFiles();
     }
 
     public IEnumerable<string> GetDirectoriesInDirectory(string directory)

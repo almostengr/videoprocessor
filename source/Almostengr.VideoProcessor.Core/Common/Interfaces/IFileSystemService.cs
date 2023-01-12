@@ -15,6 +15,6 @@ public interface IFileSystemService
     void DeleteFiles(string[] narrationFiles);
     void SaveFileContents(string filePath, string content);
     string GetFileContents(string filePath);
-    string GetRandomSrtFileFromDirectory(string directory);
+    // string GetRandomSrtFileFromDirectory(string directory);
     void CopyFile(string sourceFile, string destinationDirectory, bool createDestinationDirectory = true);
 }

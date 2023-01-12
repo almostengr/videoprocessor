@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.Common.Interfaces;
+using Almostengr.VideoProcessor.Core.Common;
+using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem;
 using NUnit.Framework;
 
@@ -18,7 +18,7 @@ public class FileSystemTests
     public void CreateDirectory_ReturnsNothing()
     {
         AppSettings appSettings = new AppSettings();
-        IFileSystem fileSystem = new FileSystem.FileSystem(appSettings);
+        IFileSystemService fileSystem = new FileSystem.FileSystem(appSettings);
 
         fileSystem.CreateDirectory("/tmp");
     }

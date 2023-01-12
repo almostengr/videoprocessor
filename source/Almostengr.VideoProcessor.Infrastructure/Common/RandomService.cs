@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Domain.Common.Interfaces;
+using Almostengr.VideoProcessor.Core.Common.Interfaces;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Common;
 
