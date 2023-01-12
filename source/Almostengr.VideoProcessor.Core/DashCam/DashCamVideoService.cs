@@ -72,6 +72,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             video = new DashCamVideo(_appSettings.DashCamDirectory, Path.GetFileName(incomingTarball));
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
+            _fileSystemService.CreateDirectory(WorkingDirectory);
 
             await _tarballService.ExtractTarballContentsAsync(
                 video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
@@ -166,4 +167,8 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         return options[0];
     }
 
+    public override async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)
+    {
+        await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
+    }
 }

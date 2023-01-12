@@ -42,9 +42,9 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     //     _musicService = music;
     // }
 
-    public HandymanVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IGzipService gzipService, 
+    public HandymanVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IGzipService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
-         IMusicService musicService, ILoggerService<HandymanVideoService> loggerService) : 
+         IMusicService musicService, ILoggerService<HandymanVideoService> loggerService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService)
     {
         IncomingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
@@ -59,47 +59,68 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     {
         await base.CompressTarballsInArchiveFolderAsync(ArchiveDirectory, cancellationToken);
     }
-    
+
     public override async Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken)
     {
-        string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(IncomingDirectory);
-
-        HandymanVideo handymanVideo = new HandymanVideo(
-            _appSettings.DashCamDirectory, Path.GetFileName(incomingTarball));
-
-        _fileSystemService.DeleteDirectory(WorkingDirectory);
-
-        await _tarballService.ExtractTarballContentsAsync(
-            handymanVideo.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
-
-        _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
-
-        await ConvertVideoAudioFilesToAudioOnly(WorkingDirectory, cancellationToken);
-
-        await MergeVideoAndAudioFiles(cancellationToken);
-
-        CreateFfmpegInputFile(handymanVideo);
-
-        handymanVideo.AddDrawTextVideoFilter(
-            GetChannelBrandingText(handymanVideo.BrandingTextOptions()),
-            handymanVideo.DrawTextFilterTextColor(),
-            Opacity.Full,
-            FfmpegFontSize.Large,
-            DrawTextPosition.UpperRight,
-            handymanVideo.DrawTextFilterBackgroundColor(),
-            Opacity.Light);
-
-        if (_fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss)).Any())
+        HandymanVideo? video = null;
+        try
         {
-            handymanVideo.AddSubtitleVideoFilter(
-                _fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss)).Single());
+            string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(IncomingDirectory);
+
+            video = new HandymanVideo(
+                _appSettings.DashCamDirectory, Path.GetFileName(incomingTarball));
+
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
+            _fileSystemService.CreateDirectory(WorkingDirectory);
+
+            await _tarballService.ExtractTarballContentsAsync(
+                video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
+
+            _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
+
+            await ConvertVideoAudioFilesToAudioOnly(WorkingDirectory, cancellationToken);
+
+            await MergeVideoAndAudioFiles(cancellationToken);
+
+            CreateFfmpegInputFile(video);
+
+            video.AddDrawTextVideoFilter(
+                GetChannelBrandingText(video.BrandingTextOptions()),
+                video.DrawTextFilterTextColor(),
+                Opacity.Full,
+                FfmpegFontSize.Large,
+                DrawTextPosition.UpperRight,
+                video.DrawTextFilterBackgroundColor(),
+                Opacity.Light);
+
+            if (_fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss)).Any())
+            {
+                video.AddSubtitleVideoFilter(
+                    _fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss)).Single());
+            }
+
+            await _ffmpegService.RenderVideoAsync(
+                video.FfmpegInputFilePath(), video.VideoFilter, video.OutputFileName(), cancellationToken);
+
+            _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
+        catch (NoTarballsPresentException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
 
-        await _ffmpegService.RenderVideoAsync(
-            handymanVideo.FfmpegInputFilePath(), handymanVideo.VideoFilter, handymanVideo.OutputFileName(), cancellationToken);
-
-        _fileSystemService.MoveFile(handymanVideo.IncomingTarballFilePath(), handymanVideo.ArchiveTarballFilePath());
-        _fileSystemService.DeleteDirectory(WorkingDirectory);
+            if (video != null)
+            {
+                _fileSystemService.MoveFile(video.IncomingTarballFilePath(), Path.Combine(ErrorDirectory, video.ArchiveFileName));
+                _fileSystemService.SaveFileContents(
+                    Path.Combine(ErrorDirectory, video.ArchiveFileName + FileExtension.Log),
+                    ex.Message);
+            }
+        }
     }
 
     private void CreateFfmpegInputFile(HandymanVideo handymanVideo)
@@ -183,5 +204,10 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         }
 
         return Task.CompletedTask;
+    }
+
+    public override async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)
+    {
+        await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
     }
 }

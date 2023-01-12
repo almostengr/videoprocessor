@@ -1,5 +1,4 @@
 using System.Text;
-using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Music.Services;
@@ -33,6 +32,7 @@ public abstract class BaseVideoService : IBaseVideoService
     internal abstract string GetChannelBrandingText(string[] options);
     public abstract Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken);
     public abstract Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
+    public abstract Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
     public virtual Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
@@ -78,4 +78,15 @@ public abstract class BaseVideoService : IBaseVideoService
                 file, outputFilePath, workingDirectory, cancellationToken);
         }
     }
+
+    public async Task CreateTarballsFromDirectoriesAsync(string incomingDirectory, CancellationToken cancellationToken)
+    {
+        var directories = _fileSystemService.GetDirectoriesInDirectory(incomingDirectory);
+        foreach (var directory in directories)
+        {
+            await _tarballService.CreateTarballFromDirectoryAsync(directory, cancellationToken);
+            _fileSystemService.DeleteDirectory(directory);
+        }
+    }
+
 }

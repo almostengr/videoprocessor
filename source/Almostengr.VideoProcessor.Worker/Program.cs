@@ -28,9 +28,9 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IToastmastersVideoService, ToastmastersVideoService>();
         services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
 
-        services.AddHostedService<DashCamVideoWorker>();
-        services.AddHostedService<HandymanVideoWorker>();
-        services.AddHostedService<TechTalkVideoWorker>();
+        // services.AddHostedService<DashCamVideoWorker>();
+        // services.AddHostedService<HandymanVideoWorker>();
+        // services.AddHostedService<TechTalkVideoWorker>();
         services.AddHostedService<ToastmastersVideoWorker>();
     })
     .UseSystemd()

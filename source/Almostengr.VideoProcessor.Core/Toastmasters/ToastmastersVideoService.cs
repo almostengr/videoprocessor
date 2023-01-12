@@ -45,11 +45,11 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         ILoggerService<ToastmastersVideoService> loggerService, IMusicService musicService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService)
     {
-        IncomingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
-        ArchiveDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Archive);
-        ErrorDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Error);
-        UploadDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Upload);
-        WorkingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Working);
+        IncomingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Incoming);
+        ArchiveDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Archive);
+        ErrorDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Error);
+        UploadDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Upload);
+        WorkingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Working);
         _loggerService = loggerService;
     }
 
@@ -67,14 +67,9 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         _fileSystemService.CreateDirectory(WorkingDirectory);
     }
 
-    public async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)
+    public override async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)
     {
-        var directories = _fileSystemService.GetDirectoriesInDirectory(IncomingDirectory);
-        foreach (var directory in directories)
-        {
-            await _tarballService.CreateTarballFromDirectoryAsync(directory, cancellationToken);
-            _fileSystemService.DeleteDirectory(directory);
-        }
+        await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
     }
 
     public override async Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken)
@@ -85,9 +80,10 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         {
             string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(IncomingDirectory);
 
-            video = new ToastmastersVideo(_appSettings.DashCamDirectory, Path.GetFileName(incomingTarball));
+            video = new ToastmastersVideo(_appSettings.ToastmastersDirectory, Path.GetFileName(incomingTarball));
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
+            _fileSystemService.CreateDirectory(WorkingDirectory);
 
             await _tarballService.ExtractTarballContentsAsync(
                 video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
@@ -126,7 +122,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         }
         catch (NoTarballsPresentException)
         {
-            return;
+            throw;
         }
         catch (Exception ex)
         {

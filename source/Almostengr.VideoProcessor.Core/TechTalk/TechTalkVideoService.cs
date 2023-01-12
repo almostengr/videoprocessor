@@ -72,6 +72,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             video = new TechTalkVideo(_appSettings.DashCamDirectory, Path.GetFileName(incomingTarball));
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
+            _fileSystemService.CreateDirectory(WorkingDirectory);
 
             await _tarballService.ExtractTarballContentsAsync(
                 video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
@@ -131,7 +132,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         }
         catch (NoTarballsPresentException)
         {
-            return;
+            throw;
         }
         catch (Exception ex)
         {
@@ -174,5 +175,10 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         }
 
         return Task.CompletedTask;
+    }
+
+    public override async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)
+    {
+        await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
     }
 }
