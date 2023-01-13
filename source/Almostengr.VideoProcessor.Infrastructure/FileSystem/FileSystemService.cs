@@ -32,16 +32,6 @@ public sealed class FileSystemService : IFileSystemService
         Directory.CreateDirectory(directory);
     }
 
-    // public void CopyFile(string source, string destination, bool createDestinationDirectory = true)
-    // {
-    //     if (createDestinationDirectory)
-    //     {
-    //         CreateDirectory(Path.GetDirectoryName(destination));
-    //     }
-
-    //     File.Copy(source, destination);
-    // }
-
     public void DeleteFile(string filePath)
     {
         if (File.Exists(filePath))
@@ -118,10 +108,14 @@ public sealed class FileSystemService : IFileSystemService
         }
     }
 
+    public FileInfo[] GetFilesInDirectoryWithInfo(string directory)
+    {
+        return (new DirectoryInfo(directory)).GetFiles();
+    }
+
     public IEnumerable<string> GetFilesInDirectory(string directory)
     {
         return Directory.GetFiles(directory);
-        // return (new DirectoryInfo(directory)).GetFiles();
     }
 
     public IEnumerable<string> GetDirectoriesInDirectory(string directory)
@@ -162,14 +156,6 @@ public sealed class FileSystemService : IFileSystemService
     public bool DoesFileExist(string filePath)
     {
         return File.Exists(filePath);
-    }
-
-    public void DeleteFiles(string[] files)
-    {
-        foreach (var file in files)
-        {
-            DeleteFile(file);
-        }
     }
 
     public string GetFileContents(string filePath)

@@ -45,6 +45,16 @@ public abstract record BaseVideo
             .Replace(Constant.Colon, string.Empty);
     }
 
+    public string ErrorFilePath()
+    {
+        return Path.Combine(BaseDirectory, DirectoryName.Error, OutputFileName());
+    }
+
+    public string OutputFilePath()
+    {
+        return Path.Combine(BaseDirectory, DirectoryName.Upload, OutputFileName());
+    }
+
     public string OutputFileName()
     {
         return ArchiveFileName.Replace(FileExtension.Tar, string.Empty)
@@ -131,7 +141,6 @@ public abstract record BaseVideo
         VideoFilter += textFilter.ToString();
     }
 
-    // ffmpeg -i input.mp4 -vf "subtitles=subtitle.srt:force_style='Fontname=Roboto,OutlineColour=&H40000000,BorderStyle=3'" output.mp4
     public virtual void AddSubtitleVideoFilter(
         string filePath, int leftMargin = 10, int rightMargin = 10, int verticalMargin = 10)
     {
@@ -149,22 +158,12 @@ public abstract record BaseVideo
         VideoFilter += textFilter.ToString();
     }
 
-    private string FilterDuration()
+    private string FilterDuration(int duration = 180)
     {
-        return $"enable=lt(mod(t\\,120)\\,{Constant.CallToActionDuration})";
+        return $"enable=lt(mod(t\\,{duration})\\,{Constant.CallToActionDuration})";
     }
 
-    // public string GetSubscribeTextFilter()
-    // {
-    //     return $"drawtext=text:'SUBSCRIBE for future videos':fontcolor={FfMpegColor.White}:fontsize={FfmpegFontSize.Large}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColor.Red}:box=1:boxborderw=10:{FilterDuration()}";
-    // }
-
-    // public string GetLikeTextFilter()
-    // {
-    //     return $"drawtext=text:'GIVE US A THUMBS UP!':fontcolor={FfMpegColor.White}:fontsize={FfmpegFontSize.Large}:{DrawTextPosition.LowerLeft}:boxcolor={FfMpegColor.Blue}:box=1:boxborderw=10:{FilterDuration()}";
-    // }
-
-    public void AddSubscribeVideoFilter()
+    public void AddSubscribeVideoFilter(int duration)
     {
         AddDrawTextVideoFilter(
             "SUBSCRIBE for future videos",
@@ -174,12 +173,12 @@ public abstract record BaseVideo
             DrawTextPosition.LowerLeft,
             FfMpegColor.Red,
             Opacity.Full,
-            5,
-            FilterDuration()
+            10,
+            FilterDuration(duration)
         );
     }
 
-    public void AddLikeVideoFilter()
+    public void AddLikeVideoFilter(int duration)
     {
         AddDrawTextVideoFilter(
             "Please LIKE this video",
@@ -189,8 +188,8 @@ public abstract record BaseVideo
             DrawTextPosition.LowerLeft,
             FfMpegColor.White,
             Opacity.Full,
-            5,
-            FilterDuration()
+            10,
+            FilterDuration(duration)
         );
     }
 

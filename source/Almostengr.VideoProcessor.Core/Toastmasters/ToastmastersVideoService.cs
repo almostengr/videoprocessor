@@ -10,35 +10,13 @@ namespace Almostengr.VideoProcessor.Core.Toastmasters;
 
 public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVideoService
 {
+    private readonly ILoggerService<ToastmastersVideoService> _loggerService;
+    
     private readonly string IncomingDirectory;
     private readonly string ArchiveDirectory;
     private readonly string ErrorDirectory;
     private readonly string UploadDirectory;
     private readonly string WorkingDirectory;
-    private readonly ILoggerService<ToastmastersVideoService> _loggerService;
-    // private readonly IFileSystemService _fileSystemService;
-    // private readonly ITarballService _tarballService;
-    // private readonly IRandomService _random;
-    // private readonly IFfmpegService _ffmpeg;
-    // private readonly AppSettings _appSettings;
-
-    // public ToastmastersVideoService(AppSettings appSettings, IFileSystemService fileSystem,
-    // ILoggerService<ToastmastersVideoService> loggerService,
-    //     ITarballService tarball, IRandomService random, IFfmpegService ffmpeg)
-    // {
-    //     _appSettings = appSettings;
-    //     IncomingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
-    //     ArchiveDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Archive);
-    //     ErrorDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Error);
-    //     UploadDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Upload);
-    //     WorkingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Working);
-    //     _fileSystemService = fileSystem;
-    //     _tarballService = tarball;
-    //     _random = random;
-    //     _ffmpeg = ffmpeg;
-    //     _loggerService = loggerService;
-    // }
-
 
     public ToastmastersVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IGzipService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
@@ -55,7 +33,14 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
-        await base.CompressTarballsInArchiveFolderAsync(ArchiveDirectory, cancellationToken);
+        try
+        {
+            await base.CompressTarballsInArchiveFolderAsync(ArchiveDirectory, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
     }
 
     public void CreateDirectories()
@@ -69,7 +54,14 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
     public override async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)
     {
-        await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
+        try
+        {
+            await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
     }
 
     public override async Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken)
@@ -111,10 +103,10 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 video.DrawTextFilterBackgroundColor(),
                 Opacity.Light);
 
-            video.AddLikeVideoFilter();
+            video.AddLikeVideoFilter(_randomService.SubscribeLikeDuration());
 
             await _ffmpegService.RenderVideoAsync(
-                video.FfmpegInputFilePath(), video.VideoFilter, video.OutputFileName(), cancellationToken);
+                video.FfmpegInputFilePath(), video.VideoFilter, video.OutputFilePath(), cancellationToken);
 
             _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
             _fileSystemService.DeleteDirectory(WorkingDirectory);
@@ -137,10 +129,4 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             }
         }
     }
-
-    internal override string GetChannelBrandingText(string[] options)
-    {
-        return options.ElementAt(_randomService.Next(0, options.Count()));
-    }
-
 }

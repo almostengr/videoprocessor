@@ -10,54 +10,37 @@ namespace Almostengr.VideoProcessor.Core.Handyman;
 
 public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoService
 {
-    // private readonly AppSettings _appSettings;
-
-    public string IncomingDirectory { get; }
-    public string ArchiveDirectory { get; }
-    public string ErrorDirectory { get; }
-    public string UploadDirectory { get; }
-    public string WorkingDirectory { get; }
-
     private readonly ILoggerService<HandymanVideoService> _loggerService;
 
-    // private readonly IFileSystemService _fileSystemService;
-    // private readonly ITarballService _tarballService;
-    // private readonly IRandomService _randomService;
-    // private readonly IFfmpegService _ffmpegService;
-    // private readonly IMusicService _musicService;
-
-    // public HandymanVideoService(AppSettings appSettings, IFileSystemService fileSystem,
-    //     ITarballService tarball, IRandomService random, IFfmpegService ffmpeg, IMusicService music)
-    // {
-    //     _appSettings = appSettings;
-    //     IncomingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
-    //     ArchiveDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Archive);
-    //     ErrorDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Error);
-    //     UploadDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Upload);
-    //     WorkingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Working);
-    //     _fileSystemService = fileSystem;
-    //     _tarballService = tarball;
-    //     _randomService = random;
-    //     _ffmpegService = ffmpeg;
-    //     _musicService = music;
-    // }
+    private readonly string IncomingDirectory;
+    private readonly string ArchiveDirectory;
+    private readonly string ErrorDirectory;
+    private readonly string UploadDirectory;
+    private readonly string WorkingDirectory;
 
     public HandymanVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IGzipService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
          IMusicService musicService, ILoggerService<HandymanVideoService> loggerService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService)
     {
-        IncomingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
-        ArchiveDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Archive);
-        ErrorDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Error);
-        UploadDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Upload);
-        WorkingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Working);
+        IncomingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Incoming);
+        ArchiveDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Archive);
+        ErrorDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Error);
+        UploadDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Upload);
+        WorkingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Working);
         _loggerService = loggerService;
     }
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
-        await base.CompressTarballsInArchiveFolderAsync(ArchiveDirectory, cancellationToken);
+        try
+        {
+            await base.CompressTarballsInArchiveFolderAsync(ArchiveDirectory, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
     }
 
     public override async Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken)
@@ -67,8 +50,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         {
             string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(IncomingDirectory);
 
-            video = new HandymanVideo(
-                _appSettings.DashCamDirectory, Path.GetFileName(incomingTarball));
+            video = new HandymanVideo(_appSettings.HandymanDirectory, Path.GetFileName(incomingTarball));
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
@@ -149,15 +131,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 continue;
             }
 
-            // string audioFileName = 
-            // workingDirVideos
-            //     .Where(f => f.StartsWith(Path.GetFileNameWithoutExtension(videoFilePath)))
-            //     .Single() 
-            // string audioFilePath = videoFilePath
-            //     .Replace(FileExtension.Mp4, string.Empty)
-            //     .Replace(FileExtension.Mkv, string.Empty)
-            //     + FileExtension.Mp3;
-
             string? audioFilePath = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.StartsWith(Path.GetFileNameWithoutExtension(videoFilePath)) && f.EndsWith(FileExtension.Mp3))
                 .SingleOrDefault();
@@ -177,11 +150,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         }
     }
 
-    internal override string GetChannelBrandingText(string[] options)
-    {
-        return options.ElementAt(_randomService.Next(0, options.Count()));
-    }
-
     public override Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
     {
         try
@@ -197,7 +165,9 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             _fileSystemService.MoveFile(subtitle.IncomingFilePath(), subtitle.ArchiveFilePath());
         }
         catch (NoSubtitleFilesPresentException)
-        { }
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
@@ -208,6 +178,13 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
     public override async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)
     {
-        await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
+        try
+        {
+            await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
     }
 }

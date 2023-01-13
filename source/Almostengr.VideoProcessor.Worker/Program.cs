@@ -32,6 +32,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         // services.AddHostedService<HandymanVideoWorker>();
         // services.AddHostedService<TechTalkVideoWorker>();
         services.AddHostedService<ToastmastersVideoWorker>();
+        services.AddHostedService<ArchiveCompressWorker>();
     })
     .UseSystemd()
     .Build();

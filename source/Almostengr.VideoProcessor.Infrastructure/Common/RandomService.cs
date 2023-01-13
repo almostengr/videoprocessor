@@ -20,4 +20,9 @@ public sealed class RandomService : IRandomService
     {
         return _random.Next();
     }
+
+    public int SubscribeLikeDuration()
+    {
+        return _random.Next(300, 600);
+    }
 }

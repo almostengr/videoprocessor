@@ -29,34 +29,39 @@ public abstract class BaseVideoService : IBaseVideoService
         _musicService = musicService;
     }
 
-    internal abstract string GetChannelBrandingText(string[] options);
     public abstract Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken);
     public abstract Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
     public abstract Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
+
     public virtual Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
     }
-    
+
+    internal string GetChannelBrandingText(string[] options)
+    {
+        return options.ElementAt(_randomService.Next(0, options.Count()));
+    }
+
     internal async Task CompressTarballsInArchiveFolderAsync(
         string archiveDirectory, CancellationToken cancellationToken)
     {
         var archiveTarballs = _fileSystemService.GetFilesInDirectory(archiveDirectory)
             .Where(f => f.EndsWith(FileExtension.Tar) && !f.Contains(FileExtension.DraftTar));
 
-        foreach(var archive in archiveTarballs)
+        foreach (var archive in archiveTarballs)
         {
             await _gzipService.CompressFileAsync(archive, cancellationToken);
         }
     }
-    
+
     internal string FfmpegInputFileText(string[] filesInDirectory, string inputFilePath)
     {
         StringBuilder text = new();
         const string FILE = "file";
         foreach (var file in filesInDirectory)
         {
-            text.Append($"{FILE} '{file}'");
+            text.Append($"{FILE} '{file}' {Environment.NewLine}");
         }
 
         return text.ToString();
@@ -87,6 +92,11 @@ public abstract class BaseVideoService : IBaseVideoService
             await _tarballService.CreateTarballFromDirectoryAsync(directory, cancellationToken);
             _fileSystemService.DeleteDirectory(directory);
         }
+    }
+
+    public int FilterDurationInSeconds()
+    {
+        return _randomService.Next(240, 600);
     }
 
 }

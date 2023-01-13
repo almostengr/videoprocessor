@@ -5,7 +5,8 @@ namespace Almostengr.VideoProcessor.Core.Toastmasters;
 
 public sealed record ToastmastersVideo : BaseVideo
 {
-    public ToastmastersVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
+    public ToastmastersVideo(string baseDirectory, string archiveFileName) : 
+        base(baseDirectory, archiveFileName)
     {
     }
 

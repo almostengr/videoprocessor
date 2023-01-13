@@ -10,37 +10,13 @@ namespace Almostengr.VideoProcessor.Core.DashCam;
 
 public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 {
-    // private readonly AppSettings _appSettings;
-    // private readonly IFileSystemService _fileSystemService;
-    // private readonly ITarballService _tarballService;
-    // private readonly IRandomService _randomService;
-    // private readonly IFfmpegService _ffmpegService;
-    // private readonly IGzipService _gzipService;
     private readonly ILoggerService<DashCamVideoService> _loggerService;
 
-    public string IncomingDirectory { get; }
-    public string ArchiveDirectory { get; }
-    public string ErrorDirectory { get; }
-    public string UploadDirectory { get; }
-    public string WorkingDirectory { get; }
-
-    // public DashCamVideoService(AppSettings appSettings, IFileSystemService fileSystemService,
-    //     ILoggerService<DashCamVideoService> loggerService, IGzipService gzipService,
-    //     ITarballService tarballService, IRandomService randomService, IFfmpegService ffmpegService)
-    // {
-    //     _appSettings = appSettings;
-    //     IncomingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
-    //     ArchiveDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Archive);
-    //     ErrorDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Error);
-    //     UploadDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Upload);
-    //     WorkingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Working);
-    //     _fileSystemService = fileSystemService;
-    //     _tarballService = tarballService;
-    //     _randomService = randomService;
-    //     _ffmpegService = ffmpegService;
-    //     _loggerService = loggerService;
-    //     _gzipService = gzipService;
-    // }
+    private readonly string IncomingDirectory;
+    private readonly string ArchiveDirectory;
+    private readonly string ErrorDirectory;
+    private readonly string UploadDirectory;
+    private readonly string WorkingDirectory;
 
     public DashCamVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IGzipService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
@@ -57,7 +33,14 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
-        await base.CompressTarballsInArchiveFolderAsync(ArchiveDirectory, cancellationToken);
+        try
+        {
+            await base.CompressTarballsInArchiveFolderAsync(ArchiveDirectory, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
     }
 
     public override async Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken)
@@ -83,8 +66,6 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             if (video.IsDraft())
             {
-                // await _ffmpegService.RenderVideoAsync(
-                //     video.FfmpegInputFilePath(), string.Empty, video.OutputFileName(), cancellationToken);
                 await _ffmpegService.RenderVideoAsCopyAsync(
                     video.FfmpegInputFilePath(),
                     Path.Combine(ArchiveDirectory, video.OutputFileName()),
@@ -122,10 +103,14 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             video.SetGraphicsSubtitleFileName(graphicsSubtitle);
 
-            video.AddLikeVideoFilter();
+            video.AddSubscribeVideoFilter(_randomService.SubscribeLikeDuration());
 
-            await _ffmpegService.RenderVideoAsync(
-                video.FfmpegInputFilePath(), video.VideoFilter, video.OutputFileName(), cancellationToken);
+            await _ffmpegService.RenderVideoWithMixTrackAsync(
+                video.FfmpegInputFilePath(),
+                _musicService.GetRandomMixTrack(),
+                video.VideoFilter,
+                video.OutputFilePath(),
+                cancellationToken);
 
             _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
             _fileSystemService.DeleteDirectory(WorkingDirectory);
@@ -162,13 +147,15 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         _fileSystemService.SaveFileContents(video.FfmpegInputFilePath(), ffmpegInput);
     }
 
-    internal override string GetChannelBrandingText(string[] options)
-    {
-        return options[0];
-    }
-
     public override async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)
     {
-        await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
+        try
+        {
+            await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
     }
 }

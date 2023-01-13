@@ -10,54 +10,37 @@ namespace Almostengr.VideoProcessor.Core.TechTalk;
 
 public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoService
 {
-    // private readonly IRandomService _random;
-    // private readonly IFfmpegService _ffmpegService;
     private readonly ILoggerService<TechTalkVideoService> _loggerService;
-    // private readonly AppSettings _appSettings;
 
-    public string IncomingDirectory { get; }
-    public string ArchiveDirectory { get; }
-    public string ErrorDirectory { get; }
-    public string UploadDirectory { get; }
-    public string WorkingDirectory { get; }
-
-    // private IFileSystemService _fileSystemService;
-    // private readonly ITarballService _tarballService;
-
-    // public TechTalkVideoService(AppSettings appSettings, IFileSystemService fileSystem,
-    // ILoggerService<TechTalkVideoService> loggerService,
-    //     ITarballService tarball, IRandomService random, IFfmpegService ffmpeg)
-    // {
-    //     _appSettings = appSettings;
-    //     IncomingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
-    //     ArchiveDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Archive);
-    //     ErrorDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Error);
-    //     UploadDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Upload);
-    //     WorkingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Working);
-    //     _fileSystemService = fileSystem;
-    //     _tarballService = tarball;
-    //     _random = random;
-    //     _ffmpegService = ffmpeg;
-    //     _loggerService = loggerService;
-    // }
-
+    public readonly string IncomingDirectory;
+    public readonly string ArchiveDirectory;
+    public readonly string ErrorDirectory;
+    public readonly string UploadDirectory;
+    public readonly string WorkingDirectory;
 
     public TechTalkVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IGzipService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         ILoggerService<TechTalkVideoService> loggerService, IMusicService musicService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService)
     {
-        IncomingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
-        ArchiveDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Archive);
-        ErrorDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Error);
-        UploadDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Upload);
-        WorkingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Working);
+        IncomingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Incoming);
+        ArchiveDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Archive);
+        ErrorDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Error);
+        UploadDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Upload);
+        WorkingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Working);
         _loggerService = loggerService;
     }
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
-        await base.CompressTarballsInArchiveFolderAsync(ArchiveDirectory, cancellationToken);
+        try
+        {
+            await base.CompressTarballsInArchiveFolderAsync(ArchiveDirectory, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
     }
 
     public override async Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken)
@@ -69,7 +52,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(IncomingDirectory);
             _loggerService.LogInformation($"Processing ${incomingTarball}");
 
-            video = new TechTalkVideo(_appSettings.DashCamDirectory, Path.GetFileName(incomingTarball));
+            video = new TechTalkVideo(_appSettings.TechnologyDirectory, Path.GetFileName(incomingTarball));
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
@@ -148,11 +131,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         }
     }
 
-    internal override string GetChannelBrandingText(string[] options)
-    {
-        return options.ElementAt(_randomService.Next(0, options.Count()));
-    }
-
     public override Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
     {
         try
@@ -179,6 +157,13 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
     public override async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)
     {
-        await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
+        try
+        {
+            await base.CreateTarballsFromDirectoriesAsync(IncomingDirectory, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
     }
 }

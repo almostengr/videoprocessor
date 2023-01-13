@@ -1,6 +1,7 @@
 using Almostengr.VideoProcessor.Core.Common.Videos;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
-    public interface IDashCamVideoService : IBaseVideoService
-    {
-    }
+
+public interface IDashCamVideoService : IBaseVideoService
+{
+}
