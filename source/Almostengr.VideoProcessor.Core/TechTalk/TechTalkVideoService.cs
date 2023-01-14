@@ -14,7 +14,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
     public readonly string IncomingDirectory;
     public readonly string ArchiveDirectory;
-    public readonly string ErrorDirectory;
     public readonly string UploadDirectory;
     public readonly string WorkingDirectory;
 
@@ -25,7 +24,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
     {
         IncomingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Incoming);
         ArchiveDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Archive);
-        ErrorDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Error);
         UploadDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Upload);
         WorkingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Working);
         _loggerService = loggerService;
@@ -60,22 +58,31 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             await _tarballService.ExtractTarballContentsAsync(
                 video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
 
+            _fileSystemService.CopyFile(
+                video.EndScreenFilePath(), 
+                Path.Combine(WorkingDirectory, video.EndScreenFileName()));
+
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
             // create input file
             _fileSystemService.DeleteFile(video.FfmpegInputFilePath());
-            string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+            var videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp4) || f.EndsWith(FileExtension.Mkv))
                 .OrderBy(f => f)
-                .ToArray();
-            string ffmpegInput = FfmpegInputFileText(videoFiles, video.FfmpegInputFilePath());
+                // .ToArray();
+                .ToList();
 
-            _fileSystemService.SaveFileContents(video.FfmpegInputFilePath(), ffmpegInput);
+            videoFiles.Add(video.EndScreenFilePath());
+            // string ffmpegInput = CreateFfmpegInputFile(videoFiles, video.FfmpegInputFilePath());
+            CreateFfmpegInputFile(videoFiles.ToArray(), video.FfmpegInputFilePath());
+
+            // _fileSystemService.SaveFileContents(video.FfmpegInputFilePath(), ffmpegInput);
 
             if (video.IsDraft())
             {
                 await _ffmpegService.RenderVideoAsync(
-                    video.FfmpegInputFilePath(), string.Empty, Path.Combine(UploadDirectory, video.OutputFileName()), cancellationToken);
+                    // video.FfmpegInputFilePath(), string.Empty, Path.Combine(UploadDirectory, video.OutputFileName()), cancellationToken);
+                    video.FfmpegInputFilePath(), string.Empty, video.OutputVideoFilePath(), cancellationToken);
                 _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
                 _fileSystemService.DeleteDirectory(WorkingDirectory);
                 return;
@@ -108,7 +115,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             }
 
             await _ffmpegService.RenderVideoAsync(
-                video.FfmpegInputFilePath(), video.VideoFilter, video.OutputFileName(), cancellationToken);
+                video.FfmpegInputFilePath(), video.VideoFilter, video.OutputVideoFilePath(), cancellationToken);
 
             _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
             _fileSystemService.DeleteDirectory(WorkingDirectory);
@@ -123,9 +130,9 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             if (video != null)
             {
-                _fileSystemService.MoveFile(video.IncomingTarballFilePath(), Path.Combine(ErrorDirectory, video.ArchiveFileName));
+                _fileSystemService.MoveFile(video.IncomingTarballFilePath(), Path.Combine(ArchiveDirectory, video.ArchiveFileName));
                 _fileSystemService.SaveFileContents(
-                    Path.Combine(ErrorDirectory, video.ArchiveFileName + FileExtension.Log),
+                    Path.Combine(ArchiveDirectory, video.ArchiveFileName + FileExtension.Log),
                     ex.Message);
             }
         }

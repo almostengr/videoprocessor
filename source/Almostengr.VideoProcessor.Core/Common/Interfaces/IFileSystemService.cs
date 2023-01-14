@@ -15,4 +15,5 @@ public interface IFileSystemService
     void SaveFileContents(string filePath, string content);
     string GetFileContents(string filePath);
     string GetRandomSrtFileFromDirectory(string directory);
+    void CopyFile(string sourceFilePath, string destinationFilePath);
 }

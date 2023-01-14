@@ -4,28 +4,28 @@ using Almostengr.VideoProcessor.Core.TechTalk.Exceptions;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk;
 
-public sealed record TechTalkVideo : BaseVideo
+internal sealed record TechTalkVideo : BaseVideo
 {
-    public bool IsChristmasLightVideo { get; private set; }
-    public bool IsIndependenceDayVideo { get; private set; }
+    internal bool IsChristmasLightVideo { get; private set; }
+    internal bool IsIndependenceDayVideo { get; private set; }
 
-    public TechTalkVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
+    internal TechTalkVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
     {
         IsChristmasLightVideo = false;
         IsIndependenceDayVideo = false;
     }
 
-    public string ChristmasLightMetaFile()
+    internal string ChristmasLightMetaFile()
     {
         return Path.Combine(BaseDirectory, DirectoryName.Working, "christmas.txt");
     }
 
-    public string IndependenceDayMetaFile()
+    internal string IndependenceDayMetaFile()
     {
         return Path.Combine(BaseDirectory, DirectoryName.Working, "independence.txt");
     }
 
-    public void ConfirmChristmasLightVideo()
+    internal void ConfirmChristmasLightVideo()
     {
         if (IsIndependenceDayVideo)
         {
@@ -35,7 +35,7 @@ public sealed record TechTalkVideo : BaseVideo
         IsChristmasLightVideo = true;
     }
 
-    public void ConfirmIndependenceDayVideo()
+    internal void ConfirmIndependenceDayVideo()
     {
         if (IsChristmasLightVideo)
         {
@@ -45,7 +45,7 @@ public sealed record TechTalkVideo : BaseVideo
         IsIndependenceDayVideo = true;
     }
 
-    public override string[] BrandingTextOptions()
+    internal override string[] BrandingTextOptions()
     {
         const string TECH_TALK = "Tech Talk with RHT Services";
 
@@ -57,7 +57,7 @@ public sealed record TechTalkVideo : BaseVideo
         return new string[] { RHT_WEBSITE, TECH_TALK };
     }
 
-    public override string DrawTextFilterBackgroundColor()
+    internal override string DrawTextFilterBackgroundColor()
     {
         if (IsChristmasLightVideo)
         {
@@ -71,7 +71,7 @@ public sealed record TechTalkVideo : BaseVideo
         return FfMpegColor.Green;
     }
 
-    public override string DrawTextFilterTextColor()
+    internal override string DrawTextFilterTextColor()
     {
         return FfMpegColor.White;
     }

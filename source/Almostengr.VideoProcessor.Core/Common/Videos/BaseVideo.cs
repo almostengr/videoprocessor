@@ -5,18 +5,18 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public abstract record BaseVideo
+internal abstract record BaseVideo
 {
-    public string Title { get; init; }
-    public string ArchiveFileName { get; init; }
-    public string GraphicsSubtitleFileName { get; private set; }
-    public string BaseDirectory { get; init; }
-    public string VideoFilter { get; private set; }
+    internal string Title { get; init; }
+    internal string ArchiveFileName { get; init; }
+    internal string GraphicsSubtitleFileName { get; private set; }
+    internal string BaseDirectory { get; init; }
+    internal string VideoFilter { get; private set; }
 
-    public readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
-    public readonly string RHT_WEBSITE = "rhtservices.net";
+    internal readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
+    internal readonly string RHT_WEBSITE = "rhtservices.net";
 
-    public BaseVideo(string baseDirectory, string archiveFileName)
+    internal BaseVideo(string baseDirectory, string archiveFileName)
     {
         if (string.IsNullOrWhiteSpace(baseDirectory) || string.IsNullOrWhiteSpace(archiveFileName))
         {
@@ -30,7 +30,17 @@ public abstract record BaseVideo
         VideoFilter = string.Empty;
     }
 
-    public abstract string[] BrandingTextOptions();
+    internal virtual string EndScreenFilePath()
+    {
+        return Path.Combine(BaseDirectory, EndScreenFileName());
+    }
+
+    internal string EndScreenFileName()
+    {
+        return "endscreen.mp4";
+    }
+
+    internal abstract string[] BrandingTextOptions();
 
     internal virtual string SetTitle(string fileName)
     {
@@ -45,17 +55,17 @@ public abstract record BaseVideo
             .Replace(Constant.Colon, string.Empty);
     }
 
-    public string ErrorFilePath()
+    internal string ErrorTarballFilePath()
     {
-        return Path.Combine(BaseDirectory, DirectoryName.Error, OutputFileName());
+        return Path.Combine(BaseDirectory, DirectoryName.Archive, OutputVideoFileName() + FileExtension.Err);
     }
 
-    public string OutputFilePath()
+    internal string OutputVideoFilePath()
     {
-        return Path.Combine(BaseDirectory, DirectoryName.Upload, OutputFileName());
+        return Path.Combine(BaseDirectory, DirectoryName.Upload, OutputVideoFileName());
     }
 
-    public string OutputFileName()
+    internal string OutputVideoFileName()
     {
         return ArchiveFileName.Replace(FileExtension.Tar, string.Empty)
             .Replace(FileExtension.TarXz, string.Empty)
@@ -63,12 +73,12 @@ public abstract record BaseVideo
             + FileExtension.Mp4;
     }
 
-    public bool IsDraft()
+    internal bool IsDraft()
     {
         return ArchiveFileName.ToLower().Contains(".draft");
     }
 
-    public void SetGraphicsSubtitleFileName(string fileName)
+    internal void SetGraphicsSubtitleFileName(string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
@@ -78,42 +88,42 @@ public abstract record BaseVideo
         GraphicsSubtitleFileName = fileName;
     }
 
-    public virtual string DrawTextFilterBackgroundColor()
+    internal virtual string DrawTextFilterBackgroundColor()
     {
         return FfMpegColor.Black;
     }
 
-    public virtual string DrawTextFilterTextColor()
+    internal virtual string DrawTextFilterTextColor()
     {
         return FfMpegColor.White;
     }
 
-    public virtual string SubtitleBackgroundColor()
+    internal virtual string SubtitleBackgroundColor()
     {
         return FfMpegColor.Black;
     }
 
-    public virtual string SubtitleTextColor()
+    internal virtual string SubtitleTextColor()
     {
         return FfMpegColor.White;
     }
 
-    public string FfmpegInputFilePath()
+    internal string FfmpegInputFilePath()
     {
         return Path.Combine(BaseDirectory, DirectoryName.Working, "ffmpeginput.txt");
     }
 
-    public string IncomingTarballFilePath()
+    internal string IncomingTarballFilePath()
     {
         return Path.Combine(BaseDirectory, DirectoryName.Incoming, ArchiveFileName);
     }
 
-    public string ArchiveTarballFilePath()
+    internal string ArchiveTarballFilePath()
     {
         return Path.Combine(BaseDirectory, DirectoryName.Archive, ArchiveFileName);
     }
 
-    public virtual void AddDrawTextVideoFilter(
+    internal virtual void AddDrawTextVideoFilter(
         string text, string textColor, string textBrightness, string fontSize, string position,
         string backgroundColor, string backgroundBrightness, int borderWidth = 5, string duration = "")
     {
@@ -141,7 +151,7 @@ public abstract record BaseVideo
         VideoFilter += textFilter.ToString();
     }
 
-    public virtual void AddSubtitleVideoFilter(
+    internal virtual void AddSubtitleVideoFilter(
         string filePath, int leftMargin = 10, int rightMargin = 10, int verticalMargin = 10)
     {
         StringBuilder textFilter = new();
@@ -163,7 +173,7 @@ public abstract record BaseVideo
         return $"enable=lt(mod(t\\,{duration})\\,{Constant.CallToActionDuration})";
     }
 
-    public void AddSubscribeVideoFilter(int duration)
+    internal void AddSubscribeVideoFilter(int duration)
     {
         AddDrawTextVideoFilter(
             "SUBSCRIBE for future videos",
@@ -178,7 +188,7 @@ public abstract record BaseVideo
         );
     }
 
-    public void AddLikeVideoFilter(int duration)
+    internal void AddLikeVideoFilter(int duration)
     {
         AddDrawTextVideoFilter(
             "Please LIKE this video",

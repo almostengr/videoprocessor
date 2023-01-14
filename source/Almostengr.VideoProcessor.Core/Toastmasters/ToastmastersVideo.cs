@@ -3,24 +3,24 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Toastmasters;
 
-public sealed record ToastmastersVideo : BaseVideo
+internal sealed record ToastmastersVideo : BaseVideo
 {
-    public ToastmastersVideo(string baseDirectory, string archiveFileName) : 
+    internal ToastmastersVideo(string baseDirectory, string archiveFileName) : 
         base(baseDirectory, archiveFileName)
     {
     }
 
-    public override string[] BrandingTextOptions()
+    internal override string[] BrandingTextOptions()
     {
         return new string[] { "towertoastmasters.org", "Tower Toastmasters", "toastmasters.org" };
     }
 
-    public override string DrawTextFilterBackgroundColor()
+    internal override string DrawTextFilterBackgroundColor()
     {
         return FfMpegColor.SteelBlue;
     }
 
-    public override string DrawTextFilterTextColor()
+    internal override string DrawTextFilterTextColor()
     {
         return FfMpegColor.White;
     }

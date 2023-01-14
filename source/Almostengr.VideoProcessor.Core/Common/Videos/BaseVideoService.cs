@@ -55,7 +55,8 @@ public abstract class BaseVideoService : IBaseVideoService
         }
     }
 
-    internal string FfmpegInputFileText(string[] filesInDirectory, string inputFilePath)
+    // internal string CreateFfmpegInputFile(string[] filesInDirectory, string inputFilePath)
+    internal void CreateFfmpegInputFile(string[] filesInDirectory, string inputFilePath)
     {
         StringBuilder text = new();
         const string FILE = "file";
@@ -64,7 +65,8 @@ public abstract class BaseVideoService : IBaseVideoService
             text.Append($"{FILE} '{file}' {Environment.NewLine}");
         }
 
-        return text.ToString();
+        // return text.ToString();
+        _fileSystemService.SaveFileContents(text.ToString(), inputFilePath);
     }
 
     protected async Task ConvertVideoAudioFilesToAudioOnly(

@@ -26,6 +26,7 @@ internal sealed class ToastmastersVideoWorker : BaseWorker
             }
             catch (NoTarballsPresentException)
             {
+                await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
                 await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
                 await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
             }

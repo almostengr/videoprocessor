@@ -140,7 +140,8 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         string videoInputFilePath, string audioOutputFilePath, string workingDirectory, CancellationToken cancellationToken)
     {
         return await FfmpegAsync(
-            $"-i \"{videoInputFilePath}\" -vn -acodec copy \"{audioOutputFilePath}\"",
+            $"-i \"{videoInputFilePath}\" -vn \"{audioOutputFilePath}\"",
+            // $"-i \"{videoInputFilePath}\" -vn -acodec copy \"{audioOutputFilePath}\"",
             workingDirectory,
             cancellationToken);
     }

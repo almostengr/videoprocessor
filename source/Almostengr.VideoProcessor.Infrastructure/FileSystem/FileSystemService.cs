@@ -17,6 +17,11 @@ public sealed class FileSystemService : IFileSystemService
         _appSettings = appSettings;
     }
 
+    public void CopyFile(string sourceFilePath, string destinationFilePath)
+    {
+        File.Copy(sourceFilePath, destinationFilePath, false);
+    }
+
     public void CreateDirectory(string directory)
     {
         if (string.IsNullOrWhiteSpace(directory))

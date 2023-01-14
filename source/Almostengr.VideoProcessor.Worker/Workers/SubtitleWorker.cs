@@ -11,7 +11,7 @@ internal sealed class SubtitleWorker : BaseWorker
     private readonly ITechTalkVideoService _techTalkService;
     private readonly AppSettings _appSettings;
 
-    internal SubtitleWorker(IHandymanVideoService handymanService, ITechTalkVideoService techTalkService,
+    public SubtitleWorker(IHandymanVideoService handymanService, ITechTalkVideoService techTalkService,
         AppSettings appSettings) : base(appSettings)
     {
         _handymanService = handymanService;

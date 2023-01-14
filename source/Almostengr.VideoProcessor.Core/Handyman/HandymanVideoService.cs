@@ -14,7 +14,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
     private readonly string IncomingDirectory;
     private readonly string ArchiveDirectory;
-    private readonly string ErrorDirectory;
     private readonly string UploadDirectory;
     private readonly string WorkingDirectory;
 
@@ -25,7 +24,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     {
         IncomingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Incoming);
         ArchiveDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Archive);
-        ErrorDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Error);
         UploadDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Upload);
         WorkingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Working);
         _loggerService = loggerService;
@@ -58,6 +56,10 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             await _tarballService.ExtractTarballContentsAsync(
                 video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
 
+            _fileSystemService.CopyFile(
+                video.EndScreenFilePath(), 
+                Path.Combine(WorkingDirectory, video.EndScreenFileName()));
+
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
             await ConvertVideoAudioFilesToAudioOnly(WorkingDirectory, cancellationToken);
@@ -73,7 +75,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 FfmpegFontSize.Large,
                 DrawTextPosition.UpperRight,
                 video.DrawTextFilterBackgroundColor(),
-                Opacity.Light);
+                Opacity.Medium);
 
             if (_fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss)).Any())
             {
@@ -82,7 +84,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             }
 
             await _ffmpegService.RenderVideoAsync(
-                video.FfmpegInputFilePath(), video.VideoFilter, video.OutputFileName(), cancellationToken);
+                video.FfmpegInputFilePath(), video.VideoFilter, video.OutputVideoFileName(), cancellationToken);
 
             _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
             _fileSystemService.DeleteDirectory(WorkingDirectory);
@@ -97,9 +99,9 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
             if (video != null)
             {
-                _fileSystemService.MoveFile(video.IncomingTarballFilePath(), Path.Combine(ErrorDirectory, video.ArchiveFileName));
+                _fileSystemService.MoveFile(video.IncomingTarballFilePath(), Path.Combine(ArchiveDirectory, video.ArchiveFileName));
                 _fileSystemService.SaveFileContents(
-                    Path.Combine(ErrorDirectory, video.ArchiveFileName + FileExtension.Log),
+                    Path.Combine(ArchiveDirectory, video.ArchiveFileName + FileExtension.Log),
                     ex.Message);
             }
         }
@@ -108,13 +110,17 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     private void CreateFfmpegInputFile(HandymanVideo handymanVideo)
     {
         _fileSystemService.DeleteFile(handymanVideo.FfmpegInputFilePath());
-        string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+        // string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+        var videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
             .Where(f => f.EndsWith(FileExtension.Mp4) || f.EndsWith(FileExtension.Mkv))
             .OrderBy(f => f)
-            .ToArray();
-        string ffmpegInput = FfmpegInputFileText(videoFiles, handymanVideo.FfmpegInputFilePath());
+            // .ToArray();
+            .ToList();
 
-        _fileSystemService.SaveFileContents(handymanVideo.FfmpegInputFilePath(), ffmpegInput);
+        videoFiles.Add(handymanVideo.EndScreenFilePath());
+        base.CreateFfmpegInputFile(videoFiles.ToArray(), handymanVideo.FfmpegInputFilePath());
+        // string ffmpegInput = CreateFfmpegInputFile(videoFiles.ToArray(), handymanVideo.FfmpegInputFilePath());
+        // _fileSystemService.SaveFileContents(handymanVideo.FfmpegInputFilePath(), ffmpegInput);
     }
 
     private async Task MergeVideoAndAudioFiles(CancellationToken cancellationToken)
