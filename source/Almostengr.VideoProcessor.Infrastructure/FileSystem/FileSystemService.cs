@@ -187,6 +187,11 @@ public sealed class FileSystemService : IFileSystemService
             throw new SaveFileDirectoryIsNullOrEmptyException();
         }
 
+        if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+        {
+            throw new VideoProcessorException("Directories do not exist");
+        }
+
         CreateDirectory(directoryName);
         File.WriteAllText(filePath, content);
     }

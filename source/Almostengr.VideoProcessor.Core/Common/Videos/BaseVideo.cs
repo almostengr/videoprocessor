@@ -37,7 +37,8 @@ internal abstract record BaseVideo
 
     internal string EndScreenFileName()
     {
-        return "endscreen.mp4";
+        // return "endscreen.mp4";
+        return "endscreen.ts";
     }
 
     internal abstract string[] BrandingTextOptions();
@@ -67,9 +68,10 @@ internal abstract record BaseVideo
 
     internal string OutputVideoFileName()
     {
-        return ArchiveFileName.Replace(FileExtension.Tar, string.Empty)
+        return ArchiveFileName
             .Replace(FileExtension.TarXz, string.Empty)
             .Replace(FileExtension.TarGz, string.Empty)
+            .Replace(FileExtension.Tar, string.Empty)
             + FileExtension.Mp4;
     }
 

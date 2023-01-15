@@ -1,6 +1,7 @@
 using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
+using Almostengr.VideoProcessor.Core.Constants;
 using Almostengr.VideoProcessor.Core.Music.Services;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
@@ -14,6 +15,8 @@ public abstract class BaseVideoService : IBaseVideoService
     protected readonly IFileSystemService _fileSystemService;
     protected readonly IRandomService _randomService;
     protected readonly IMusicService _musicService;
+
+    protected const string END_SCREEN = "endscreen";
 
     protected BaseVideoService(
         AppSettings appSettings, IFfmpegService ffmpegService, IGzipService gzipService,
@@ -55,7 +58,6 @@ public abstract class BaseVideoService : IBaseVideoService
         }
     }
 
-    // internal string CreateFfmpegInputFile(string[] filesInDirectory, string inputFilePath)
     internal void CreateFfmpegInputFile(string[] filesInDirectory, string inputFilePath)
     {
         StringBuilder text = new();
@@ -65,8 +67,7 @@ public abstract class BaseVideoService : IBaseVideoService
             text.Append($"{FILE} '{file}' {Environment.NewLine}");
         }
 
-        // return text.ToString();
-        _fileSystemService.SaveFileContents(text.ToString(), inputFilePath);
+        _fileSystemService.SaveFileContents(inputFilePath, text.ToString());
     }
 
     protected async Task ConvertVideoAudioFilesToAudioOnly(
@@ -81,7 +82,7 @@ public abstract class BaseVideoService : IBaseVideoService
                 file.Replace(FileExtension.AudioMkv, FileExtension.Mp3)
                     .Replace(FileExtension.AudioMp4, FileExtension.Mp3));
 
-            await _ffmpegService.ConvertVideoToMp3AudioAsync(
+            await _ffmpegService.ConvertVideoFileToMp3FileAsync(
                 file, outputFilePath, workingDirectory, cancellationToken);
         }
     }
@@ -101,4 +102,27 @@ public abstract class BaseVideoService : IBaseVideoService
         return _randomService.Next(240, 600);
     }
 
+    public async Task CreateEndScreenVideoAsync(string workingDirectory, CancellationToken cancellationToken)
+    {
+        string imageFilePath = _fileSystemService.GetFilesInDirectory(workingDirectory)
+            .Where(f => f.ToLower().EndsWith(FileExtension.Png))
+            .Single();
+
+        string audioFilePath = _fileSystemService.GetFilesInDirectory(workingDirectory)
+            .Where(f => f.ToLower().EndsWith(FileExtension.Mp3))
+            .Single();
+
+        
+        string outputFilePath = Path.Combine(
+            workingDirectory,
+            END_SCREEN + FileExtension.Mp4);
+
+        await _ffmpegService.ConvertEndScreenImageToMp4VideoAsync(
+            imageFilePath, audioFilePath, outputFilePath, cancellationToken);
+
+        await _ffmpegService.ConvertVideoFileToTsFormatAsync(
+            outputFilePath, 
+            Path.Combine(workingDirectory.Replace(DirectoryName.Working, string.Empty), END_SCREEN + FileExtension.Ts),
+            cancellationToken);
+    }
 }

@@ -6,13 +6,11 @@ namespace Almostengr.VideoProcessor.Core.TechTalk;
 
 internal sealed record TechTalkVideo : BaseVideo
 {
-    internal bool IsChristmasLightVideo { get; private set; }
-    internal bool IsIndependenceDayVideo { get; private set; }
+    internal TechTalkVideoSubType SubType { get; private set; }
 
     internal TechTalkVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
     {
-        IsChristmasLightVideo = false;
-        IsIndependenceDayVideo = false;
+        SubType = TechTalkVideoSubType.TechTalk;
     }
 
     internal string ChristmasLightMetaFile()
@@ -27,52 +25,66 @@ internal sealed record TechTalkVideo : BaseVideo
 
     internal void ConfirmChristmasLightVideo()
     {
-        if (IsIndependenceDayVideo)
+        if (SubType == TechTalkVideoSubType.IndependenceDay)
         {
-            throw new ChristmasAndIndependenceVideoException();
+            throw new TechLightShowVideoTypeException();
         }
 
-        IsChristmasLightVideo = true;
+        SubType = TechTalkVideoSubType.Christmas;
     }
 
     internal void ConfirmIndependenceDayVideo()
     {
-        if (IsChristmasLightVideo)
+        if (SubType == TechTalkVideoSubType.Christmas)
         {
-            throw new ChristmasAndIndependenceVideoException();
+            throw new TechLightShowVideoTypeException();
         }
 
-        IsIndependenceDayVideo = true;
+        SubType = TechTalkVideoSubType.IndependenceDay;
     }
 
     internal override string[] BrandingTextOptions()
     {
         const string TECH_TALK = "Tech Talk with RHT Services";
 
-        if (IsChristmasLightVideo || IsIndependenceDayVideo)
+        List<string> options = new();
+
+        if (SubType != TechTalkVideoSubType.TechTalk)
         {
-            return new string[] { RHT_WEBSITE, TECH_TALK, "twitter.com/hplightshow" };
+            options.Add("twitter.com/hplightshow");
         }
 
-        return new string[] { RHT_WEBSITE, TECH_TALK };
+        options.Add(TECH_TALK);
+        options.Add(RHT_WEBSITE);
+
+        return options.ToArray();
     }
 
     internal override string DrawTextFilterBackgroundColor()
     {
-        if (IsChristmasLightVideo)
+        switch (SubType)
         {
-            return FfMpegColor.Maroon;
-        }
-        else if (IsIndependenceDayVideo)
-        {
-            return FfMpegColor.Blue;
-        }
+            case TechTalkVideoSubType.Christmas:
+                return FfMpegColor.Maroon;
 
-        return FfMpegColor.Green;
+            case TechTalkVideoSubType.IndependenceDay:
+                return FfMpegColor.Blue;
+
+            default:
+                return FfMpegColor.Green;
+        }
     }
 
     internal override string DrawTextFilterTextColor()
     {
         return FfMpegColor.White;
     }
+}
+
+
+internal enum TechTalkVideoSubType
+{
+    TechTalk,
+    Christmas,
+    IndependenceDay
 }

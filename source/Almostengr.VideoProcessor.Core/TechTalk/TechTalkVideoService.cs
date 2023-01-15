@@ -58,30 +58,49 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             await _tarballService.ExtractTarballContentsAsync(
                 video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
 
-            _fileSystemService.CopyFile(
-                video.EndScreenFilePath(), 
-                Path.Combine(WorkingDirectory, video.EndScreenFileName()));
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
-            // create input file
+            if (video.ArchiveFileName.ToLower().StartsWith(END_SCREEN))
+            {
+                await CreateEndScreenVideoAsync(WorkingDirectory, cancellationToken);
+                _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
+                _fileSystemService.DeleteDirectory(WorkingDirectory);
+                return;
+            }
+
             _fileSystemService.DeleteFile(video.FfmpegInputFilePath());
+
             var videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp4) || f.EndsWith(FileExtension.Mkv))
                 .OrderBy(f => f)
                 // .ToArray();
                 .ToList();
 
-            videoFiles.Add(video.EndScreenFilePath());
+            foreach (var file in videoFiles)
+            {
+                await _ffmpegService.ConvertVideoFileToTsFormatAsync(
+                    file, file + FileExtension.Ts, cancellationToken);
+            }
+
+            videoFiles.Clear();
+
+            videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.EndsWith(FileExtension.Ts))
+                .OrderBy(f => f)
+                .ToList();
+
+            if (video.SubType == TechTalkVideoSubType.TechTalk && video.IsDraft() == false)
+            {
+                videoFiles.Add(video.EndScreenFilePath());
+            }
+
             // string ffmpegInput = CreateFfmpegInputFile(videoFiles, video.FfmpegInputFilePath());
             CreateFfmpegInputFile(videoFiles.ToArray(), video.FfmpegInputFilePath());
 
-            // _fileSystemService.SaveFileContents(video.FfmpegInputFilePath(), ffmpegInput);
-
             if (video.IsDraft())
             {
-                await _ffmpegService.RenderVideoAsync(
-                    // video.FfmpegInputFilePath(), string.Empty, Path.Combine(UploadDirectory, video.OutputFileName()), cancellationToken);
+                await _ffmpegService.ConcatTsFilesToMp4FileAsync(
                     video.FfmpegInputFilePath(), string.Empty, video.OutputVideoFilePath(), cancellationToken);
                 _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
                 _fileSystemService.DeleteDirectory(WorkingDirectory);
@@ -106,7 +125,8 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 FfmpegFontSize.Large,
                 DrawTextPosition.UpperRight,
                 video.DrawTextFilterBackgroundColor(),
-                Opacity.Light);
+                Opacity.Light,
+                10);
 
             if (_fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss)).Any())
             {
@@ -114,8 +134,8 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                     _fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss)).Single());
             }
 
-            await _ffmpegService.RenderVideoAsync(
-                video.FfmpegInputFilePath(), video.VideoFilter, video.OutputVideoFilePath(), cancellationToken);
+            await _ffmpegService.ConcatTsFilesToMp4FileAsync(
+                video.FfmpegInputFilePath(), video.OutputVideoFilePath(), video.VideoFilter, cancellationToken);
 
             _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
             _fileSystemService.DeleteDirectory(WorkingDirectory);

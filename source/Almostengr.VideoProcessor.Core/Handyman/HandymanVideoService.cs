@@ -61,6 +61,14 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 Path.Combine(WorkingDirectory, video.EndScreenFileName()));
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
+            
+            if (video.ArchiveFileName.ToLower().StartsWith(END_SCREEN))
+            {
+                await CreateEndScreenVideoAsync(WorkingDirectory, cancellationToken);
+                _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
+                _fileSystemService.DeleteDirectory(WorkingDirectory);
+                return;
+            }
 
             await ConvertVideoAudioFilesToAudioOnly(WorkingDirectory, cancellationToken);
 

@@ -31,3 +31,4 @@ accordingly.
 * https://filme.imyfone.com/video-editing-tips/how-to-merge-or-combine-videos-using-ffmpeg/
 * https://stackoverflow.com/questions/44280903/ffmpeg-vaapi-and-drawtext
 * https://trac.ffmpeg.org/wiki/Hardware/VAAPI
+* https://stackoverflow.com/questions/7333232/how-to-concatenate-two-mp4-files-using-ffmpeg

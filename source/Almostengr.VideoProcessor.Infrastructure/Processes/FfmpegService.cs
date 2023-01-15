@@ -1,3 +1,4 @@
+using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
@@ -110,6 +111,18 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             fileName.EndsWith(FileExtension.Mov) || fileName.EndsWith(FileExtension.Mp4));
     }
 
+    public async Task<(string stdout, string stdErr)> ConcatTsFilesToMp4FileAsync(
+        string ffmpegInputFilePath, string outputFilePath, string videoFilter, CancellationToken cancellationToken)
+    {
+        string workingDirectory = Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+
+        return await FfmpegAsync(
+            // $"-f concat -i \"{ffmpegInputFilePath}\" -c copy -bsf:a aac_adtstoasc {outputFilePath}",
+            $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -c:a copy -bsf:a aac_adtstoasc -vf \"{videoFilter}\" \"{outputFilePath}\"",
+            workingDirectory,
+            cancellationToken);
+    }
+
     public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
@@ -130,13 +143,13 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(videoFilePath) + FileExtension.Ts);
 
         return await FfmpegAsync(
-            $"-i \"{Path.GetFileName(videoFilePath)}\" -c copy -bsf:v h264_mp4toannexb -f mpegts \"{outputFileName}\"",
+            $"-i \"{videoFilePath}\" -c copy -bsf:v h264_mp4toannexb -f mpegts \"{outputFileName}\"",
             workingDirectory,
             cancellationToken
         );
     }
 
-    public async Task<(string stdout, string stdErr)> ConvertVideoToMp3AudioAsync(
+    public async Task<(string stdout, string stdErr)> ConvertVideoFileToMp3FileAsync(
         string videoInputFilePath, string audioOutputFilePath, string workingDirectory, CancellationToken cancellationToken)
     {
         return await FfmpegAsync(
@@ -146,34 +159,31 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken);
     }
 
-    // public async Task<(string stdout, string stdErr)> CreateThumbnailsFromVideoFilesAsync<T>(
-    //     T video, CancellationToken cancellationToken) where T : BaseVideo
-    // {
-    //     const int SCENE_CHANGE_PERCENT = 10;
-    //     const int EXTRACT_NUMBER_OF_FRAMES = 5;
+    public async Task<(string stdout, string stdErr)> ConvertEndScreenImageToMp4VideoAsync(
+        string endScreenImageFilePath, string endScreenAudioFilePath, string endScreenOutputFilePath, CancellationToken cancellationToken)
+    {
+        if (!endScreenAudioFilePath.EndsWith(FileExtension.Mp3))
+        {
+            throw new VideoProcessorException("Audio file in wrong format");
+        }
 
-    //     var videoFiles = _fileSystem.GetFilesInDirectory(video.WorkingDirectory);
+        if (!endScreenImageFilePath.EndsWith(FileExtension.Png) && !endScreenImageFilePath.EndsWith(FileExtension.Jpg))
+        {
+            throw new VideoProcessorException("Image file in wrong format");
+        }
 
-    //     for (int i = 0; i < videoFiles.Count(); i++)
-    //     {
-    //         await FfmpegAsync(
-    //            $"-i \"{videoFiles.ElementAt(i)}\" -vf select=gt(scene\\,0.{SCENE_CHANGE_PERCENT}) -frames:v {EXTRACT_NUMBER_OF_FRAMES} -vsync vfr \"{video.Title}.{i}.%03d.jpg\"",
-    //            video.WorkingDirectory,
-    //            cancellationToken
-    //        );
-    //     }
+        if (!endScreenOutputFilePath.EndsWith(FileExtension.Mp4))
+        {
+            throw new VideoProcessorException("Output file must be in MP4 format");
+        }
 
-    //     return (string.Empty, string.Empty);
-    // }
+        // ffmpeg -y -framerate 0.1 -i endscreen_techtalk.png -i endscreen.mp3 -map 0:v:0 -map 1:a:0 -c:v libx264 -r 30 -shortest endtechtalk.mp4
+        string workingDirectory = Path.GetDirectoryName(endScreenImageFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
 
-    // public async Task<(string stdout, string stdErr)> CreateTitleTextVideoAsync<T>(
-    //     T video, CancellationToken cancellationToken) where T : BaseVideo
-    // {
-    //     // ffmpeg -y -lavfi "color=green:1920x1080:d=3,subtitles=subtitle.srt:force_style='Alignment=10,OutlineColour=&H100000000,BorderStyle=6,Outline=1,Shadow=1,Fontsize=40,MarginL=5,MarginV=25'"
-    //     return await FfmpegAsync(
-    //         $"-y -lavfi \"color={video.BannerBackgroundColor()}:1920x1080:d=3,subtitles=title.srt:force_style='Alignment=10,OutlineColour=&H100000000,BorderStyle=6,Outline=1,Shadow=1,Fontsize=40,MarginL=5,MarginV=25'\"",
-    //         video.WorkingDirectory,
-    //         cancellationToken
-    //     );
-    // }
+        return await FfmpegAsync(
+            // $"-framerate 0.1 -i \"{endScreenImageFilePath}\" -i \"{endScreenAudioFilePath}\" -map 0:v:0 -map 1:a:0 -c:v h264_mp4toannexb -r 30 -shortest \"{endScreenOutputFilePath}\"",
+            $"-y -framerate 0.1 -i \"{endScreenImageFilePath}\" -i \"{endScreenAudioFilePath}\" -map 0:v:0 -map 1:a:0 -c:v libx264 -r 30 -shortest \"{endScreenOutputFilePath}\"",
+            workingDirectory,
+            cancellationToken);
+    }
 }
