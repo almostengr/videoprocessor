@@ -15,6 +15,7 @@ internal abstract record BaseVideo
 
     internal readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
     internal readonly string RHT_WEBSITE = "rhtservices.net";
+    internal readonly string RHT_SOCIALS = "rhtservices.net/social";
 
     internal BaseVideo(string baseDirectory, string archiveFileName)
     {
@@ -170,7 +171,7 @@ internal abstract record BaseVideo
         VideoFilter += textFilter.ToString();
     }
 
-    private string FilterDuration(int duration = 180)
+    private string FilterDuration(int duration = 239)
     {
         return $"enable=lt(mod(t\\,{duration})\\,{Constant.CallToActionDuration})";
     }

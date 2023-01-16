@@ -11,7 +11,7 @@ internal sealed record HandymanVideo : BaseVideo
 
     internal override string[] BrandingTextOptions()
     {
-        return new string[] { ROBINSON_SERVICES, RHT_WEBSITE, "@rhtservicesllc" };
+        return new string[] { ROBINSON_SERVICES, RHT_WEBSITE, "@rhtservicesllc", RHT_SOCIALS };
     }
 
     internal override string DrawTextFilterBackgroundColor()

@@ -3,8 +3,6 @@ namespace Almostengr.VideoProcessor.Core.Constants;
 public static class Constant
 {
     public static readonly string BorderBox = "box=1:";
-    public static readonly int BorderBoxWidthSmall = 5;
-    public static readonly int BorderBoxWidthLarge = 10;
     public static readonly int CallToActionDuration = 7;
     public static readonly string CommaSpace = ", ";
     public static readonly string DoubleWhitespace = "  ";

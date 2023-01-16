@@ -17,13 +17,13 @@ public sealed class AppSettings
         {
             const string pbaseDirectory = "/mnt/3761e00d-e29b-4073-b282-589ade503755";
             DashCamDirectory = $"{pbaseDirectory}/dashcam";
-            DeleteFilesAfterDays = 30;
-            DiskSpaceThreshold = 0.1;
+            DeleteFilesAfterDays = 0;
+            DiskSpaceThreshold = 0;
             HandymanDirectory = $"{pbaseDirectory}/handyman";
             MusicDirectory = string.Empty;
             TechnologyDirectory = $"{pbaseDirectory}/technology";
             ToastmastersDirectory = $"{pbaseDirectory}/toastmasters";
-            WorkerDelay = TimeSpan.FromMinutes(120);
+            WorkerDelay = TimeSpan.FromMinutes(60);
             return;
         }
 
