@@ -118,7 +118,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     private void CreateFfmpegInputFile(HandymanVideo handymanVideo)
     {
         _fileSystemService.DeleteFile(handymanVideo.FfmpegInputFilePath());
-        // string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+
         var videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
             .Where(f => f.EndsWith(FileExtension.Mp4) || f.EndsWith(FileExtension.Mkv))
             .OrderBy(f => f)
@@ -127,8 +127,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
         videoFiles.Add(handymanVideo.EndScreenFilePath());
         base.CreateFfmpegInputFile(videoFiles.ToArray(), handymanVideo.FfmpegInputFilePath());
-        // string ffmpegInput = CreateFfmpegInputFile(videoFiles.ToArray(), handymanVideo.FfmpegInputFilePath());
-        // _fileSystemService.SaveFileContents(handymanVideo.FfmpegInputFilePath(), ffmpegInput);
     }
 
     private async Task MergeVideoAndAudioFiles(CancellationToken cancellationToken)

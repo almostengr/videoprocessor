@@ -140,10 +140,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             .Where(f => f.EndsWith(FileExtension.Mov))
             .OrderBy(f => f)
             .ToArray();
-        // string ffmpegInput = CreateFfmpegInputFile(videoFiles, video.FfmpegInputFilePath());
         CreateFfmpegInputFile(videoFiles, video.FfmpegInputFilePath());
-
-        // _fileSystemService.SaveFileContents(video.FfmpegInputFilePath(), ffmpegInput);
     }
 
     public override async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)

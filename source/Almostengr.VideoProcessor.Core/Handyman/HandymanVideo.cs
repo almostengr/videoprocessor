@@ -3,23 +3,23 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Handyman;
 
-internal sealed record HandymanVideo : BaseVideo
+public sealed record HandymanVideo : BaseVideo
 {
-    internal HandymanVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
+    public HandymanVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
     {
     }
 
-    internal override string[] BrandingTextOptions()
+    public override string[] BrandingTextOptions()
     {
-        return new string[] { ROBINSON_SERVICES, RHT_WEBSITE, "@rhtservicesllc", RHT_SOCIALS };
+        return new string[] { ROBINSON_SERVICES, RHT_WEBSITE, "@rhtservicesllc", RHT_SOCIAL_LINKS };
     }
 
-    internal override string DrawTextFilterBackgroundColor()
+    public override string DrawTextFilterBackgroundColor()
     {
         return FfMpegColor.RhtYellow;
     }
 
-    internal override string DrawTextFilterTextColor()
+    public override string DrawTextFilterTextColor()
     {
         return FfMpegColor.Black;
     }

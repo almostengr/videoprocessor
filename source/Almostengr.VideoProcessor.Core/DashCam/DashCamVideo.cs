@@ -3,18 +3,18 @@ using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
 
-internal sealed record DashCamVideo : BaseVideo
+public sealed record DashCamVideo : BaseVideo
 {
-    internal DashCamVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
+    public DashCamVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
     {
     }
 
-    internal override string[] BrandingTextOptions()
+    public override string[] BrandingTextOptions()
     {
         return new string[] { "Kenny Ram Dash Cam" };
     }
 
-    internal override string SetTitle(string fileName)
+    public override string SetTitle(string fileName)
     {
         if (fileName.ToLower().Contains("bad drivers of montgomery"))
         {

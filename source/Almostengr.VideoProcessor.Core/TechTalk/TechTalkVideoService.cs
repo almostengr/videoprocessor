@@ -74,7 +74,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             var videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp4) || f.EndsWith(FileExtension.Mkv))
                 .OrderBy(f => f)
-                // .ToArray();
                 .ToList();
 
             foreach (var file in videoFiles)
@@ -95,7 +94,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 videoFiles.Add(video.EndScreenFilePath());
             }
 
-            // string ffmpegInput = CreateFfmpegInputFile(videoFiles, video.FfmpegInputFilePath());
             CreateFfmpegInputFile(videoFiles.ToArray(), video.FfmpegInputFilePath());
 
             if (video.IsDraft())

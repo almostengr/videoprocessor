@@ -86,10 +86,8 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 .Where(f => f.EndsWith(FileExtension.Mp4))
                 .OrderBy(f => f)
                 .ToArray();
-            // string ffmpegInput = CreateFfmpegInputFile(videoFiles, video.FfmpegInputFilePath());
-            CreateFfmpegInputFile(videoFiles, video.FfmpegInputFilePath());
 
-            // _fileSystemService.SaveFileContents(video.FfmpegInputFilePath(), ffmpegInput);
+            CreateFfmpegInputFile(videoFiles, video.FfmpegInputFilePath());
 
             // brand video
             video.AddDrawTextVideoFilter(

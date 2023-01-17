@@ -4,26 +4,26 @@ using Almostengr.VideoProcessor.Core.TechTalk.Exceptions;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk;
 
-internal sealed record TechTalkVideo : BaseVideo
+public sealed record TechTalkVideo : BaseVideo
 {
-    internal TechTalkVideoSubType SubType { get; private set; }
+    public TechTalkVideoSubType SubType { get; private set; }
 
-    internal TechTalkVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
+    public TechTalkVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
     {
         SubType = TechTalkVideoSubType.TechTalk;
     }
 
-    internal string ChristmasLightMetaFile()
+    public string ChristmasLightMetaFile()
     {
         return Path.Combine(BaseDirectory, DirectoryName.Working, "christmas.txt");
     }
 
-    internal string IndependenceDayMetaFile()
+    public string IndependenceDayMetaFile()
     {
         return Path.Combine(BaseDirectory, DirectoryName.Working, "independence.txt");
     }
 
-    internal void ConfirmChristmasLightVideo()
+    public void ConfirmChristmasLightVideo()
     {
         if (SubType == TechTalkVideoSubType.IndependenceDay)
         {
@@ -33,7 +33,7 @@ internal sealed record TechTalkVideo : BaseVideo
         SubType = TechTalkVideoSubType.Christmas;
     }
 
-    internal void ConfirmIndependenceDayVideo()
+    public void ConfirmIndependenceDayVideo()
     {
         if (SubType == TechTalkVideoSubType.Christmas)
         {
@@ -43,7 +43,7 @@ internal sealed record TechTalkVideo : BaseVideo
         SubType = TechTalkVideoSubType.IndependenceDay;
     }
 
-    internal override string[] BrandingTextOptions()
+    public override string[] BrandingTextOptions()
     {
         const string TECH_TALK = "Tech Talk with RHT Services";
         List<string> options = new();
@@ -55,12 +55,12 @@ internal sealed record TechTalkVideo : BaseVideo
 
         options.Add(TECH_TALK);
         options.Add(RHT_WEBSITE);
-        options.Add(RHT_SOCIALS);
+        options.Add(RHT_SOCIAL_LINKS);
 
         return options.ToArray();
     }
 
-    internal override string DrawTextFilterBackgroundColor()
+    public override string DrawTextFilterBackgroundColor()
     {
         switch (SubType)
         {
@@ -75,14 +75,14 @@ internal sealed record TechTalkVideo : BaseVideo
         }
     }
 
-    internal override string DrawTextFilterTextColor()
+    public override string DrawTextFilterTextColor()
     {
         return FfMpegColor.White;
     }
 }
 
 
-internal enum TechTalkVideoSubType
+public enum TechTalkVideoSubType
 {
     TechTalk,
     Christmas,

@@ -139,11 +139,9 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
 
         string workingDirectory =
             Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-        string outputFileName =
-            Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(videoFilePath) + FileExtension.Ts);
 
         return await FfmpegAsync(
-            $"-i \"{videoFilePath}\" -c copy -bsf:v h264_mp4toannexb -f mpegts \"{outputFileName}\"",
+            $"-i \"{videoFilePath}\" -c copy -bsf:v h264_mp4toannexb -f mpegts \"{outputFilePath}\"",
             workingDirectory,
             cancellationToken
         );
