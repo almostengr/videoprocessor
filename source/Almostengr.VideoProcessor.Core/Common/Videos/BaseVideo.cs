@@ -67,6 +67,11 @@ public abstract record BaseVideo
         return Path.Combine(BaseDirectory, DirectoryName.Upload, OutputVideoFileName());
     }
 
+    public string UploadVideoFilePath()
+    {
+        return Path.Combine(BaseDirectory, DirectoryName.Upload, OutputVideoFileName());
+    }
+
     public string OutputVideoFileName()
     {
         return ArchiveFileName
@@ -81,7 +86,7 @@ public abstract record BaseVideo
         return ArchiveFileName.ToLower().Contains(".draft");
     }
 
-    public void SetGraphicsSubtitleFileName(string fileName)
+    public void SetGraphicsSubtitleFileName(string? fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
@@ -205,5 +210,4 @@ public abstract record BaseVideo
             FilterDuration(duration)
         );
     }
-
 }

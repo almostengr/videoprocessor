@@ -78,7 +78,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             // brand video
             video.AddDrawTextVideoFilter(
-                GetChannelBrandingText(video.BrandingTextOptions()),
+                RandomChannelBrandingText(video.BrandingTextOptions()),
                 video.DrawTextFilterTextColor(),
                 Opacity.Full,
                 FfmpegFontSize.Medium,

@@ -16,6 +16,8 @@ public interface IFfmpegService
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> AddAudioToVideoAsync(
         string videoFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken);
+    Task<(string stdout, string stdErr)> AddAccAudioToVideoAsync(
+        string videoFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> ConvertVideoFileToMp3FileAsync(
         string videoInputFilePath, string audioOutputFilePath, string workingDirectory, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> ConcatTsFilesToMp4FileAsync(

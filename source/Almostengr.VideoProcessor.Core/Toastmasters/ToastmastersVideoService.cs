@@ -91,7 +91,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
             // brand video
             video.AddDrawTextVideoFilter(
-                GetChannelBrandingText(video.BrandingTextOptions()),
+                RandomChannelBrandingText(video.BrandingTextOptions()),
                 video.DrawTextFilterTextColor(),
                 Opacity.Full,
                 FfmpegFontSize.Large,

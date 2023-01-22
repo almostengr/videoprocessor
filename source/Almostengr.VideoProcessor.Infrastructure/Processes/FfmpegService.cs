@@ -99,7 +99,20 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
 
         return await FfmpegAsync(
-            $"-hwaccel vaapi -hwaccel_output_format vaapi -i \"{Path.GetFileName(videoFilePath)}\" -i \"{audioFilePath}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"",
+            $"-hwaccel vaapi -hwaccel_output_format vaapi -i \"{videoFilePath}\" -i \"{audioFilePath}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"",
+            workingDirectory,
+            cancellationToken
+        );
+    }
+
+    public async Task<(string stdout, string stdErr)> AddAccAudioToVideoAsync(
+        string videoFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken)
+    {
+        string workingDirectory =
+            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+
+        return await FfmpegAsync(
+            $"-hwaccel vaapi -hwaccel_output_format vaapi -i \"{videoFilePath}\" -i \"{audioFilePath}\" -c:v h264_vaapi -c:a aac -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"",
             workingDirectory,
             cancellationToken
         );

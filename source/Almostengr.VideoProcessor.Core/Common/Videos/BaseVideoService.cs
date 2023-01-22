@@ -41,7 +41,7 @@ public abstract class BaseVideoService : IBaseVideoService
         return Task.CompletedTask;
     }
 
-    internal string GetChannelBrandingText(string[] options)
+    internal string RandomChannelBrandingText(string[] options)
     {
         return options.ElementAt(_randomService.Next(0, options.Count()));
     }

@@ -58,7 +58,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             await _tarballService.ExtractTarballContentsAsync(
                 video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
 
-
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
             if (video.ArchiveFileName.ToLower().StartsWith(END_SCREEN))
@@ -76,6 +75,8 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 .OrderBy(f => f)
                 .ToList();
 
+            await MergeVideoAndAudioFilesAsync(cancellationToken);
+
             foreach (var file in videoFiles)
             {
                 await _ffmpegService.ConvertVideoFileToTsFormatAsync(
@@ -89,10 +90,11 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 .OrderBy(f => f)
                 .ToList();
 
-            if (video.SubType == TechTalkVideoSubType.TechTalk && video.IsDraft() == false)
-            {
-                videoFiles.Add(video.EndScreenFilePath());
-            }
+            // if (video.SubType == TechTalkVideoSubType.TechTalk && video.IsDraft() == false)
+            // {
+            //     videoFiles.Add(video.EndScreenFilePath());
+            // }
+
 
             CreateFfmpegInputFile(videoFiles.ToArray(), video.FfmpegInputFilePath());
 
@@ -117,7 +119,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             // brand video
             video.AddDrawTextVideoFilter(
-                GetChannelBrandingText(video.BrandingTextOptions()),
+                RandomChannelBrandingText(video.BrandingTextOptions()),
                 video.DrawTextFilterTextColor(),
                 Opacity.Full,
                 FfmpegFontSize.Large,
@@ -131,6 +133,11 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 video.AddSubtitleVideoFilter(
                     _fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss)).Single());
             }
+
+            var graphicsSubtitle = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.EndsWith(FileExtension.GraphicsAss) || f.EndsWith(FileExtension.GraphicsSrt))
+                .SingleOrDefault();
+            video.SetGraphicsSubtitleFileName(graphicsSubtitle);
 
             await _ffmpegService.ConcatTsFilesToMp4FileAsync(
                 video.FfmpegInputFilePath(), video.OutputVideoFilePath(), video.VideoFilter, cancellationToken);
@@ -153,6 +160,34 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                     Path.Combine(ArchiveDirectory, video.ArchiveFileName + FileExtension.Log),
                     ex.Message);
             }
+        }
+    }
+
+    private async Task MergeVideoAndAudioFilesAsync(CancellationToken cancellationToken)
+    {
+        var workingDirVideos = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+            .Where(f => f.EndsWith(FileExtension.Mp4) || f.EndsWith(FileExtension.Mkv));
+
+        foreach (var videoFilePath in workingDirVideos)
+        {
+            string? audioFilePath = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.Contains(Path.GetFileNameWithoutExtension(videoFilePath)) && f.EndsWith(FileExtension.Mp3))
+                // .Where(f => f.StartsWith(Path.GetFileNameWithoutExtension(videoFilePath)) && f.EndsWith(FileExtension.Mp3))
+                .SingleOrDefault();
+
+            if (string.IsNullOrWhiteSpace(audioFilePath))
+            {
+                continue;
+            }
+
+            string tempOutputFilePath = Path.Combine(WorkingDirectory,
+                Path.GetFileNameWithoutExtension(videoFilePath) + ".tmp" + Path.GetExtension(videoFilePath));
+
+            await _ffmpegService.AddAccAudioToVideoAsync(
+                videoFilePath, audioFilePath, tempOutputFilePath, cancellationToken);
+
+            _fileSystemService.DeleteFile(videoFilePath);
+            _fileSystemService.MoveFile(tempOutputFilePath, videoFilePath);
         }
     }
 

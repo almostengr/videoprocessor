@@ -9,6 +9,7 @@ public static class FileExtension
     public static readonly string DraftTarGz = ".draft.tar";
     public static readonly string Err = ".err";
     public static readonly string GraphicsAss = ".graphics.ass";
+    public static readonly string GraphicsSrt = ".graphics.srt";
     public static readonly string InfoAss = ".info.ass";
     public static readonly string Jpg = ".jpg";
     public static readonly string Log = ".log";

@@ -72,12 +72,12 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
             await ConvertVideoAudioFilesToAudioOnly(WorkingDirectory, cancellationToken);
 
-            await MergeVideoAndAudioFiles(cancellationToken);
+            await MergeVideoAndAudioFilesAsync(cancellationToken);
 
             CreateFfmpegInputFile(video);
 
             video.AddDrawTextVideoFilter(
-                GetChannelBrandingText(video.BrandingTextOptions()),
+                RandomChannelBrandingText(video.BrandingTextOptions()),
                 video.DrawTextFilterTextColor(),
                 Opacity.Full,
                 FfmpegFontSize.Large,
@@ -129,7 +129,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         base.CreateFfmpegInputFile(videoFiles.ToArray(), handymanVideo.FfmpegInputFilePath());
     }
 
-    private async Task MergeVideoAndAudioFiles(CancellationToken cancellationToken)
+    private async Task MergeVideoAndAudioFilesAsync(CancellationToken cancellationToken)
     {
         var workingDirVideos = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                     .Where(f => f.EndsWith(FileExtension.Mp4) || f.EndsWith(FileExtension.Mkv));
