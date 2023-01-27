@@ -2,16 +2,16 @@
 
 ## Purpose
 
-Ask any YouTuber and they will tell you that creating YouTube videos is a time consuming process. 
+Ask any YouTuber and they will tell you that creating YouTube videos is a time consuming process.
 For me, the most mundane and worse part of the process is waiting on the videos to render and uploading them
-to YouTube. 
+to YouTube.
 
 Some video editors, have a version of their software that can be ran on the server to render the video files
-created. By offloading the video rendering to another machine, you can edit more videos in less time. 
+created. By offloading the video rendering to another machine, you can edit more videos in less time.
 
 Purpose of this application is to automate the video creation process. Videos that I post on both of my YouTube
-channels have a predefined structure for each video. Thus they are easy to automate. When additional 
-content or on screen text needs to be displayed, the automation for that particular channel is modified 
+channels have a predefined structure for each video. Thus they are easy to automate. When additional
+content or on screen text needs to be displayed, the automation for that particular channel is modified
 accordingly.
 
 ## Additional Resources
@@ -22,8 +22,16 @@ accordingly.
 ## My YouTube Channels
 
 * [Dash Cam Channel](https://www.youtube.com/channel/UCB7rvymUaUbbig3skv2zvCQ?sub_confirmation=1)
-* [Home Improvement Channel](https://www.youtube.com/channel/UC4HCouBLtXD1j1U_17aBqig?sub_confirmation=1) 
+* [Home Improvement Channel](https://www.youtube.com/channel/UC4HCouBLtXD1j1U_17aBqig?sub_confirmation=1)
 * [Technology Channel](http://www.youtube.com/channel/UC4xp-TEEIAL-4XtMVvfRaQw?sub_confirmation=1)
+
+## Video Schedule By Channel
+
+* Kenny Ram Dash Cam - Videos released weekly
+* Robinson Handy and Technology Services - Videos released on 2nd and 4th Saturdays
+* Tech Talk with RHT Services - released on 1st and 3rd Tuesdays
+* Latter two channels may release videos on 5th Saturday or Tuesday respectively
+* [rhtservices.net](https://rhtservices.net) website will be updated monthly with the transcriptions of the videos released
 
 ## References
 
