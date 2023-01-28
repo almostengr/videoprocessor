@@ -18,7 +18,7 @@ public sealed record DashCamVideo : BaseVideo
     {
         if (fileName.ToLower().Contains("bad drivers of montgomery"))
         {
-            throw new InvalidVideoTitleException();
+            throw new ArgumentException("Title contains invalid text", nameof(fileName));
         }
 
         return base.SetTitle(fileName);

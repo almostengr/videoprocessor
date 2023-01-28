@@ -120,8 +120,8 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
 
     private bool IsVideoFile(string fileName)
     {
-        return (fileName.EndsWith(FileExtension.Avi) || fileName.EndsWith(FileExtension.Mkv) ||
-            fileName.EndsWith(FileExtension.Mov) || fileName.EndsWith(FileExtension.Mp4));
+        return (fileName.EndsWith(FileExtension.Avi.ToString()) || fileName.EndsWith(FileExtension.Mkv.ToString()) ||
+            fileName.EndsWith(FileExtension.Mov.ToString()) || fileName.EndsWith(FileExtension.Mp4.ToString()));
     }
 
     public async Task<(string stdout, string stdErr)> ConcatTsFilesToMp4FileAsync(
@@ -173,17 +173,17 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     public async Task<(string stdout, string stdErr)> ConvertEndScreenImageToMp4VideoAsync(
         string endScreenImageFilePath, string endScreenAudioFilePath, string endScreenOutputFilePath, CancellationToken cancellationToken)
     {
-        if (!endScreenAudioFilePath.EndsWith(FileExtension.Mp3))
+        if (!endScreenAudioFilePath.EndsWith(FileExtension.Mp3.ToString()))
         {
             throw new VideoProcessorException("Audio file in wrong format");
         }
 
-        if (!endScreenImageFilePath.EndsWith(FileExtension.Png) && !endScreenImageFilePath.EndsWith(FileExtension.Jpg))
+        if (!endScreenImageFilePath.EndsWith(FileExtension.Png.ToString()) && !endScreenImageFilePath.EndsWith(FileExtension.Jpg.ToString()))
         {
             throw new VideoProcessorException("Image file in wrong format");
         }
 
-        if (!endScreenOutputFilePath.EndsWith(FileExtension.Mp4))
+        if (!endScreenOutputFilePath.EndsWith(FileExtension.Mp4.ToString()))
         {
             throw new VideoProcessorException("Output file must be in MP4 format");
         }

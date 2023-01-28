@@ -53,35 +53,50 @@ public sealed class FileSystemService : IFileSystemService
         }
     }
 
-    public string GetRandomTarballFromDirectory(string directory)
-    {
-        IEnumerable<string> tarballPaths = GetFilesInDirectory(directory)
-            .Where(f => f.Contains(FileExtension.Tar));
+    // public string GetRandomTarballFromDirectory(string directory)
+    // {
+    //     IEnumerable<string> tarballPaths = GetFilesInDirectory(directory)
+    //         .Where(f => f.Contains(FileExtension.Tar.ToString()));
 
-        if (tarballPaths.Count() == 0)
+    //     if (tarballPaths.Count() == 0)
+    //     {
+    //         throw new NoTar.ToString()ballsPresentException();
+    //     }
+
+    //     return tarballPaths.Where(f => f.Contains(FileExtension.Tar.ToString()))
+    //         .Where(f => f.StartsWith(".") == false)
+    //         .OrderBy(f => _randomService.Next())
+    //         .Take(1)
+    //         .First();
+    // }
+
+    // public string GetRandomSrtFileFromDirectory(string directory)
+    // {
+    //     IEnumerable<string> srtFilePaths = GetFilesInDirectory(directory)
+    //         .Where(f => f.EndsWith(FileExtension.Srt.ToString()));
+
+    //     if (srtFilePaths.Count() == 0)
+    //     {
+    //         throw new NoSubtitleFilesPresentException();
+    //     }
+
+    //     return srtFilePaths
+    //         .Where(f => f.EndsWith(FileExtension.Srt.ToString()))
+    //         .OrderBy(f => _randomService.Next()).Take(1)
+    //         .First();
+    // }
+
+    public string GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
+    {
+        IEnumerable<string> filePaths = GetFilesInDirectory(directory)
+            .Where(f => f.Contains(extension.ToString()));
+        
+        if (filePaths.Count() == 0)
         {
-            throw new NoTarballsPresentException();
+            throw new NoFilesMatchException();
         }
 
-        return tarballPaths.Where(f => f.Contains(FileExtension.Tar))
-            .Where(f => f.StartsWith(".") == false)
-            .OrderBy(f => _randomService.Next())
-            .Take(1)
-            .First();
-    }
-
-    public string GetRandomSrtFileFromDirectory(string directory)
-    {
-        IEnumerable<string> srtFilePaths = GetFilesInDirectory(directory)
-            .Where(f => f.EndsWith(FileExtension.Srt));
-
-        if (srtFilePaths.Count() == 0)
-        {
-            throw new NoSubtitleFilesPresentException();
-        }
-
-        return srtFilePaths
-            .Where(f => f.EndsWith(FileExtension.Srt))
+        return filePaths
             .OrderBy(f => _randomService.Next()).Take(1)
             .First();
     }

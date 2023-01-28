@@ -2,13 +2,13 @@ using Almostengr.VideoProcessor.Core.Common.Videos;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk;
 
-public sealed record TechTalkSrtSubtitle : BaseSrtSubtitle
+public sealed record TechTalkSrtSubtitleFile : SrtSubtitleFile
 {
-    public TechTalkSrtSubtitle(string baseDirectory, string filePath) : base(baseDirectory, filePath)
+    public TechTalkSrtSubtitleFile(string filePath) : base(filePath)
     {
     }
 
-    internal override string BlogPostText()
+    public override string BlogPostText()
     {
         return base.BlogPostText().ToLower()
             .Replace("c sharp", "C#")

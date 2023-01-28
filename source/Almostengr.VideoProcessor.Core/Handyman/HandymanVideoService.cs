@@ -11,7 +11,7 @@ namespace Almostengr.VideoProcessor.Core.Handyman;
 public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoService
 {
     private readonly ILoggerService<HandymanVideoService> _loggerService;
-
+    private readonly ISrtSubtitleFileService _srtService;
     private readonly string IncomingDirectory;
     private readonly string ArchiveDirectory;
     private readonly string UploadDirectory;
@@ -19,7 +19,8 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
     public HandymanVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IGzipService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
-         IMusicService musicService, ILoggerService<HandymanVideoService> loggerService) :
+         IMusicService musicService, ILoggerService<HandymanVideoService> loggerService,
+         ISrtSubtitleFileService srtSubtitleFileService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService)
     {
         IncomingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Incoming);
@@ -27,6 +28,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         UploadDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Upload);
         WorkingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Working);
         _loggerService = loggerService;
+        _srtService = srtSubtitleFileService;
     }
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
@@ -46,7 +48,8 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         HandymanVideo? video = null;
         try
         {
-            string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(IncomingDirectory);
+            // string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(IncomingDirectory);
+            string incomingTarball = _fileSystemService.GetRandomFileByExtensionFromDirectory(IncomingDirectory, FileExtension.Tar);
 
             video = new HandymanVideo(_appSettings.HandymanDirectory, Path.GetFileName(incomingTarball));
 
@@ -57,11 +60,16 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
 
             _fileSystemService.CopyFile(
-                video.EndScreenFilePath(), 
+                video.EndScreenFilePath(),
                 Path.Combine(WorkingDirectory, video.EndScreenFileName()));
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
-            
+
+            if (DoesKdenliveFileExist(IncomingDirectory))
+            {
+                throw new KdenliveFileExistsException();
+            }
+
             if (video.ArchiveFileName.ToLower().StartsWith(END_SCREEN))
             {
                 await CreateEndScreenVideoAsync(WorkingDirectory, cancellationToken);
@@ -85,10 +93,13 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 video.DrawTextFilterBackgroundColor(),
                 Opacity.Medium);
 
-            if (_fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss)).Any())
+            if (_fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString())).Any())
             {
                 video.AddSubtitleVideoFilter(
-                    _fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss)).Single());
+                    // _fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss)).Single());
+                    _fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString())).Single(),
+                    "&H00006400",
+                    "&H00FFFFFF");
             }
 
             await _ffmpegService.RenderVideoAsync(
@@ -97,7 +108,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
-        catch (NoTarballsPresentException)
+        catch (NoFilesMatchException)
         {
             throw;
         }
@@ -120,7 +131,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         _fileSystemService.DeleteFile(handymanVideo.FfmpegInputFilePath());
 
         var videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-            .Where(f => f.EndsWith(FileExtension.Mp4) || f.EndsWith(FileExtension.Mkv))
+            .Where(f => f.EndsWith(FileExtension.Mp4.ToString()) || f.EndsWith(FileExtension.Mkv.ToString()))
             .OrderBy(f => f)
             // .ToArray();
             .ToList();
@@ -132,7 +143,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     private async Task MergeVideoAndAudioFilesAsync(CancellationToken cancellationToken)
     {
         var workingDirVideos = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                    .Where(f => f.EndsWith(FileExtension.Mp4) || f.EndsWith(FileExtension.Mkv));
+                    .Where(f => f.EndsWith(FileExtension.Mp4.ToString()) || f.EndsWith(FileExtension.Mkv.ToString()));
 
         foreach (var videoFilePath in workingDirVideos)
         {
@@ -144,7 +155,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             }
 
             string? audioFilePath = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.StartsWith(Path.GetFileNameWithoutExtension(videoFilePath)) && f.EndsWith(FileExtension.Mp3))
+                .Where(f => f.StartsWith(Path.GetFileNameWithoutExtension(videoFilePath)) && f.EndsWith(FileExtension.Mp3.ToString()))
                 .SingleOrDefault();
 
             if (string.IsNullOrWhiteSpace(audioFilePath))
@@ -166,17 +177,29 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
     {
         try
         {
-            string filePath = _fileSystemService.GetRandomSrtFileFromDirectory(IncomingDirectory);
+            // string filePath = _fileSystemService.GetRandomSrtFileFromDirectory(IncomingDirectory);
+            string filePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(IncomingDirectory, FileExtension.Srt);
 
-            HandymanSrtSubtitle subtitle = new(_appSettings.TechnologyDirectory, filePath);
+            HandymanSrtSubtitleFile subtitle = new(filePath);
 
-            subtitle.SetSubtitleText(_fileSystemService.GetFileContents(subtitle.IncomingFilePath()));
+            // subtitle.SetSubtitleText(_fileSystemService.GetFileContents(subtitle.IncomingFilePath()));
 
-            _fileSystemService.SaveFileContents(subtitle.SubtitleOutputFilePath(), subtitle.SubtitleText());
-            _fileSystemService.SaveFileContents(subtitle.BlogOutputFilePath(), subtitle.BlogPostText());
-            _fileSystemService.MoveFile(subtitle.IncomingFilePath(), subtitle.ArchiveFilePath());
+            // _fileSystemService.SaveFileContents(subtitle.SubtitleOutputFilePath(), subtitle.SubtitleText());
+            // _fileSystemService.SaveFileContents(subtitle.BlogOutputFilePath(), subtitle.BlogPostText());
+            // _fileSystemService.MoveFile(subtitle.IncomingFilePath(), subtitle.ArchiveFilePath());
+
+            var subtitles = _srtService.ReadFile(subtitle.FilePath);
+            subtitle.SetSubtitles(subtitles);
+
+            _srtService.WriteFile(Path.Combine(UploadDirectory, subtitle.FileName()), subtitle.Subtitles);
+
+            _fileSystemService.SaveFileContents(
+                Path.Combine(UploadDirectory, subtitle.BlogFileName()), subtitle.BlogPostText());
+            
+            _fileSystemService.MoveFile(
+                subtitle.FilePath, Path.Combine(ArchiveDirectory, subtitle.FileName()), false);
         }
-        catch (NoSubtitleFilesPresentException)
+        catch (NoFilesMatchException)
         {
             throw;
         }

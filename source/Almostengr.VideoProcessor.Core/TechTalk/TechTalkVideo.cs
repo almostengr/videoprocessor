@@ -60,7 +60,7 @@ public sealed record TechTalkVideo : BaseVideo
         return options.ToArray();
     }
 
-    public override string DrawTextFilterBackgroundColor()
+    public override FfMpegColor DrawTextFilterBackgroundColor()
     {
         switch (SubType)
         {
@@ -75,7 +75,7 @@ public sealed record TechTalkVideo : BaseVideo
         }
     }
 
-    public override string DrawTextFilterTextColor()
+    public override FfMpegColor DrawTextFilterTextColor()
     {
         return FfMpegColor.White;
     }

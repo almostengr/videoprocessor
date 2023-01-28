@@ -14,12 +14,12 @@ public sealed record HandymanVideo : BaseVideo
         return new string[] { ROBINSON_SERVICES, RHT_WEBSITE, "@rhtservicesllc", RHT_SOCIAL_LINKS };
     }
 
-    public override string DrawTextFilterBackgroundColor()
+    public override FfMpegColor DrawTextFilterBackgroundColor()
     {
         return FfMpegColor.RhtYellow;
     }
 
-    public override string DrawTextFilterTextColor()
+    public override FfMpegColor DrawTextFilterTextColor()
     {
         return FfMpegColor.Black;
     }

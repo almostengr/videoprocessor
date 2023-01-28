@@ -48,12 +48,12 @@ public abstract record BaseVideo
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            throw new VideoTitleIsNullOrWhiteSpaceException();
+            throw new ArgumentException("Video title cannot be null or whitespace", nameof(fileName));
         }
 
-        return fileName.Replace(FileExtension.TarGz, string.Empty)
-            .Replace(FileExtension.TarXz, string.Empty)
-            .Replace(FileExtension.Tar, string.Empty)
+        return fileName.Replace(FileExtension.TarGz.ToString(), string.Empty.ToString())
+            .Replace(FileExtension.TarXz.ToString(), string.Empty.ToString())
+            .Replace(FileExtension.Tar.ToString(), string.Empty.ToString())
             .Replace(Constant.Colon, string.Empty);
     }
 
@@ -75,9 +75,9 @@ public abstract record BaseVideo
     public string OutputVideoFileName()
     {
         return ArchiveFileName
-            .Replace(FileExtension.TarXz, string.Empty)
-            .Replace(FileExtension.TarGz, string.Empty)
-            .Replace(FileExtension.Tar, string.Empty)
+            .Replace(FileExtension.TarXz.ToString(), string.Empty.ToString())
+            .Replace(FileExtension.TarGz.ToString(), string.Empty.ToString())
+            .Replace(FileExtension.Tar.ToString(), string.Empty.ToString())
             + FileExtension.Mp4;
     }
 
@@ -96,22 +96,22 @@ public abstract record BaseVideo
         GraphicsSubtitleFileName = fileName;
     }
 
-    public virtual string DrawTextFilterBackgroundColor()
+    public virtual FfMpegColor DrawTextFilterBackgroundColor()
     {
         return FfMpegColor.Black;
     }
 
-    public virtual string DrawTextFilterTextColor()
+    public virtual FfMpegColor DrawTextFilterTextColor()
     {
         return FfMpegColor.White;
     }
 
-    public virtual string SubtitleBackgroundColor()
+    public virtual FfMpegColor SubtitleBackgroundColor()
     {
         return FfMpegColor.Black;
     }
 
-    public virtual string SubtitleTextColor()
+    public virtual FfMpegColor SubtitleTextColor()
     {
         return FfMpegColor.White;
     }
@@ -131,9 +131,14 @@ public abstract record BaseVideo
         return Path.Combine(BaseDirectory, DirectoryName.Archive, ArchiveFileName);
     }
 
+    public string DraftTarballFilePath()
+    {
+        return Path.Combine(BaseDirectory, DirectoryName.Draft, ArchiveFileName);
+    }
+
     public virtual void AddDrawTextVideoFilter(
-        string text, string textColor, string textBrightness, string fontSize, string position,
-        string backgroundColor, string backgroundBrightness, int borderWidth = 5, string duration = "")
+        string text, FfMpegColor textColor, Opacity textBrightness, FfmpegFontSize fontSize, DrawTextPosition position,
+        FfMpegColor backgroundColor, Opacity backgroundBrightness, int borderWidth = 5, string duration = "")
     {
         StringBuilder textFilter = new();
 
@@ -160,7 +165,8 @@ public abstract record BaseVideo
     }
 
     public virtual void AddSubtitleVideoFilter(
-        string filePath, int leftMargin = 10, int rightMargin = 10, int verticalMargin = 10)
+        // string filePath, int leftMargin = 10, int rightMargin = 10, int verticalMargin = 10)
+        string filePath, string outlineColor, string textColor, int fontSize = 30)
     {
         StringBuilder textFilter = new();
 
@@ -170,8 +176,7 @@ public abstract record BaseVideo
         }
 
         textFilter.Append($"subtitles='{filePath}':");
-        // textFilter.Append($"force_style='OutlineColor=")
-        // todo over styles
+        textFilter.Append($"force_style='OutlineColour={outlineColor},TextColour={textColor},BorderStyle=3,Outline=5,Shadow=1,Alignment=1,Fontsize={fontSize}'");
 
         VideoFilter += textFilter.ToString();
     }
@@ -210,4 +215,5 @@ public abstract record BaseVideo
             FilterDuration(duration)
         );
     }
+
 }

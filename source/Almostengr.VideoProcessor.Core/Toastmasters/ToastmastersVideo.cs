@@ -15,12 +15,12 @@ public sealed record ToastmastersVideo : BaseVideo
         return new string[] { "towertoastmasters.org", "Tower Toastmasters", "toastmasters.org" };
     }
 
-    public override string DrawTextFilterBackgroundColor()
+    public override FfMpegColor DrawTextFilterBackgroundColor()
     {
         return FfMpegColor.SteelBlue;
     }
 
-    public override string DrawTextFilterTextColor()
+    public override FfMpegColor DrawTextFilterTextColor()
     {
         return FfMpegColor.White;
     }

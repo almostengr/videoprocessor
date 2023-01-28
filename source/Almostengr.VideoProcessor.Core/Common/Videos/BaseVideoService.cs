@@ -50,7 +50,7 @@ public abstract class BaseVideoService : IBaseVideoService
         string archiveDirectory, CancellationToken cancellationToken)
     {
         var archiveTarballs = _fileSystemService.GetFilesInDirectory(archiveDirectory)
-            .Where(f => f.EndsWith(FileExtension.Tar) && !f.Contains(FileExtension.DraftTar));
+            .Where(f => f.EndsWith(FileExtension.Tar.ToString()) && !f.Contains(FileExtension.DraftTar.ToString()));
 
         foreach (var archive in archiveTarballs)
         {
@@ -74,13 +74,13 @@ public abstract class BaseVideoService : IBaseVideoService
         string workingDirectory, CancellationToken cancellationToken)
     {
         var audioAsVideoFiles = _fileSystemService.GetFilesInDirectory(workingDirectory)
-            .Where(f => f.EndsWith(FileExtension.AudioMkv) || f.EndsWith(FileExtension.AudioMp4));
+            .Where(f => f.EndsWith(FileExtension.AudioMkv.ToString()) || f.EndsWith(FileExtension.AudioMp4.ToString()));
 
         foreach (var file in audioAsVideoFiles)
         {
             string outputFilePath = Path.Combine(workingDirectory,
-                file.Replace(FileExtension.AudioMkv, FileExtension.Mp3)
-                    .Replace(FileExtension.AudioMp4, FileExtension.Mp3));
+                file.Replace(FileExtension.AudioMkv.ToString(), FileExtension.Mp3.ToString())
+                    .Replace(FileExtension.AudioMp4.ToString(), FileExtension.Mp3.ToString()));
 
             await _ffmpegService.ConvertVideoFileToMp3FileAsync(
                 file, outputFilePath, workingDirectory, cancellationToken);
@@ -105,14 +105,14 @@ public abstract class BaseVideoService : IBaseVideoService
     public async Task CreateEndScreenVideoAsync(string workingDirectory, CancellationToken cancellationToken)
     {
         string imageFilePath = _fileSystemService.GetFilesInDirectory(workingDirectory)
-            .Where(f => f.ToLower().EndsWith(FileExtension.Png))
+            .Where(f => f.ToLower().EndsWith(FileExtension.Png.ToString()))
             .Single();
 
         string audioFilePath = _fileSystemService.GetFilesInDirectory(workingDirectory)
-            .Where(f => f.ToLower().EndsWith(FileExtension.Mp3))
+            .Where(f => f.ToLower().EndsWith(FileExtension.Mp3.ToString()))
             .Single();
 
-        
+
         string outputFilePath = Path.Combine(
             workingDirectory,
             END_SCREEN + FileExtension.Mp4);
@@ -121,8 +121,15 @@ public abstract class BaseVideoService : IBaseVideoService
             imageFilePath, audioFilePath, outputFilePath, cancellationToken);
 
         await _ffmpegService.ConvertVideoFileToTsFormatAsync(
-            outputFilePath, 
+            outputFilePath,
             Path.Combine(workingDirectory.Replace(DirectoryName.Working, string.Empty), END_SCREEN + FileExtension.Ts),
             cancellationToken);
+    }
+
+    public bool DoesKdenliveFileExist(string directory)
+    {
+        return _fileSystemService.GetFilesInDirectory(directory)
+            .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.ToString()))
+            .Any();
     }
 }

@@ -6,13 +6,17 @@ public sealed class AppSettings
     public string HandymanDirectory { get; init; }
     public string TechnologyDirectory { get; init; }
     public string ToastmastersDirectory { get; init; }
-    public string MusicDirectory {get; init;}
+    public string MusicDirectory { get; init; }
     public TimeSpan WorkerDelay { get; init; }
     public double DiskSpaceThreshold { get; init; }
     public int DeleteFilesAfterDays { get; init; }
+    public string? YouTubeApiKey { get; init; }
+    public readonly string AppName;
 
     public AppSettings()
     {
+        AppName = "almostengrVideoProcessor";
+
         if (IsReleaseMode())
         {
             const string pbaseDirectory = "/mnt/3761e00d-e29b-4073-b282-589ade503755";

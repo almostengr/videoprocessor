@@ -24,7 +24,7 @@ internal sealed class TechTalkVideoWorker : BaseWorker
             {
                 await _videoService.ProcessIncomingVideoTarballsAsync(cancellationToken);
             }
-            catch (NoTarballsPresentException)
+            catch (NoFilesMatchException)
             {
                 await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
                 await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);

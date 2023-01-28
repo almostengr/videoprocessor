@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Google.Apis.Core" Version="1.59.0" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.58.0.2874" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
   </ItemGroup>
 

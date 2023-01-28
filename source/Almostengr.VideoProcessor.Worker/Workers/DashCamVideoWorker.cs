@@ -24,7 +24,7 @@ internal sealed class DashCamVideoWorker : BaseWorker
             {
                 await _videoService.ProcessIncomingVideoTarballsAsync(cancellationToken);
             }
-            catch (NoTarballsPresentException)
+            catch (NoFilesMatchException)
             {
                 await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
                 await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);

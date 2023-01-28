@@ -4,7 +4,7 @@ namespace Almostengr.VideoProcessor.Core.Common;
 
 public class VideoProcessorException : Exception
 {
-    protected VideoProcessorException() : base()
+    public VideoProcessorException() : base()
     {
     }
     

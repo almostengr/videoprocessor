@@ -67,7 +67,9 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
         try
         {
-            string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(IncomingDirectory);
+            // string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(IncomingDirectory);
+            string incomingTarball = _fileSystemService.GetRandomFileByExtensionFromDirectory(
+                IncomingDirectory, FileExtension.Tar);
 
             video = new ToastmastersVideo(_appSettings.ToastmastersDirectory, Path.GetFileName(incomingTarball));
 
@@ -83,7 +85,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             _fileSystemService.DeleteFile(video.FfmpegInputFilePath());
 
             string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp4))
+                .Where(f => f.EndsWith(FileExtension.Mp4.ToString()))
                 .OrderBy(f => f)
                 .ToArray();
 
@@ -108,7 +110,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _loggerService.LogInformation($"Completed processing {incomingTarball}");
         }
-        catch (NoTarballsPresentException)
+        catch (NoFilesMatchException)
         {
             throw;
         }
