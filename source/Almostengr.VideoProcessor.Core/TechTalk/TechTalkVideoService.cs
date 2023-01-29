@@ -84,13 +84,13 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 throw new KdenliveFileExistsException("Archive has Kdenlive project file");
             }
 
-            if (video.ArchiveFileName.ToLower().StartsWith(END_SCREEN))
-            {
-                await CreateEndScreenVideoAsync(_workingDirectory, cancellationToken);
-                _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
-                _fileSystemService.DeleteDirectory(_workingDirectory);
-                return;
-            }
+            // if (video.ArchiveFileName.ToLower().StartsWith(END_SCREEN))
+            // {
+            //     await CreateEndScreenVideoAsync(_workingDirectory, cancellationToken);
+            //     _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
+            //     _fileSystemService.DeleteDirectory(_workingDirectory);
+            //     return;
+            // }
 
             _fileSystemService.DeleteFile(video.FfmpegInputFilePath());
 
@@ -121,7 +121,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             CreateFfmpegInputFile(videoFiles.ToArray(), video.FfmpegInputFilePath());
 
-            if (video.IsDraft())
+            if (video.IsDraft)
             {
                 await _ffmpegService.ConcatTsFilesToMp4FileAsync(
                     video.FfmpegInputFilePath(), string.Empty, video.OutputVideoFilePath(), cancellationToken);

@@ -82,7 +82,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             CreateFfmpegInputFile(video);
 
-            if (video.IsDraft())
+            if (video.IsDraft)
             {
                 await _ffmpegService.RenderVideoAsCopyAsync(
                     video.FfmpegInputFilePath(),

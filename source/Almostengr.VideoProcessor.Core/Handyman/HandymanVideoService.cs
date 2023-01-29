@@ -73,9 +73,9 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             await _tarballService.ExtractTarballContentsAsync(
                 video.IncomingTarballFilePath(), _workingDirectory, cancellationToken);
 
-            _fileSystemService.CopyFile(
-                video.EndScreenFilePath(),
-                Path.Combine(_workingDirectory, video.EndScreenFileName()));
+            // _fileSystemService.CopyFile(
+            //     video.EndScreenFilePath(),
+            //     Path.Combine(_workingDirectory, video.EndScreenFileName()));
 
             _fileSystemService.PrepareAllFilesInDirectory(_workingDirectory);
 
@@ -84,13 +84,13 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 throw new KdenliveFileExistsException();
             }
 
-            if (video.ArchiveFileName.ToLower().StartsWith(END_SCREEN))
-            {
-                await CreateEndScreenVideoAsync(_workingDirectory, cancellationToken);
-                _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
-                _fileSystemService.DeleteDirectory(_workingDirectory);
-                return;
-            }
+            // if (video.ArchiveFileName.ToLower().StartsWith(END_SCREEN))
+            // {
+            //     await CreateEndScreenVideoAsync(_workingDirectory, cancellationToken);
+            //     _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
+            //     _fileSystemService.DeleteDirectory(_workingDirectory);
+            //     return;
+            // }
 
             await ConvertVideoAudioFilesToAudioOnly(_workingDirectory, cancellationToken);
 
@@ -150,7 +150,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             // .ToArray();
             .ToList();
 
-        videoFiles.Add(handymanVideo.EndScreenFilePath());
+        // videoFiles.Add(handymanVideo.EndScreenFilePath());
         base.CreateFfmpegInputFile(videoFiles.ToArray(), handymanVideo.FfmpegInputFilePath());
     }
 

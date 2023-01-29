@@ -104,29 +104,29 @@ public abstract class BaseVideoService : IBaseVideoService
         return _randomService.Next(240, 600);
     }
 
-    public async Task CreateEndScreenVideoAsync(string workingDirectory, CancellationToken cancellationToken)
-    {
-        string imageFilePath = _fileSystemService.GetFilesInDirectory(workingDirectory)
-            .Where(f => f.ToLower().EndsWith(FileExtension.Png.ToString()))
-            .Single();
+    // public async Task CreateEndScreenVideoAsync(string workingDirectory, CancellationToken cancellationToken)
+    // {
+    //     string imageFilePath = _fileSystemService.GetFilesInDirectory(workingDirectory)
+    //         .Where(f => f.ToLower().EndsWith(FileExtension.Png.ToString()))
+    //         .Single();
 
-        string audioFilePath = _fileSystemService.GetFilesInDirectory(workingDirectory)
-            .Where(f => f.ToLower().EndsWith(FileExtension.Mp3.ToString()))
-            .Single();
+    //     string audioFilePath = _fileSystemService.GetFilesInDirectory(workingDirectory)
+    //         .Where(f => f.ToLower().EndsWith(FileExtension.Mp3.ToString()))
+    //         .Single();
 
 
-        string outputFilePath = Path.Combine(
-            workingDirectory,
-            END_SCREEN + FileExtension.Mp4);
+    //     string outputFilePath = Path.Combine(
+    //         workingDirectory,
+    //         END_SCREEN + FileExtension.Mp4);
 
-        await _ffmpegService.ConvertEndScreenImageToMp4VideoAsync(
-            imageFilePath, audioFilePath, outputFilePath, cancellationToken);
+    //     await _ffmpegService.ConvertEndScreenImageToMp4VideoAsync(
+    //         imageFilePath, audioFilePath, outputFilePath, cancellationToken);
 
-        await _ffmpegService.ConvertVideoFileToTsFormatAsync(
-            outputFilePath,
-            Path.Combine(workingDirectory.Replace(DirectoryName.Working, string.Empty), END_SCREEN + FileExtension.Ts),
-            cancellationToken);
-    }
+    //     await _ffmpegService.ConvertVideoFileToTsFormatAsync(
+    //         outputFilePath,
+    //         Path.Combine(workingDirectory.Replace(DirectoryName.Working, string.Empty), END_SCREEN + FileExtension.Ts),
+    //         cancellationToken);
+    // }
 
     public bool DoesKdenliveFileExist(string directory)
     {
@@ -134,4 +134,6 @@ public abstract class BaseVideoService : IBaseVideoService
             .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.ToString()))
             .Any();
     }
+
+    
 }

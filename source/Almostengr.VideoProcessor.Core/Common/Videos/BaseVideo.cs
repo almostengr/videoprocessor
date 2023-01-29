@@ -1,6 +1,5 @@
 using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
-using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
@@ -12,6 +11,7 @@ public abstract record BaseVideo
     public string GraphicsSubtitleFileName { get; private set; }
     public string BaseDirectory { get; init; }
     public string VideoFilter { get; private set; }
+    public bool IsDraft { get; private set; } = false;
 
     public readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
     public readonly string RHT_WEBSITE = "rhtservices.net";
@@ -29,6 +29,11 @@ public abstract record BaseVideo
         GraphicsSubtitleFileName = string.Empty;
         Title = SetTitle(archiveFileName);
         VideoFilter = string.Empty;
+
+        if (Title.ToLower().Contains("draft"))
+        {
+            IsDraft = true;
+        }
     }
 
     public virtual string EndScreenFilePath()
@@ -81,10 +86,10 @@ public abstract record BaseVideo
             + FileExtension.Mp4;
     }
 
-    public bool IsDraft()
-    {
-        return ArchiveFileName.ToLower().Contains(".draft");
-    }
+    // public bool IsDraft()
+    // {
+    //     return ArchiveFileName.ToLower().Contains(".draft");
+    // }
 
     public void SetGraphicsSubtitleFileName(string? fileName)
     {
