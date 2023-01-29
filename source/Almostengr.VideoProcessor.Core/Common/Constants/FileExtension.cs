@@ -62,6 +62,6 @@ public struct FileExtension
 
     public override string ToString()
     {
-        return base.ToString();
+        return base.ToString() ?? throw new InvalidOperationException();
     }
 }
