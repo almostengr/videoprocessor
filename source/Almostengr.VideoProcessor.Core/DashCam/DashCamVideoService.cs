@@ -12,26 +12,27 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 {
     private readonly ILoggerService<DashCamVideoService> _loggerService;
 
-    private readonly string _incomingDirectory;
-    private readonly string _archiveDirectory;
-    private readonly string _uploadDirectory;
-    private readonly string _workingDirectory;
+    // private readonly string _incomingDirectory;
+    // private readonly string _archiveDirectory;
+    // private readonly string _uploadDirectory;
+    // private readonly string _workingDirectory;
 
     public DashCamVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         ILoggerService<DashCamVideoService> loggerService, IMusicService musicService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService)
     {
-        _incomingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
-        _archiveDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Archive);
-        _uploadDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Upload);
-        _workingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Working);
+        Incomingdirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
+        ArchiveDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Archive);
+        UploadDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Upload);
+        WorkingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Working);
+        DraftDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Draft);
         _loggerService = loggerService;
     }
 
     public override async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
     {
-        var tarGzFiles = _fileSystemService.GetFilesInDirectory(_archiveDirectory)
+        var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
             .Where(f => f.EndsWith(FileExtension.TarGz.ToString()));
 
         foreach(var file in tarGzFiles)
@@ -47,7 +48,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     {
         try
         {
-            await base.CompressTarballsInArchiveFolderAsync(_archiveDirectory, cancellationToken);
+            await base.CompressTarballsInArchiveFolderAsync(ArchiveDirectory, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -57,25 +58,25 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
     public override async Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken)
     {
-        DashCamVideo? video = null;
+        DashCamVideoFile? video = null;
 
         try
         {
             // string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(_incomingDirectory);
-            string incomingTarball = _fileSystemService.GetRandomFileByExtensionFromDirectory(_incomingDirectory, FileExtension.Srt);
+            string incomingTarball = _fileSystemService.GetRandomFileByExtensionFromDirectory(Incomingdirectory, FileExtension.Srt);
             _loggerService.LogInformation($"Processing ${incomingTarball}");
 
-            video = new DashCamVideo(_appSettings.DashCamDirectory, Path.GetFileName(incomingTarball));
+            video = new DashCamVideoFile(_appSettings.DashCamDirectory, Path.GetFileName(incomingTarball));
 
-            _fileSystemService.DeleteDirectory(_workingDirectory);
-            _fileSystemService.CreateDirectory(_workingDirectory);
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
+            _fileSystemService.CreateDirectory(WorkingDirectory);
 
             await _tarballService.ExtractTarballContentsAsync(
-                video.IncomingTarballFilePath(), _workingDirectory, cancellationToken);
+                video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
 
-            _fileSystemService.PrepareAllFilesInDirectory(_workingDirectory);
+            _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
-            if (DoesKdenliveFileExist(_incomingDirectory))
+            if (DoesKdenliveFileExist(Incomingdirectory))
             {
                 throw new KdenliveFileExistsException("Archive has Kdenlive project file");    
             }
@@ -86,13 +87,13 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             {
                 await _ffmpegService.RenderVideoAsCopyAsync(
                     video.FfmpegInputFilePath(),
-                    Path.Combine(_archiveDirectory, video.OutputVideoFileName()),
+                    Path.Combine(ArchiveDirectory, video.OutputVideoFileName()),
                     cancellationToken);
                 _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.DraftTarballFilePath());
                 _fileSystemService.SaveFileContents(
-                    Path.Combine(_archiveDirectory, video.ArchiveFileName + FileExtension.GraphicsAss),
+                    Path.Combine(ArchiveDirectory, video.ArchiveFileName + FileExtension.GraphicsAss),
                     string.Empty);
-                _fileSystemService.DeleteDirectory(_workingDirectory);
+                _fileSystemService.DeleteDirectory(WorkingDirectory);
                 return;
             }
 
@@ -115,7 +116,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 video.DrawTextFilterBackgroundColor(),
                 Opacity.Light);
 
-            var graphicsSubtitle = _fileSystemService.GetFilesInDirectory(_workingDirectory)
+            var graphicsSubtitle = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
                 .Single();
 
@@ -131,7 +132,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 cancellationToken);
 
             _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
-            _fileSystemService.DeleteDirectory(_workingDirectory);
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
             _loggerService.LogInformation($"Completed processing {incomingTarball}");
         }
         catch (NoFilesMatchException)
@@ -144,19 +145,19 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             if (video != null)
             {
-                _fileSystemService.MoveFile(video.IncomingTarballFilePath(), Path.Combine(_archiveDirectory, video.ArchiveFileName));
+                _fileSystemService.MoveFile(video.IncomingTarballFilePath(), Path.Combine(ArchiveDirectory, video.ArchiveFileName));
                 _fileSystemService.SaveFileContents(
-                    Path.Combine(_archiveDirectory, video.ArchiveFileName + FileExtension.Log),
+                    Path.Combine(ArchiveDirectory, video.ArchiveFileName + FileExtension.Log),
                     ex.Message);
             }
         }
     }
 
-    private void CreateFfmpegInputFile(DashCamVideo video)
+    private void CreateFfmpegInputFile(DashCamVideoFile video)
     {
         _fileSystemService.DeleteFile(video.FfmpegInputFilePath());
 
-        string[] videoFiles = _fileSystemService.GetFilesInDirectory(_workingDirectory)
+        string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
             .Where(f => f.EndsWith(FileExtension.Mov.ToString()))
             .OrderBy(f => f)
             .ToArray();
@@ -167,7 +168,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     {
         try
         {
-            await base.CreateTarballsFromDirectoriesAsync(_incomingDirectory, cancellationToken);
+            await base.CreateTarballsFromDirectoriesAsync(Incomingdirectory, cancellationToken);
         }
         catch (Exception ex)
         {

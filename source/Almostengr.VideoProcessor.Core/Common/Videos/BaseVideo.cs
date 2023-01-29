@@ -4,7 +4,7 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public abstract record BaseVideo
+public abstract record BaseVideoFile
 {
     public string Title { get; init; }
     public string ArchiveFileName { get; init; }
@@ -17,7 +17,7 @@ public abstract record BaseVideo
     public readonly string RHT_WEBSITE = "rhtservices.net";
     public readonly string RHT_SOCIAL_LINKS = "rhtservices.net/links";
 
-    public BaseVideo(string baseDirectory, string archiveFileName)
+    public BaseVideoFile(string baseDirectory, string archiveFileName)
     {
         if (string.IsNullOrWhiteSpace(baseDirectory) || string.IsNullOrWhiteSpace(archiveFileName))
         {

@@ -4,11 +4,11 @@ using Almostengr.VideoProcessor.Core.TechTalk.Exceptions;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk;
 
-public sealed record TechTalkVideo : BaseVideo
+public sealed record TechTalkVideoFile : BaseVideoFile
 {
     public TechTalkVideoSubType SubType { get; private set; }
 
-    public TechTalkVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
+    public TechTalkVideoFile(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
     {
         SubType = TechTalkVideoSubType.TechTalk;
     }
@@ -79,12 +79,4 @@ public sealed record TechTalkVideo : BaseVideo
     {
         return FfMpegColor.White;
     }
-}
-
-
-public enum TechTalkVideoSubType
-{
-    TechTalk,
-    Christmas,
-    IndependenceDay
 }

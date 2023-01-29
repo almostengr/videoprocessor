@@ -5,12 +5,12 @@ namespace Almostengr.VideoProcessor.Core.Test;
 
 public class DashCamVideoTests
 {
-    DashCamVideo? video = null;
+    DashCamVideoFile? video = null;
 
     [OneTimeSetUp]
     public void OneTimeSetup()
     {
-        video = new DashCamVideo("/tmp", "testfile.tar");
+        video = new DashCamVideoFile("/tmp", "testfile.tar");
     }
 
     [Test]

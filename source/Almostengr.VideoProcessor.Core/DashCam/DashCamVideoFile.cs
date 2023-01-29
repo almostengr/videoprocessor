@@ -1,11 +1,11 @@
 using Almostengr.VideoProcessor.Core.Common.Videos;
-using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
+// using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
 
-public sealed record DashCamVideo : BaseVideo
+public sealed record DashCamVideoFile : BaseVideoFile
 {
-    public DashCamVideo(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
+    public DashCamVideoFile(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
     {
     }
 

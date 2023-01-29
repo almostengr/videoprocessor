@@ -1,7 +1,6 @@
 using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
-using Almostengr.VideoProcessor.Core.Constants;
 using Almostengr.VideoProcessor.Core.Music.Services;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
@@ -16,7 +15,14 @@ public abstract class BaseVideoService : IBaseVideoService
     protected readonly IRandomService _randomService;
     protected readonly IMusicService _musicService;
 
-    protected const string END_SCREEN = "endscreen";
+    // protected const string END_SCREEN = "endscreen";
+
+
+    protected string Incomingdirectory { get; init; }
+    protected string ArchiveDirectory { get; init; }
+    protected string UploadDirectory { get; init; }
+    protected string WorkingDirectory { get; init; }
+    protected string DraftDirectory { get; init; }
 
     protected BaseVideoService(
         AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
@@ -135,5 +141,5 @@ public abstract class BaseVideoService : IBaseVideoService
             .Any();
     }
 
-    
+
 }
