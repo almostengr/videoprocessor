@@ -10,7 +10,7 @@ public abstract class BaseVideoService : IBaseVideoService
 {
     protected readonly AppSettings _appSettings;
     protected readonly IFfmpegService _ffmpegService;
-    protected readonly IGzipService _gzipService;
+    protected readonly IFileCompressionService _compressionService;
     protected readonly ITarballService _tarballService;
     protected readonly IFileSystemService _fileSystemService;
     protected readonly IRandomService _randomService;
@@ -19,13 +19,13 @@ public abstract class BaseVideoService : IBaseVideoService
     protected const string END_SCREEN = "endscreen";
 
     protected BaseVideoService(
-        AppSettings appSettings, IFfmpegService ffmpegService, IGzipService gzipService,
+        AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         IMusicService musicService)
     {
         _appSettings = appSettings;
         _ffmpegService = ffmpegService;
-        _gzipService = gzipService;
+        _compressionService = gzipService;
         _tarballService = tarballService;
         _fileSystemService = fileSystemService;
         _randomService = randomService;
@@ -35,6 +35,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public abstract Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken);
     public abstract Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
     public abstract Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
+    public abstract Task ConvertGzToXzAsync(CancellationToken cancellationToken);
 
     public virtual Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
     {
@@ -54,7 +55,8 @@ public abstract class BaseVideoService : IBaseVideoService
 
         foreach (var archive in archiveTarballs)
         {
-            await _gzipService.CompressFileAsync(archive, cancellationToken);
+            // await _gzipService.CompressFileAsync(archive, cancellationToken);
+            await _compressionService.CompressFileAsync(archive, cancellationToken);
         }
     }
 

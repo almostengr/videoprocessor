@@ -1,31 +1,30 @@
 using Almostengr.VideoProcessor.Core.Common.Constants;
+using Almostengr.VideoProcessor.Core.Common.Exceptions;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
-using Almostengr.VideoProcessor.Core.Common.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
-public sealed class GzipService : BaseProcess<GzipService>, IFileCompressionService
+public sealed class XzService : BaseProcess<XzService>, IFileCompressionService
 {
-    private const string Gzip = "/usr/bin/gzip";
-    private const string Gunzip = "/usr/bin/gunzip";
-
-    public GzipService(ILoggerService<GzipService> loggerService) : base(loggerService)
+    private const string Xz = "/usr/bin/xz";
+    
+    public XzService(ILoggerService<XzService> loggerService) : base(loggerService)
     {
     }
 
     public async Task<(string stdOut, string stdErr)> CompressFileAsync(
-        string filePath, CancellationToken cancellationToken)
+        string tarballFilePath, CancellationToken cancellationToken)
     {
-        if (filePath.EndsWith(FileExtension.TarXz.ToString()) || filePath.EndsWith(FileExtension.TarGz.ToString()))
+        if (tarballFilePath.EndsWith(FileExtension.TarXz.ToString()) || tarballFilePath.EndsWith(FileExtension.TarGz.ToString()))
         {
             throw new FileAlreadyCompressedException();
         }
 
-        string workingDirectory = Path.GetDirectoryName(filePath) ?? string.Empty;
+        string workingDirectory = Path.GetDirectoryName(tarballFilePath) ?? string.Empty;
 
         var result = await RunProcessAsync(
-            Gzip, $"\"{filePath}\"", workingDirectory, cancellationToken);
+            Xz, $"-z \"{tarballFilePath}\"", workingDirectory, cancellationToken);
 
         if (result.exitCode > 0)
         {
@@ -36,17 +35,17 @@ public sealed class GzipService : BaseProcess<GzipService>, IFileCompressionServ
     }
 
     public async Task<(string stdOut, string stdErr)> DecompressFileAsync(
-        string filePath, CancellationToken stoppingToken)
+        string tarballFilePath, CancellationToken stoppingToken)
     {
-        if (!filePath.EndsWith(FileExtension.TarGz.ToString()))
+        if (!tarballFilePath.EndsWith(FileExtension.TarXz.ToString()))
         {
             throw new UnableToDecompressFileException();
         }
 
-        string workingDirectory = Path.GetDirectoryName(filePath) ?? string.Empty;
+        string workingDirectory = Path.GetDirectoryName(tarballFilePath) ?? string.Empty;
 
         var result = await RunProcessAsync(
-            Gunzip, $"\"{filePath}\"", workingDirectory, stoppingToken);
+            Xz, $"-d \"{tarballFilePath}\"", workingDirectory, stoppingToken);
 
         if (result.exitCode > 0)
         {

@@ -10,7 +10,7 @@ public sealed class AppSettings
     public TimeSpan WorkerDelay { get; init; }
     public double DiskSpaceThreshold { get; init; }
     public int DeleteFilesAfterDays { get; init; }
-    public string? YouTubeApiKey { get; init; }
+    public string YouTubeApiKey { get; init; }
     public readonly string AppName;
 
     public AppSettings()
@@ -28,6 +28,7 @@ public sealed class AppSettings
             TechnologyDirectory = $"{pbaseDirectory}/technology";
             ToastmastersDirectory = $"{pbaseDirectory}/toastmasters";
             WorkerDelay = TimeSpan.FromMinutes(60);
+            YouTubeApiKey = Environment.GetEnvironmentVariable("YouTubeApiKey") ?? throw new ArgumentNullException("YouTube API key not valid");
             return;
         }
 
@@ -40,6 +41,7 @@ public sealed class AppSettings
         TechnologyDirectory = $"{baseDirectory}/technology";
         ToastmastersDirectory = $"{baseDirectory}/toastmasters";
         WorkerDelay = TimeSpan.FromSeconds(15);
+        YouTubeApiKey = string.Empty;
     }
 
     private bool IsReleaseMode()

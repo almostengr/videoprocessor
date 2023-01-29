@@ -28,6 +28,7 @@ internal sealed class DashCamVideoWorker : BaseWorker
             {
                 await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
                 await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
+                await _videoService.ConvertGzToXzAsync(cancellationToken);
                 await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
             }
         }
