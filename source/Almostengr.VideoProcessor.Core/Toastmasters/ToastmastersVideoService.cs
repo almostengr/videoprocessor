@@ -12,11 +12,6 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 {
     private readonly ILoggerService<ToastmastersVideoService> _loggerService;
 
-    // private readonly string _incomingDirectory;
-    // private readonly string _archiveDirectory;
-    // private readonly string _uploadDirectory;
-    // private readonly string _workingDirectory;
-
     public ToastmastersVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService compressionService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         ILoggerService<ToastmastersVideoService> loggerService, IMusicService musicService) :
@@ -82,24 +77,20 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
         try
         {
-            // string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(IncomingDirectory);
             string incomingTarball = _fileSystemService.GetRandomFileByExtensionFromDirectory(
                 IncomingDirectory, FileExtension.Tar);
 
             video = new ToastmastersVideoFile(incomingTarball);
-            // video = new ToastmastersVideoFile(_appSettings.ToastmastersDirectory, Path.GetFileName(incomingTarball));
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
             await _tarballService.ExtractTarballContentsAsync(
-                // video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
                 video.TarballFilePath, WorkingDirectory, cancellationToken);
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
             // create input file
-            // _fileSystemService.DeleteFile(video.FfmpegInputFilePath());
             _fileSystemService.DeleteFile(_ffmpegInputFilePath);
 
             string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
@@ -108,7 +99,6 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 .ToArray();
 
             CreateFfmpegInputFile(videoFiles, _ffmpegInputFilePath);
-            // CreateFfmpegInputFile(videoFiles, video.FfmpegInputFilePath());
 
             // brand video
             video.AddDrawTextVideoFilter(
@@ -123,14 +113,12 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             video.AddLikeVideoFilter(_randomService.SubscribeLikeDuration());
 
             await _ffmpegService.RenderVideoAsync(
-                // video.FfmpegInputFilePath(), video.VideoFilter, video.OutputVideoFilePath(), cancellationToken);
                 _ffmpegInputFilePath,
                 video.VideoFilter,
                 Path.Combine(UploadDirectory, video.OutputVideoFileName),
                 cancellationToken);
 
             _fileSystemService.MoveFile(video.TarballFilePath, Path.Combine(ArchiveDirectory, video.TarballFileName));
-            // _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _loggerService.LogInformation($"Completed processing {incomingTarball}");
         }
@@ -145,11 +133,11 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             if (video != null)
             {
                 _fileSystemService.MoveFile(video.TarballFilePath, Path.Combine(ArchiveDirectory, video.TarballFileName));
-                // _fileSystemService.MoveFile(video.IncomingTarballFilePath(), Path.Combine(ArchiveDirectory, video.TarballFileName));
                 _fileSystemService.SaveFileContents(
                     Path.Combine(ArchiveDirectory, video.TarballFileName + FileExtension.Log),
                     ex.Message);
             }
         }
     }
+    
 }

@@ -17,9 +17,6 @@ public abstract class BaseVideoService : IBaseVideoService
     protected readonly IMusicService _musicService;
     protected string _ffmpegInputFilePath { get; init; }
 
-    // protected const string END_SCREEN = "endscreen";
-
-
     protected string IncomingDirectory { get; init; }
     protected string ArchiveDirectory { get; init; }
     protected string UploadDirectory { get; init; }
@@ -63,7 +60,6 @@ public abstract class BaseVideoService : IBaseVideoService
 
         foreach (var archive in archiveTarballs)
         {
-            // await _gzipService.CompressFileAsync(archive, cancellationToken);
             await _compressionService.CompressFileAsync(archive, cancellationToken);
         }
     }
@@ -111,30 +107,6 @@ public abstract class BaseVideoService : IBaseVideoService
     {
         return _randomService.Next(240, 600);
     }
-
-    // public async Task CreateEndScreenVideoAsync(string workingDirectory, CancellationToken cancellationToken)
-    // {
-    //     string imageFilePath = _fileSystemService.GetFilesInDirectory(workingDirectory)
-    //         .Where(f => f.ToLower().EndsWith(FileExtension.Png.ToString()))
-    //         .Single();
-
-    //     string audioFilePath = _fileSystemService.GetFilesInDirectory(workingDirectory)
-    //         .Where(f => f.ToLower().EndsWith(FileExtension.Mp3.ToString()))
-    //         .Single();
-
-
-    //     string outputFilePath = Path.Combine(
-    //         workingDirectory,
-    //         END_SCREEN + FileExtension.Mp4);
-
-    //     await _ffmpegService.ConvertEndScreenImageToMp4VideoAsync(
-    //         imageFilePath, audioFilePath, outputFilePath, cancellationToken);
-
-    //     await _ffmpegService.ConvertVideoFileToTsFormatAsync(
-    //         outputFilePath,
-    //         Path.Combine(workingDirectory.Replace(DirectoryName.Working, string.Empty), END_SCREEN + FileExtension.Ts),
-    //         cancellationToken);
-    // }
 
     public bool DoesKdenliveFileExist(string directory)
     {

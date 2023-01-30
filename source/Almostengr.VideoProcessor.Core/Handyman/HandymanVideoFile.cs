@@ -5,9 +5,6 @@ namespace Almostengr.VideoProcessor.Core.Handyman;
 
 public sealed record HandymanVideoFile : BaseVideoFile
 {
-    // public HandymanVideoFile(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
-    // {
-    // }
     public HandymanVideoFile(string archiveFilePath) : base(archiveFilePath)
     {}
 

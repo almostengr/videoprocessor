@@ -28,14 +28,6 @@ public abstract record SrtSubtitleFile
         }
 
         Subtitles.Clear();
-
-        // foreach(var subtitle in subtitles)
-        // {
-            // Subtitles.Add(
-            //     new SubtitleFileEntry(subtitle.StartTime, subtitle.EndTime, FixMisspellings(subtitle.Text))
-            // );
-        // }
-
         Subtitles = subtitles;
     }
 

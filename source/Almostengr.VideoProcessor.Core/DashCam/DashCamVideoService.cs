@@ -12,11 +12,6 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 {
     private readonly ILoggerService<DashCamVideoService> _loggerService;
 
-    // private readonly string _incomingDirectory;
-    // private readonly string _archiveDirectory;
-    // private readonly string _uploadDirectory;
-    // private readonly string _workingDirectory;
-
     public DashCamVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         ILoggerService<DashCamVideoService> loggerService, IMusicService musicService,
@@ -66,16 +61,13 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
         try
         {
-            // string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(_incomingDirectory);
             string incomingTarball = _fileSystemService.GetRandomFileByExtensionFromDirectory(IncomingDirectory, FileExtension.Srt);
             _loggerService.LogInformation($"Processing ${incomingTarball}");
 
-            // video = new DashCamVideoFile(_appSettings.DashCamDirectory, Path.GetFileName(incomingTarball));
             video = new DashCamVideoFile(incomingTarball);
 
             string incomingFilePath = Path.Combine(IncomingDirectory, video.TarballFileName);
             string archiveFilePath = Path.Combine(ArchiveDirectory, video.TarballFileName);
-            // string workingfilePath = Path.Combine(WorkingDirectory, video.TarballFileName);
             string outputFilePath = Path.Combine(UploadDirectory, video.TarballFileName);
             string draftFilePath = Path.Combine(DraftDirectory, video.TarballFileName);
             string ffmpegInputFilePath = Path.Combine(WorkingDirectory, video.TarballFileName);
@@ -85,7 +77,6 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
             await _tarballService.ExtractTarballContentsAsync(
-                // video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
                 incomingFilePath, WorkingDirectory, cancellationToken);
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
@@ -100,10 +91,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             if (video.IsDraft)
             {
                 await _ffmpegService.RenderVideoAsCopyAsync(
-                    // video.FfmpegInputFilePath(),
-                    // Path.Combine(ArchiveDirectory, video.OutputVideoFileName),
                     ffmpegInputFilePath, archiveFilePath, cancellationToken);
-                // _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.DraftTarballFilePath());
                 _fileSystemService.MoveFile(
                     incomingTarball,
                     draftFilePath);// Path.Combine(DraftDirectory, video.FileName));
@@ -149,7 +137,6 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 cancellationToken);
 
             _fileSystemService.MoveFile(incomingFilePath, archiveFilePath);
-            // _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _loggerService.LogInformation($"Completed processing {incomingTarball}");
         }
@@ -163,7 +150,6 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             if (video != null)
             {
-                // _fileSystemService.MoveFile(video.IncomingTarballFilePath(), Path.Combine(ArchiveDirectory, video.TarballFileName));
                 _fileSystemService.MoveFile(
                     Path.Combine(IncomingDirectory, video.TarballFileName),
                     Path.Combine(ArchiveDirectory, video.TarballFileName)
@@ -177,14 +163,12 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
     private void CreateFfmpegInputFile(DashCamVideoFile video)
     {
-        // _fileSystemService.DeleteFile(video.FfmpegInputFilePath());
         _fileSystemService.DeleteFile(Path.Combine(WorkingDirectory, FFMPEG_FILE_NAME));
 
         string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
             .Where(f => f.EndsWith(FileExtension.Mov.ToString()))
             .OrderBy(f => f)
             .ToArray();
-        // CreateFfmpegInputFile(videoFiles, video.FfmpegInputFilePath());
         CreateFfmpegInputFile(videoFiles, Path.Combine(WorkingDirectory, FFMPEG_FILE_NAME));
     }
 
