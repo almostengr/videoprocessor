@@ -3,12 +3,12 @@ using Almostengr.VideoProcessor.Core.Common.Videos;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
-public sealed class SrtSubtitleFileEntryFileService : ISrtSubtitleFileService
+public sealed class SrtSubtitleFileService : ISrtSubtitleFileService
 {
     private const string TIME_SEPARATOR = " --> ";
     private readonly IFileSystemService _fileSystemService;
 
-    public SrtSubtitleFileEntryFileService(IFileSystemService fileSystemService)
+    public SrtSubtitleFileService(IFileSystemService fileSystemService)
     {
         _fileSystemService = fileSystemService;
     }

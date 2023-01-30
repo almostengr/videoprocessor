@@ -5,10 +5,13 @@ namespace Almostengr.VideoProcessor.Core.Toastmasters;
 
 public sealed record ToastmastersVideoFile : BaseVideoFile
 {
-    public ToastmastersVideoFile(string baseDirectory, string archiveFileName) : 
-        base(baseDirectory, archiveFileName)
-    {
-    }
+    // public ToastmastersVideoFile(string baseDirectory, string archiveFileName) : 
+    //     base(baseDirectory, archiveFileName)
+    // {
+    // }
+
+    public ToastmastersVideoFile(string archiveFilePath) : base(archiveFilePath)
+    {}
 
     public override string[] BrandingTextOptions()
     {

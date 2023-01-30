@@ -1,12 +1,30 @@
 using Almostengr.VideoProcessor.Core.Common.Videos;
+using Almostengr.VideoProcessor.Core.Constants;
 // using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
 
 public sealed record DashCamVideoFile : BaseVideoFile
 {
-    public DashCamVideoFile(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
+    public DashCamVideoType SubType { get; private set; }
+
+    // public DashCamVideoFile(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
+    // {
+    // }
+
+    public DashCamVideoFile(string archiveFilePath) : base(archiveFilePath)
     {
+        SubType = DashCamVideoType.Normal;
+
+        if (Title.ToLower().Contains("night"))
+        {
+            SubType = DashCamVideoType.Night;
+        }
+        else if (Title.ToLower().Contains("firework"))
+        {
+            SubType = DashCamVideoType.Fireworks;
+        }
+
     }
 
     public override string[] BrandingTextOptions()
@@ -21,6 +39,34 @@ public sealed record DashCamVideoFile : BaseVideoFile
             throw new ArgumentException("Title contains invalid text", nameof(fileName));
         }
 
-        return base.SetTitle(fileName);
+        return base.SetTitle(fileName.Split(Constant.SemiColon).First());
     }
+
+    public override FfMpegColor DrawTextFilterBackgroundColor()
+    {
+        if (SubType == DashCamVideoType.Fireworks)
+        {
+            return FfMpegColor.Blue;
+        }
+
+        return FfMpegColor.Black;
+    }
+
+    public override FfMpegColor DrawTextFilterTextColor()
+    {
+        if (SubType == DashCamVideoType.Night)
+        {
+            return FfMpegColor.Orange;
+        }
+
+        return FfMpegColor.White;
+    }
+}
+
+
+public enum DashCamVideoType
+{
+    Normal,
+    Night,
+    Fireworks
 }

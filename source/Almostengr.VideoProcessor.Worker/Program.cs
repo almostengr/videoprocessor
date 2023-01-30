@@ -20,7 +20,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IDashCamVideoService, DashCamVideoService>();
         services.AddSingleton<IFfmpegService, FfmpegService>();
         services.AddSingleton<IFileSystemService, FileSystemService>();
-        services.AddSingleton<IFileCompressionService, GzipService>();
+        services.AddSingleton<IFileCompressionService, XzService>();
         services.AddSingleton<IHandymanVideoService, HandymanVideoService>();
         services.AddSingleton<IMusicService, MusicService>();
         services.AddSingleton<IRandomService, RandomService>();
@@ -30,6 +30,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
 
         services.AddSingleton<IYouTubeSearchService, YouTubeSearchService>();
+        services.AddSingleton<ISrtSubtitleFileService, SrtSubtitleFileService>();
 
         // services.AddHostedService<DashCamVideoWorker>();
         // services.AddHostedService<HandymanVideoWorker>();

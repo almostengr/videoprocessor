@@ -40,10 +40,10 @@ namespace Almostengr.VideoProcessor.Core.Constants;
 public struct DrawTextPosition
 {
     private const int Padding = 30;
-    private string Position;
-    public DrawTextPosition(string textPosition)
+    private string Value;
+    public DrawTextPosition(string value)
     {
-        Position = textPosition;
+        Value = value;
     }
     
     public static readonly DrawTextPosition UpperLeft = new($"x={Padding}:y={Padding}");
@@ -62,4 +62,9 @@ public struct DrawTextPosition
     // public static readonly string LowerLeft = $"x={Padding}:y=h-th-{Padding}";
     // public static readonly string LowerCenter = $"x=(w-tw)/2:y=h-th-{Padding}";
     // public static readonly string LowerRight = $"x=w-tw-{Padding}:y=h-th-{Padding}";
+
+    public override string ToString()
+    {
+        return Value.ToString();
+    }
 }

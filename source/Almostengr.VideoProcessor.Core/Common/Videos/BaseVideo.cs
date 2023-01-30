@@ -7,28 +7,57 @@ namespace Almostengr.VideoProcessor.Core.Common.Videos;
 public abstract record BaseVideoFile
 {
     public string Title { get; init; }
-    public string ArchiveFileName { get; init; }
+    public string TarballFilePath { get; }
+    public string TarballFileName { get; init; }
     public string GraphicsSubtitleFileName { get; private set; }
-    public string BaseDirectory { get; init; }
+    // public string BaseDirectory { get; init; }
     public string VideoFilter { get; private set; }
     public bool IsDraft { get; private set; } = false;
+    public string OutputVideoFileName { get; private set; }
 
     public readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
     public readonly string RHT_WEBSITE = "rhtservices.net";
     public readonly string RHT_SOCIAL_LINKS = "rhtservices.net/links";
 
-    public BaseVideoFile(string baseDirectory, string archiveFileName)
+    // public BaseVideoFile(string baseDirectory, string archiveFileName)
+    // {
+    //     if (string.IsNullOrWhiteSpace(baseDirectory) || string.IsNullOrWhiteSpace(archiveFileName))
+    //     {
+    //         throw new ArgumentException("Arguments are null or whitespace");
+    //     }
+
+    //     ArchiveFileName = archiveFileName;
+    //     BaseDirectory = baseDirectory;
+    //     GraphicsSubtitleFileName = string.Empty;
+    //     Title = SetTitle(archiveFileName);
+    //     VideoFilter = string.Empty;
+
+    //     if (Title.ToLower().Contains("draft"))
+    //     {
+    //         IsDraft = true;
+    //     }
+    // }
+
+    public BaseVideoFile(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(baseDirectory) || string.IsNullOrWhiteSpace(archiveFileName))
+        if (string.IsNullOrWhiteSpace(filePath))
         {
             throw new ArgumentException("Arguments are null or whitespace");
         }
 
-        ArchiveFileName = archiveFileName;
-        BaseDirectory = baseDirectory;
+        TarballFilePath = filePath;
+
+        // ArchiveFileName = archiveFileName;
+        TarballFileName = Path.GetFileName(TarballFilePath);
         GraphicsSubtitleFileName = string.Empty;
-        Title = SetTitle(archiveFileName);
+        Title = SetTitle(TarballFileName);
         VideoFilter = string.Empty;
+
+        OutputVideoFileName = TarballFileName
+            .Replace(FileExtension.TarXz.ToString(), string.Empty.ToString())
+            .Replace(FileExtension.TarGz.ToString(), string.Empty.ToString())
+            .Replace(FileExtension.Tar.ToString(), string.Empty.ToString())
+            + FileExtension.Mp4;
 
         if (Title.ToLower().Contains("draft"))
         {
@@ -36,16 +65,16 @@ public abstract record BaseVideoFile
         }
     }
 
-    public virtual string EndScreenFilePath()
-    {
-        return Path.Combine(BaseDirectory, EndScreenFileName());
-    }
+    // public virtual string EndScreenFilePath()
+    // {
+    //     return Path.Combine(BaseDirectory, EndScreenFileName());
+    // }
 
-    public string EndScreenFileName()
-    {
-        // return "endscreen.mp4";
-        return "endscreen.ts";
-    }
+    // public string EndScreenFileName()
+    // {
+    //     // return "endscreen.mp4";
+    //     return "endscreen.ts";
+    // }
 
     public abstract string[] BrandingTextOptions();
 
@@ -62,29 +91,29 @@ public abstract record BaseVideoFile
             .Replace(Constant.Colon, string.Empty);
     }
 
-    public string ErrorTarballFilePath()
-    {
-        return Path.Combine(BaseDirectory, DirectoryName.Archive, OutputVideoFileName() + FileExtension.Err);
-    }
+    // public string ErrorTarballFilePath()
+    // {
+    //     return Path.Combine(BaseDirectory, DirectoryName.Archive, OutputVideoFileName() + FileExtension.Err);
+    // }
 
-    public string OutputVideoFilePath()
-    {
-        return Path.Combine(BaseDirectory, DirectoryName.Upload, OutputVideoFileName());
-    }
+    // public string OutputVideoFilePath()
+    // {
+    //     return Path.Combine(BaseDirectory, DirectoryName.Upload, OutputVideoFileName());
+    // }
 
-    public string UploadVideoFilePath()
-    {
-        return Path.Combine(BaseDirectory, DirectoryName.Upload, OutputVideoFileName());
-    }
+    // public string UploadVideoFilePath()
+    // {
+    //     return Path.Combine(BaseDirectory, DirectoryName.Upload, OutputVideoFileName());
+    // }
 
-    public string OutputVideoFileName()
-    {
-        return ArchiveFileName
-            .Replace(FileExtension.TarXz.ToString(), string.Empty.ToString())
-            .Replace(FileExtension.TarGz.ToString(), string.Empty.ToString())
-            .Replace(FileExtension.Tar.ToString(), string.Empty.ToString())
-            + FileExtension.Mp4;
-    }
+    // public string OutputVideoFileName()
+    // {
+    //     return ArchiveFileName
+    //         .Replace(FileExtension.TarXz.ToString(), string.Empty.ToString())
+    //         .Replace(FileExtension.TarGz.ToString(), string.Empty.ToString())
+    //         .Replace(FileExtension.Tar.ToString(), string.Empty.ToString())
+    //         + FileExtension.Mp4;
+    // }
 
     // public bool IsDraft()
     // {
@@ -121,25 +150,45 @@ public abstract record BaseVideoFile
         return FfMpegColor.White;
     }
 
-    public string FfmpegInputFilePath()
-    {
-        return Path.Combine(BaseDirectory, DirectoryName.Working, "ffmpeginput.txt");
-    }
+    // public string FfmpegInputFilePath()
+    // {
+    //     return Path.Combine(BaseDirectory, DirectoryName.Working, "ffmpeginput.txt");
+    // }
 
-    public string IncomingTarballFilePath()
-    {
-        return Path.Combine(BaseDirectory, DirectoryName.Incoming, ArchiveFileName);
-    }
+    // public string IncomingTarballFilePath()
+    // {
+    //     return Path.Combine(BaseDirectory, DirectoryName.Incoming, ArchiveFileName);
+    // }
 
-    public string ArchiveTarballFilePath()
-    {
-        return Path.Combine(BaseDirectory, DirectoryName.Archive, ArchiveFileName);
-    }
+    // public string ArchiveTarballFilePath()
+    // {
+    //     return Path.Combine(BaseDirectory, DirectoryName.Archive, ArchiveFileName);
+    // }
 
-    public string DraftTarballFilePath()
-    {
-        return Path.Combine(BaseDirectory, DirectoryName.Draft, ArchiveFileName);
-    }
+    // public string DraftTarballFilePath()
+    // {
+    //     return Path.Combine(BaseDirectory, DirectoryName.Draft, ArchiveFileName);
+    // }
+
+    // public string ffmpegInputFilePath(string directory)
+    // {
+    //     return Path.Combine(directory, "ffmpeginput.txt");
+    // }
+
+    // public string IncomingTarballFilePath(string directory)
+    // {
+    //     return Path.Combine(directory, TarballFileName);
+    // }
+
+    // public string ArchiveTarballFilePath(string directory)
+    // {
+    //     return Path.Combine(directory, TarballFileName);
+    // }
+
+    // public string DraftTarballFilePath(string directory)
+    // {
+    //     return Path.Combine(directory, TarballFileName);
+    // }
 
     public virtual void AddDrawTextVideoFilter(
         string text, FfMpegColor textColor, Opacity textBrightness, FfmpegFontSize fontSize, DrawTextPosition position,
@@ -153,12 +202,12 @@ public abstract record BaseVideoFile
         }
 
         textFilter.Append($"drawtext=textfile:'{text.Trim()}':");
-        textFilter.Append($"fontcolor={textColor}@{textBrightness}:");
-        textFilter.Append($"fontsize={fontSize}:");
-        textFilter.Append($"{position}:");
+        textFilter.Append($"fontcolor={textColor.ToString()}@{textBrightness.ToString()}:");
+        textFilter.Append($"fontsize={fontSize.ToString()}:");
+        textFilter.Append($"{position.ToString()}:");
         textFilter.Append(Constant.BorderBox);
         textFilter.Append($"boxborderw={borderWidth.ToString()}:");
-        textFilter.Append($"boxcolor={backgroundColor}@{backgroundBrightness}");
+        textFilter.Append($"boxcolor={backgroundColor.ToString()}@{backgroundBrightness.ToString()}");
 
         if (duration.Length > 0)
         {

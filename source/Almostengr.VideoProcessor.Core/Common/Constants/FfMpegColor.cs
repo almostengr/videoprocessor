@@ -34,10 +34,10 @@ namespace Almostengr.VideoProcessor.Core.Constants;
 
 public struct FfMpegColor
 {
-    private string Color;
-    public FfMpegColor(string color)
+    private string Value;
+    public FfMpegColor(string value)
     {
-        Color = color;
+        Value = value;
     }
 
     public static readonly FfMpegColor Black = new FfMpegColor("black");
@@ -52,4 +52,10 @@ public struct FfMpegColor
     public static readonly FfMpegColor SteelBlue = new FfMpegColor("steelblue");
     public static readonly FfMpegColor White = new FfMpegColor("white");
     public static readonly FfMpegColor SaddleBrown = new FfMpegColor("SaddleBrown");
+
+    public override string ToString()
+    {
+        // return base.ToString() ?? throw new InvalidOperationException();
+        return Value.ToString();
+    }
 }

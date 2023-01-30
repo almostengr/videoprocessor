@@ -30,11 +30,11 @@ namespace Almostengr.VideoProcessor.Core.Common.Constants;
 
 public struct FileExtension
 {
-    private string Extension;
+    private string Value;
 
-    public FileExtension(string extension)
+    public FileExtension(string value)
     {
-        Extension = extension;
+        Value = value;
     }
 
     public static readonly FileExtension AudioMkv = new FileExtension(".audio.mkv");
@@ -62,6 +62,6 @@ public struct FileExtension
 
     public override string ToString()
     {
-        return base.ToString() ?? throw new InvalidOperationException();
+        return Value.ToString();
     }
 }

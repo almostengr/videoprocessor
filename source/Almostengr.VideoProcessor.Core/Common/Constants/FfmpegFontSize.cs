@@ -10,10 +10,10 @@ namespace Almostengr.VideoProcessor.Core.Constants;
 
 public struct FfmpegFontSize
 {
-    private string Size;
-    public FfmpegFontSize(string size)
+    private string Value;
+    public FfmpegFontSize(string value)
     {
-        Size = size;
+        Value = value;
     }
 
     public static readonly FfmpegFontSize XLarge = new FfmpegFontSize("h/21");
@@ -24,4 +24,10 @@ public struct FfmpegFontSize
     // public const string Large = "h/28";
     // public const string Medium = "h/35";
     // public const string Small = "h/42";
+
+    public override string ToString()
+    {
+        // return base.ToString() ?? throw new InvalidOperationException();
+        return Value.ToString();
+    }
 }
