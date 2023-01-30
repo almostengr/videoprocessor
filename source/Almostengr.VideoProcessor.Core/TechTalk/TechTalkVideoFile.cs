@@ -8,10 +8,6 @@ public sealed record TechTalkVideoFile : BaseVideoFile
 {
     public TechTalkVideoSubType SubType { get; private set; }
 
-    // public TechTalkVideoFile(string baseDirectory, string archiveFileName) : base(baseDirectory, archiveFileName)
-    // {
-    //     SubType = TechTalkVideoSubType.TechTalk;
-    // }
     public TechTalkVideoFile(string archiveFilePath) : base(archiveFilePath)
     {
         SubType = TechTalkVideoSubType.TechTalk;
@@ -25,46 +21,6 @@ public sealed record TechTalkVideoFile : BaseVideoFile
             SubType = TechTalkVideoSubType.IndependenceDay;
         }
     }
-
-    // public string ChristmasLightFileName()
-    // {
-    //     return "christmas.txt";
-    // }
-
-    // public string IndependenceDayFileName()
-    // {
-    //     return "independence.txt";
-    // }
-
-    // public string ChristmasLightMetaFile()
-    // {
-    //     return Path.Combine(BaseDirectory, DirectoryName.Working, "christmas.txt");
-    // }
-
-    // public string IndependenceDayMetaFile()
-    // {
-    //     return Path.Combine(BaseDirectory, DirectoryName.Working, "independence.txt");
-    // }
-
-    // public void ConfirmChristmasLightVideo()
-    // {
-    //     if (SubType == TechTalkVideoSubType.IndependenceDay)
-    //     {
-    //         throw new TechLightShowVideoTypeException();
-    //     }
-
-    //     SubType = TechTalkVideoSubType.Christmas;
-    // }
-
-    // public void ConfirmIndependenceDayVideo()
-    // {
-    //     if (SubType == TechTalkVideoSubType.Christmas)
-    //     {
-    //         throw new TechLightShowVideoTypeException();
-    //     }
-
-    //     SubType = TechTalkVideoSubType.IndependenceDay;
-    // }
 
     public override string[] BrandingTextOptions()
     {

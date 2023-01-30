@@ -21,6 +21,8 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IFfmpegService, FfmpegService>();
         services.AddSingleton<IFileSystemService, FileSystemService>();
         services.AddSingleton<IFileCompressionService, XzService>();
+        services.AddSingleton<IGzFileCompressionService, GzipService>();
+        services.AddSingleton<IXzFileCompressionService, XzService>();
         services.AddSingleton<IHandymanVideoService, HandymanVideoService>();
         services.AddSingleton<IMusicService, MusicService>();
         services.AddSingleton<IRandomService, RandomService>();

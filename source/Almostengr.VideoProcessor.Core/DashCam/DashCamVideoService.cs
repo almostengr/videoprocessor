@@ -19,7 +19,8 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
     public DashCamVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
-        ILoggerService<DashCamVideoService> loggerService, IMusicService musicService) :
+        ILoggerService<DashCamVideoService> loggerService, IMusicService musicService,
+        IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService)
     {
         IncomingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
@@ -29,6 +30,8 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         DraftDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Draft);
         _loggerService = loggerService;
         _ffmpegInputFilePath = Path.Combine(WorkingDirectory, FFMPEG_FILE_NAME);
+        _xzFileService = xzFileService;
+        _gzFileService = gzFileService;
     }
 
     public override async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
@@ -38,9 +41,9 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
         foreach (var file in tarGzFiles)
         {
-            await _compressionService.DecompressFileAsync(file, cancellationToken);
+            await _gzFileService.DecompressFileAsync(file, cancellationToken);
 
-            await _compressionService.CompressFileAsync(
+            await _xzFileService.CompressFileAsync(
                 file.Replace(FileExtension.TarGz.ToString(), FileExtension.Tar.ToString()), cancellationToken);
         }
     }

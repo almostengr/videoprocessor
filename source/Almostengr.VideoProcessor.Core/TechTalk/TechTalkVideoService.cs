@@ -13,15 +13,11 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
     private readonly ILoggerService<TechTalkVideoService> _loggerService;
     private readonly ISrtSubtitleFileService _srtService;
 
-    // private readonly string _incomingDirectory;
-    // private readonly string _archiveDirectory;
-    // private readonly string _uploadDirectory;
-    // private readonly string _workingDirectory;
-
     public TechTalkVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         ILoggerService<TechTalkVideoService> loggerService, IMusicService musicService,
-        ISrtSubtitleFileService srtSubtitleFileService) :
+        ISrtSubtitleFileService srtSubtitleFileService, 
+        IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService)
     {
         IncomingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Incoming);
@@ -32,6 +28,8 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         _loggerService = loggerService;
         _srtService = srtSubtitleFileService;
         _ffmpegInputFilePath = Path.Combine(WorkingDirectory, FFMPEG_FILE_NAME);
+        _xzFileService = xzFileService;
+        _gzFileService = gzFileService;
     }
 
     public override async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
@@ -41,9 +39,9 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
         foreach (var file in tarGzFiles)
         {
-            await _compressionService.DecompressFileAsync(file, cancellationToken);
+            await _gzFileService.DecompressFileAsync(file, cancellationToken);
 
-            await _compressionService.CompressFileAsync(
+            await _xzFileService.CompressFileAsync(
                 file.Replace(FileExtension.TarGz.ToString(), FileExtension.Tar.ToString()), cancellationToken);
         }
     }
@@ -66,19 +64,16 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
         try
         {
-            // string incomingTarball = _fileSystemService.GetRandomTarballFromDirectory(IncomingDirectory);
             string incomingTarball = _fileSystemService.GetRandomFileByExtensionFromDirectory(
                 IncomingDirectory, FileExtension.Tar);
             _loggerService.LogInformation($"Processing ${incomingTarball}");
 
             video = new TechTalkVideoFile(incomingTarball);
-            // video = new TechTalkVideoFile(_appSettings.TechnologyDirectory, Path.GetFileName(incomingTarball));
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
             await _tarballService.ExtractTarballContentsAsync(
-                // video.IncomingTarballFilePath(), WorkingDirectory, cancellationToken);
                 video.TarballFilePath, WorkingDirectory, cancellationToken);
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
@@ -88,15 +83,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 throw new KdenliveFileExistsException("Archive has Kdenlive project file");
             }
 
-            // if (video.ArchiveFileName.ToLower().StartsWith(END_SCREEN))
-            // {
-            //     await CreateEndScreenVideoAsync(_workingDirectory, cancellationToken);
-            //     _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
-            //     _fileSystemService.DeleteDirectory(_workingDirectory);
-            //     return;
-            // }
-
-            // _fileSystemService.DeleteFile(video.FfmpegInputFilePath());
             _fileSystemService.DeleteFile(Path.Combine(WorkingDirectory, FFMPEG_FILE_NAME));
 
             var videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
@@ -119,18 +105,11 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 .OrderBy(f => f)
                 .ToList();
 
-            // if (video.SubType == TechTalkVideoSubType.TechTalk && video.IsDraft() == false)
-            // {
-            //     videoFiles.Add(video.EndScreenFilePath());
-            // }
-
-            // CreateFfmpegInputFile(videoFiles.ToArray(), video.FfmpegInputFilePath());
             CreateFfmpegInputFile(videoFiles.ToArray(), Path.Combine(WorkingDirectory, FFMPEG_FILE_NAME));
 
             if (video.IsDraft)
             {
                 await _ffmpegService.ConcatTsFilesToMp4FileAsync(
-                    // _ffmpegInputFilePath, string.Empty, video.OutputVideoFilePath(), cancellationToken);
                     _ffmpegInputFilePath,
                     Path.Combine(UploadDirectory, video.OutputVideoFileName),
                     video.VideoFilter,
@@ -140,18 +119,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 _fileSystemService.DeleteDirectory(WorkingDirectory);
                 return;
             }
-
-            // // if (_fileSystemService.DoesFileExist(video.ChristmasLightMetaFile()))
-            // if (_fileSystemService.DoesFileExist(Path.Combine(WorkingDirectory, video.ChristmasLightFileName())))
-            // {
-            //     video.ConfirmChristmasLightVideo();
-            // }
-
-            // if (_fileSystemService.DoesFileExist(Path.Combine(WorkingDirectory, video.IndependenceDayFileName())))
-            // // if (_fileSystemService.DoesFileExist(video.IndependenceDayMetaFile()))
-            // {
-            //     video.ConfirmIndependenceDayVideo();
-            // }
 
             // brand video
             video.AddDrawTextVideoFilter(
@@ -173,19 +140,12 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 video.AddSubtitleVideoFilter(graphicsSubtitleFile,"&H00006400","&H00FFFFFF", 26);
             }
 
-            // var graphicsSubtitle = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-            //     .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
-            //     .SingleOrDefault();
-            // video.SetGraphicsSubtitleFileName(graphicsSubtitle);
-
             await _ffmpegService.ConcatTsFilesToMp4FileAsync(
                 _ffmpegInputFilePath,
                 Path.Combine(UploadDirectory, video.OutputVideoFileName),
                 video.VideoFilter,
                 cancellationToken);
-            // video.FfmpegInputFilePath(), video.OutputVideoFilePath(), video.VideoFilter, cancellationToken);
 
-            // _fileSystemService.MoveFile(video.IncomingTarballFilePath(), video.ArchiveTarballFilePath());
             _fileSystemService.MoveFile(
                 video.TarballFilePath, Path.Combine(ArchiveDirectory, video.TarballFileName));
             _fileSystemService.DeleteDirectory(WorkingDirectory);
@@ -201,7 +161,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             if (video != null)
             {
                 _fileSystemService.MoveFile(
-                    // video.IncomingTarballFilePath(), 
                     video.TarballFilePath,
                     Path.Combine(ArchiveDirectory, video.TarballFileName));
                 _fileSystemService.SaveFileContents(
@@ -220,7 +179,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         {
             string? audioFilePath = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.Contains(Path.GetFileNameWithoutExtension(videoFilePath)) && f.EndsWith(FileExtension.Mp3.ToString()))
-                // .Where(f => f.StartsWith(Path.GetFileNameWithoutExtension(videoFilePath)) && f.EndsWith(FileExtension.Mp3))
                 .SingleOrDefault();
 
             if (string.IsNullOrWhiteSpace(audioFilePath))
@@ -244,15 +202,8 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         try
         {
             string filePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(IncomingDirectory, FileExtension.Srt);
-            // string filePath = _fileSystemService.GetRandomSrtFileFromDirectory(IncomingDirectory);
 
             TechTalkSrtSubtitleFile subtitle = new(filePath);
-
-            // subtitle.SetSubtitleText(_fileSystemService.GetFileContents(subtitle.IncomingFilePath()));
-
-            // _fileSystemService.SaveFileContents(subtitle.SubtitleOutputFilePath(), subtitle.SubtitleText());
-            // _fileSystemService.SaveFileContents(subtitle.BlogOutputFilePath(), subtitle.BlogPostText());
-            // _fileSystemService.MoveFile(subtitle.IncomingFilePath(), subtitle.ArchiveFilePath());
 
             var subtitles = _srtService.ReadFile(subtitle.FilePath);
             subtitle.SetSubtitles(subtitles);
@@ -265,7 +216,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             _fileSystemService.MoveFile(
                 subtitle.FilePath, Path.Combine(ArchiveDirectory, subtitle.FileName()), false);
         }
-        catch (NoFilesMatchException) // NoSubtitleFilesPresentException)
+        catch (NoFilesMatchException)
         { }
         catch (Exception ex)
         {
