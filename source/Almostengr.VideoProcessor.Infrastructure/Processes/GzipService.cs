@@ -5,7 +5,7 @@ using Almostengr.VideoProcessor.Core.Common.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
-public sealed class GzipService : BaseProcess<GzipService>, IFileCompressionService
+public sealed class GzipService : BaseProcess<GzipService>, IFileCompressionService, IGzFileCompressionService
 {
     private const string Gzip = "/usr/bin/gzip";
     private const string Gunzip = "/usr/bin/gunzip";

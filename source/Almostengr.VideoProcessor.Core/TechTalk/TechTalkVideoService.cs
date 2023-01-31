@@ -12,6 +12,8 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 {
     private readonly ILoggerService<TechTalkVideoService> _loggerService;
     private readonly ISrtSubtitleFileService _srtService;
+    private readonly IGzFileCompressionService _gzFileService;
+    private readonly IXzFileCompressionService _xzFileService;
 
     public TechTalkVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,

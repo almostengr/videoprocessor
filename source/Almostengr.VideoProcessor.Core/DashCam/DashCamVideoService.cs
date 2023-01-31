@@ -11,6 +11,8 @@ namespace Almostengr.VideoProcessor.Core.DashCam;
 public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 {
     private readonly ILoggerService<DashCamVideoService> _loggerService;
+    private readonly IGzFileCompressionService _gzFileService;
+    private readonly IXzFileCompressionService _xzFileService;
 
     public DashCamVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,

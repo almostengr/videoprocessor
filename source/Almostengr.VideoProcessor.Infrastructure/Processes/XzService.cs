@@ -5,7 +5,7 @@ using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
-public sealed class XzService : BaseProcess<XzService>, IFileCompressionService
+public sealed class XzService : BaseProcess<XzService>, IFileCompressionService, IXzFileCompressionService
 {
     private const string Xz = "/usr/bin/xz";
     

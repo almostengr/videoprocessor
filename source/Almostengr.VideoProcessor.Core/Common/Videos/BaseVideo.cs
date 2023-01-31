@@ -91,7 +91,7 @@ public abstract record BaseVideoFile
 
     public virtual void AddDrawTextVideoFilter(
         string text, FfMpegColor textColor, Opacity textBrightness, FfmpegFontSize fontSize, DrawTextPosition position,
-        FfMpegColor backgroundColor, Opacity backgroundBrightness, int borderWidth = 5, string duration = "")
+        FfMpegColor backgroundColor, Opacity backgroundBrightness, int borderWidth = 10, string duration = "")
     {
         StringBuilder textFilter = new();
 
@@ -117,8 +117,50 @@ public abstract record BaseVideoFile
         VideoFilter += textFilter.ToString();
     }
 
+    public virtual void AddLowerThird(
+        uint startSeconds, uint durationSeconds,
+        string primaryText, // FfMpegColor primaryTextColor, FfMpegColor primaryBgColor,
+        string? secondaryText = null //, // FfMpegColor? secondaryTextColor = null, FfMpegColor? secondaryBgColor = null
+    )
+    {
+        if (string.IsNullOrWhiteSpace(primaryText.Trim()))
+        {   
+            throw new ArgumentException("Primary text is required to have a value");
+        }
+
+        // if (primaryTextColor.ToString() == primaryBgColor.ToString())
+        // {
+        //     throw new ArgumentException("Primary background and text color cannot be the same");
+        // }
+
+        if (durationSeconds < 3)
+        {
+            throw new ArgumentException("Duration is too short");
+        }
+        
+        // todo insert primary text filter
+        AddDrawTextVideoFilter(primaryText, DrawTextFilterTextColor(), Opacity.Full,
+            FfmpegFontSize.XLarge, DrawTextPosition.SubtitlePrimary, DrawTextFilterBackgroundColor(), 
+            Opacity.Full, 10, startSeconds);
+
+        if (string.IsNullOrEmpty(secondaryText))
+        {
+            return;
+        }
+
+        // if (secondaryTextColor.ToString() == secondaryBgColor.ToString())
+        // {
+        //     throw new ArgumentException("Secondary background and text color cannot be the same");
+        // }
+
+        // todo insert secondary text filter
+        AddDrawTextVideoFilter(primaryText, DrawTextFilterBackgroundColor(), Opacity.Full,
+            FfmpegFontSize.Medium, DrawTextPosition.SubtitleSecondary, DrawTextFilterTextColor(), 
+            Opacity.Full, 10, startSeconds);
+    }
+
     public virtual void AddSubtitleVideoFilter(
-        string filePath, string outlineColor, string textColor, int fontSize = 30)
+        string filePath, string outlineColor, string textColor, uint fontSize = 26)
     {
         StringBuilder textFilter = new();
 
@@ -133,7 +175,7 @@ public abstract record BaseVideoFile
         VideoFilter += textFilter.ToString();
     }
 
-    private string FilterDuration(int duration = 239)
+    protected string FilterDuration(int duration = 239)
     {
         return $"enable=lt(mod(t\\,{duration})\\,{Constant.CallToActionDuration})";
     }
