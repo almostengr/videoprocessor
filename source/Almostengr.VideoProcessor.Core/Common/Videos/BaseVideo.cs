@@ -22,11 +22,10 @@ public abstract record BaseVideoFile
     {
         if (string.IsNullOrWhiteSpace(filePath))
         {
-            throw new ArgumentException("Arguments are null or whitespace");
+            throw new ArgumentException("File path is null or whitespace", nameof(filePath));
         }
 
         TarballFilePath = filePath;
-
         TarballFileName = Path.GetFileName(TarballFilePath);
         GraphicsSubtitleFileName = string.Empty;
         Title = SetTitle(TarballFileName);

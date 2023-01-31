@@ -7,6 +7,7 @@ namespace Almostengr.VideoProcessor.Core.Common.Videos;
 public abstract record SrtSubtitleFile
 {
     public string FilePath { get; init; }
+    public string FileName {get; init;}
     public IList<SubtitleFileEntry> Subtitles { get; private set; }
 
     public SrtSubtitleFile(string filePath)
@@ -18,6 +19,7 @@ public abstract record SrtSubtitleFile
 
         FilePath = filePath;
         Subtitles = new List<SubtitleFileEntry>();
+        FileName = Path.GetFileName(FilePath);
     }
 
     public void SetSubtitles(IList<SubtitleFileEntry> subtitles)
@@ -29,11 +31,6 @@ public abstract record SrtSubtitleFile
 
         Subtitles.Clear();
         Subtitles = subtitles;
-    }
-
-    public string FileName()
-    {
-        return Path.GetFileName(FilePath);
     }
 
     public string BlogFileName()
