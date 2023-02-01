@@ -134,7 +134,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             await _ffmpegService.RenderVideoWithMixTrackAsync(
                 ffmpegInputFilePath, // video.FfmpegInputFilePath(),
                 _musicService.GetRandomMixTrack(),
-                video.VideoFilter,
+                video.VideoFilters(),
                 outputFilePath, // video.OutputVideoFilePath(),
                 cancellationToken);
 

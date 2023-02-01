@@ -114,7 +114,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 await _ffmpegService.ConcatTsFilesToMp4FileAsync(
                     _ffmpegInputFilePath,
                     Path.Combine(UploadDirectory, video.OutputVideoFileName),
-                    video.VideoFilter,
+                    video.VideoFilters(),
                     cancellationToken);
 
                 _fileSystemService.MoveFile(video.TarballFilePath, Path.Combine(ArchiveDirectory, video.TarballFileName));
@@ -145,7 +145,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             await _ffmpegService.ConcatTsFilesToMp4FileAsync(
                 _ffmpegInputFilePath,
                 Path.Combine(UploadDirectory, video.OutputVideoFileName),
-                video.VideoFilter,
+                video.VideoFilters(),
                 cancellationToken);
 
             _fileSystemService.MoveFile(
@@ -210,13 +210,13 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             var subtitles = _srtService.ReadFile(subtitle.FilePath);
             subtitle.SetSubtitles(subtitles);
 
-            _srtService.WriteFile(Path.Combine(UploadDirectory, subtitle.FileName()), subtitle.Subtitles);
+            _srtService.WriteFile(Path.Combine(UploadDirectory, subtitle.FileName), subtitle.Subtitles);
 
             _fileSystemService.SaveFileContents(
                 Path.Combine(UploadDirectory, subtitle.BlogFileName()), subtitle.BlogPostText());
 
             _fileSystemService.MoveFile(
-                subtitle.FilePath, Path.Combine(ArchiveDirectory, subtitle.FileName()), false);
+                subtitle.FilePath, Path.Combine(ArchiveDirectory, subtitle.FileName), false);
         }
         catch (NoFilesMatchException)
         { }

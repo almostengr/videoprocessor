@@ -114,7 +114,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
             await _ffmpegService.RenderVideoAsync(
                 _ffmpegInputFilePath,
-                video.VideoFilter,
+                video.VideoFilters(),
                 Path.Combine(UploadDirectory, video.OutputVideoFileName),
                 cancellationToken);
 

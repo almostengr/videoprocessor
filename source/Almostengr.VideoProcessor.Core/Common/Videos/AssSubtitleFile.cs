@@ -6,7 +6,7 @@ public abstract record AssSubtitleFile
     public string FileName {get; init;}
     public IList<SubtitleFileEntry> Subtitles { get; private set; }
 
-    public SrtSubtitleFile(string filePath)
+    public AssSubtitleFile(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
         {

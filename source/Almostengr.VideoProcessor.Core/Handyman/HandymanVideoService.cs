@@ -102,7 +102,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
             await _ffmpegService.RenderVideoAsync(
                 Path.Combine(WorkingDirectory, FFMPEG_FILE_NAME),
-                video.VideoFilter,
+                video.VideoFilters(),
                 Path.Combine(UploadDirectory, video.OutputVideoFileName),
                 cancellationToken);
 
@@ -186,13 +186,13 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             var subtitles = _srtService.ReadFile(subtitle.FilePath);
             subtitle.SetSubtitles(subtitles);
 
-            _srtService.WriteFile(Path.Combine(UploadDirectory, subtitle.FileName()), subtitle.Subtitles);
+            _srtService.WriteFile(Path.Combine(UploadDirectory, subtitle.FileName), subtitle.Subtitles);
 
             _fileSystemService.SaveFileContents(
                 Path.Combine(UploadDirectory, subtitle.BlogFileName()), subtitle.BlogPostText());
 
             _fileSystemService.MoveFile(
-                subtitle.FilePath, Path.Combine(ArchiveDirectory, subtitle.FileName()), false);
+                subtitle.FilePath, Path.Combine(ArchiveDirectory, subtitle.FileName), false);
         }
         catch (NoFilesMatchException)
         {

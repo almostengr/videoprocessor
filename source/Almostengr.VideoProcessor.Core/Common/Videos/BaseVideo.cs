@@ -10,7 +10,8 @@ public abstract record BaseVideoFile
     public string TarballFilePath { get; }
     public string TarballFileName { get; init; }
     public string GraphicsSubtitleFileName { get; private set; }
-    public string VideoFilter { get; private set; }
+    // public string VideoFilter { get; private set; }
+    public List<DrawTextFilter> DrawTextFilters { get; set; }
     public bool IsDraft { get; private set; } = false;
     public string OutputVideoFileName { get; private set; }
 
@@ -29,7 +30,7 @@ public abstract record BaseVideoFile
         TarballFileName = Path.GetFileName(TarballFilePath);
         GraphicsSubtitleFileName = string.Empty;
         Title = SetTitle(TarballFileName);
-        VideoFilter = string.Empty;
+        // VideoFilter = string.Empty;
 
         OutputVideoFileName = TarballFileName
             .Replace(FileExtension.TarXz.ToString(), string.Empty.ToString())
@@ -41,9 +42,25 @@ public abstract record BaseVideoFile
         {
             IsDraft = true;
         }
+
+        DrawTextFilters = new();
     }
 
     public abstract string[] BrandingTextOptions();
+
+    public string VideoFilters()
+    {
+        StringBuilder stringBuilder = new();
+
+        foreach (var filter in DrawTextFilters)
+        {
+            stringBuilder.Append(filter.ToString());
+        }
+
+        // todo add subtitle file filters
+
+        return stringBuilder.ToString();
+    }
 
     public virtual string SetTitle(string fileName)
     {
@@ -78,100 +95,95 @@ public abstract record BaseVideoFile
         return FfMpegColor.White;
     }
 
-    public virtual FfMpegColor SubtitleBackgroundColor()
-    {
-        return FfMpegColor.Black;
-    }
+    // public virtual FfMpegColor SubtitleBackgroundColor()
+    // {
+    //     return FfMpegColor.Black;
+    // }
 
-    public virtual FfMpegColor SubtitleTextColor()
+    // public virtual FfMpegColor SubtitleTextColor()
+    // {
+    //     return FfMpegColor.White;
+    // }
+
+    public void AddDrawTextVideoFilter(
+        string text, FfMpegColor textColor, Opacity textBrightness, FfmpegFontSize fontSize,
+        FfMpegColor backgroundColor, Opacity backgroundBrightness, DrawTextPosition position,
+        uint startSeconds, uint durationSeconds)
     {
-        return FfMpegColor.White;
+        DrawTextFilters.Add(
+            new DrawTextFilter(text, textColor, textBrightness, backgroundColor,
+            backgroundBrightness, fontSize, position, startSeconds, durationSeconds));
     }
 
     public virtual void AddDrawTextVideoFilter(
         string text, FfMpegColor textColor, Opacity textBrightness, FfmpegFontSize fontSize, DrawTextPosition position,
         FfMpegColor backgroundColor, Opacity backgroundBrightness, int borderWidth = 10, string duration = "")
     {
-        StringBuilder textFilter = new();
+        // StringBuilder textFilter = new();
 
-        if (VideoFilter.Length > 0)
-        {
-            textFilter.Append(Constant.CommaSpace);
-        }
+        // if (VideoFilter.Length > 0)
+        // {
+        //     textFilter.Append(Constant.CommaSpace);
+        // }
 
-        textFilter.Append($"drawtext=textfile:'{text.Trim()}':");
-        textFilter.Append($"fontcolor={textColor.ToString()}@{textBrightness.ToString()}:");
-        textFilter.Append($"fontsize={fontSize.ToString()}:");
-        textFilter.Append($"{position.ToString()}:");
-        textFilter.Append(Constant.BorderBox);
-        textFilter.Append($"boxborderw={borderWidth.ToString()}:");
-        textFilter.Append($"boxcolor={backgroundColor.ToString()}@{backgroundBrightness.ToString()}");
+        // textFilter.Append($"drawtext=textfile:'{text.Trim()}':");
+        // textFilter.Append($"fontcolor={textColor.ToString()}@{textBrightness.ToString()}:");
+        // textFilter.Append($"fontsize={fontSize.ToString()}:");
+        // textFilter.Append($"{position.ToString()}:");
+        // textFilter.Append(Constant.BorderBox);
+        // textFilter.Append($"boxborderw={borderWidth.ToString()}:");
+        // textFilter.Append($"boxcolor={backgroundColor.ToString()}@{backgroundBrightness.ToString()}");
 
-        if (duration.Length > 0)
-        {
-            textFilter.Append(":");
-            textFilter.Append(duration);
-        }
+        // if (duration.Length > 0)
+        // {
+        //     textFilter.Append(":");
+        //     textFilter.Append(duration);
+        // }
 
-        VideoFilter += textFilter.ToString();
+        // VideoFilter += textFilter.ToString();
+
+        // DrawTextFilters.Add(
+        //     return new DrawTextFilter(text, textColor, textBrightness, backgroundColor,
+        //     backgroundBrightness, fontSize, position,
+        // )
+        DrawTextFilters.Add(
+            new DrawTextFilter(text, textColor, textBrightness, backgroundColor,
+            backgroundBrightness, fontSize, position, 0, 0));
     }
 
     public virtual void AddLowerThird(
-        uint startSeconds, uint durationSeconds,
-        string primaryText, // FfMpegColor primaryTextColor, FfMpegColor primaryBgColor,
-        string? secondaryText = null //, // FfMpegColor? secondaryTextColor = null, FfMpegColor? secondaryBgColor = null
-    )
+        uint startSeconds, uint durationSeconds, string primaryText, string? secondaryText = null)
     {
-        if (string.IsNullOrWhiteSpace(primaryText.Trim()))
-        {   
-            throw new ArgumentException("Primary text is required to have a value");
-        }
-
-        // if (primaryTextColor.ToString() == primaryBgColor.ToString())
-        // {
-        //     throw new ArgumentException("Primary background and text color cannot be the same");
-        // }
-
-        if (durationSeconds < 3)
-        {
-            throw new ArgumentException("Duration is too short");
-        }
-        
-        // todo insert primary text filter
-        AddDrawTextVideoFilter(primaryText, DrawTextFilterTextColor(), Opacity.Full,
-            FfmpegFontSize.XLarge, DrawTextPosition.SubtitlePrimary, DrawTextFilterBackgroundColor(), 
-            Opacity.Full, 10, startSeconds);
+        DrawTextFilters.Add(
+            new DrawTextFilter(primaryText, DrawTextFilterTextColor(), Opacity.Full,
+            DrawTextFilterBackgroundColor(), Opacity.Full,
+            FfmpegFontSize.Medium, DrawTextPosition.SubtitlePrimary, startSeconds, durationSeconds));
 
         if (string.IsNullOrEmpty(secondaryText))
         {
             return;
         }
 
-        // if (secondaryTextColor.ToString() == secondaryBgColor.ToString())
-        // {
-        //     throw new ArgumentException("Secondary background and text color cannot be the same");
-        // }
-
-        // todo insert secondary text filter
-        AddDrawTextVideoFilter(primaryText, DrawTextFilterBackgroundColor(), Opacity.Full,
-            FfmpegFontSize.Medium, DrawTextPosition.SubtitleSecondary, DrawTextFilterTextColor(), 
-            Opacity.Full, 10, startSeconds);
+        DrawTextFilters.Add(
+            new DrawTextFilter(secondaryText, DrawTextFilterBackgroundColor(), Opacity.Full,
+            DrawTextFilterTextColor(), Opacity.Full,
+            FfmpegFontSize.Medium, DrawTextPosition.SubtitlePrimary, startSeconds, durationSeconds));
     }
 
     public virtual void AddSubtitleVideoFilter(
         string filePath, string outlineColor, string textColor, uint fontSize = 26)
     {
-        StringBuilder textFilter = new();
+        // StringBuilder textFilter = new();
 
-        if (VideoFilter.Length > 0)
-        {
-            textFilter.Append(Constant.CommaSpace);
-        }
+        // if (VideoFilter.Length > 0)
+        // {
+        //     textFilter.Append(Constant.CommaSpace);
+        // }
 
-        textFilter.Append($"subtitles='{filePath}':");
-        textFilter.Append($"force_style='OutlineColour={outlineColor},TextColour={textColor},BorderStyle=3,Outline=5,Shadow=1,Alignment=1,Fontsize={fontSize}'");
+        // textFilter.Append($"subtitles='{filePath}':");
+        // textFilter.Append($"force_style='OutlineColour={outlineColor},TextColour={textColor},BorderStyle=3,Outline=5,Shadow=1,Alignment=1,Fontsize={fontSize}'");
 
-        VideoFilter += textFilter.ToString();
+        // VideoFilter += textFilter.ToString();
     }
 
     protected string FilterDuration(int duration = 239)
@@ -209,4 +221,87 @@ public abstract record BaseVideoFile
         );
     }
 
+}
+
+public sealed class DrawTextFilter
+{
+    private string Text { get; init; }
+    private FfMpegColor TextColor { get; init; }
+    private Opacity TextBrightness { get; init; }
+    private FfmpegFontSize FontSize { get; init; }
+    private DrawTextPosition Position { get; init; }
+    private FfMpegColor BackgroundColor { get; init; }
+    private Opacity BackgroundBrightness { get; init; }
+    private uint StartSeconds { get; init; }
+    private uint DurationSeconds { get; init; }
+    private uint BorderWidth { get; init; } = 10;
+    private string? Duration { get; init; }
+
+    public DrawTextFilter(
+        string text, FfMpegColor textColor, Opacity textBrightness,
+        FfMpegColor backgroundColor, Opacity backgroundBrightness,
+        FfmpegFontSize fontSize, DrawTextPosition position, uint startSeconds = 0, uint durationSeconds = 0,
+        string? duration = null)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new ArgumentException("Text is null or whitespace");
+        }
+
+        if (textBrightness.ToString() == Opacity.None.ToString())
+        {
+            throw new ArgumentException("Text brightness cannot be none");
+        }
+
+        if (textColor.ToString() == backgroundColor.ToString())
+        {
+            throw new ArgumentException("Text and background color cannot be the same");
+        }
+
+        if (durationSeconds <= 3 && startSeconds != 0)
+        {
+            throw new ArgumentException("Duration is too short");
+        }
+
+        if (string.IsNullOrWhiteSpace(duration))
+        {
+            StartSeconds = startSeconds;
+            DurationSeconds = durationSeconds;
+        }
+
+        Text = text;
+        TextColor = textColor;
+        TextBrightness = textBrightness;
+        FontSize = fontSize;
+        Position = position;
+        BackgroundColor = backgroundColor;
+        BackgroundBrightness = backgroundBrightness;
+        Duration = duration;
+    }
+
+    public override string ToString()
+    {
+        StringBuilder stringBuilder = new();
+        stringBuilder.Append($"drawtext=textfile:'{Text.Trim()}':");
+        stringBuilder.Append($"fontcolor={TextColor.ToString()}@{TextBrightness.ToString()}:");
+        stringBuilder.Append($"fontsize={FontSize.ToString()}:");
+        stringBuilder.Append($"{Position.ToString()}:");
+        stringBuilder.Append(Constant.BorderBox);
+        stringBuilder.Append($"boxborderw={BorderWidth.ToString()}:");
+        stringBuilder.Append($"boxcolor={BackgroundColor.ToString()}@{BackgroundBrightness.ToString()}");
+
+        if (StartSeconds > 0 && DurationSeconds > 0)
+        {
+            stringBuilder.Append(":");
+            stringBuilder.Append($"enable='between(t,{StartSeconds}, {(StartSeconds + DurationSeconds)})'");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Duration))
+        {
+            stringBuilder.Append(":");
+            stringBuilder.Append(Duration);
+        }
+
+        return stringBuilder.ToString();
+    }
 }
