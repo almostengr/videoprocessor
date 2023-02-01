@@ -2,6 +2,7 @@ using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Music.Services;
+using Almostengr.VideoProcessor.Core.TechTalk;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
@@ -15,6 +16,8 @@ public abstract class BaseVideoService : IBaseVideoService
     protected readonly IFileSystemService _fileSystemService;
     protected readonly IRandomService _randomService;
     protected readonly IMusicService _musicService;
+    protected readonly IAssSubtitleFileService _assSubtitleFileService;
+
     protected string _ffmpegInputFilePath { get; init; }
 
     protected string IncomingDirectory { get; init; }
@@ -26,7 +29,7 @@ public abstract class BaseVideoService : IBaseVideoService
     protected BaseVideoService(
         AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
-        IMusicService musicService)
+        IMusicService musicService, IAssSubtitleFileService assSubtitleFileService)
     {
         _appSettings = appSettings;
         _ffmpegService = ffmpegService;
@@ -35,6 +38,7 @@ public abstract class BaseVideoService : IBaseVideoService
         _fileSystemService = fileSystemService;
         _randomService = randomService;
         _musicService = musicService;
+        _assSubtitleFileService = assSubtitleFileService;
     }
 
     public abstract Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken);
@@ -115,5 +119,17 @@ public abstract class BaseVideoService : IBaseVideoService
             .Any();
     }
 
+    public void CheckAndAddGraphicsSubtitle(TechTalkVideoFile video)
+    {
+        string? graphicsSubtitleFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+            .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
+            .SingleOrDefault();
+
+        if (graphicsSubtitleFile != null)
+        {
+            var subtitles = _assSubtitleFileService.ReadFile(graphicsSubtitleFile);
+            video.AddDrawTextVideoFilterFromSubtitles(subtitles);
+        }
+    }
 
 }

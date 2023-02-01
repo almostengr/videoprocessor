@@ -17,8 +17,8 @@ public struct DrawTextPosition
     public static readonly DrawTextPosition LowerCenter = new($"x=(w-tw)/2:y=h-th-{Padding}");
     public static readonly DrawTextPosition LowerRight = new($"x=w-tw-{Padding}:y=h-th-{Padding}");
 
-    private static readonly uint SubtitleXPadding = 75;
-    private static readonly uint SubtitleTopYPadding = 80;
+    private static readonly uint SubtitleXPadding = 100;
+    private static readonly uint SubtitleTopYPadding = 150;
     private static readonly uint SubtitleBottomYPadding = SubtitleTopYPadding - 50;
     public static readonly DrawTextPosition SubtitlePrimary =  new($"x={SubtitleXPadding}:y=h-th-{SubtitleTopYPadding}");
     public static readonly DrawTextPosition SubtitleSecondary =  new($"x={SubtitleXPadding}:y=h-th-{SubtitleBottomYPadding}");

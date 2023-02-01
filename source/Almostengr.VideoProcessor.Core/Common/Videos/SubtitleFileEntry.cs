@@ -10,15 +10,16 @@ public sealed record SubtitleFileEntry
 
     public SubtitleFileEntry(TimeSpan startTime, TimeSpan endTime, string text)
     {
-        if (endTime >= startTime)
+        if (endTime <= startTime)
         {
-            throw new ArgumentException("End time cannot be before start time", nameof(endTime));
+            throw new ArgumentException("Start time must be before end time", nameof(endTime));
         }
 
         text = text.Trim();
         if (string.IsNullOrWhiteSpace(text))
         {
-            throw new ArgumentException("Text cannot be null or whitepsace", nameof(text));
+            // throw new ArgumentException("Text cannot be null or whitepsace", nameof(text));
+            return;
         }
 
         StartTime = startTime;
@@ -36,14 +37,19 @@ public sealed record SubtitleFileEntry
         Text = FixMisspellings(text);
     }
 
-    public string StartSeconds()
+    public uint StartSeconds()
     {
-        return StartTime.TotalSeconds.ToString();
+        return (uint)StartTime.TotalSeconds;
     }
 
-    public string EndSeconds()
+    public uint EndSeconds()
     {
-        return EndTime.TotalSeconds.ToString();
+        return (uint)EndTime.TotalSeconds;
+    }
+
+    public uint Duration()
+    {
+        return (uint)(EndTime - StartTime).TotalSeconds;
     }
 
     private string FixMisspellings(string input)

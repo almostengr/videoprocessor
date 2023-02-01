@@ -33,6 +33,7 @@ IHost host = Host.CreateDefaultBuilder(args)
 
         services.AddSingleton<IYouTubeSearchService, YouTubeSearchService>();
         services.AddSingleton<ISrtSubtitleFileService, SrtSubtitleFileService>();
+        services.AddSingleton<IAssSubtitleFileService, AssSubtitleFileService>();
 
         // services.AddHostedService<DashCamVideoWorker>();
         // services.AddHostedService<HandymanVideoWorker>();

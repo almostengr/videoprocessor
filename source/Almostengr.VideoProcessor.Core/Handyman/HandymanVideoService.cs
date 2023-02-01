@@ -15,9 +15,9 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
     public HandymanVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
-         IMusicService musicService, ILoggerService<HandymanVideoService> loggerService,
-         ISrtSubtitleFileService srtSubtitleFileService) :
-        base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService)
+        IMusicService musicService, ILoggerService<HandymanVideoService> loggerService,
+        IAssSubtitleFileService assSubtitleFileService, ISrtSubtitleFileService srtSubtitleFileService) :
+        base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Incoming);
         ArchiveDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Archive);
@@ -94,10 +94,10 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
             if (_fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString())).Any())
             {
-                video.AddSubtitleVideoFilter(
-                    _fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString())).Single(),
-                    "&H00006400",
-                    "&H00FFFFFF");
+                // video.AddSubtitleVideoFilter(
+                //     _fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString())).Single(),
+                //     "&H00006400",
+                //     "&H00FFFFFF");
             }
 
             await _ffmpegService.RenderVideoAsync(

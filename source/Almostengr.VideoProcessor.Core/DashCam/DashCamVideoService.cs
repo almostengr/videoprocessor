@@ -17,8 +17,9 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
     public DashCamVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         ILoggerService<DashCamVideoService> loggerService, IMusicService musicService,
+        IAssSubtitleFileService assSubtitleFileService,
         IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService) :
-        base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService)
+        base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Incoming);
         ArchiveDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Archive);

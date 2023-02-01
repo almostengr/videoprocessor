@@ -14,8 +14,9 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
     public ToastmastersVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService compressionService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
+        IGzFileCompressionService gzipService, IAssSubtitleFileService assSubtitleFileService,
         ILoggerService<ToastmastersVideoService> loggerService, IMusicService musicService) :
-        base(appSettings, ffmpegService, compressionService, tarballService, fileSystemService, randomService, musicService)
+        base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Incoming);
         ArchiveDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Archive);
@@ -139,5 +140,5 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             }
         }
     }
-    
+
 }

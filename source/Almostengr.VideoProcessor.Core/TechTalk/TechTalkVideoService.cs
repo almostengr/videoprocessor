@@ -18,9 +18,9 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
     public TechTalkVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         ILoggerService<TechTalkVideoService> loggerService, IMusicService musicService,
-        ISrtSubtitleFileService srtSubtitleFileService, 
+        ISrtSubtitleFileService srtSubtitleFileService, IAssSubtitleFileService assSubtitleFileService,
         IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService) :
-        base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService)
+        base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Incoming);
         ArchiveDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Archive);
@@ -133,14 +133,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 Opacity.Light,
                 10);
 
-            string? graphicsSubtitleFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
-                .SingleOrDefault();
-
-            if (graphicsSubtitleFile != null)
-            {
-                video.AddSubtitleVideoFilter(graphicsSubtitleFile,"&H00006400","&H00FFFFFF", 26);
-            }
+            CheckAndAddGraphicsSubtitle(video);
 
             await _ffmpegService.ConcatTsFilesToMp4FileAsync(
                 _ffmpegInputFilePath,

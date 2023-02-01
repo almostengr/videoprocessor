@@ -37,7 +37,9 @@ public sealed class AssSubtitleFileService : IAssSubtitleFileService
             TimeSpan endTime = TimeSpan.Parse(parts[2]);
             string text = parts[9];
 
+            // return new SubtitleFileEntry(startTime, endTime, text);
             return new SubtitleFileEntry(startTime, endTime, text);
-        }).ToList();
+        })
+        .ToList();
     }
 }
