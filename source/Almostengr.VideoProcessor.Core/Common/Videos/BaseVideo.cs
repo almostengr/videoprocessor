@@ -25,8 +25,7 @@ public abstract record BaseVideoFile
             throw new ArgumentException("File path is null or whitespace", nameof(filePath));
         }
 
-        TarballFilePath = filePath;
-        TarballFileName = Path.GetFileName(TarballFilePath);
+        TarballFilePath = filePath; allFilePath);
         GraphicsSubtitleFileName = string.Empty;
         Title = SetTitle(TarballFileName);
         OutputVideoFileName = TarballFileName
@@ -101,6 +100,8 @@ public abstract record BaseVideoFile
         FfMpegColor backgroundColor, Opacity backgroundBrightness, DrawTextPosition position,
         uint startSeconds, uint durationSeconds)
     {
+        // todo split if there is semi colon in text. add addition filter for text with inverted colors
+
         DrawTextFilters.Add(
             new DrawTextFilter(text, textColor, textBrightness, backgroundColor,
             backgroundBrightness, fontSize, position, startSeconds, durationSeconds));
@@ -213,10 +214,10 @@ public sealed class DrawTextFilter
             throw new ArgumentException("Text is null or whitespace");
         }
 
-        if (text.Length > 60)
-        {
-            throw new ArgumentException("Text is too long");
-        }
+        // if (text.Length > 60)
+        // {
+        //     throw new ArgumentException("Text is too long");
+        // }
 
         if (textBrightness.ToString() == Opacity.None.ToString())
         {
@@ -240,9 +241,29 @@ public sealed class DrawTextFilter
         }
 
         Text = text;
+
+        switch(Text.Length)
+        {
+            case int x when x <= 60:
+                FontSize = FfmpegFontSize.XLarge;
+                break;
+
+            case int x when x <= 100:
+                FontSize = FfmpegFontSize.Large;
+                break;
+
+            case int x when x <= 140:
+                FontSize = FfmpegFontSize.Medium;
+                break;
+
+            default:
+                throw new ArgumentException("Text length is too long");
+                break;
+        }
+        // FontSize = fontSize;
+
         TextColor = textColor;
         TextBrightness = textBrightness;
-        FontSize = fontSize;
         Position = position;
         BackgroundColor = backgroundColor;
         BackgroundBrightness = backgroundBrightness;
@@ -263,13 +284,13 @@ public sealed class DrawTextFilter
 
         if (StartSeconds > 0 && DurationSeconds > 0)
         {
-            stringBuilder.Append(":");
+            stringBuilder.Append(Constant.Colon);
             stringBuilder.Append($"enable='between(t,{StartSeconds}, {(StartSeconds + DurationSeconds)})'");
         }
 
         if (!string.IsNullOrWhiteSpace(Duration))
         {
-            stringBuilder.Append(":");
+            stringBuilder.Append(Constant.Colon));
             stringBuilder.Append(Duration);
         }
 
