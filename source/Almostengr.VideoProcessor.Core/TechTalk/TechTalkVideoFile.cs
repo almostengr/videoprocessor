@@ -54,8 +54,4 @@ public sealed record TechTalkVideoFile : BaseVideoFile
         }
     }
 
-    public override FfMpegColor DrawTextFilterTextColor()
-    {
-        return FfMpegColor.White;
-    }
 }

@@ -89,6 +89,8 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 throw new KdenliveFileExistsException("Archive has Kdenlive project file");
             }
 
+            if (_fileSystemService.GetFilesInDirectory(WorkingDirectory))
+
             CreateFfmpegInputFile(video);
 
             if (video.IsDraft)
@@ -96,8 +98,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 await _ffmpegService.RenderVideoAsCopyAsync(
                     ffmpegInputFilePath, archiveFilePath, cancellationToken);
                 _fileSystemService.MoveFile(
-                    incomingTarball,
-                    draftFilePath);// Path.Combine(DraftDirectory, video.FileName));
+                    incomingTarball, draftFilePath);// Path.Combine(DraftDirectory, video.FileName));
                 _fileSystemService.SaveFileContents(
                     Path.Combine(ArchiveDirectory, video.TarballFileName + FileExtension.GraphicsAss),
                     string.Empty);
@@ -124,11 +125,11 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 video.DrawTextFilterBackgroundColor(),
                 Opacity.Light);
 
-            var graphicsSubtitle = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
-                .Single();
+            // var graphicsSubtitle = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+            //     .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
+            //     .Single();
 
-            video.SetGraphicsSubtitleFileName(graphicsSubtitle);
+            // video.SetGraphicsSubtitleFileName(graphicsSubtitle);
 
             // video.AddSubscribeVideoFilter(_randomService.SubscribeLikeDuration());
 

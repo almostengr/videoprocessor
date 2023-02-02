@@ -13,7 +13,7 @@ public struct FileExtension
     public static readonly FileExtension AudioMp4 = new FileExtension(".audio.mp4");
     public static readonly FileExtension Avi = new FileExtension(".avi");
     public static readonly FileExtension DraftTar = new FileExtension(".draft.tar");
-    public static readonly FileExtension Err = new FileExtension(".err");
+    public static readonly FileExtension Err = new FileExtension(".err"); 
     public static readonly FileExtension GraphicsAss = new FileExtension(".graphics.ass");
     public static readonly FileExtension Jpg = new FileExtension(".jpg");
     public static readonly FileExtension Kdenlive = new FileExtension(".kdenlive");

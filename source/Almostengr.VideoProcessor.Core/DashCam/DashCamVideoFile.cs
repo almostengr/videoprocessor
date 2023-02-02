@@ -39,22 +39,40 @@ public sealed record DashCamVideoFile : BaseVideoFile
 
     public override FfMpegColor DrawTextFilterBackgroundColor()
     {
-        if (SubType == DashCamVideoType.Fireworks)
-        {
-            return FfMpegColor.Blue;
-        }
+        // if (SubType == DashCamVideoType.Fireworks)
+        // {
+        //     return FfMpegColor.Blue;
+        // }
 
-        return FfMpegColor.Black;
+        // return FfMpegColor.Black;
+
+        switch(SubType)
+        {
+            case DashCamVideoType.Fireworks:
+                return FfMpegColor.Blue;
+
+            default:
+                return FfMpegColor.Black;
+        }
     }
 
     public override FfMpegColor DrawTextFilterTextColor()
     {
-        if (SubType == DashCamVideoType.Night)
-        {
-            return FfMpegColor.Orange;
-        }
+        // if (SubType == DashCamVideoType.Night)
+        // {
+        //     return FfMpegColor.Orange;
+        // }
 
-        return FfMpegColor.White;
+        // return FfMpegColor.White;
+
+        switch(SubType)
+        {
+            case DashCamVideoType.Night:
+                return FfMpegColor.Orange;
+
+            default: 
+                return FfMpegColor.White;
+        }
     }
 }
 

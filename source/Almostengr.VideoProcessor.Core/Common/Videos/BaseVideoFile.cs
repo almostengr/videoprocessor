@@ -7,7 +7,7 @@ namespace Almostengr.VideoProcessor.Core.Common.Videos;
 public abstract record BaseVideoFile
 {
     public string Title { get; init; }
-    public string TarballFilePath { get; }
+    public string TarballFilePath { get; init; }
     public string TarballFileName { get; init; }
     public string GraphicsSubtitleFileName { get; private set; }
     public List<DrawTextFilter> DrawTextFilters { get; private set; }
@@ -76,15 +76,15 @@ public abstract record BaseVideoFile
             .Replace(Constant.Colon, string.Empty);
     }
 
-    public void SetGraphicsSubtitleFileName(string? fileName)
-    {
-        if (string.IsNullOrWhiteSpace(fileName))
-        {
-            return;
-        }
+    // public void SetGraphicsSubtitleFileName(string? fileName)
+    // {
+    //     if (string.IsNullOrWhiteSpace(fileName))
+    //     {
+    //         return;
+    //     }
 
-        GraphicsSubtitleFileName = fileName;
-    }
+    //     GraphicsSubtitleFileName = fileName;
+    // }
 
     public virtual FfMpegColor DrawTextFilterBackgroundColor()
     {
@@ -117,14 +117,14 @@ public abstract record BaseVideoFile
             var splitTitles = subtitle.Text.Split(Constant.SemiColon);
 
             DrawTextFilters.Add(
-                new DrawTextFilter(splitTitles[0], DrawTextFilterTextColor(), Opacity.Full,
+                new DrawTextFilter(splitTitles.First(), DrawTextFilterTextColor(), Opacity.Full,
                 DrawTextFilterBackgroundColor(), Opacity.Full, DrawTextPosition.SubtitlePrimary,
                 subtitle.StartTime, subtitle.EndTime));
 
             if (splitTitles.Count() == 2)
             {
                 DrawTextFilters.Add(
-                    new DrawTextFilter(splitTitles[1], DrawTextFilterBackgroundColor(), Opacity.Full,
+                    new DrawTextFilter(splitTitles.Last(), DrawTextFilterBackgroundColor(), Opacity.Full,
                     DrawTextFilterTextColor(), Opacity.Full, DrawTextPosition.SubtitleSecondary,
                     subtitle.StartTime, subtitle.EndTime));
             }
