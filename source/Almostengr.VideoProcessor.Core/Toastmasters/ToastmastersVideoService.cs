@@ -111,7 +111,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 video.DrawTextFilterBackgroundColor(),
                 Opacity.Medium);
 
-            video.AddLikeVideoFilter(_randomService.SubscribeLikeDuration());
+            // video.AddLikeVideoFilter(_randomService.SubscribeLikeDuration());
 
             await _ffmpegService.RenderVideoAsync(
                 _ffmpegInputFilePath,

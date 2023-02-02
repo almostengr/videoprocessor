@@ -130,7 +130,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             video.SetGraphicsSubtitleFileName(graphicsSubtitle);
 
-            video.AddSubscribeVideoFilter(_randomService.SubscribeLikeDuration());
+            // video.AddSubscribeVideoFilter(_randomService.SubscribeLikeDuration());
 
             await _ffmpegService.RenderVideoWithMixTrackAsync(
                 ffmpegInputFilePath, // video.FfmpegInputFilePath(),

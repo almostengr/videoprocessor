@@ -25,7 +25,8 @@ public abstract record BaseVideoFile
             throw new ArgumentException("File path is null or whitespace", nameof(filePath));
         }
 
-        TarballFilePath = filePath; allFilePath);
+        TarballFilePath = filePath;
+        TarballFileName = Path.GetFileName(TarballFilePath);
         GraphicsSubtitleFileName = string.Empty;
         Title = SetTitle(TarballFileName);
         OutputVideoFileName = TarballFileName
@@ -97,14 +98,11 @@ public abstract record BaseVideoFile
 
     public void AddDrawTextVideoFilter(
         string text, FfMpegColor textColor, Opacity textBrightness, FfmpegFontSize fontSize,
-        FfMpegColor backgroundColor, Opacity backgroundBrightness, DrawTextPosition position,
-        uint startSeconds, uint durationSeconds)
+        FfMpegColor backgroundColor, Opacity backgroundBrightness, DrawTextPosition position)
     {
-        // todo split if there is semi colon in text. add addition filter for text with inverted colors
-
         DrawTextFilters.Add(
             new DrawTextFilter(text, textColor, textBrightness, backgroundColor,
-            backgroundBrightness, fontSize, position, startSeconds, durationSeconds));
+            backgroundBrightness, position));
     }
 
     public virtual void AddDrawTextVideoFilterFromSubtitles(List<SubtitleFileEntry> subtitles)
@@ -116,11 +114,20 @@ public abstract record BaseVideoFile
                 continue;
             }
 
+            var splitTitles = subtitle.Text.Split(Constant.SemiColon);
+
             DrawTextFilters.Add(
-                new DrawTextFilter(subtitle.Text, DrawTextFilterTextColor(), Opacity.Full,
-                DrawTextFilterBackgroundColor(), Opacity.Full,
-                FfmpegFontSize.XLarge, DrawTextPosition.SubtitlePrimary,
-                subtitle.StartSeconds(), subtitle.Duration(), 25));
+                new DrawTextFilter(splitTitles[0], DrawTextFilterTextColor(), Opacity.Full,
+                DrawTextFilterBackgroundColor(), Opacity.Full, DrawTextPosition.SubtitlePrimary,
+                subtitle.StartTime, subtitle.EndTime));
+
+            if (splitTitles.Count() == 2)
+            {
+                DrawTextFilters.Add(
+                    new DrawTextFilter(splitTitles[1], DrawTextFilterBackgroundColor(), Opacity.Full,
+                    DrawTextFilterTextColor(), Opacity.Full, DrawTextPosition.SubtitleSecondary,
+                    subtitle.StartTime, subtitle.EndTime));
+            }
         }
     }
 
@@ -130,61 +137,12 @@ public abstract record BaseVideoFile
     {
         DrawTextFilters.Add(
             new DrawTextFilter(text, textColor, textBrightness, backgroundColor,
-            backgroundBrightness, fontSize, position, 0, 0));
-    }
-
-    public virtual void AddLowerThird(
-        uint startSeconds, uint durationSeconds, string primaryText, string? secondaryText = null)
-    {
-        DrawTextFilters.Add(
-            new DrawTextFilter(primaryText, DrawTextFilterTextColor(), Opacity.Full,
-            DrawTextFilterBackgroundColor(), Opacity.Full,
-            FfmpegFontSize.Medium, DrawTextPosition.SubtitlePrimary, startSeconds, durationSeconds));
-
-        if (string.IsNullOrEmpty(secondaryText))
-        {
-            return;
-        }
-
-        DrawTextFilters.Add(
-            new DrawTextFilter(secondaryText, DrawTextFilterBackgroundColor(), Opacity.Full,
-            DrawTextFilterTextColor(), Opacity.Full,
-            FfmpegFontSize.Medium, DrawTextPosition.SubtitlePrimary, startSeconds, durationSeconds));
+            backgroundBrightness, position));
     }
 
     protected string FilterDuration(int duration = 239)
     {
         return $"enable=lt(mod(t\\,{duration})\\,{Constant.CallToActionDuration})";
-    }
-
-    public void AddSubscribeVideoFilter(int duration)
-    {
-        AddDrawTextVideoFilter(
-            "SUBSCRIBE for future videos",
-            FfMpegColor.White,
-            Opacity.Full,
-            FfmpegFontSize.Large,
-            DrawTextPosition.LowerLeft,
-            FfMpegColor.Red,
-            Opacity.Full,
-            10,
-            FilterDuration(duration)
-        );
-    }
-
-    public void AddLikeVideoFilter(int duration)
-    {
-        AddDrawTextVideoFilter(
-            "Please LIKE this video",
-            FfMpegColor.Blue,
-            Opacity.Full,
-            FfmpegFontSize.Large,
-            DrawTextPosition.LowerLeft,
-            FfMpegColor.White,
-            Opacity.Full,
-            10,
-            FilterDuration(duration)
-        );
     }
 
 }
@@ -198,26 +156,18 @@ public sealed class DrawTextFilter
     private DrawTextPosition Position { get; init; }
     private FfMpegColor BackgroundColor { get; init; }
     private Opacity BackgroundBrightness { get; init; }
-    private uint StartSeconds { get; init; }
-    private uint DurationSeconds { get; init; }
     private uint BorderWidth { get; init; }
-    private string? Duration { get; init; }
+    private TimeSpan? StartTime { get; init; }
+    private TimeSpan? EndTime { get; init; }
 
-    public DrawTextFilter(
-        string text, FfMpegColor textColor, Opacity textBrightness,
-        FfMpegColor backgroundColor, Opacity backgroundBrightness,
-        FfmpegFontSize fontSize, DrawTextPosition position, uint startSeconds = 0, uint durationSeconds = 0,
-        uint borderWidth = 10, string? duration = null)
+    public DrawTextFilter(string text, FfMpegColor textColor, Opacity textBrightness,
+        FfMpegColor backgroundColor, Opacity backgroundBrightness, DrawTextPosition position,
+        TimeSpan? startTime = null, TimeSpan? endTime = null)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
             throw new ArgumentException("Text is null or whitespace");
         }
-
-        // if (text.Length > 60)
-        // {
-        //     throw new ArgumentException("Text is too long");
-        // }
 
         if (textBrightness.ToString() == Opacity.None.ToString())
         {
@@ -229,46 +179,44 @@ public sealed class DrawTextFilter
             throw new ArgumentException("Text and background color cannot be the same");
         }
 
-        // if (durationSeconds <= 3 && startSeconds != 0)
-        // {
-        //     throw new ArgumentException("Duration is too short");
-        // }
-
-        if (string.IsNullOrWhiteSpace(duration))
+        if (endTime < startTime)
         {
-            StartSeconds = startSeconds;
-            DurationSeconds = durationSeconds;
+            throw new ArgumentException("Start time must be before end time");
         }
 
-        Text = text;
-
-        switch(Text.Length)
+        if (text.Length > 80)
         {
-            case int x when x <= 60:
-                FontSize = FfmpegFontSize.XLarge;
-                break;
-
-            case int x when x <= 100:
-                FontSize = FfmpegFontSize.Large;
-                break;
-
-            case int x when x <= 140:
-                FontSize = FfmpegFontSize.Medium;
-                break;
-
-            default:
-                throw new ArgumentException("Text length is too long");
-                break;
+            throw new ArgumentException($"Text length is too long: {text}", nameof(text));
         }
-        // FontSize = fontSize;
+
+        Text = text.Replace("=", "\\=").Replace(":", "\\:");
+        Position = position;
+
+        // font size 
+        if (Position.ToString() == DrawTextPosition.SubtitlePrimary.ToString() && Text.Length <= 60)
+        {
+            if (Text.Length > 60)
+            {
+                throw new ArgumentException($"Primary subtitle length is too long: {text}", nameof(text));
+            }
+            FontSize = FfmpegFontSize.XLarge;
+        }
+        else if (Position.ToString() == DrawTextPosition.SubtitleSecondary.ToString())
+        {
+            FontSize = FfmpegFontSize.Large;
+        }
+        else
+        {
+            FontSize = FfmpegFontSize.Medium;
+        }
 
         TextColor = textColor;
         TextBrightness = textBrightness;
-        Position = position;
         BackgroundColor = backgroundColor;
         BackgroundBrightness = backgroundBrightness;
-        Duration = duration;
-        BorderWidth = borderWidth;
+        BorderWidth = 20;
+        StartTime = startTime;
+        EndTime = endTime;
     }
 
     public override string ToString()
@@ -282,16 +230,10 @@ public sealed class DrawTextFilter
         stringBuilder.Append($"boxborderw={BorderWidth.ToString()}:");
         stringBuilder.Append($"boxcolor={BackgroundColor.ToString()}@{BackgroundBrightness.ToString()}");
 
-        if (StartSeconds > 0 && DurationSeconds > 0)
+        if (StartTime != null && EndTime != null)
         {
             stringBuilder.Append(Constant.Colon);
-            stringBuilder.Append($"enable='between(t,{StartSeconds}, {(StartSeconds + DurationSeconds)})'");
-        }
-
-        if (!string.IsNullOrWhiteSpace(Duration))
-        {
-            stringBuilder.Append(Constant.Colon));
-            stringBuilder.Append(Duration);
+            stringBuilder.Append($"enable='between(t, {(uint)StartTime.Value.TotalSeconds}, {(uint)EndTime.Value.TotalSeconds})'");
         }
 
         return stringBuilder.ToString();

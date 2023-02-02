@@ -128,9 +128,9 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 video.DrawTextFilterTextColor(),
                 Opacity.Full,
                 FfmpegFontSize.Large,
-                DrawTextPosition.UpperRight,
+                DrawTextPosition.ChannelBrand,
                 video.DrawTextFilterBackgroundColor(),
-                Opacity.Light,
+                Opacity.Medium,
                 10);
 
             CheckAndAddGraphicsSubtitle(video);
