@@ -15,11 +15,11 @@ public sealed record HandymanVideoFile : BaseVideoFile
 
     public override FfMpegColor DrawTextFilterBackgroundColor()
     {
-        return FfMpegColor.RhtYellow;
+        return FfMpegColor.Black;
     }
 
     public override FfMpegColor DrawTextFilterTextColor()
     {
-        return FfMpegColor.Black;
+        return FfMpegColor.RhtYellow;
     }
 }
