@@ -5,7 +5,7 @@ namespace Almostengr.VideoProcessor.Core.DashCam;
 
 public sealed record DashCamVideoFile : BaseVideoFile
 {
-    public DashCamVideoType SubType { get; private set; }
+    private DashCamVideoType SubType { get; private set; }
 
     public DashCamVideoFile(string archiveFilePath) : base(archiveFilePath)
     {
@@ -19,7 +19,6 @@ public sealed record DashCamVideoFile : BaseVideoFile
         {
             SubType = DashCamVideoType.Fireworks;
         }
-
     }
 
     public override string[] BrandingTextOptions()
@@ -86,6 +85,13 @@ public sealed record DashCamVideoFile : BaseVideoFile
             DrawTextPosition.UpperLeft)).ToString();
     }
 
+    enum DashCamVideoType
+    {
+        Normal,
+        Night,
+        Fireworks
+    }
+
     // public override void AddDrawTextVideoFilterFromSubtitles(List<SubtitleFileEntry> subtitles)
     // {
     //     foreach (var subtitle in subtitles)
@@ -117,9 +123,9 @@ public sealed record DashCamVideoFile : BaseVideoFile
 }
 
 
-public enum DashCamVideoType
-{
-    Normal,
-    Night,
-    Fireworks
-}
+// public enum DashCamVideoType
+// {
+//     Normal,
+//     Night,
+//     Fireworks
+// }

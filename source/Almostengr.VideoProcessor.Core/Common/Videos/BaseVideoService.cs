@@ -113,6 +113,18 @@ public abstract class BaseVideoService : IBaseVideoService
             .Any();
     }
 
+    public void StopProcessingIfKdenliveFileExists(string directory)
+    {
+        bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
+            .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.ToString()))
+            .Any();
+
+        if (fileExists)
+        {
+            throw new KdenliveFileExistsException("Archive has Kdenlive project file");
+        }
+    }
+
     // public void CheckAndAddGraphicsSubtitle(TechTalkVideoFile video)
     // {
     //     string? graphicsSubtitleFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
