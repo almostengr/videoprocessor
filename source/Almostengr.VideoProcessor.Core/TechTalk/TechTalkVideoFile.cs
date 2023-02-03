@@ -6,7 +6,7 @@ namespace Almostengr.VideoProcessor.Core.TechTalk;
 
 public sealed record TechTalkVideoFile : BaseVideoFile
 {
-    public TechTalkVideoSubType SubType { get; private set; }
+    private TechTalkVideoSubType SubType { get; init; }
 
     public TechTalkVideoFile(string archiveFilePath) : base(archiveFilePath)
     {
@@ -54,4 +54,11 @@ public sealed record TechTalkVideoFile : BaseVideoFile
         }
     }
 
+
+    enum TechTalkVideoSubType
+    {
+        TechTalk,
+        Christmas,
+        IndependenceDay
+    }
 }

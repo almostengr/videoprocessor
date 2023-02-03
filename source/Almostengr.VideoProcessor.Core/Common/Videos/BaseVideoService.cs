@@ -2,7 +2,6 @@ using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Music.Services;
-using Almostengr.VideoProcessor.Core.TechTalk;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
@@ -107,11 +106,6 @@ public abstract class BaseVideoService : IBaseVideoService
         }
     }
 
-    public int FilterDurationInSeconds()
-    {
-        return _randomService.Next(240, 600);
-    }
-
     public bool DoesKdenliveFileExist(string directory)
     {
         return _fileSystemService.GetFilesInDirectory(directory)
@@ -119,17 +113,17 @@ public abstract class BaseVideoService : IBaseVideoService
             .Any();
     }
 
-    public void CheckAndAddGraphicsSubtitle(TechTalkVideoFile video)
-    {
-        string? graphicsSubtitleFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-            .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
-            .SingleOrDefault();
+    // public void CheckAndAddGraphicsSubtitle(TechTalkVideoFile video)
+    // {
+    //     string? graphicsSubtitleFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+    //         .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
+    //         .SingleOrDefault();
 
-        if (graphicsSubtitleFile != null)
-        {
-            var subtitles = _assSubtitleFileService.ReadFile(graphicsSubtitleFile);
-            video.AddDrawTextVideoFilterFromSubtitles(subtitles);
-        }
-    }
+    //     if (graphicsSubtitleFile != null)
+    //     {
+    //         var subtitles = _assSubtitleFileService.ReadFile(graphicsSubtitleFile);
+    //         video.AddDrawTextVideoFilterFromSubtitles(subtitles);
+    //     }
+    // }
 
 }

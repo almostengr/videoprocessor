@@ -75,7 +75,6 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             string draftFilePath = Path.Combine(DraftDirectory, video.TarballFileName);
             string ffmpegInputFilePath = Path.Combine(WorkingDirectory, video.TarballFileName);
 
-
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
@@ -89,7 +88,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 throw new KdenliveFileExistsException("Archive has Kdenlive project file");
             }
 
-            if (_fileSystemService.GetFilesInDirectory(WorkingDirectory))
+            // if (_fileSystemService.GetFilesInDirectory(WorkingDirectory))
 
             CreateFfmpegInputFile(video);
 
@@ -107,36 +106,50 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             }
 
             // brand video
-            video.AddDrawTextVideoFilter(
-                RandomChannelBrandingText(video.BrandingTextOptions()),
-                video.DrawTextFilterTextColor(),
-                Opacity.Full,
-                FfmpegFontSize.Medium,
-                DrawTextPosition.UpperRight,
-                video.DrawTextFilterBackgroundColor(),
-                Opacity.Light);
+            // video.AddDrawTextVideoFilter(
+            //     RandomChannelBrandingText(video.BrandingTextOptions()),
+            //     video.DrawTextFilterTextColor(),
+            //     Opacity.Full,
+            //     FfmpegFontSize.Medium,
+            //     DrawTextPosition.UpperRight,
+            //     video.DrawTextFilterBackgroundColor(),
+            //     Opacity.Light);
 
-            video.AddDrawTextVideoFilter(
-                video.Title,
-                video.DrawTextFilterTextColor(),
-                Opacity.Full,
-                FfmpegFontSize.Small,
-                DrawTextPosition.UpperLeft,
-                video.DrawTextFilterBackgroundColor(),
-                Opacity.Light);
+            // video.AddDrawTextVideoFilter(
+            //     video.Title,
+            //     video.DrawTextFilterTextColor(),
+            //     Opacity.Full,
+            //     FfmpegFontSize.Small,
+            //     DrawTextPosition.UpperLeft,
+            //     video.DrawTextFilterBackgroundColor(),
+            //     Opacity.Light);
 
             // var graphicsSubtitle = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
             //     .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
             //     .Single();
 
+            // video.AddDrawTextVideoFilterFromSubtitles(_assSubtitleFileService.ReadFile(graphicsSubtitle));
+            
+            string? graphicsSubtitleFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
+                .Single();
+
+            video.SetGraphicsSubtitleFile(graphicsSubtitleFile);
+            video.GraphicsSubtitleFile.SetSubtitles(
+                _assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
+
             // video.SetGraphicsSubtitleFileName(graphicsSubtitle);
 
             // video.AddSubscribeVideoFilter(_randomService.SubscribeLikeDuration());
+            
+            video.SetBrandingText(RandomChannelBrandingText(video.BrandingTextOptions()));
+            var videoFilters = video.VideoFilters() + Constant.CommaSpace + video.TitleDrawTextFilter();
 
             await _ffmpegService.RenderVideoWithMixTrackAsync(
                 ffmpegInputFilePath, // video.FfmpegInputFilePath(),
                 _musicService.GetRandomMixTrack(),
-                video.VideoFilters(),
+                // video.VideoFilters(),
+                videoFilters,
                 outputFilePath, // video.OutputVideoFilePath(),
                 cancellationToken);
 

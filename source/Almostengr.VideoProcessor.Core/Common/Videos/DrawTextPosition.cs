@@ -24,6 +24,7 @@ public struct DrawTextPosition
     public static readonly DrawTextPosition SubtitleSecondary =  new($"x={SubtitleXPadding}:y=h-th-{SubtitleBottomYPadding}");
 
     public static readonly DrawTextPosition ChannelBrand = UpperRight;
+    public static readonly DrawTextPosition DashCamInfo = LowerRight;
 
     public override string ToString()
     {

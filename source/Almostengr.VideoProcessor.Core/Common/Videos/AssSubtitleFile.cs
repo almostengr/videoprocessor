@@ -3,7 +3,7 @@ namespace Almostengr.VideoProcessor.Core.Common.Videos;
 public sealed record AssSubtitleFile
 {
     public string FilePath { get; init; }
-    public string FileName {get; init;}
+    public string FileName { get; init; }
     public IList<SubtitleFileEntry> Subtitles { get; private set; }
 
     public AssSubtitleFile(string filePath)
@@ -15,7 +15,7 @@ public sealed record AssSubtitleFile
 
         FilePath = filePath;
         Subtitles = new List<SubtitleFileEntry>();
-        FileName  = Path.GetFileName(FilePath);
+        FileName = Path.GetFileName(FilePath);
     }
 
     public void SetSubtitles(IList<SubtitleFileEntry> subtitles)

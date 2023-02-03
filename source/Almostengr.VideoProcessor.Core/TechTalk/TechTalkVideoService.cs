@@ -114,7 +114,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 await _ffmpegService.ConcatTsFilesToMp4FileAsync(
                     _ffmpegInputFilePath,
                     Path.Combine(UploadDirectory, video.OutputVideoFileName),
-                    video.VideoFilters(),
+                    string.Empty,
                     cancellationToken);
 
                 _fileSystemService.MoveFile(video.TarballFilePath, Path.Combine(ArchiveDirectory, video.TarballFileName));
@@ -123,17 +123,27 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             }
 
             // brand video
-            video.AddDrawTextVideoFilter(
-                RandomChannelBrandingText(video.BrandingTextOptions()),
-                video.DrawTextFilterTextColor(),
-                Opacity.Full,
-                FfmpegFontSize.Large,
-                DrawTextPosition.ChannelBrand,
-                video.DrawTextFilterBackgroundColor(),
-                Opacity.Medium,
-                10);
+            // video.AddDrawTextVideoFilter(
+            //     RandomChannelBrandingText(video.BrandingTextOptions()),
+            //     video.DrawTextFilterTextColor(),
+            //     Opacity.Full,
+            //     FfmpegFontSize.Large,
+            //     DrawTextPosition.ChannelBrand,
+            //     video.DrawTextFilterBackgroundColor(),
+            //     Opacity.Medium,
+            //     10);
 
-            CheckAndAddGraphicsSubtitle(video);
+            // CheckAndAddGraphicsSubtitle(video);
+            string? graphicsSubtitleFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
+                .SingleOrDefault();
+
+            if (!string.IsNullOrEmpty(graphicsSubtitleFile))
+            {
+                video.SetGraphicsSubtitleFile(graphicsSubtitleFile);
+                video.GraphicsSubtitleFile.SetSubtitles(
+                    _assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
+            }
 
             await _ffmpegService.ConcatTsFilesToMp4FileAsync(
                 _ffmpegInputFilePath,

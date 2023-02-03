@@ -6,7 +6,7 @@ namespace Almostengr.VideoProcessor.Core.Toastmasters;
 public sealed record ToastmastersVideoFile : BaseVideoFile
 {
     public ToastmastersVideoFile(string archiveFilePath) : base(archiveFilePath)
-    {}
+    { }
 
     public override string[] BrandingTextOptions()
     {
@@ -18,23 +18,25 @@ public sealed record ToastmastersVideoFile : BaseVideoFile
         return FfMpegColor.SteelBlue;
     }
 
-    public override FfMpegColor DrawTextFilterTextColor()
-    {
-        return FfMpegColor.White;
-    }
+    // public void AddMeetingFilter(int duration)
+    // {
+    //     AddDrawTextVideoFilter(
+    //         "Join us on Tuesdays at 12 Noon!",
+    //         FfMpegColor.Black,
+    //         Opacity.Full,
+    //         FfmpegFontSize.Large,
+    //         DrawTextPosition.LowerLeft,
+    //         FfMpegColor.White,
+    //         Opacity.Full,
+    //         10,
+    //         base.FilterDuration(duration)
+    //     );
+    // }
 
-    public void AddMeetingFilter(int duration)
+    public string MeetingFilter()
     {
-        AddDrawTextVideoFilter(
-            "Join us on Tuesdays at 12 Noon!",
-            FfMpegColor.Black,
-            Opacity.Full,
-            FfmpegFontSize.Large,
-            DrawTextPosition.LowerLeft,
-            FfMpegColor.White,
-            Opacity.Full,
-            10,
-            base.FilterDuration(duration)
-        );
+        return (new DrawTextFilter("Join us on Tuesdays at 12 Noon", FfMpegColor.Blue, Opacity.Full,
+            FfMpegColor.White, Opacity.Full, DrawTextPosition.LowerLeft,
+            new TimeSpan(0, 4, 5), new TimeSpan(0, 4, 25))).ToString();
     }
 }

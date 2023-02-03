@@ -83,21 +83,32 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
             CreateFfmpegInputFile(video);
 
-            video.AddDrawTextVideoFilter(
-                RandomChannelBrandingText(video.BrandingTextOptions()),
-                video.DrawTextFilterTextColor(),
-                Opacity.Full,
-                FfmpegFontSize.Large,
-                DrawTextPosition.UpperRight,
-                video.DrawTextFilterBackgroundColor(),
-                Opacity.Medium);
+            // video.AddDrawTextVideoFilter(
+            //     RandomChannelBrandingText(video.BrandingTextOptions()),
+            //     video.DrawTextFilterTextColor(),
+            //     Opacity.Full,
+            //     FfmpegFontSize.Large,
+            //     DrawTextPosition.UpperRight,
+            //     video.DrawTextFilterBackgroundColor(),
+            //     Opacity.Medium);
 
-            if (_fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString())).Any())
+            // if (_fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString())).Any())
+            // {
+            // video.AddSubtitleVideoFilter(
+            //     _fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString())).Single(),
+            //     "&H00006400",
+            //     "&H00FFFFFF");
+            // }
+
+            string? graphicsSubtitleFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
+                .SingleOrDefault();
+
+            if (!string.IsNullOrEmpty(graphicsSubtitleFile))
             {
-                // video.AddSubtitleVideoFilter(
-                //     _fileSystemService.GetFilesInDirectory(WorkingDirectory).Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString())).Single(),
-                //     "&H00006400",
-                //     "&H00FFFFFF");
+                video.SetGraphicsSubtitleFile(graphicsSubtitleFile);
+                video.GraphicsSubtitleFile.SetSubtitles(
+                    _assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
             }
 
             await _ffmpegService.RenderVideoAsync(

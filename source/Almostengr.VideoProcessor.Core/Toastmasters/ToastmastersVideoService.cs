@@ -52,14 +52,6 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         }
     }
 
-    public void CreateDirectories()
-    {
-        _fileSystemService.CreateDirectory(IncomingDirectory);
-        _fileSystemService.CreateDirectory(ArchiveDirectory);
-        _fileSystemService.CreateDirectory(UploadDirectory);
-        _fileSystemService.CreateDirectory(WorkingDirectory);
-    }
-
     public override async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)
     {
         try
@@ -102,20 +94,21 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             CreateFfmpegInputFile(videoFiles, _ffmpegInputFilePath);
 
             // brand video
-            video.AddDrawTextVideoFilter(
-                RandomChannelBrandingText(video.BrandingTextOptions()),
-                video.DrawTextFilterTextColor(),
-                Opacity.Full,
-                FfmpegFontSize.Large,
-                DrawTextPosition.UpperRight,
-                video.DrawTextFilterBackgroundColor(),
-                Opacity.Medium);
+            // video.AddDrawTextVideoFilter(
+            //     RandomChannelBrandingText(video.BrandingTextOptions()),
+            //     video.DrawTextFilterTextColor(),
+            //     Opacity.Full,
+            //     FfmpegFontSize.Large,
+            //     DrawTextPosition.UpperRight,
+            //     video.DrawTextFilterBackgroundColor(),
+            //     Opacity.Medium);
+            video.SetBrandingText(RandomChannelBrandingText(video.BrandingTextOptions()));
 
             // video.AddLikeVideoFilter(_randomService.SubscribeLikeDuration());
 
             await _ffmpegService.RenderVideoAsync(
                 _ffmpegInputFilePath,
-                video.VideoFilters(),
+                video.VideoFilters() + Constant.CommaSpace + video.MeetingFilter(),
                 Path.Combine(UploadDirectory, video.OutputVideoFileName),
                 cancellationToken);
 

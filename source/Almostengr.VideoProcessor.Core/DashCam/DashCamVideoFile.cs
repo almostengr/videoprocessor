@@ -27,7 +27,7 @@ public sealed record DashCamVideoFile : BaseVideoFile
         return new string[] { "Kenny Ram Dash Cam" };
     }
 
-    public override string SetTitle(string fileName)
+    protected override string SetTitle(string fileName)
     {
         if (fileName.ToLower().Contains("bad drivers of montgomery"))
         {
@@ -46,7 +46,7 @@ public sealed record DashCamVideoFile : BaseVideoFile
 
         // return FfMpegColor.Black;
 
-        switch(SubType)
+        switch (SubType)
         {
             case DashCamVideoType.Fireworks:
                 return FfMpegColor.Blue;
@@ -65,15 +65,55 @@ public sealed record DashCamVideoFile : BaseVideoFile
 
         // return FfMpegColor.White;
 
-        switch(SubType)
+        switch (SubType)
         {
             case DashCamVideoType.Night:
                 return FfMpegColor.Orange;
 
-            default: 
+            default:
                 return FfMpegColor.White;
         }
     }
+
+    public string TitleDrawTextFilter()
+    {
+        return (new DrawTextFilter(
+            Title,
+            DrawTextFilterTextColor(),
+            Opacity.Full,
+            DrawTextFilterBackgroundColor(),
+            Opacity.Medium,
+            DrawTextPosition.UpperLeft)).ToString();
+    }
+
+    // public override void AddDrawTextVideoFilterFromSubtitles(List<SubtitleFileEntry> subtitles)
+    // {
+    //     foreach (var subtitle in subtitles)
+    //     {
+    //         if (string.IsNullOrWhiteSpace(subtitle.Text))
+    //         {
+    //             continue;
+    //         }
+
+    //         var splitTitles = subtitle.Text.Split(Constant.SemiColon);
+
+    //         FfMpegColor bgColor = FfMpegColor.Green;
+    //         Opacity bgOpacity = Opacity.Full;
+
+    //         string textLowered = subtitle.Text.ToLower();
+    //         if (textLowered.StartsWith("info"))
+    //         {
+    //             bgColor = FfMpegColor.Black;
+    //             bgOpacity = Opacity.Medium;
+    //         }
+
+    //         DrawTextFilters.Add(
+    //             new DrawTextFilter(splitTitles.First(), FfMpegColor.White, Opacity.Full,
+    //             bgColor, bgOpacity, DrawTextPosition.DashCamInfo,
+    //             subtitle.StartTime, (subtitle.StartTime.Add(TimeSpan.FromSeconds(5)))
+    //             ));
+    //     }
+    // }
 }
 
 
