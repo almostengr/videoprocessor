@@ -90,7 +90,7 @@ public sealed class FileSystemService : IFileSystemService
     {
         IEnumerable<string> filePaths = GetFilesInDirectory(directory)
             .Where(f => f.ToLower().Contains(extension.ToString()));
-        
+
         if (filePaths.Count() == 0)
         {
             throw new NoFilesMatchException();
@@ -163,12 +163,13 @@ public sealed class FileSystemService : IFileSystemService
                 Path.Combine(
                         directory,
                         Path.GetFileName(file)
-                            .ToLower()
+                            // .ToLower()
                             .Replace(";", "_")
                             .Replace(" ", "_")
-                            .Replace("__", "_")
-                            .Replace("\"", string.Empty)
-                            .Replace("\'", string.Empty))
+                            // .Replace("__", "_")
+                            // .Replace("\"", string.Empty)
+                            // .Replace("\'", string.Empty)
+                            )
             );
         }
     }

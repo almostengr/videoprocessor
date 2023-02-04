@@ -38,20 +38,6 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         }
     }
 
-    public override async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
-    {
-        var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
-            .Where(f => f.EndsWith(FileExtension.TarGz.ToString()));
-
-        foreach (var file in tarGzFiles)
-        {
-            await _compressionService.DecompressFileAsync(file, cancellationToken);
-
-            await _compressionService.CompressFileAsync(
-                file.Replace(FileExtension.TarGz.ToString(), FileExtension.Tar.ToString()), cancellationToken);
-        }
-    }
-
     public override async Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken)
     {
         try
@@ -83,7 +69,6 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
-            // create input file
             _fileSystemService.DeleteFile(_ffmpegInputFilePath);
 
             string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
@@ -93,18 +78,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
             CreateFfmpegInputFile(videoFiles, _ffmpegInputFilePath);
 
-            // brand video
-            // video.AddDrawTextVideoFilter(
-            //     RandomChannelBrandingText(video.BrandingTextOptions()),
-            //     video.DrawTextFilterTextColor(),
-            //     Opacity.Full,
-            //     FfmpegFontSize.Large,
-            //     DrawTextPosition.UpperRight,
-            //     video.DrawTextFilterBackgroundColor(),
-            //     Opacity.Medium);
             video.SetBrandingText(RandomChannelBrandingText(video.BrandingTextOptions()));
-
-            // video.AddLikeVideoFilter(_randomService.SubscribeLikeDuration());
 
             await _ffmpegService.RenderVideoAsync(
                 _ffmpegInputFilePath,

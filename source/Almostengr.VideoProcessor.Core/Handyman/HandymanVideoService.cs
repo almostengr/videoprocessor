@@ -29,7 +29,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         _ffmpegInputFilePath = Path.Combine(WorkingDirectory, FFMPEG_FILE_NAME);
     }
 
-    public override async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
+    public async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
     {
         var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
             .Where(f => f.EndsWith(FileExtension.TarGz.ToString()));

@@ -43,7 +43,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public abstract Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken);
     public abstract Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
     public abstract Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
-    public abstract Task ConvertGzToXzAsync(CancellationToken cancellationToken);
+    // public abstract Task ConvertGzToXzAsync(CancellationToken cancellationToken);
 
     public virtual Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
     {

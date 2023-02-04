@@ -34,7 +34,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         _gzFileService = gzFileService;
     }
 
-    public override async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
+    public async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
     {
         var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
             .Where(f => f.EndsWith(FileExtension.TarGz.ToString()));

@@ -9,8 +9,6 @@ public abstract record BaseVideoFile
     public string Title { get; init; }
     public string TarballFilePath { get; init; }
     public string TarballFileName { get; init; }
-    // public string GraphicsSubtitleFileName { get; private set; }
-    // public List<DrawTextFilter> DrawTextFilters { get; private set; }
     public bool IsDraft { get; init; }
     public string OutputVideoFileName { get; init; }
     public AssSubtitleFile? GraphicsSubtitleFile { get; private set; }
@@ -29,7 +27,6 @@ public abstract record BaseVideoFile
 
         TarballFilePath = filePath;
         TarballFileName = Path.GetFileName(TarballFilePath);
-        // GraphicsSubtitleFileName = string.Empty;
         Title = SetTitle(TarballFileName);
         OutputVideoFileName = TarballFileName
             .Replace(FileExtension.TarXz.ToString(), string.Empty)
@@ -42,7 +39,6 @@ public abstract record BaseVideoFile
             IsDraft = true;
         }
 
-        // DrawTextFilters = new();
         GraphicsSubtitleFile = null;
     }
 
@@ -72,24 +68,21 @@ public abstract record BaseVideoFile
             DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.ChannelBrand).ToString()
             );
 
-        // var lastItem = DrawTextFilters.Last();
-        // foreach (var filter in DrawTextFilters)
-        // var lastItem = GraphicsSubtitleFile.Subtitles.Last();
+        if (GraphicsSubtitleFile == null)
+        {
+            return stringBuilder.ToString();
+        }
+
         foreach (var subtitle in GraphicsSubtitleFile.Subtitles)
         {
             stringBuilder.Append(Constant.CommaSpace);
 
             var splitTitle = subtitle.Text.Split(Constant.SemiColon);
 
-            // stringBuilder.Append(filter.ToString());
             stringBuilder.Append(
                 new DrawTextFilter(splitTitle.First(), DrawTextFilterTextColor(), Opacity.Full,
                 DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.SubtitlePrimary,
                 subtitle.StartTime, subtitle.EndTime).ToString());
-
-            // if (!.Equals(lastItem))
-            // {
-            // }
 
             if (splitTitle.Length == 2)
             {
@@ -116,16 +109,6 @@ public abstract record BaseVideoFile
             .Replace(Constant.Colon, string.Empty);
     }
 
-    // public void SetGraphicsSubtitleFileName(string? fileName)
-    // {
-    //     if (string.IsNullOrWhiteSpace(fileName))
-    //     {
-    //         return;
-    //     }
-
-    //     GraphicsSubtitleFileName = fileName;
-    // }
-
     public virtual FfMpegColor DrawTextFilterBackgroundColor()
     {
         return FfMpegColor.Black;
@@ -135,55 +118,6 @@ public abstract record BaseVideoFile
     {
         return FfMpegColor.White;
     }
-
-    // public void AddDrawTextVideoFilter(
-    //     string text, FfMpegColor textColor, Opacity textBrightness, FfmpegFontSize fontSize,
-    //     FfMpegColor backgroundColor, Opacity backgroundBrightness, DrawTextPosition position)
-    // {
-    //     DrawTextFilters.Add(
-    //         new DrawTextFilter(text, textColor, textBrightness, backgroundColor,
-    //         backgroundBrightness, position));
-    // }
-
-    // public virtual void AddDrawTextVideoFilterFromSubtitles(List<SubtitleFileEntry> subtitles)
-    // {
-    //     foreach (var subtitle in subtitles)
-    //     {
-    //         if (string.IsNullOrWhiteSpace(subtitle.Text))
-    //         {
-    //             continue;
-    //         }
-
-    //         var splitTitles = subtitle.Text.Split(Constant.SemiColon);
-
-    //         DrawTextFilters.Add(
-    //             new DrawTextFilter(splitTitles.First(), DrawTextFilterTextColor(), Opacity.Full,
-    //             DrawTextFilterBackgroundColor(), Opacity.Full, DrawTextPosition.SubtitlePrimary,
-    //             subtitle.StartTime, subtitle.EndTime));
-
-    //         if (splitTitles.Count() == 2)
-    //         {
-    //             DrawTextFilters.Add(
-    //                 new DrawTextFilter(splitTitles.Last(), DrawTextFilterBackgroundColor(), Opacity.Full,
-    //                 DrawTextFilterTextColor(), Opacity.Full, DrawTextPosition.SubtitleSecondary,
-    //                 subtitle.StartTime, subtitle.EndTime));
-    //         }
-    //     }
-    // }
-
-    // public virtual void AddDrawTextVideoFilter(
-    //     string text, FfMpegColor textColor, Opacity textBrightness, FfmpegFontSize fontSize, DrawTextPosition position,
-    //     FfMpegColor backgroundColor, Opacity backgroundBrightness, int borderWidth = 10, string duration = "")
-    // {
-    //     DrawTextFilters.Add(
-    //         new DrawTextFilter(text, textColor, textBrightness, backgroundColor,
-    //         backgroundBrightness, position));
-    // }
-
-    // protected string FilterDuration(int duration = 239)
-    // {
-    //     return $"enable=lt(mod(t\\,{duration})\\,{Constant.CallToActionDuration})";
-    // }
 
     protected sealed class DrawTextFilter // public sealed class DrawTextFilter
     {

@@ -32,7 +32,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         _gzFileService = gzFileService;
     }
 
-    public override async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
+    public async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
     {
         var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
             .Where(f => f.EndsWith(FileExtension.TarGz.ToString()));
@@ -51,6 +51,33 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         try
         {
             await base.CompressTarballsInArchiveFolderAsync(ArchiveDirectory, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
+    }
+
+    public async Task ProcessDraftVideoAsync(CancellationToken cancellationToken)
+    {
+        DashCamVideoFile? video = null;
+        AssSubtitleFile? subtitle = null;
+
+        try
+        {
+            string subtitleFile = _fileSystemService.GetRandomFileByExtensionFromDirectory(
+                DraftDirectory, FileExtension.GraphicsAss);
+            _loggerService.LogInformation($"Processing {subtitleFile}");
+            subtitle = new AssSubtitleFile(subtitleFile);
+
+            string? videoFile = _fileSystemService.GetFilesInDirectory(DraftDirectory)
+                .Where(f => f.StartsWith(Path.GetFileNameWithoutExtension(subtitleFile)) &&
+                    f.EndsWith(FileExtension.Mp4.ToString()))
+                .SingleOrDefault();
+        }
+        catch (NoFilesMatchException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -130,7 +157,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             //     .Single();
 
             // video.AddDrawTextVideoFilterFromSubtitles(_assSubtitleFileService.ReadFile(graphicsSubtitle));
-            
+
             string? graphicsSubtitleFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
                 .Single();
@@ -142,7 +169,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             // video.SetGraphicsSubtitleFileName(graphicsSubtitle);
 
             // video.AddSubscribeVideoFilter(_randomService.SubscribeLikeDuration());
-            
+
             video.SetBrandingText(RandomChannelBrandingText(video.BrandingTextOptions()));
             var videoFilters = video.VideoFilters() + Constant.CommaSpace + video.TitleDrawTextFilter();
 
