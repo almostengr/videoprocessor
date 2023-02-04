@@ -5,7 +5,7 @@ namespace Almostengr.VideoProcessor.Core.DashCam;
 
 public sealed record DashCamVideoFile : BaseVideoFile
 {
-    private DashCamVideoType SubType { get; private set; }
+    private DashCamVideoType SubType { get; init; }
 
     public DashCamVideoFile(string archiveFilePath) : base(archiveFilePath)
     {

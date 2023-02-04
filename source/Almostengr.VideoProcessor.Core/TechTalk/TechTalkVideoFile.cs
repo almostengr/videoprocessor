@@ -1,6 +1,5 @@
 using Almostengr.VideoProcessor.Core.Common.Videos;
 using Almostengr.VideoProcessor.Core.Constants;
-using Almostengr.VideoProcessor.Core.TechTalk.Exceptions;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk;
 

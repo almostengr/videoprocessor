@@ -83,10 +83,11 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
-            if (DoesKdenliveFileExist(IncomingDirectory))
-            {
-                throw new KdenliveFileExistsException("Archive has Kdenlive project file");
-            }
+            StopProcessingIfKdenliveFileExists(WorkingDirectory);
+            // if (DoesKdenliveFileExist(IncomingDirectory))
+            // {
+            //     throw new KdenliveFileExistsException("Archive has Kdenlive project file");
+            // }
 
             // if (_fileSystemService.GetFilesInDirectory(WorkingDirectory))
 

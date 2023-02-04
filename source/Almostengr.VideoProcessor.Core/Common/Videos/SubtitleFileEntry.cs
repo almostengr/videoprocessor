@@ -6,7 +6,7 @@ public sealed record SubtitleFileEntry
 {
     public TimeSpan StartTime { get; init; }
     public TimeSpan EndTime { get; init; }
-    public string Text { get; private set; }
+    public string Text { get; init; }
 
     public SubtitleFileEntry(TimeSpan startTime, TimeSpan endTime, string text)
     {
@@ -24,33 +24,23 @@ public sealed record SubtitleFileEntry
 
         StartTime = startTime;
         EndTime = endTime;
-        SetText(text);
-    }
-
-    public void SetText(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            throw new ArgumentException("Text canont be null or whitespace", nameof(text));
-        }
-
         Text = FixMisspellings(text);
     }
 
-    public uint StartSeconds()
-    {
-        return (uint)StartTime.TotalSeconds;
-    }
+    // public uint StartSeconds()
+    // {
+    //     return (uint)StartTime.TotalSeconds;
+    // }
 
-    public uint EndSeconds()
-    {
-        return (uint)EndTime.TotalSeconds;
-    }
+    // public uint EndSeconds()
+    // {
+    //     return (uint)EndTime.TotalSeconds;
+    // }
 
-    public uint Duration()
-    {
-        return (uint)(EndTime - StartTime).TotalSeconds;
-    }
+    // public uint Duration()
+    // {
+    //     return (uint)(EndTime - StartTime).TotalSeconds;
+    // }
 
     private string FixMisspellings(string input)
     {

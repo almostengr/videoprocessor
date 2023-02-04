@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 namespace Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 
 [Serializable]
-public class NoFilesMatchException : Exception
+public class NoFilesMatchException : VideoProcessorException
 {
     public NoFilesMatchException()
     {

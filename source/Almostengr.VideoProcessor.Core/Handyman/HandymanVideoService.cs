@@ -72,10 +72,12 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
-            if (DoesKdenliveFileExist(IncomingDirectory))
-            {
-                throw new KdenliveFileExistsException();
-            }
+            // if (DoesKdenliveFileExist(IncomingDirectory))
+            // {
+            //     throw new KdenliveFileExistsException();
+            // }
+
+            StopProcessingIfKdenliveFileExists(WorkingDirectory);
 
             await ConvertVideoAudioFilesToAudioOnly(WorkingDirectory, cancellationToken);
 

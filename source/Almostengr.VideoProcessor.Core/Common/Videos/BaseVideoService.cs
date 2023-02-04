@@ -106,12 +106,12 @@ public abstract class BaseVideoService : IBaseVideoService
         }
     }
 
-    public bool DoesKdenliveFileExist(string directory)
-    {
-        return _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.ToString()))
-            .Any();
-    }
+    // public bool DoesKdenliveFileExist(string directory)
+    // {
+    //     return _fileSystemService.GetFilesInDirectory(directory)
+    //         .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.ToString()))
+    //         .Any();
+    // }
 
     public void StopProcessingIfKdenliveFileExists(string directory)
     {

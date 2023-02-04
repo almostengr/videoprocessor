@@ -14,7 +14,7 @@ public abstract record BaseVideoFile
     public bool IsDraft { get; init; }
     public string OutputVideoFileName { get; init; }
     public AssSubtitleFile? GraphicsSubtitleFile { get; private set; }
-    public string? BrandingText { get; private set; } = null;
+    public string BrandingText { get; private set; } = string.Empty;
 
     public readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
     public readonly string RHT_WEBSITE = "rhtservices.net";
@@ -43,6 +43,7 @@ public abstract record BaseVideoFile
         }
 
         // DrawTextFilters = new();
+        GraphicsSubtitleFile = null;
     }
 
     public abstract string[] BrandingTextOptions();

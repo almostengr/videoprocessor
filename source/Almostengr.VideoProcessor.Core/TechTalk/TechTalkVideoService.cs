@@ -80,10 +80,12 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
-            if (DoesKdenliveFileExist(IncomingDirectory))
-            {
-                throw new KdenliveFileExistsException("Archive has Kdenlive project file");
-            }
+            StopProcessingIfKdenliveFileExists(WorkingDirectory);
+
+            // if (DoesKdenliveFileExist(IncomingDirectory))
+            // {
+            //     throw new KdenliveFileExistsException("Archive has Kdenlive project file");
+            // }
 
             _fileSystemService.DeleteFile(Path.Combine(WorkingDirectory, FFMPEG_FILE_NAME));
 
