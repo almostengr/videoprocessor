@@ -1,6 +1,7 @@
 using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
+using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Music.Services;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
@@ -19,11 +20,22 @@ public abstract class BaseVideoService : IBaseVideoService
 
     protected string _ffmpegInputFilePath { get; init; }
 
+
+    // received, stitching, stitched, reviewing, animating, animated, uploading
     protected string IncomingDirectory { get; init; }
     protected string ArchiveDirectory { get; init; }
-    protected string UploadDirectory { get; init; }
-    protected string WorkingDirectory { get; init; }
-    protected string? DraftDirectory { get; init; }
+    // protected string WorkingDirectory { get; init; }
+    // protected string DraftDirectory { get; init; }
+    // protected string RenderingDirectory { get; init; }
+    // protected string StitchingDirectory { get; init; }
+    // protected string AnimatingDirectory { get; init; }
+    // protected string AnimatedDirectory { get; init; }
+    protected string UploadingDirectory { get; init; }
+    protected string ReviewingDirectory { get; set; }
+    protected string ReviewWorkDirectory { get; init; }
+
+    protected string IncomingWorkDirectory { get; init; }
+
 
     protected BaseVideoService(
         AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
@@ -40,7 +52,7 @@ public abstract class BaseVideoService : IBaseVideoService
         _assSubtitleFileService = assSubtitleFileService;
     }
 
-    public abstract Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken);
+    // public abstract Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken);
     public abstract Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
     public abstract Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
     // public abstract Task ConvertGzToXzAsync(CancellationToken cancellationToken);
@@ -113,6 +125,30 @@ public abstract class BaseVideoService : IBaseVideoService
     //         .Any();
     // }
 
+    public void StopProcessingIfDetailsTxtFileExists(string directory)
+    {
+        bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
+            .Where(f => f.ToLower().Contains("details.txt"))
+            .Any();
+
+        if (fileExists)
+        {
+            throw new DetailsTxtFileExistsException("details.txt file exists. Please repackage tarball file");
+        }
+    }
+
+    public void StopProcessingIfFfmpegInputTxtFileExists(string directory)
+    {
+        bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
+            .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.ToString()))
+            .Any();
+
+        if (fileExists)
+        {
+            throw new OldFfmpegInputFileExistsException("Old ffmpeg input file exists. Please repackage tarball file");
+        }
+    }
+
     public void StopProcessingIfKdenliveFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
@@ -121,9 +157,17 @@ public abstract class BaseVideoService : IBaseVideoService
 
         if (fileExists)
         {
-            throw new KdenliveFileExistsException("Archive has Kdenlive project file");
+            throw new KdenliveFileExistsException("Archive has Kdenlive project file. Please repackage tarball file");
         }
     }
+
+    public abstract Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken);
+
+    public abstract Task ProcessReviewedFilesAsync(CancellationToken cancellationToken);
+
+    // public abstract Task ReceivedToStitchedAsync(CancellationToken cancellationToken);
+
+    // public abstract Task ReviewingToAnimated(CancellationToken cancellationToken);
 
     // public void CheckAndAddGraphicsSubtitle(TechTalkVideoFile video)
     // {

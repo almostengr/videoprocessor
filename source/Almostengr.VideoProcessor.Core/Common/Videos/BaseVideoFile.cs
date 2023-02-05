@@ -1,17 +1,21 @@
 using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Constants;
+using Almostengr.VideoProcessor.Core.Music;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
 public abstract record BaseVideoFile
 {
     public string Title { get; init; }
-    public string TarballFilePath { get; init; }
-    public string TarballFileName { get; init; }
+    public string FilePath { get; init; }
+    public string FileName { get; init; }
+    // public string TarballFilePath { get; init; }
+    // public string TarballFileName { get; init; }
     public bool IsDraft { get; init; }
     public string OutputVideoFileName { get; init; }
     public AssSubtitleFile? GraphicsSubtitleFile { get; private set; }
+    public AudioFile AudioFile { get; private set; }
     public string BrandingText { get; private set; } = string.Empty;
 
     public readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
@@ -25,19 +29,21 @@ public abstract record BaseVideoFile
             throw new ArgumentException("File path is null or whitespace", nameof(filePath));
         }
 
-        TarballFilePath = filePath;
-        TarballFileName = Path.GetFileName(TarballFilePath);
-        Title = SetTitle(TarballFileName);
-        OutputVideoFileName = TarballFileName
+        // TarballFilePath = filePath;
+        // TarballFileName = Path.GetFileName(TarballFilePath);
+        FilePath = filePath;
+        FileName = Path.GetFileName(FilePath);
+        Title = SetTitle(FileName);
+        OutputVideoFileName = FileName
             .Replace(FileExtension.TarXz.ToString(), string.Empty)
             .Replace(FileExtension.TarGz.ToString(), string.Empty)
             .Replace(FileExtension.Tar.ToString(), string.Empty)
             + FileExtension.Mp4;
 
-        if (TarballFileName.ToLower().Contains("draft"))
-        {
-            IsDraft = true;
-        }
+        // if (TarballFileName.ToLower().Contains("draft"))
+        // {
+        //     IsDraft = true;
+        // }
 
         GraphicsSubtitleFile = null;
     }
@@ -47,6 +53,16 @@ public abstract record BaseVideoFile
     public void SetGraphicsSubtitleFile(string filePath)
     {
         GraphicsSubtitleFile = new AssSubtitleFile(filePath);
+    }
+
+    public void SetAudioFile(AudioFile audioFile)
+    {
+        AudioFile = audioFile;
+    }
+
+    public void SetAudioFile(string filePath)
+    {
+        AudioFile = new AudioFile(filePath);
     }
 
     public void SetBrandingText(string brandingText)

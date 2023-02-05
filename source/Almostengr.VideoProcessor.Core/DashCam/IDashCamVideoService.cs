@@ -4,5 +4,4 @@ namespace Almostengr.VideoProcessor.Core.DashCam;
 
 public interface IDashCamVideoService : IBaseVideoService
 {
-    Task ConvertGzToXzAsync(CancellationToken cancellationToken);
 }

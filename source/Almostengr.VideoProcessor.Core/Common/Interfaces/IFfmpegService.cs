@@ -24,4 +24,7 @@ public interface IFfmpegService
         string ffmpegInputFilePath, string outputFilePath, string videoFilter, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> ConvertEndScreenImageToMp4VideoAsync(
         string endScreenImageFilePath, string endScreenAudioFilePath, string endScreenOutputFilePath, CancellationToken cancellationToken);
+    Task<(string stdout, string stdErr)> RenderVideoAsync(
+        string videoFilePath, string videoFilters, string outputFilePath, string workingDirectory, CancellationToken cancellationToken, string? audioFilePath);
+    Task RenderVideoAsync(string filePath, string v, string outputFilePath, string reviewWorkDirectory, CancellationToken cancellationToken);
 }

@@ -2,8 +2,7 @@ namespace Almostengr.VideoProcessor.Core.Common.Constants;
 
 public struct FileExtension
 {
-    private string Value;
-
+    public string Value { get; init; }
     public FileExtension(string value)
     {
         Value = value;
@@ -13,6 +12,8 @@ public struct FileExtension
     public static readonly FileExtension AudioMp4 = new FileExtension(".audio.mp4");
     public static readonly FileExtension Avi = new FileExtension(".avi");
     public static readonly FileExtension DraftTar = new FileExtension(".draft.tar");
+    public static readonly FileExtension Err = new FileExtension(".err");
+    public static readonly FileExtension FfmpegInput = new FileExtension(".ffmpeginput");
     public static readonly FileExtension GraphicsAss = new FileExtension(".graphics.ass");
     public static readonly FileExtension Jpg = new FileExtension(".jpg");
     public static readonly FileExtension Kdenlive = new FileExtension(".kdenlive");
@@ -30,8 +31,8 @@ public struct FileExtension
     public static readonly FileExtension TmpMp4 = new FileExtension(".tmp.mp4");
     public static readonly FileExtension Ts = new FileExtension(".ts");
 
-    public override string ToString()
-    {
-        return Value.ToString();
-    }
+    // public override string ToString()
+    // {
+    //     return Value.ToString();
+    // }
 }

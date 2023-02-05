@@ -7,7 +7,7 @@ public sealed record DashCamVideoFile : BaseVideoFile
 {
     private DashCamVideoType SubType { get; init; }
 
-    public DashCamVideoFile(string archiveFilePath) : base(archiveFilePath)
+    public DashCamVideoFile(string videoFilePath) : base(videoFilePath)
     {
         SubType = DashCamVideoType.Normal;
 
