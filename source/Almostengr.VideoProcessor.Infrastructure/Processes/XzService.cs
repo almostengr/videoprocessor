@@ -16,7 +16,7 @@ public sealed class XzService : BaseProcess<XzService>, IFileCompressionService,
     public async Task<(string stdOut, string stdErr)> CompressFileAsync(
         string tarballFilePath, CancellationToken cancellationToken)
     {
-        if (tarballFilePath.EndsWith(FileExtension.TarXz.ToString()) || tarballFilePath.EndsWith(FileExtension.TarGz.ToString()))
+        if (tarballFilePath.EndsWith(FileExtension.TarXz.Value) || tarballFilePath.EndsWith(FileExtension.TarGz.Value))
         {
             throw new FileAlreadyCompressedException();
         }
@@ -37,7 +37,7 @@ public sealed class XzService : BaseProcess<XzService>, IFileCompressionService,
     public async Task<(string stdOut, string stdErr)> DecompressFileAsync(
         string tarballFilePath, CancellationToken stoppingToken)
     {
-        if (!tarballFilePath.EndsWith(FileExtension.TarXz.ToString()))
+        if (!tarballFilePath.EndsWith(FileExtension.TarXz.Value))
         {
             throw new UnableToDecompressFileException();
         }

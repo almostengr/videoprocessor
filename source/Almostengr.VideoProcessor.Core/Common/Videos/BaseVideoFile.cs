@@ -35,9 +35,9 @@ public abstract record BaseVideoFile
         FileName = Path.GetFileName(FilePath);
         Title = SetTitle(FileName);
         OutputVideoFileName = FileName
-            .Replace(FileExtension.TarXz.ToString(), string.Empty)
-            .Replace(FileExtension.TarGz.ToString(), string.Empty)
-            .Replace(FileExtension.Tar.ToString(), string.Empty)
+            .Replace(FileExtension.TarXz.Value, string.Empty)
+            .Replace(FileExtension.TarGz.Value, string.Empty)
+            .Replace(FileExtension.Tar.Value, string.Empty)
             + FileExtension.Mp4;
 
         // if (TarballFileName.ToLower().Contains("draft"))
@@ -119,9 +119,9 @@ public abstract record BaseVideoFile
             throw new ArgumentException("Video title cannot be null or whitespace", nameof(fileName));
         }
 
-        return fileName.Replace(FileExtension.TarGz.ToString(), string.Empty.ToString())
-            .Replace(FileExtension.TarXz.ToString(), string.Empty.ToString())
-            .Replace(FileExtension.Tar.ToString(), string.Empty.ToString())
+        return fileName.Replace(FileExtension.TarGz.Value, string.Empty.ToString())
+            .Replace(FileExtension.TarXz.Value, string.Empty.ToString())
+            .Replace(FileExtension.Tar.Value, string.Empty.ToString())
             .Replace(Constant.Colon, string.Empty);
     }
 

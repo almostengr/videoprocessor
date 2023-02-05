@@ -38,13 +38,6 @@ public sealed record DashCamVideoFile : BaseVideoFile
 
     public override FfMpegColor DrawTextFilterBackgroundColor()
     {
-        // if (SubType == DashCamVideoType.Fireworks)
-        // {
-        //     return FfMpegColor.Blue;
-        // }
-
-        // return FfMpegColor.Black;
-
         switch (SubType)
         {
             case DashCamVideoType.Fireworks:
@@ -57,13 +50,6 @@ public sealed record DashCamVideoFile : BaseVideoFile
 
     public override FfMpegColor DrawTextFilterTextColor()
     {
-        // if (SubType == DashCamVideoType.Night)
-        // {
-        //     return FfMpegColor.Orange;
-        // }
-
-        // return FfMpegColor.White;
-
         switch (SubType)
         {
             case DashCamVideoType.Night:
@@ -92,40 +78,4 @@ public sealed record DashCamVideoFile : BaseVideoFile
         Fireworks
     }
 
-    // public override void AddDrawTextVideoFilterFromSubtitles(List<SubtitleFileEntry> subtitles)
-    // {
-    //     foreach (var subtitle in subtitles)
-    //     {
-    //         if (string.IsNullOrWhiteSpace(subtitle.Text))
-    //         {
-    //             continue;
-    //         }
-
-    //         var splitTitles = subtitle.Text.Split(Constant.SemiColon);
-
-    //         FfMpegColor bgColor = FfMpegColor.Green;
-    //         Opacity bgOpacity = Opacity.Full;
-
-    //         string textLowered = subtitle.Text.ToLower();
-    //         if (textLowered.StartsWith("info"))
-    //         {
-    //             bgColor = FfMpegColor.Black;
-    //             bgOpacity = Opacity.Medium;
-    //         }
-
-    //         DrawTextFilters.Add(
-    //             new DrawTextFilter(splitTitles.First(), FfMpegColor.White, Opacity.Full,
-    //             bgColor, bgOpacity, DrawTextPosition.DashCamInfo,
-    //             subtitle.StartTime, (subtitle.StartTime.Add(TimeSpan.FromSeconds(5)))
-    //             ));
-    //     }
-    // }
 }
-
-
-// public enum DashCamVideoType
-// {
-//     Normal,
-//     Night,
-//     Fireworks
-// }

@@ -19,7 +19,7 @@ public abstract record BaseIncomingTarballFile
         VideoFileName = FileName.Replace(FileExtension.TarGz.Value, string.Empty)
             .Replace(FileExtension.TarXz.Value, string.Empty)
             .Replace(FileExtension.Tar.Value, string.Empty)
-            + FileExtension.Ts;
+            + FileExtension.Ts.Value;
     }
 
     public string FilePath { get; init; }

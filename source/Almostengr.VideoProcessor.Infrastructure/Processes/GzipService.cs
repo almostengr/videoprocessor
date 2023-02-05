@@ -17,7 +17,7 @@ public sealed class GzipService : BaseProcess<GzipService>, IFileCompressionServ
     public async Task<(string stdOut, string stdErr)> CompressFileAsync(
         string filePath, CancellationToken cancellationToken)
     {
-        if (filePath.EndsWith(FileExtension.TarXz.ToString()) || filePath.EndsWith(FileExtension.TarGz.ToString()))
+        if (filePath.EndsWith(FileExtension.TarXz.Value) || filePath.EndsWith(FileExtension.TarGz.Value))
         {
             throw new FileAlreadyCompressedException();
         }
@@ -38,7 +38,7 @@ public sealed class GzipService : BaseProcess<GzipService>, IFileCompressionServ
     public async Task<(string stdOut, string stdErr)> DecompressFileAsync(
         string filePath, CancellationToken stoppingToken)
     {
-        if (!filePath.EndsWith(FileExtension.TarGz.ToString()))
+        if (!filePath.EndsWith(FileExtension.TarGz.Value))
         {
             throw new UnableToDecompressFileException();
         }

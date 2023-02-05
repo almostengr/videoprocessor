@@ -53,7 +53,6 @@ public sealed record TechTalkVideoFile : BaseVideoFile
         }
     }
 
-
     enum TechTalkVideoSubType
     {
         TechTalk,

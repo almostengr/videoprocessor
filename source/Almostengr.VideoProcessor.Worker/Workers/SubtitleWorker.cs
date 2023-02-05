@@ -27,7 +27,7 @@ internal sealed class SubtitleWorker : BaseWorker
 
             try
             {
-                await _handymanService.ProcessIncomingSubtitlesAsync(cancellationToken);
+                // await _handymanService.ProcessIncomingSubtitlesAsync(cancellationToken);
             }
             catch (NoFilesMatchException)
             {
@@ -36,7 +36,7 @@ internal sealed class SubtitleWorker : BaseWorker
 
             try
             {
-                await _techTalkService.ProcessIncomingSubtitlesAsync(cancellationToken);
+                // await _techTalkService.ProcessIncomingSubtitlesAsync(cancellationToken);
             }
             catch (NoFilesMatchException)
             {

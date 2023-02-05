@@ -8,7 +8,6 @@ namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
 public abstract class BaseVideoService : IBaseVideoService
 {
-    protected const string FFMPEG_FILE_NAME = "ffmpeginput.txt";
     protected readonly AppSettings _appSettings;
     protected readonly IFfmpegService _ffmpegService;
     protected readonly IFileCompressionService _compressionService;
@@ -18,18 +17,9 @@ public abstract class BaseVideoService : IBaseVideoService
     protected readonly IMusicService _musicService;
     protected readonly IAssSubtitleFileService _assSubtitleFileService;
 
-    protected string _ffmpegInputFilePath { get; init; }
-
-
     // received, stitching, stitched, reviewing, animating, animated, uploading
     protected string IncomingDirectory { get; init; }
     protected string ArchiveDirectory { get; init; }
-    // protected string WorkingDirectory { get; init; }
-    // protected string DraftDirectory { get; init; }
-    // protected string RenderingDirectory { get; init; }
-    // protected string StitchingDirectory { get; init; }
-    // protected string AnimatingDirectory { get; init; }
-    // protected string AnimatedDirectory { get; init; }
     protected string UploadingDirectory { get; init; }
     protected string ReviewingDirectory { get; set; }
     protected string ReviewWorkDirectory { get; init; }
@@ -71,7 +61,7 @@ public abstract class BaseVideoService : IBaseVideoService
         string archiveDirectory, CancellationToken cancellationToken)
     {
         var archiveTarballs = _fileSystemService.GetFilesInDirectory(archiveDirectory)
-            .Where(f => f.EndsWith(FileExtension.Tar.ToString()) && !f.Contains(FileExtension.DraftTar.ToString()));
+            .Where(f => f.EndsWith(FileExtension.Tar.Value) && !f.Contains(FileExtension.DraftTar.Value));
 
         foreach (var archive in archiveTarballs)
         {
@@ -95,13 +85,13 @@ public abstract class BaseVideoService : IBaseVideoService
         string workingDirectory, CancellationToken cancellationToken)
     {
         var audioAsVideoFiles = _fileSystemService.GetFilesInDirectory(workingDirectory)
-            .Where(f => f.EndsWith(FileExtension.AudioMkv.ToString()) || f.EndsWith(FileExtension.AudioMp4.ToString()));
+            .Where(f => f.EndsWith(FileExtension.AudioMkv.Value) || f.EndsWith(FileExtension.AudioMp4.Value));
 
         foreach (var file in audioAsVideoFiles)
         {
             string outputFilePath = Path.Combine(workingDirectory,
-                file.Replace(FileExtension.AudioMkv.ToString(), FileExtension.Mp3.ToString())
-                    .Replace(FileExtension.AudioMp4.ToString(), FileExtension.Mp3.ToString()));
+                file.Replace(FileExtension.AudioMkv.Value, FileExtension.Mp3.Value)
+                    .Replace(FileExtension.AudioMp4.Value, FileExtension.Mp3.Value));
 
             await _ffmpegService.ConvertVideoFileToMp3FileAsync(
                 file, outputFilePath, workingDirectory, cancellationToken);
@@ -140,7 +130,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public void StopProcessingIfFfmpegInputTxtFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.ToString()))
+            .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.Value))
             .Any();
 
         if (fileExists)
@@ -152,7 +142,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public void StopProcessingIfKdenliveFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.ToString()))
+            .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.Value))
             .Any();
 
         if (fileExists)

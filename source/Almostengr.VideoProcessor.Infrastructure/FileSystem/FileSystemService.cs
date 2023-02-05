@@ -89,7 +89,8 @@ public sealed class FileSystemService : IFileSystemService
     public string GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
     {
         IEnumerable<string> filePaths = GetFilesInDirectory(directory)
-            .Where(f => f.ToLower().Contains(extension.ToString()) &&
+            .Where(f => f.ToLower().Contains(extension.Value) &&
+            // .Where(f => f.ToLower().Contains(extension.ToString()) &&
                 !f.ToLower().EndsWith(FileExtension.Err.Value));
 
         if (filePaths.Count() == 0)

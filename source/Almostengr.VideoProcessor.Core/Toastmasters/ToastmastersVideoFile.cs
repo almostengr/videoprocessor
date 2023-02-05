@@ -18,21 +18,6 @@ public sealed record ToastmastersVideoFile : BaseVideoFile
         return FfMpegColor.SteelBlue;
     }
 
-    // public void AddMeetingFilter(int duration)
-    // {
-    //     AddDrawTextVideoFilter(
-    //         "Join us on Tuesdays at 12 Noon!",
-    //         FfMpegColor.Black,
-    //         Opacity.Full,
-    //         FfmpegFontSize.Large,
-    //         DrawTextPosition.LowerLeft,
-    //         FfMpegColor.White,
-    //         Opacity.Full,
-    //         10,
-    //         base.FilterDuration(duration)
-    //     );
-    // }
-
     public string MeetingFilter()
     {
         return (new DrawTextFilter("Join us on Tuesdays at 12 Noon", FfMpegColor.Blue, Opacity.Full,

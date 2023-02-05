@@ -22,7 +22,7 @@ internal sealed class HandymanVideoWorker : BaseWorker
         {
             try
             {
-                await _videoService.ProcessIncomingVideoTarballsAsync(cancellationToken);
+                // await _videoService.ProcessIncomingVideoTarballsAsync(cancellationToken);
             }
             catch (NoFilesMatchException)
             {
