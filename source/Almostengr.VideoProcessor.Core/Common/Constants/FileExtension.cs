@@ -30,9 +30,4 @@ public struct FileExtension
     public static readonly FileExtension TarXz = new FileExtension(".tar.xz");
     public static readonly FileExtension TmpMp4 = new FileExtension(".tmp.mp4");
     public static readonly FileExtension Ts = new FileExtension(".ts");
-
-    // public override string ToString()
-    // {
-    //     return Value.ToString();
-    // }
 }

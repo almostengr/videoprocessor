@@ -26,11 +26,8 @@ internal sealed class TechTalkVideoWorker : BaseWorker
             }
             catch (NoFilesMatchException)
             {
-                await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
                 await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
-                await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
             }
-
 
             try
             {
@@ -39,19 +36,9 @@ internal sealed class TechTalkVideoWorker : BaseWorker
             catch (NoFilesMatchException)
             {
                 await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
-                await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
-                // await _videoService.ConvertGzToXzAsync(cancellationToken);
                 await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
             }
 
-            try
-            {
-                await _videoService.ProcessIncomingTarballFilesAsync(cancellationToken);
-            }
-            catch (NoFilesMatchException)
-            {
-
-            }
         }
     }
 }

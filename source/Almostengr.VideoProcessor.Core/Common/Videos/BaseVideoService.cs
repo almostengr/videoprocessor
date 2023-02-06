@@ -42,10 +42,10 @@ public abstract class BaseVideoService : IBaseVideoService
         _assSubtitleFileService = assSubtitleFileService;
     }
 
-    // public abstract Task ProcessIncomingVideoTarballsAsync(CancellationToken cancellationToken);
     public abstract Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
     public abstract Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
-    // public abstract Task ConvertGzToXzAsync(CancellationToken cancellationToken);
+    public abstract Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken);
+    public abstract Task ProcessReviewedFilesAsync(CancellationToken cancellationToken);
 
     public virtual Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
     {
@@ -108,13 +108,6 @@ public abstract class BaseVideoService : IBaseVideoService
         }
     }
 
-    // public bool DoesKdenliveFileExist(string directory)
-    // {
-    //     return _fileSystemService.GetFilesInDirectory(directory)
-    //         .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.ToString()))
-    //         .Any();
-    // }
-
     public void StopProcessingIfDetailsTxtFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
@@ -150,26 +143,5 @@ public abstract class BaseVideoService : IBaseVideoService
             throw new KdenliveFileExistsException("Archive has Kdenlive project file. Please repackage tarball file");
         }
     }
-
-    public abstract Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken);
-
-    public abstract Task ProcessReviewedFilesAsync(CancellationToken cancellationToken);
-
-    // public abstract Task ReceivedToStitchedAsync(CancellationToken cancellationToken);
-
-    // public abstract Task ReviewingToAnimated(CancellationToken cancellationToken);
-
-    // public void CheckAndAddGraphicsSubtitle(TechTalkVideoFile video)
-    // {
-    //     string? graphicsSubtitleFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-    //         .Where(f => f.EndsWith(FileExtension.GraphicsAss.ToString()))
-    //         .SingleOrDefault();
-
-    //     if (graphicsSubtitleFile != null)
-    //     {
-    //         var subtitles = _assSubtitleFileService.ReadFile(graphicsSubtitleFile);
-    //         video.AddDrawTextVideoFilterFromSubtitles(subtitles);
-    //     }
-    // }
 
 }

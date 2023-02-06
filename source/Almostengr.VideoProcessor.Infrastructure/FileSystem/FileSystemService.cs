@@ -17,10 +17,10 @@ public sealed class FileSystemService : IFileSystemService
         _appSettings = appSettings;
     }
 
-    public void CopyFile(string sourceFilePath, string destinationFilePath)
-    {
-        File.Copy(sourceFilePath, destinationFilePath, false);
-    }
+    // public void CopyFile(string sourceFilePath, string destinationFilePath)
+    // {
+    //     File.Copy(sourceFilePath, destinationFilePath, false);
+    // }
 
     public void CreateDirectory(string directory)
     {
@@ -89,17 +89,14 @@ public sealed class FileSystemService : IFileSystemService
     public string GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
     {
         IEnumerable<string> filePaths = GetFilesInDirectory(directory)
-            .Where(f => f.ToLower().Contains(extension.Value) &&
-            // .Where(f => f.ToLower().Contains(extension.ToString()) &&
-                !f.ToLower().EndsWith(FileExtension.Err.Value));
+            .Where(f => f.ToLower().Contains(extension.Value) && !f.ToLower().EndsWith(FileExtension.Err.Value));
 
         if (filePaths.Count() == 0)
         {
             throw new NoFilesMatchException();
         }
 
-        return filePaths
-            .OrderBy(f => _randomService.Next()).Take(1)
+        return filePaths.OrderBy(f => _randomService.Next()).Take(1)
             .First();
     }
 
@@ -117,15 +114,20 @@ public sealed class FileSystemService : IFileSystemService
         throw new DiskSpaceIsLowException($"Disk space remaining {spaceRemainingPercentage}");
     }
 
-    public void MoveFile(string source, string destination, bool createDestinationDirectory = true)
+    public void MoveFile(string source, string destination)
     {
         try
         {
+            if (File.Exists(destination))
+            {
+                DeleteFile(destination);
+            }
+
             File.Move(source, destination);
         }
         catch (DirectoryNotFoundException)
         {
-            CreateDirectory(destination);
+            CreateDirectory(Path.GetDirectoryName(destination));
             File.Move(source, destination);
         }
     }
@@ -176,15 +178,15 @@ public sealed class FileSystemService : IFileSystemService
         }
     }
 
-    public bool DoesFileExist(string filePath)
-    {
-        return File.Exists(filePath);
-    }
+    // public bool DoesFileExist(string filePath)
+    // {
+    //     return File.Exists(filePath);
+    // }
 
-    public string GetFileContents(string filePath)
-    {
-        return File.ReadAllText(filePath).Trim();
-    }
+    // public string GetFileContents(string filePath)
+    // {
+    //     return File.ReadAllText(filePath).Trim();
+    // }
 
     public void SaveFileContents(string filePath, string content)
     {

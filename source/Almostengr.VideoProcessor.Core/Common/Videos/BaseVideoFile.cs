@@ -10,17 +10,14 @@ public abstract record BaseVideoFile
     public string Title { get; init; }
     public string FilePath { get; init; }
     public string FileName { get; init; }
-    // public string TarballFilePath { get; init; }
-    // public string TarballFileName { get; init; }
-    public bool IsDraft { get; init; }
-    public string OutputVideoFileName { get; init; }
+    public string OutputMp4VideoFileName { get; init; }
+    public string OutputTsVideoFileName { get; init; }
     public AssSubtitleFile? GraphicsSubtitleFile { get; private set; }
     public AudioFile AudioFile { get; private set; }
     public string BrandingText { get; private set; } = string.Empty;
 
     public readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
     public readonly string RHT_WEBSITE = "rhtservices.net";
-    public readonly string RHT_SOCIAL_LINKS = "rhtservices.net/links";
 
     public BaseVideoFile(string filePath)
     {
@@ -29,21 +26,16 @@ public abstract record BaseVideoFile
             throw new ArgumentException("File path is null or whitespace", nameof(filePath));
         }
 
-        // TarballFilePath = filePath;
-        // TarballFileName = Path.GetFileName(TarballFilePath);
         FilePath = filePath;
         FileName = Path.GetFileName(FilePath);
         Title = SetTitle(FileName);
-        OutputVideoFileName = FileName
+        OutputMp4VideoFileName = FileName
             .Replace(FileExtension.TarXz.Value, string.Empty)
             .Replace(FileExtension.TarGz.Value, string.Empty)
             .Replace(FileExtension.Tar.Value, string.Empty)
             + FileExtension.Mp4;
 
-        // if (TarballFileName.ToLower().Contains("draft"))
-        // {
-        //     IsDraft = true;
-        // }
+        OutputTsVideoFileName = OutputMp4VideoFileName.Replace(FileExtension.Mp4.Value, FileExtension.Ts.Value);
 
         GraphicsSubtitleFile = null;
     }
@@ -91,17 +83,23 @@ public abstract record BaseVideoFile
 
         foreach (var subtitle in GraphicsSubtitleFile.Subtitles)
         {
+            if (string.IsNullOrWhiteSpace(subtitle.Text))
+            {
+                continue;
+            }
+            
             stringBuilder.Append(Constant.CommaSpace);
 
             var splitTitle = subtitle.Text.Split(Constant.SemiColon);
 
             stringBuilder.Append(
                 new DrawTextFilter(splitTitle.First(), DrawTextFilterTextColor(), Opacity.Full,
-                DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.SubtitlePrimary,
+                DrawTextFilterBackgroundColor(), Opacity.Full, DrawTextPosition.SubtitlePrimary,
                 subtitle.StartTime, subtitle.EndTime).ToString());
 
             if (splitTitle.Length == 2)
             {
+                stringBuilder.Append(Constant.CommaSpace);
                 stringBuilder.Append(
                     new DrawTextFilter(splitTitle.Last(), DrawTextFilterBackgroundColor(), Opacity.Full,
                     DrawTextFilterTextColor(), Opacity.Full, DrawTextPosition.SubtitleSecondary,
@@ -135,7 +133,7 @@ public abstract record BaseVideoFile
         return FfMpegColor.White;
     }
 
-    protected sealed class DrawTextFilter // public sealed class DrawTextFilter
+    protected sealed class DrawTextFilter
     {
         private string Text { get; init; }
         private FfMpegColor TextColor { get; init; }

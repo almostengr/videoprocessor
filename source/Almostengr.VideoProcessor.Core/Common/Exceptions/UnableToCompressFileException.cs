@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Core.Common.Exceptions;
 
-public class UnableToCompressFileException : VideoProcessorException
+public sealed class UnableToCompressFileException : VideoProcessorException
 {
     public UnableToCompressFileException()
     {

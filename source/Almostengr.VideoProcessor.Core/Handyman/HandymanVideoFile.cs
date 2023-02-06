@@ -5,12 +5,18 @@ namespace Almostengr.VideoProcessor.Core.Handyman;
 
 public sealed record HandymanVideoFile : BaseVideoFile
 {
-    public HandymanVideoFile(string archiveFilePath) : base(archiveFilePath)
-    {}
+    public HandymanVideoFile(string filePath) : base(filePath)
+    { }
 
     public override string[] BrandingTextOptions()
     {
-        return new string[] { ROBINSON_SERVICES, RHT_WEBSITE, "@rhtservicesllc", RHT_SOCIAL_LINKS };
+        List<string> options = new();
+        options.Add(ROBINSON_SERVICES);
+        options.Add(RHT_WEBSITE);
+        options.Add("@rhtservicesllc");
+        options.Add("#rhtservicesllc");
+        options.Add("rhtservices.net/handyman");
+        return options.ToArray();
     }
 
     public override FfMpegColor DrawTextFilterBackgroundColor()

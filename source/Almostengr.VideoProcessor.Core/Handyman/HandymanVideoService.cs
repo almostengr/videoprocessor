@@ -104,7 +104,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 Path.Combine(UploadingDirectory, subtitle.BlogFileName()), subtitle.BlogPostText());
 
             _fileSystemService.MoveFile(
-                subtitle.FilePath, Path.Combine(ArchiveDirectory, subtitle.FileName), false);
+                subtitle.FilePath, Path.Combine(ArchiveDirectory, subtitle.FileName));
         }
         catch (NoFilesMatchException)
         {

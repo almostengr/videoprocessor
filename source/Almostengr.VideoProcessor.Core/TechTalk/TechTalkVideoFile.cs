@@ -23,7 +23,6 @@ public sealed record TechTalkVideoFile : BaseVideoFile
 
     public override string[] BrandingTextOptions()
     {
-        const string TECH_TALK = "Tech Talk with RHT Services";
         List<string> options = new();
 
         if (SubType == TechTalkVideoSubType.Christmas || SubType == TechTalkVideoSubType.IndependenceDay)
@@ -31,10 +30,11 @@ public sealed record TechTalkVideoFile : BaseVideoFile
             options.Add("twitter.com/hplightshow");
         }
 
-        options.Add(TECH_TALK);
+        options.Add("Tech Talk with RHT Services");
         options.Add(RHT_WEBSITE);
-        options.Add(RHT_SOCIAL_LINKS);
-
+        options.Add("@rhtservicestech");
+        options.Add("#rhtservicestech");
+        options.Add("rhtservices.net/techtalk");
         return options.ToArray();
     }
 

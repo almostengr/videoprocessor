@@ -10,8 +10,8 @@ public interface IFfmpegService
         string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdOut, string stdErr)> RenderVideoAsync(
         string ffmpegInputFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken);
-    Task<(string stdOut, string stdErr)> RenderVideoWithMixTrackAsync(
-        string ffmpegInputFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken);
+    // Task<(string stdOut, string stdErr)> RenderVideoWithAudioAsync(
+    //     string ffmpegInputFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> AddAudioToVideoAsync(
@@ -28,4 +28,6 @@ public interface IFfmpegService
         string videoFilePath, string videoFilters, string outputFilePath, string workingDirectory, CancellationToken cancellationToken, string? audioFilePath);
     Task RenderVideoAsync(string filePath, string v, string outputFilePath, string reviewWorkDirectory, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> ConcatTsFilesToMp4FileAsync(string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken);
+    Task<(string stdOut, string stdErr)> RenderVideoWithAudioAndFiltersAsync(
+        string videoFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken);
 }

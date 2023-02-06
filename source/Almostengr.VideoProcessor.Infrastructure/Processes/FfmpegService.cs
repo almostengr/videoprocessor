@@ -67,13 +67,24 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
-    public async Task<(string stdOut, string stdErr)> RenderVideoWithMixTrackAsync(
-        string ffmpegInputFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
+    // public async Task<(string stdOut, string stdErr)> RenderVideoWithAudioAsync(
+    //     string ffmpegInputFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
+    // {
+    //     string workingDirectory =
+    //         Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+    //     string arguments =
+    //         $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -i \"{audioTrackFilePath}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
+
+    //     return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    // }
+
+    public async Task<(string stdOut, string stdErr)> RenderVideoWithAudioAndFiltersAsync(
+        string videoFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory =
-            Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
         string arguments =
-            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -i \"{audioTrackFilePath}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
+            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i \"{videoFilePath}\" -i \"{audioTrackFilePath}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
 
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
@@ -210,14 +221,13 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken);
     }
 
-    public Task<(string stdout, string stdErr)> RenderVideoAsync(
-        string videoFilePath, string videoFilters, string outputFilePath, string workingDirectory, CancellationToken cancellationToken, string? audioFilePath)
+    public Task RenderVideoAsync(
+        string filePath, string videoFilter, string outputFilePath, string reviewWorkDirectory, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public Task RenderVideoAsync(
-        string filePath, string videoFilter, string outputFilePath, string reviewWorkDirectory, CancellationToken cancellationToken)
+    public Task<(string stdout, string stdErr)> RenderVideoAsync(string videoFilePath, string videoFilters, string outputFilePath, string workingDirectory, CancellationToken cancellationToken, string? audioFilePath)
     {
         throw new NotImplementedException();
     }

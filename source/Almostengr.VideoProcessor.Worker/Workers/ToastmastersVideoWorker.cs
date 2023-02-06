@@ -20,40 +20,24 @@ internal sealed class ToastmastersVideoWorker : BaseWorker
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            // try
-            // {
-            //     await _videoService.ProcessIncomingVideoTarballsAsync(cancellationToken);
-            // }
-            // catch (NoFilesMatchException)
-            // {
-            //     await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
-            //     await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
-            //     await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
-            // }
-
-
-            try
-            {
-                // await _videoService.ProcessIncomingVideoTarballsAsync(cancellationToken);
-                await _videoService.ProcessReviewedFilesAsync(cancellationToken);
-            }
-            catch (NoFilesMatchException)
-            {
-                await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
-                await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
-                // await _videoService.ConvertGzToXzAsync(cancellationToken);
-                await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
-            }
-
             try
             {
                 await _videoService.ProcessIncomingTarballFilesAsync(cancellationToken);
             }
             catch (NoFilesMatchException)
             {
-
+                await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
             }
-            
+
+            try
+            {
+                await _videoService.ProcessReviewedFilesAsync(cancellationToken);
+            }
+            catch (NoFilesMatchException)
+            {
+                await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
+                await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
+            }
         }
     }
 }

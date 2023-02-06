@@ -18,7 +18,6 @@ public sealed record SubtitleFileEntry
         text = text.Trim();
         if (string.IsNullOrWhiteSpace(text))
         {
-            // throw new ArgumentException("Text cannot be null or whitepsace", nameof(text));
             return;
         }
 
@@ -26,21 +25,6 @@ public sealed record SubtitleFileEntry
         EndTime = endTime;
         Text = FixMisspellings(text);
     }
-
-    // public uint StartSeconds()
-    // {
-    //     return (uint)StartTime.TotalSeconds;
-    // }
-
-    // public uint EndSeconds()
-    // {
-    //     return (uint)EndTime.TotalSeconds;
-    // }
-
-    // public uint Duration()
-    // {
-    //     return (uint)(EndTime - StartTime).TotalSeconds;
-    // }
 
     private string FixMisspellings(string input)
     {
