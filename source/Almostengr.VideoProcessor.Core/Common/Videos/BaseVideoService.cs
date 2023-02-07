@@ -46,11 +46,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public abstract Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
     public abstract Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken);
     public abstract Task ProcessReviewedFilesAsync(CancellationToken cancellationToken);
-
-    public virtual Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
+    public abstract Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken);
 
     internal string RandomChannelBrandingText(string[] options)
     {

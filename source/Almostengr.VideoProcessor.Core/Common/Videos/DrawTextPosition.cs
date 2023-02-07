@@ -2,7 +2,7 @@ namespace Almostengr.VideoProcessor.Core.Constants;
 
 public struct DrawTextPosition
 {
-    private string Value;
+    public string Value { get; }
     public DrawTextPosition(string value)
     {
         Value = value;

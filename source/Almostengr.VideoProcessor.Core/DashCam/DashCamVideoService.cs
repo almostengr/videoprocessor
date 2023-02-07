@@ -33,6 +33,11 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         _gzFileService = gzFileService;
     }
 
+    public override async Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
     public override async Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken)
     {
         DashCamIncomingTarballFile? tarball = null;
@@ -55,6 +60,8 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             StopProcessingIfFfmpegInputTxtFileExists(IncomingWorkDirectory);
             StopProcessingIfDetailsTxtFileExists(IncomingWorkDirectory);
 
+            _fileSystemService.PrepareAllFilesInDirectory(IncomingWorkDirectory);
+
             string? ffmpegInputFilePath = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
                 .Where(f => f.EndsWith(FileExtension.FfmpegInput.Value))
                 .SingleOrDefault();
@@ -62,13 +69,12 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             if (string.IsNullOrEmpty(ffmpegInputFilePath))
             {
                 // todo should be ordering by date
-                string[] videoFiles = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
+                var videoFiles = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
                     .Where(f => f.EndsWith(FileExtension.Mov.Value))
-                    .OrderBy(f => f)
-                    .ToArray();
+                    .OrderBy(f => f);
 
                 ffmpegInputFilePath = Path.Combine(IncomingWorkDirectory, "videos" + FileExtension.FfmpegInput.Value);
-                CreateFfmpegInputFile(videoFiles, ffmpegInputFilePath);
+                CreateFfmpegInputFile(videoFiles.ToArray(), ffmpegInputFilePath);
             }
 
             string outputFilePath = Path.Combine(IncomingWorkDirectory, tarball.VideoFileName);
@@ -107,11 +113,12 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             
             _loggerService.LogInformation($"Processing {subtitleFilePath}");
 
-            string videoFilePath = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
-                .Where(f => f.StartsWith(subtitleFile.FileName) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
+            var video = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
+                .Where(f => f.StartsWith(subtitleFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
+                .Select(f => new DashCamVideoFile(f))
                 .Single();
 
-            DashCamVideoFile video = new DashCamVideoFile(videoFilePath);
+            // DashCamVideoFile video = new DashCamVideoFile(videoFilePath);
             video.SetGraphicsSubtitleFile(subtitleFilePath);
             video.GraphicsSubtitleFile.SetSubtitles(_assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
 
@@ -149,19 +156,19 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
         }
     }
 
-    public async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
-    {
-        var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
-            .Where(f => f.EndsWith(FileExtension.TarGz.Value));
+    // public async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
+    // {
+    //     var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
+    //         .Where(f => f.EndsWith(FileExtension.TarGz.Value));
 
-        foreach (var file in tarGzFiles)
-        {
-            await _gzFileService.DecompressFileAsync(file, cancellationToken);
+    //     foreach (var file in tarGzFiles)
+    //     {
+    //         await _gzFileService.DecompressFileAsync(file, cancellationToken);
 
-            await _xzFileService.CompressFileAsync(
-                file.Replace(FileExtension.TarGz.Value, FileExtension.Tar.Value), cancellationToken);
-        }
-    }
+    //         await _xzFileService.CompressFileAsync(
+    //             file.Replace(FileExtension.TarGz.Value, FileExtension.Tar.Value), cancellationToken);
+    //     }
+    // }
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {

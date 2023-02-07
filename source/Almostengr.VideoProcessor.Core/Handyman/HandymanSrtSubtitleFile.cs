@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Core.Common.Videos;
 
 namespace Almostengr.VideoProcessor.Core.Handyman;
 
-public sealed record HandymanSrtSubtitleFile : SrtSubtitleFile
+public sealed class HandymanSrtSubtitleFile : SrtSubtitleFile
 {
     public HandymanSrtSubtitleFile(string filePath) : base(filePath)
     {

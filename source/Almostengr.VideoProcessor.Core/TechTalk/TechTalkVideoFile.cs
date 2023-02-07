@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk;
 
-public sealed record TechTalkVideoFile : BaseVideoFile
+public sealed class TechTalkVideoFile : BaseVideoFile
 {
     private TechTalkVideoSubType SubType { get; init; }
 

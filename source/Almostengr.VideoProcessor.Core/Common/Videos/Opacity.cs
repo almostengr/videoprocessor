@@ -2,8 +2,7 @@ namespace Almostengr.VideoProcessor.Core.Constants;
 
 public struct Opacity
 {
-    private string Value;
-
+    public string Value { get; }
     public Opacity(string value)
     {
         Value = value;

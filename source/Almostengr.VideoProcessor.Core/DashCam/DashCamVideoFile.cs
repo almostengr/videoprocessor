@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
 
-public sealed record DashCamVideoFile : BaseVideoFile
+public sealed class DashCamVideoFile : BaseVideoFile
 {
     private DashCamVideoType SubType { get; init; }
 

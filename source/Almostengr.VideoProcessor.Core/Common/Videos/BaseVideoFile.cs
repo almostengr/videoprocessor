@@ -5,7 +5,7 @@ using Almostengr.VideoProcessor.Core.Music;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public abstract record BaseVideoFile
+public abstract class BaseVideoFile
 {
     public string Title { get; init; }
     public string FilePath { get; init; }
@@ -13,7 +13,7 @@ public abstract record BaseVideoFile
     public string OutputMp4VideoFileName { get; init; }
     public string OutputTsVideoFileName { get; init; }
     public AssSubtitleFile? GraphicsSubtitleFile { get; private set; }
-    public AudioFile AudioFile { get; private set; }
+    public MusicFile AudioFile { get; private set; }
     public string BrandingText { get; private set; } = string.Empty;
 
     public readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
@@ -26,6 +26,17 @@ public abstract record BaseVideoFile
             throw new ArgumentException("File path is null or whitespace", nameof(filePath));
         }
 
+        filePath = filePath.ToLower();
+        if (!filePath.EndsWith(FileExtension.Avi.Value) &&
+            !filePath.EndsWith(FileExtension.Mkv.Value) &&
+            !filePath.EndsWith(FileExtension.Mov.Value) &&
+            !filePath.EndsWith(FileExtension.Mp4.Value) &&
+            !filePath.EndsWith(FileExtension.Ts.Value)
+            )
+        {
+            throw new ArgumentException("File path is not valid video file", nameof(filePath));
+        }
+
         FilePath = filePath;
         FileName = Path.GetFileName(FilePath);
         Title = SetTitle(FileName);
@@ -36,7 +47,6 @@ public abstract record BaseVideoFile
             + FileExtension.Mp4;
 
         OutputTsVideoFileName = OutputMp4VideoFileName.Replace(FileExtension.Mp4.Value, FileExtension.Ts.Value);
-
         GraphicsSubtitleFile = null;
     }
 
@@ -47,14 +57,9 @@ public abstract record BaseVideoFile
         GraphicsSubtitleFile = new AssSubtitleFile(filePath);
     }
 
-    public void SetAudioFile(AudioFile audioFile)
+    public void SetAudioFile(MusicFile audioFile)
     {
         AudioFile = audioFile;
-    }
-
-    public void SetAudioFile(string filePath)
-    {
-        AudioFile = new AudioFile(filePath);
     }
 
     public void SetBrandingText(string brandingText)
@@ -87,7 +92,7 @@ public abstract record BaseVideoFile
             {
                 continue;
             }
-            
+
             stringBuilder.Append(Constant.CommaSpace);
 
             var splitTitle = subtitle.Text.Split(Constant.SemiColon);

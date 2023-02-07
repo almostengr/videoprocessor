@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public sealed record SubtitleFileEntry
+public sealed class SubtitleFileEntry
 {
     public TimeSpan StartTime { get; init; }
     public TimeSpan EndTime { get; init; }

@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Handyman;
 
-public sealed record HandymanVideoFile : BaseVideoFile
+public sealed class HandymanVideoFile : BaseVideoFile
 {
     public HandymanVideoFile(string filePath) : base(filePath)
     { }

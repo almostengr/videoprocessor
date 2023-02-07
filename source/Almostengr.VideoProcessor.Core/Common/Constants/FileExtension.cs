@@ -2,7 +2,7 @@ namespace Almostengr.VideoProcessor.Core.Common.Constants;
 
 public struct FileExtension
 {
-    public string Value { get; init; }
+    public string Value { get; }
     public FileExtension(string value)
     {
         Value = value;
@@ -17,7 +17,6 @@ public struct FileExtension
     public static readonly FileExtension GraphicsAss = new FileExtension(".graphics.ass");
     public static readonly FileExtension Jpg = new FileExtension(".jpg");
     public static readonly FileExtension Kdenlive = new FileExtension(".kdenlive");
-    public static readonly FileExtension Log = new FileExtension(".log");
     public static readonly FileExtension Md = new FileExtension(".md");
     public static readonly FileExtension Mkv = new FileExtension(".mkv");
     public static readonly FileExtension Mov = new FileExtension(".mov");
@@ -28,6 +27,5 @@ public struct FileExtension
     public static readonly FileExtension Tar = new FileExtension(".tar");
     public static readonly FileExtension TarGz = new FileExtension(".tar.gz");
     public static readonly FileExtension TarXz = new FileExtension(".tar.xz");
-    public static readonly FileExtension TmpMp4 = new FileExtension(".tmp.mp4");
     public static readonly FileExtension Ts = new FileExtension(".ts");
 }

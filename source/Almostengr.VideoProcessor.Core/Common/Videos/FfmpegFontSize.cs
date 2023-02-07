@@ -2,7 +2,7 @@ namespace Almostengr.VideoProcessor.Core.Constants;
 
 public struct FfmpegFontSize
 {
-    private string Value;
+    public string Value { get; }
     public FfmpegFontSize(string value)
     {
         Value = value;

@@ -4,7 +4,7 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public abstract record SrtSubtitleFile
+public abstract class SrtSubtitleFile
 {
     public string FilePath { get; init; }
     public string FileName {get; init;}
@@ -15,6 +15,11 @@ public abstract record SrtSubtitleFile
         if (string.IsNullOrWhiteSpace(filePath))
         {
             throw new ArgumentException("File path not provided", nameof(filePath));
+        }
+
+        if (!filePath.ToLower().EndsWith(FileExtension.Srt.Value))
+        {
+            throw new ArgumentException("File path is not valid", nameof(filePath));
         }
 
         FilePath = filePath;

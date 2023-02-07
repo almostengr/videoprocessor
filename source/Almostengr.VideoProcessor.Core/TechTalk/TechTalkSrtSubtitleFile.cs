@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Core.Common.Videos;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk;
 
-public sealed record TechTalkSrtSubtitleFile : SrtSubtitleFile
+public sealed class TechTalkSrtSubtitleFile : SrtSubtitleFile
 {
     public TechTalkSrtSubtitleFile(string filePath) : base(filePath)
     {

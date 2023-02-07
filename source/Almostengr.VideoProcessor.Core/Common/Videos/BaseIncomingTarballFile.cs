@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public abstract record BaseIncomingTarballFile
+public abstract class BaseIncomingTarballFile
 {
     protected BaseIncomingTarballFile(string tarballFilePath)
     {

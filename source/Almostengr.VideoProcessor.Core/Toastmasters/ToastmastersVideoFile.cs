@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Toastmasters;
 
-public sealed record ToastmastersVideoFile : BaseVideoFile
+public sealed class ToastmastersVideoFile : BaseVideoFile
 {
     public ToastmastersVideoFile(string archiveFilePath) : base(archiveFilePath)
     { }

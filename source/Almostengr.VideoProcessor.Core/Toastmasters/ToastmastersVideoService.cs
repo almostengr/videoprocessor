@@ -27,6 +27,11 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         _loggerService = loggerService;
     }
 
+    public override async Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
         try

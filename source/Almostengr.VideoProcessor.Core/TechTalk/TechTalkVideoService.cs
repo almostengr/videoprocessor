@@ -40,19 +40,19 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         _fileSystemService.CreateDirectory(ReviewingDirectory);
     }
 
-    public async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
-    {
-        var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
-            .Where(f => f.EndsWith(FileExtension.TarGz.Value));
+    // public async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
+    // {
+    //     var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
+    //         .Where(f => f.EndsWith(FileExtension.TarGz.Value));
 
-        foreach (var file in tarGzFiles)
-        {
-            await _gzFileService.DecompressFileAsync(file, cancellationToken);
+    //     foreach (var file in tarGzFiles)
+    //     {
+    //         await _gzFileService.DecompressFileAsync(file, cancellationToken);
 
-            await _xzFileService.CompressFileAsync(
-                file.Replace(FileExtension.TarGz.Value, FileExtension.Tar.ToString()), cancellationToken);
-        }
-    }
+    //         await _xzFileService.CompressFileAsync(
+    //             file.Replace(FileExtension.TarGz.Value, FileExtension.Tar.ToString()), cancellationToken);
+    //     }
+    // }
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
@@ -134,7 +134,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             var audioFiles = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp3.Value))
-                .Select(f => new AudioFile(f))
+                .Select(f => new MusicFile(f))
                 .ToList();
 
             foreach (var audioFile in audioFiles)
@@ -160,8 +160,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             var mp4MkvVideoFiles = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp4.Value) || f.EndsWith(FileExtension.Mkv.Value))
-                .Select(f => new TechTalkVideoFile(f))
-                .ToList();
+                .Select(f => new TechTalkVideoFile(f));
 
             foreach (var video in mp4MkvVideoFiles)
             {
@@ -223,6 +222,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             }
 
             _fileSystemService.MoveFile(tarball.FilePath, Path.Combine(ArchiveDirectory, tarball.FileName));
+            _fileSystemService.MoveFile(outputVideoFilePath, Path.Combine(ReviewingDirectory, tarball.VideoFileName));
             _fileSystemService.DeleteDirectory(IncomingWorkDirectory);
 
             _loggerService.LogInformation($"Completed processing {selectedTarballFilePath}");
@@ -263,9 +263,9 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
                 .Select(f => new TechTalkVideoFile(f))
                 .Single();
 
-            AudioFile audioFile = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
+            MusicFile audioFile = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
                 .Where(f => f.StartsWith(subtitleFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp3.Value))
-                .Select(f => new AudioFile(f))
+                .Select(f => new MusicFile(f))
                 .Single();
 
             video.SetGraphicsSubtitleFile(subtitleFilePath);
