@@ -10,7 +10,6 @@ using Almostengr.VideoProcessor.Core.Toastmasters;
 using Almostengr.VideoProcessor.Core.TechTalk;
 using Almostengr.VideoProcessor.Core.Music.Services;
 using Almostengr.VideoProcessor.Core.DashCam;
-using Almostengr.VideoProcessor.Infrastructure.Web;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
@@ -31,7 +30,6 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IToastmastersVideoService, ToastmastersVideoService>();
         services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
 
-        services.AddSingleton<IYouTubeSearchService, YouTubeSearchService>();
         services.AddSingleton<ISrtSubtitleFileService, SrtSubtitleFileService>();
         services.AddSingleton<IAssSubtitleFileService, AssSubtitleFileService>();
 

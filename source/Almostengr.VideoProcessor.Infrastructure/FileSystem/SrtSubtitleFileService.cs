@@ -73,10 +73,6 @@ public sealed class SrtSubtitleFileService : ISrtSubtitleFileService
                 writer.WriteLine(subtitles[i].StartTime.ToString(TIME_FORMAT) + TIME_SEPARATOR + subtitles[i].EndTime.ToString(TIME_FORMAT));
                 writer.WriteLine(subtitles[i].Text);
                 writer.WriteLine();
-                // if (i != subtitles.Count - 1)
-                // {
-                //     writer.WriteLine();
-                // }
             }
         }
     }

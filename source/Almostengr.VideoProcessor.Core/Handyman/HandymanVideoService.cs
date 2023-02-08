@@ -29,20 +29,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         _srtService = srtSubtitleFileService;
     }
 
-    // public async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
-    // {
-    //     var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
-    //         .Where(f => f.EndsWith(FileExtension.TarGz.Value));
-
-    //     foreach (var file in tarGzFiles)
-    //     {
-    //         await _compressionService.DecompressFileAsync(file, cancellationToken);
-
-    //         await _compressionService.CompressFileAsync(
-    //             file.Replace(FileExtension.TarGz.Value, FileExtension.Tar.Value), cancellationToken);
-    //     }
-    // }
-
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
         try
@@ -54,38 +40,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             _loggerService.LogError(ex, ex.Message);
         }
     }
-
-    // private async Task AddMusicToTimelapseVideoAsync(CancellationToken cancellationToken)
-    // {
-    //     var workingDirVideos = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
-    //         .Where(f => f.ToLower().EndsWith(FileExtension.Mp4.Value));
-
-    //     foreach (var videoFilePath in workingDirVideos)
-    //     {
-    //         HandymanVideoFile video = new HandymanVideoFile(videoFilePath);
-
-    //         var result = await _ffmpegService.FfprobeAsync($"\"{video.FilePath}\"", IncomingWorkDirectory, cancellationToken);
-
-    //         if (result.stdErr.ToLower().Contains("audio"))
-    //         {
-    //             continue;
-    //         }
-
-    //         string audioFilePath =
-    //             _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
-    //                 .Where(f => f.StartsWith(Path.GetFileNameWithoutExtension(videoFilePath)) && f.EndsWith(FileExtension.Mp3.Value))
-    //                 .SingleOrDefault() ?? _musicService.GetRandomNonMixTrack();
-    //         video.SetAudioFile(audioFilePath);
-
-    //         string tempOutputFileName = Path.GetFileNameWithoutExtension(video.FilePath) + FileExtension.TmpMp4.Value;
-
-    //         await _ffmpegService.AddAudioToVideoAsync(
-    //             video.FilePath, video.AudioFile.FilePath, tempOutputFileName, cancellationToken);
-
-    //         _fileSystemService.DeleteFile(video.FilePath);
-    //         _fileSystemService.MoveFile(tempOutputFileName, video.FilePath);
-    //     }
-    // }
 
     public override Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
     {
@@ -221,14 +175,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                 ffmpegInputFilePath = Path.Combine(IncomingWorkDirectory, "videos" + FileExtension.FfmpegInput.Value);
                 CreateFfmpegInputFile(videoFiles.ToArray(), ffmpegInputFilePath);
             }
-
-            // string outputFilePath = Path.Combine(IncomingWorkDirectory, tarball.VideoFileName);
-
-            // await _ffmpegService.ConcatTsFilesToMp4FileAsync(
-            //     ffmpegInputFilePath,
-            //     outputFilePath,
-            //     string.Empty,
-            //     cancellationToken);
 
             string outputVideoFilePath = Path.Combine(IncomingWorkDirectory, tarball.VideoFileName);
             string outputAudioFilePath = Path.Combine(IncomingWorkDirectory, tarball.AudioFileName);

@@ -21,7 +21,6 @@ public sealed class MusicService : IMusicService
     }
 
     public MusicFile GetRandomMixTrack()
-    // public string GetRandomMixTrack()
     {
         var musicMixes = _fileSystemService.GetFilesInDirectory(_appSettings.MusicDirectory)
             .Where(x => x.ToLower().Contains(MIX) && x.ToLower().EndsWith(FileExtension.Mp3.Value))
@@ -35,33 +34,7 @@ public sealed class MusicService : IMusicService
         return musicMixes.ElementAt(_randomService.Next(0, musicMixes.Count()));
     }
 
-    // public string GetRandomMusicTracks()
-    // {
-    //     var musicFiles = _fileSystemService.GetFilesInDirectory(_appSettings.MusicDirectory)
-    //         .Where(x => x.ToLower().Contains(Mix) == false && x.ToLower().EndsWith(FileExtension.Mp3.Value));
-
-    //     if (musicFiles.Count() == 0)
-    //     {
-    //         throw new MusicTracksNotAvailableException();
-    //     }
-
-    //     string outputString = string.Empty;
-    //     while (outputString.Split(Environment.NewLine).Length < musicFiles.Count())
-    //     {
-    //         int randomIndex = _randomService.Next(0, musicFiles.Count());
-    //         string musicFilename = Path.GetFileName(musicFiles.ElementAt(randomIndex));
-
-    //         if (outputString.Contains(musicFilename) == false)
-    //         {
-    //             outputString += $"file '{musicFilename}'{Environment.NewLine}";
-    //         }
-    //     }
-
-    //     return outputString;
-    // }
-
     public MusicFile GetRandomNonMixTrack()
-    // public string GetRandomNonMixTrack()
     {
         var nonMusicMixes = _fileSystemService.GetFilesInDirectory(_appSettings.MusicDirectory)
             .Where(x => !x.ToLower().Contains(MIX) && x.ToLower().EndsWith(FileExtension.Mp3.Value))

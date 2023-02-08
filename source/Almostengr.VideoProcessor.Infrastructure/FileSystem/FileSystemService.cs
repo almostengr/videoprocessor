@@ -17,11 +17,6 @@ public sealed class FileSystemService : IFileSystemService
         _appSettings = appSettings;
     }
 
-    // public void CopyFile(string sourceFilePath, string destinationFilePath)
-    // {
-    //     File.Copy(sourceFilePath, destinationFilePath, false);
-    // }
-
     public void CreateDirectory(string directory)
     {
         if (string.IsNullOrWhiteSpace(directory))
@@ -52,39 +47,6 @@ public sealed class FileSystemService : IFileSystemService
             Directory.Delete(directory, true);
         }
     }
-
-    // public string GetRandomTarballFromDirectory(string directory)
-    // {
-    //     IEnumerable<string> tarballPaths = GetFilesInDirectory(directory)
-    //         .Where(f => f.Contains(FileExtension.Tar.ToString()));
-
-    //     if (tarballPaths.Count() == 0)
-    //     {
-    //         throw new NoTar.ToString()ballsPresentException();
-    //     }
-
-    //     return tarballPaths.Where(f => f.Contains(FileExtension.Tar.ToString()))
-    //         .Where(f => f.StartsWith(".") == false)
-    //         .OrderBy(f => _randomService.Next())
-    //         .Take(1)
-    //         .First();
-    // }
-
-    // public string GetRandomSrtFileFromDirectory(string directory)
-    // {
-    //     IEnumerable<string> srtFilePaths = GetFilesInDirectory(directory)
-    //         .Where(f => f.EndsWith(FileExtension.Srt.ToString()));
-
-    //     if (srtFilePaths.Count() == 0)
-    //     {
-    //         throw new NoSubtitleFilesPresentException();
-    //     }
-
-    //     return srtFilePaths
-    //         .Where(f => f.EndsWith(FileExtension.Srt.ToString()))
-    //         .OrderBy(f => _randomService.Next()).Take(1)
-    //         .First();
-    // }
 
     public string GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
     {
@@ -167,26 +129,12 @@ public sealed class FileSystemService : IFileSystemService
                 Path.Combine(
                         directory,
                         Path.GetFileName(file)
-                            // .ToLower()
                             .Replace(";", "_")
                             .Replace(" ", "_")
-                            // .Replace("__", "_")
-                            // .Replace("\"", string.Empty)
-                            // .Replace("\'", string.Empty)
                             )
             );
         }
     }
-
-    // public bool DoesFileExist(string filePath)
-    // {
-    //     return File.Exists(filePath);
-    // }
-
-    // public string GetFileContents(string filePath)
-    // {
-    //     return File.ReadAllText(filePath).Trim();
-    // }
 
     public void SaveFileContents(string filePath, string content)
     {

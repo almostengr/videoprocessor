@@ -134,8 +134,8 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             /// render video
             string outputFilePath = Path.Combine(ReviewWorkDirectory, video.FileName);
 
-            await _ffmpegService.RenderVideoAsync(
-                video.FilePath, video.VideoFilters(), outputFilePath, ReviewWorkDirectory, cancellationToken);
+            await _ffmpegService.RenderVideoWithFiltersAsync(
+                video.FilePath, video.VideoFilters(), outputFilePath, cancellationToken);
 
             _fileSystemService.MoveFile(
                 video.GraphicsSubtitleFile.FilePath,

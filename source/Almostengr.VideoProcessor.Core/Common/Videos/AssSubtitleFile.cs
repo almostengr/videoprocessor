@@ -35,9 +35,4 @@ public sealed class AssSubtitleFile
         Subtitles.Clear();
         Subtitles = subtitles;
     }
-
-    public void AddSubtitle(SubtitleFileEntry subtitle)
-    {
-        Subtitles.Add(subtitle);
-    }
 }

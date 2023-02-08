@@ -133,9 +133,10 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             /// render video
             string outputFilePath = Path.Combine(ReviewWorkDirectory, video.FileName);
 
-            await _ffmpegService.RenderVideoAsync(
-                video.FilePath, video.VideoFilters(), outputFilePath, ReviewWorkDirectory, cancellationToken, video.AudioFile.FilePath
-            );
+            await _ffmpegService.RenderVideoWithAudioAndFiltersAsync(
+                video.FilePath, video.AudioFile.FilePath, video.VideoFilters(), outputFilePath, cancellationToken);
+            // await _ffmpegService.RenderVideoAsync(
+            //     video.FilePath, video.VideoFilters(), outputFilePath, ReviewWorkDirectory, cancellationToken, video.AudioFile.FilePath);
 
             _fileSystemService.MoveFile(
                 video.GraphicsSubtitleFile.FilePath,
@@ -155,20 +156,6 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             _fileSystemService.MoveFile(subtitleFile.FilePath, subtitleFile.FilePath + FileExtension.Err.Value);
         }
     }
-
-    // public async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
-    // {
-    //     var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
-    //         .Where(f => f.EndsWith(FileExtension.TarGz.Value));
-
-    //     foreach (var file in tarGzFiles)
-    //     {
-    //         await _gzFileService.DecompressFileAsync(file, cancellationToken);
-
-    //         await _xzFileService.CompressFileAsync(
-    //             file.Replace(FileExtension.TarGz.Value, FileExtension.Tar.Value), cancellationToken);
-    //     }
-    // }
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {

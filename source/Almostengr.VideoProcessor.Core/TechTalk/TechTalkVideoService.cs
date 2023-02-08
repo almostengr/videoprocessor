@@ -40,20 +40,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         _fileSystemService.CreateDirectory(ReviewingDirectory);
     }
 
-    // public async Task ConvertGzToXzAsync(CancellationToken cancellationToken)
-    // {
-    //     var tarGzFiles = _fileSystemService.GetFilesInDirectory(ArchiveDirectory)
-    //         .Where(f => f.EndsWith(FileExtension.TarGz.Value));
-
-    //     foreach (var file in tarGzFiles)
-    //     {
-    //         await _gzFileService.DecompressFileAsync(file, cancellationToken);
-
-    //         await _xzFileService.CompressFileAsync(
-    //             file.Replace(FileExtension.TarGz.Value, FileExtension.Tar.ToString()), cancellationToken);
-    //     }
-    // }
-
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
         try
@@ -252,12 +238,6 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             _loggerService.LogInformation($"Processing {subtitleFilePath}");
 
-            // string videoFilePath = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
-            //     .Where(f => f.StartsWith(subtitleFile.FileName) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
-            //     .Single();
-
-            // TechTalkVideoFile video = new TechTalkVideoFile(videoFilePath);
-
             TechTalkVideoFile video = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
                 .Where(f => f.StartsWith(subtitleFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
                 .Select(f => new TechTalkVideoFile(f))
@@ -270,20 +250,15 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             video.SetGraphicsSubtitleFile(subtitleFilePath);
             video.GraphicsSubtitleFile.SetSubtitles(_assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
-            // video.SetAudioFile(video.FilePath.Replace(FileExtension.Mp4.Value, FileExtension.Mp3.Value));
             video.SetAudioFile(audioFile);
 
             _fileSystemService.DeleteDirectory(ReviewWorkDirectory);
             _fileSystemService.CreateDirectory(ReviewWorkDirectory);
 
             video.SetBrandingText(RandomChannelBrandingText(video.BrandingTextOptions()));
-            // video.SetAudioFile(_musicService.GetRandomMixTrack());
 
             /// render video
             string outputFilePath = Path.Combine(ReviewWorkDirectory, video.FileName);
-
-            // await _ffmpegService.RenderVideoAsync(
-            //     video.FilePath, video.VideoFilters(), outputFilePath, cancellationToken, video.AudioFile.FilePath);
 
             await _ffmpegService.RenderVideoWithAudioAndFiltersAsync(
                 video.FilePath, video.AudioFile.FilePath, video.VideoFilters(), outputFilePath, cancellationToken);
