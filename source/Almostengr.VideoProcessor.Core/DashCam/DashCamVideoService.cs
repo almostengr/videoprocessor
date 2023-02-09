@@ -118,7 +118,6 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 .Select(f => new DashCamVideoFile(f))
                 .Single();
 
-            // DashCamVideoFile video = new DashCamVideoFile(videoFilePath);
             video.SetGraphicsSubtitleFile(subtitleFilePath);
             video.GraphicsSubtitleFile.SetSubtitles(_assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
 
@@ -135,8 +134,6 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             await _ffmpegService.RenderVideoWithAudioAndFiltersAsync(
                 video.FilePath, video.AudioFile.FilePath, video.VideoFilters(), outputFilePath, cancellationToken);
-            // await _ffmpegService.RenderVideoAsync(
-            //     video.FilePath, video.VideoFilters(), outputFilePath, ReviewWorkDirectory, cancellationToken, video.AudioFile.FilePath);
 
             _fileSystemService.MoveFile(
                 video.GraphicsSubtitleFile.FilePath,

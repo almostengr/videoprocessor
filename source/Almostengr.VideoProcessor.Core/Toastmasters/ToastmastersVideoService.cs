@@ -86,9 +86,9 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             await _ffmpegService.RenderVideoAsCopyAsync(
                 ffmpegInputFilePath, outputFilePath, cancellationToken);
 
-            _fileSystemService.MoveFile(tarball.FilePath, Path.Combine(ArchiveDirectory, tarball.FileName));
             _fileSystemService.MoveFile(outputFilePath, Path.Combine(ReviewingDirectory, tarball.FileName));
             _fileSystemService.DeleteDirectory(IncomingWorkDirectory);
+            _fileSystemService.MoveFile(tarball.FilePath, Path.Combine(ArchiveDirectory, tarball.FileName));
 
             _loggerService.LogInformation($"Completed processing {selectedTarballFilePath}");
         }

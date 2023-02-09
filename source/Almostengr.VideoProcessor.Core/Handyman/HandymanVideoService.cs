@@ -198,9 +198,8 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
                     graphicsFile, Path.Combine(ReviewingDirectory, tarball.GraphicsFileName));
             }
 
-            _fileSystemService.MoveFile(tarball.FilePath, Path.Combine(ArchiveDirectory, tarball.FileName));
-            _fileSystemService.MoveFile(outputVideoFilePath, Path.Combine(ReviewingDirectory, tarball.VideoFileName));
             _fileSystemService.DeleteDirectory(IncomingWorkDirectory);
+            _fileSystemService.MoveFile(tarball.FilePath, Path.Combine(ArchiveDirectory, tarball.FileName));
 
             _loggerService.LogInformation($"Completed processing {selectedTarballFilePath}");
         }

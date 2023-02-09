@@ -50,7 +50,7 @@ public sealed class TarballService : BaseProcess<TarballService>, ITarballServic
     {
         var result = await RunProcessAsync(
             BashBinary,
-            $"-c \"cd \\\"{workingDirectory}\\\" && {TarBinary} -cvf \\\"{workingDirectory + FileExtension.Tar}\\\" *\"",
+            $"-c \"cd \\\"{workingDirectory}\\\" && {TarBinary} -cvf \\\"{workingDirectory + FileExtension.Tar.Value}\\\" *\"",
             workingDirectory,
             cancellationToken
         );

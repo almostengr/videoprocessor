@@ -12,7 +12,6 @@ public sealed class AssSubtitleFileService : IAssSubtitleFileService
 
     public List<SubtitleFileEntry> ReadFile(string filePath)
     {
-        // Read the contents of the file
         string[] lines = File.ReadAllLines(filePath);
 
         // Use regex to extract the dialogue lines

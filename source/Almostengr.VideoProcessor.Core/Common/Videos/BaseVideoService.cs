@@ -17,7 +17,6 @@ public abstract class BaseVideoService : IBaseVideoService
     protected readonly IMusicService _musicService;
     protected readonly IAssSubtitleFileService _assSubtitleFileService;
 
-    // received, stitching, stitched, reviewing, animating, animated, uploading
     protected string IncomingDirectory { get; init; }
     protected string ArchiveDirectory { get; init; }
     protected string UploadingDirectory { get; init; }
