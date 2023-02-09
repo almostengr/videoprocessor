@@ -24,12 +24,6 @@ public sealed class TechTalkVideoFile : BaseVideoFile
     public override string[] BrandingTextOptions()
     {
         List<string> options = new();
-
-        if (SubType == TechTalkVideoSubType.Christmas || SubType == TechTalkVideoSubType.IndependenceDay)
-        {
-            options.Add("twitter.com/hplightshow");
-        }
-
         options.Add("Tech Talk with RHT Services");
         options.Add(RHT_WEBSITE);
         options.Add("@rhtservicestech");
