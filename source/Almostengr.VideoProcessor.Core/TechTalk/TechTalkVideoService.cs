@@ -120,7 +120,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             var audioFiles = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp3.Value))
-                .Select(f => new MusicFile(f))
+                .Select(f => new AudioFile(f))
                 .ToList();
 
             foreach (var audioFile in audioFiles)
@@ -186,16 +186,16 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             }
 
             string outputVideoFilePath = Path.Combine(IncomingWorkDirectory, tarball.VideoFileName);
-            string outputAudioFilePath = Path.Combine(IncomingWorkDirectory, tarball.AudioFileName);
+            // string outputAudioFilePath = Path.Combine(IncomingWorkDirectory, tarball.AudioFileName);
 
             await _ffmpegService.ConcatTsFilesToMp4FileAsync(
                 ffmpegInputFilePath, outputVideoFilePath, cancellationToken);
 
-            await _ffmpegService.ConvertVideoFileToMp3FileAsync(
-                outputVideoFilePath, outputAudioFilePath, IncomingWorkDirectory, cancellationToken);
+            // await _ffmpegService.ConvertVideoFileToMp3FileAsync(
+            //     outputVideoFilePath, outputAudioFilePath, IncomingWorkDirectory, cancellationToken);
 
             _fileSystemService.MoveFile(outputVideoFilePath, Path.Combine(ReviewingDirectory, tarball.VideoFileName));
-            _fileSystemService.MoveFile(outputAudioFilePath, Path.Combine(ReviewingDirectory, tarball.AudioFileName));
+            // _fileSystemService.MoveFile(outputAudioFilePath, Path.Combine(ReviewingDirectory, tarball.AudioFileName));
 
             var graphicsFile = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
                 .Where(f => f.ToLower().EndsWith(FileExtension.GraphicsAss.Value))
@@ -226,30 +226,50 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
     public override async Task ProcessReviewedFilesAsync(CancellationToken cancellationToken)
     {
-        AssSubtitleFile? subtitleFile = null;
+        // AssSubtitleFile? subtitleFile = null;
+        AudioFile? audio = null;
 
         try
         {
-            string subtitleFilePath =
-                _fileSystemService.GetRandomFileByExtensionFromDirectory(ReviewingDirectory, FileExtension.GraphicsAss);
+            audio = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
+                .Where(f => f.ToLower().EndsWith(FileExtension.Mp3.Value))
+                .Select(f => new AudioFile(f))
+                .Take(1)
+                .Single();
 
-            subtitleFile = new AssSubtitleFile(subtitleFilePath);
+            // string subtitleFilePath =
+            //     _fileSystemService.GetRandomFileByExtensionFromDirectory(ReviewingDirectory, FileExtension.GraphicsAss);
 
-            _loggerService.LogInformation($"Processing {subtitleFilePath}");
+            // subtitleFile = new AssSubtitleFile(subtitleFilePath);
+
+            _loggerService.LogInformation($"Processing {audio.FilePath}");
+            // _loggerService.LogInformation($"Processing {subtitleFilePath}");
 
             TechTalkVideoFile video = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
-                .Where(f => f.StartsWith(subtitleFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
+                .Where(f => f.StartsWith(audio.FilePath.Replace(FileExtension.Mp3.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
+                // .Where(f => f.StartsWith(subtitleFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
                 .Select(f => new TechTalkVideoFile(f))
                 .Single();
 
-            MusicFile audioFile = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
-                .Where(f => f.StartsWith(subtitleFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp3.Value))
-                .Select(f => new MusicFile(f))
-                .Single();
+            video.SetAudioFile(audio);
 
-            video.SetGraphicsSubtitleFile(subtitleFilePath);
-            video.GraphicsSubtitleFile.SetSubtitles(_assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
-            video.SetAudioFile(audioFile);
+            // MusicFile audioFile = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
+            //     .Where(f => f.StartsWith(subtitleFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp3.Value))
+            //     .Select(f => new MusicFile(f))
+            //     .Single();
+
+            AssSubtitleFile? graphicsSubtitle = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
+                .Where(f => f.StartsWith(audio.FilePath.Replace(FileExtension.Mp3.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.GraphicsAss.Value))
+                .Select(f => new AssSubtitleFile(f))
+                .SingleOrDefault();
+
+            if (graphicsSubtitle != null)
+            {
+                video.SetGraphicsSubtitleFile(graphicsSubtitle.FilePath);
+                video.GraphicsSubtitleFile.SetSubtitles(_assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
+            }
+
+            // video.SetAudioFile(audioFile);
 
             _fileSystemService.DeleteDirectory(ReviewWorkDirectory);
             _fileSystemService.CreateDirectory(ReviewWorkDirectory);
@@ -270,7 +290,8 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             _fileSystemService.DeleteFile(video.FilePath);
             _fileSystemService.DeleteFile(video.AudioFile.FilePath);
 
-            _loggerService.LogInformation($"Completed processing {subtitleFilePath}");
+            // _loggerService.LogInformation($"Completed processing {subtitleFilePath}");
+            _loggerService.LogInformation($"Completed processing {audio.FilePath}");
         }
         catch (NoFilesMatchException)
         {
@@ -279,7 +300,8 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
-            _fileSystemService.MoveFile(subtitleFile.FilePath, subtitleFile.FilePath + FileExtension.Err.Value);
+            _fileSystemService.MoveFile(audio.FilePath, audio.FilePath + FileExtension.Err.Value);
+            // _fileSystemService.MoveFile(subtitleFile.FilePath, subtitleFile.FilePath + FileExtension.Err.Value);
         }
     }
 }

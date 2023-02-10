@@ -13,7 +13,7 @@ public abstract class BaseVideoFile
     public string OutputMp4VideoFileName { get; init; }
     public string OutputTsVideoFileName { get; init; }
     public AssSubtitleFile? GraphicsSubtitleFile { get; private set; }
-    public MusicFile AudioFile { get; private set; }
+    public AudioFile AudioFile { get; private set; }
     public string BrandingText { get; private set; } = string.Empty;
 
     public readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
@@ -26,12 +26,11 @@ public abstract class BaseVideoFile
             throw new ArgumentException("File path is null or whitespace", nameof(filePath));
         }
 
-        filePath = filePath.ToLower();
-        if (!filePath.EndsWith(FileExtension.Avi.Value) &&
-            !filePath.EndsWith(FileExtension.Mkv.Value) &&
-            !filePath.EndsWith(FileExtension.Mov.Value) &&
-            !filePath.EndsWith(FileExtension.Mp4.Value) &&
-            !filePath.EndsWith(FileExtension.Ts.Value)
+        if (!filePath.ToLower().EndsWith(FileExtension.Avi.Value) &&
+            !filePath.ToLower().EndsWith(FileExtension.Mkv.Value) &&
+            !filePath.ToLower().EndsWith(FileExtension.Mov.Value) &&
+            !filePath.ToLower().EndsWith(FileExtension.Mp4.Value) &&
+            !filePath.ToLower().EndsWith(FileExtension.Ts.Value)
             )
         {
             throw new ArgumentException("File path is not valid video file", nameof(filePath));
@@ -57,7 +56,7 @@ public abstract class BaseVideoFile
         GraphicsSubtitleFile = new AssSubtitleFile(filePath);
     }
 
-    public void SetAudioFile(MusicFile audioFile)
+    public void SetAudioFile(AudioFile audioFile)
     {
         AudioFile = audioFile;
     }

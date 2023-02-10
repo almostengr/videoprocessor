@@ -111,7 +111,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
             var audioFiles = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp3.Value))
-                .Select(f => new MusicFile(f))
+                .Select(f => new AudioFile(f))
                 .ToList();
 
             foreach (var audioFile in audioFiles)
@@ -177,16 +177,16 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             }
 
             string outputVideoFilePath = Path.Combine(IncomingWorkDirectory, tarball.VideoFileName);
-            string outputAudioFilePath = Path.Combine(IncomingWorkDirectory, tarball.AudioFileName);
+            // string outputAudioFilePath = Path.Combine(IncomingWorkDirectory, tarball.AudioFileName);
 
             await _ffmpegService.ConcatTsFilesToMp4FileAsync(
                 ffmpegInputFilePath, outputVideoFilePath, cancellationToken);
 
-            await _ffmpegService.ConvertVideoFileToMp3FileAsync(
-                outputVideoFilePath, outputAudioFilePath, IncomingWorkDirectory, cancellationToken);
+            // await _ffmpegService.ConvertVideoFileToMp3FileAsync(
+            //     outputVideoFilePath, outputAudioFilePath, IncomingWorkDirectory, cancellationToken);
 
             _fileSystemService.MoveFile(outputVideoFilePath, Path.Combine(ReviewingDirectory, tarball.VideoFileName));
-            _fileSystemService.MoveFile(outputAudioFilePath, Path.Combine(ReviewingDirectory, tarball.AudioFileName));
+            // _fileSystemService.MoveFile(outputAudioFilePath, Path.Combine(ReviewingDirectory, tarball.AudioFileName));
 
             var graphicsFile = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
                 .Where(f => f.ToLower().EndsWith(FileExtension.GraphicsAss.Value))
@@ -217,30 +217,53 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
     public override async Task ProcessReviewedFilesAsync(CancellationToken cancellationToken)
     {
-        AssSubtitleFile? subtitleFile = null;
+        // AssSubtitleFile? subtitleFile = null;
+        AudioFile? audio = null;
 
         try
         {
-            string subtitleFilePath =
-                _fileSystemService.GetRandomFileByExtensionFromDirectory(ReviewingDirectory, FileExtension.GraphicsAss);
+            audio = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
+                .Where(f => f.ToLower().EndsWith(FileExtension.Mp3.Value))
+                .Select(f => new AudioFile(f))
+                .Take(1)
+                .Single();
 
-            subtitleFile = new AssSubtitleFile(subtitleFilePath);
+            _loggerService.LogInformation($"Processing {audio.FilePath}");
 
-            _loggerService.LogInformation($"Processing {subtitleFilePath}");
+            // string subtitleFilePath =
+            //     _fileSystemService.GetRandomFileByExtensionFromDirectory(ReviewingDirectory, FileExtension.GraphicsAss);
+
+            // subtitleFile = new AssSubtitleFile(subtitleFilePath);
+
+            // _loggerService.LogInformation($"Processing {subtitleFilePath}");
 
             HandymanVideoFile video = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
-                .Where(f => f.StartsWith(subtitleFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
+                .Where(f => f.StartsWith(audio.FilePath.Replace(FileExtension.Mp3.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
+                // .Where(f => f.StartsWith(subtitleFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
                 .Select(f => new HandymanVideoFile(f))
                 .Single();
 
-            MusicFile audioFile = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
-                .Where(f => f.StartsWith(subtitleFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp3.Value))
-                .Select(f => new MusicFile(f))
-                .Single();
+            video.SetAudioFile(audio);
 
-            video.SetGraphicsSubtitleFile(subtitleFilePath);
-            video.GraphicsSubtitleFile.SetSubtitles(_assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
-            video.SetAudioFile(audioFile);
+            // AudioFile audioFile = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
+            //     .Where(f => f.StartsWith(subtitleFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp3.Value))
+            //     .Select(f => new AudioFile(f))
+            //     .Single();
+
+            // video.SetGraphicsSubtitleFile(subtitleFilePath);
+            // video.GraphicsSubtitleFile.SetSubtitles(_assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
+            // video.SetAudioFile(audioFile);
+
+            AssSubtitleFile? graphicsSubtitle = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
+                .Where(f => f.StartsWith(audio.FilePath.Replace(FileExtension.Mp3.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.GraphicsAss.Value))
+                .Select(f => new AssSubtitleFile(f))
+                .SingleOrDefault();
+
+            if (graphicsSubtitle != null)
+            {
+                video.SetGraphicsSubtitleFile(graphicsSubtitle.FilePath);
+                video.GraphicsSubtitleFile.SetSubtitles(_assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
+            }
 
             _fileSystemService.DeleteDirectory(ReviewWorkDirectory);
             _fileSystemService.CreateDirectory(ReviewWorkDirectory);
@@ -261,7 +284,8 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             _fileSystemService.DeleteFile(video.FilePath);
             _fileSystemService.DeleteFile(video.AudioFile.FilePath);
 
-            _loggerService.LogInformation($"Completed processing {subtitleFilePath}");
+            // _loggerService.LogInformation($"Completed processing {subtitleFilePath}");
+            _loggerService.LogInformation($"Completed processing {audio.FilePath}");
         }
         catch (NoFilesMatchException)
         {
@@ -270,7 +294,8 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
-            _fileSystemService.MoveFile(subtitleFile.FilePath, subtitleFile.FilePath + FileExtension.Err.Value);
+            // _fileSystemService.MoveFile(subtitleFile.FilePath, subtitleFile.FilePath + FileExtension.Err.Value);
+            _fileSystemService.MoveFile(audio.FilePath, audio.FilePath + FileExtension.Err.Value);
         }
     }
 }

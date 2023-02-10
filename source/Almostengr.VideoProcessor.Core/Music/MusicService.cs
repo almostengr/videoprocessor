@@ -20,11 +20,11 @@ public sealed class MusicService : IMusicService
         _appSettings = appSettings;
     }
 
-    public MusicFile GetRandomMixTrack()
+    public AudioFile GetRandomMixTrack()
     {
         var musicMixes = _fileSystemService.GetFilesInDirectory(_appSettings.MusicDirectory)
             .Where(x => x.ToLower().Contains(MIX) && x.ToLower().EndsWith(FileExtension.Mp3.Value))
-            .Select(x => new MusicFile(x));
+            .Select(x => new AudioFile(x));
 
         if (musicMixes.Count() == 0)
         {
@@ -34,11 +34,11 @@ public sealed class MusicService : IMusicService
         return musicMixes.ElementAt(_randomService.Next(0, musicMixes.Count()));
     }
 
-    public MusicFile GetRandomNonMixTrack()
+    public AudioFile GetRandomNonMixTrack()
     {
         var nonMusicMixes = _fileSystemService.GetFilesInDirectory(_appSettings.MusicDirectory)
             .Where(x => !x.ToLower().Contains(MIX) && x.ToLower().EndsWith(FileExtension.Mp3.Value))
-            .Select(x => new MusicFile(x));
+            .Select(x => new AudioFile(x));
 
         if (nonMusicMixes.Count() == 0)
         {
