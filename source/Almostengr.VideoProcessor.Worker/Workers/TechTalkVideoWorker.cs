@@ -22,6 +22,7 @@ internal sealed class TechTalkVideoWorker : BaseWorker
         {
             try
             {
+                _videoService.CreateThumbnails();
                 await _videoService.ProcessIncomingTarballFilesAsync(cancellationToken);
             }
             catch (NoFilesMatchException)

@@ -15,6 +15,7 @@ public abstract class BaseVideoFile
     public AssSubtitleFile? GraphicsSubtitleFile { get; private set; }
     public AudioFile AudioFile { get; private set; }
     public string BrandingText { get; private set; } = string.Empty;
+    public string ThumbnailFileName { get; set; }
 
     public readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
     public readonly string RHT_WEBSITE = "rhtservices.net";
@@ -47,6 +48,7 @@ public abstract class BaseVideoFile
 
         OutputTsVideoFileName = OutputMp4VideoFileName.Replace(FileExtension.Mp4.Value, FileExtension.Ts.Value);
         GraphicsSubtitleFile = null;
+        ThumbnailFileName = Path.GetFileNameWithoutExtension(FileName) + FileExtension.Jpg.Value;
     }
 
     public abstract string[] BrandingTextOptions();

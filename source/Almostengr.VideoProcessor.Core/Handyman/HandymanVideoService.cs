@@ -13,11 +13,13 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 {
     private readonly ILoggerService<HandymanVideoService> _loggerService;
     private readonly ISrtSubtitleFileService _srtService;
+    private readonly IThumbnailService _thumbnailService;
 
     public HandymanVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         IMusicService musicService, ILoggerService<HandymanVideoService> loggerService,
-        IAssSubtitleFileService assSubtitleFileService, ISrtSubtitleFileService srtSubtitleFileService) :
+        IAssSubtitleFileService assSubtitleFileService, ISrtSubtitleFileService srtSubtitleFileService,
+        IThumbnailService thumbnailService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Incoming);
@@ -27,6 +29,7 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
         UploadingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Uploading);
         _loggerService = loggerService;
         _srtService = srtSubtitleFileService;
+        _thumbnailService = thumbnailService;
     }
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
@@ -216,11 +219,8 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
 
         try
         {
-            audio = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
-                .Where(f => f.ToLower().EndsWith(FileExtension.Mp3.Value))
-                .Select(f => new AudioFile(f))
-                .Take(1)
-                .Single();
+            string audioFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(ReviewingDirectory, FileExtension.Mp3);
+            audio = new AudioFile(audioFilePath);
 
             _loggerService.LogInformation($"Processing {audio.FilePath}");
 
@@ -253,6 +253,8 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             await _ffmpegService.RenderVideoWithAudioAndFiltersAsync(
                 video.FilePath, video.AudioFile.FilePath, video.VideoFilters(), outputFilePath, cancellationToken);
 
+            _thumbnailService.GenerateThumbnail(ThumbnailType.Handyman, UploadingDirectory, video.ThumbnailFileName, video.Title);
+
             _fileSystemService.MoveFile(
                 video.GraphicsSubtitleFile.FilePath,
                 Path.Combine(ArchiveDirectory, video.GraphicsSubtitleFile.FileName));
@@ -261,7 +263,6 @@ public sealed class HandymanVideoService : BaseVideoService, IHandymanVideoServi
             _fileSystemService.DeleteFile(video.FilePath);
             _fileSystemService.DeleteFile(video.AudioFile.FilePath);
 
-            // _loggerService.LogInformation($"Completed processing {subtitleFilePath}");
             _loggerService.LogInformation($"Completed processing {audio.FilePath}");
         }
         catch (NoFilesMatchException)

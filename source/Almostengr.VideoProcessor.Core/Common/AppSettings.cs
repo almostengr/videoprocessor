@@ -12,6 +12,7 @@ public sealed class AppSettings
     public int DeleteFilesAfterDays { get; init; }
     public string YouTubeApiKey { get; init; }
     public readonly string AppName;
+    public string ChromeDriverPath { get; init; }
 
     public AppSettings()
     {
@@ -29,6 +30,7 @@ public sealed class AppSettings
             ToastmastersDirectory = $"{pbaseDirectory}/toastmasters";
             WorkerDelay = TimeSpan.FromMinutes(60);
             YouTubeApiKey = Environment.GetEnvironmentVariable("YouTubeApiKey") ?? throw new ArgumentNullException("YouTube API key not valid");
+            ChromeDriverPath = string.Empty; // todo define the path
             return;
         }
 
@@ -42,6 +44,7 @@ public sealed class AppSettings
         ToastmastersDirectory = $"{baseDirectory}/toastmasters";
         WorkerDelay = TimeSpan.FromSeconds(15);
         YouTubeApiKey = string.Empty;
+        ChromeDriverPath = "/home/almostengineer/Downloads";
     }
 
     private bool IsReleaseMode()

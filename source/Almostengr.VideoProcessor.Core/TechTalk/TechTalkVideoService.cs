@@ -15,12 +15,14 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
     private readonly ISrtSubtitleFileService _srtService;
     private readonly IGzFileCompressionService _gzFileService;
     private readonly IXzFileCompressionService _xzFileService;
+    private readonly IThumbnailService _thumbnailService;
 
     public TechTalkVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         ILoggerService<TechTalkVideoService> loggerService, IMusicService musicService,
         ISrtSubtitleFileService srtSubtitleFileService, IAssSubtitleFileService assSubtitleFileService,
-        IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService) :
+        IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService,
+        IThumbnailService thumbnailService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Incoming);
@@ -33,6 +35,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         _srtService = srtSubtitleFileService;
         _xzFileService = xzFileService;
         _gzFileService = gzFileService;
+        _thumbnailService = thumbnailService;
 
         _fileSystemService.CreateDirectory(IncomingDirectory);
         _fileSystemService.CreateDirectory(UploadingDirectory);
@@ -225,11 +228,8 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
         try
         {
-            audio = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
-                .Where(f => f.ToLower().EndsWith(FileExtension.Mp3.Value))
-                .Select(f => new AudioFile(f))
-                .Take(1)
-                .Single();
+            string audioFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(ReviewingDirectory, FileExtension.Mp3);
+            audio = new AudioFile(audioFilePath);
 
             _loggerService.LogInformation($"Processing {audio.FilePath}");
 
@@ -262,6 +262,9 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             await _ffmpegService.RenderVideoWithAudioAndFiltersAsync(
                 video.FilePath, video.AudioFile.FilePath, video.VideoFilters(), outputFilePath, cancellationToken);
 
+            _thumbnailService.GenerateThumbnail(
+                ThumbnailType.TechTalk, UploadingDirectory, video.ThumbnailFileName, video.Title);
+
             _fileSystemService.MoveFile(
                 video.GraphicsSubtitleFile.FilePath,
                 Path.Combine(ArchiveDirectory, video.GraphicsSubtitleFile.FileName));
@@ -279,7 +282,42 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
-            _fileSystemService.MoveFile(audio.FilePath, audio.FilePath + FileExtension.Err.Value);
+
+            if (audio != null)
+            {
+                _fileSystemService.MoveFile(audio.FilePath, audio.FilePath + FileExtension.Err.Value);
+            }
+        }
+    }
+
+    public void CreateThumbnails()
+    {
+        try
+        {
+            var thumbnailFiles = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
+                .Where(f => f.ToLower().EndsWith(FileExtension.ThumbTxt.Value));
+
+            if (thumbnailFiles.Count() == 0)
+            {
+                return;
+            }
+
+            foreach (var thumbnailFile in thumbnailFiles)
+            {
+                _thumbnailService.GenerateThumbnail(
+                    ThumbnailType.TechTalk,
+                    UploadingDirectory,
+                    Path.GetFileNameWithoutExtension(thumbnailFile) + FileExtension.Jpg.Value,
+                    Path.GetFileNameWithoutExtension(thumbnailFile));
+
+                _fileSystemService.MoveFile(
+                    thumbnailFile,
+                    Path.Combine(ArchiveDirectory, Path.GetFileName(thumbnailFile)));
+            }
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
         }
     }
 }

@@ -27,5 +27,6 @@ public struct FileExtension
     public static readonly FileExtension Tar = new FileExtension(".tar");
     public static readonly FileExtension TarGz = new FileExtension(".tar.gz");
     public static readonly FileExtension TarXz = new FileExtension(".tar.xz");
+    public static readonly FileExtension ThumbTxt = new FileExtension(".thumbtxt");
     public static readonly FileExtension Ts = new FileExtension(".ts");
 }
