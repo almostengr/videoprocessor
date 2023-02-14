@@ -110,7 +110,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                 _fileSystemService.GetRandomFileByExtensionFromDirectory(ReviewingDirectory, FileExtension.GraphicsAss);
 
             subtitleFile = new AssSubtitleFile(subtitleFilePath);
-            
+
             _loggerService.LogInformation($"Processing {subtitleFilePath}");
 
             var video = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
@@ -127,13 +127,20 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             video.SetBrandingText(RandomChannelBrandingText(video.BrandingTextOptions()));
             string videoFilters = video.VideoFilters() + Constant.CommaSpace + video.TitleDrawTextFilter();
 
-            video.SetAudioFile(_musicService.GetRandomMixTrack());
-
-            /// render video
             string outputFilePath = Path.Combine(ReviewWorkDirectory, video.FileName);
+            
+            if (video.SubType != DashCamVideoFile.DashCamVideoType.CarRepair)
+            {
+                video.SetAudioFile(_musicService.GetRandomMixTrack());
 
-            await _ffmpegService.RenderVideoWithAudioAndFiltersAsync(
-                video.FilePath, video.AudioFile.FilePath, video.VideoFilters(), outputFilePath, cancellationToken);
+                await _ffmpegService.RenderVideoWithAudioAndFiltersAsync(
+                    video.FilePath, video.AudioFile.FilePath, video.VideoFilters(), outputFilePath, cancellationToken);
+            }
+            else
+            {
+                await _ffmpegService.RenderVideoWithFiltersAsync(
+                    video.FilePath, video.VideoFilters(), outputFilePath, cancellationToken);
+            }
 
             _fileSystemService.MoveFile(
                 video.GraphicsSubtitleFile.FilePath,

@@ -5,19 +5,24 @@ namespace Almostengr.VideoProcessor.Core.DashCam;
 
 public sealed class DashCamVideoFile : BaseVideoFile
 {
-    private DashCamVideoType SubType { get; init; }
+    internal DashCamVideoType SubType { get; init; }
 
     public DashCamVideoFile(string videoFilePath) : base(videoFilePath)
     {
         SubType = DashCamVideoType.Normal;
+        string title = Title.ToLower();
 
-        if (Title.ToLower().Contains("night"))
+        if (title.Contains("night"))
         {
             SubType = DashCamVideoType.Night;
         }
-        else if (Title.ToLower().Contains("firework"))
+        else if (title.Contains("firework"))
         {
             SubType = DashCamVideoType.Fireworks;
+        }
+        else if (title.Contains("altima") || title.Contains("sierra"))
+        {
+            SubType = DashCamVideoType.CarRepair;
         }
     }
 
@@ -71,11 +76,12 @@ public sealed class DashCamVideoFile : BaseVideoFile
             DrawTextPosition.UpperLeft)).ToString();
     }
 
-    enum DashCamVideoType
+    internal enum DashCamVideoType
     {
         Normal,
         Night,
-        Fireworks
+        Fireworks,
+        CarRepair
     }
 
 }
