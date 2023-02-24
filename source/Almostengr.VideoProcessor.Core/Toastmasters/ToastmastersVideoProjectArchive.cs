@@ -3,10 +3,11 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Toastmasters;
 
-public sealed class ToastmastersVideoFile : BaseVideoFile
+public sealed class ToastmastersVideoProjectArchive : BaseVideoProjectArchive
 {
-    public ToastmastersVideoFile(string archiveFilePath) : base(archiveFilePath)
-    { }
+    public ToastmastersVideoProjectArchive(string filePath) : base(filePath)
+    {
+    }
 
     public override string[] BrandingTextOptions()
     {

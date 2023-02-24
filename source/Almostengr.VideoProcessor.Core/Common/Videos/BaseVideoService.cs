@@ -22,7 +22,6 @@ public abstract class BaseVideoService : IBaseVideoService
     protected string UploadingDirectory { get; init; }
     protected string ReviewingDirectory { get; set; }
     protected string ReviewWorkDirectory { get; init; }
-
     protected string IncomingWorkDirectory { get; init; }
 
 
@@ -44,8 +43,11 @@ public abstract class BaseVideoService : IBaseVideoService
     public abstract Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
     public abstract Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
     public abstract Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken);
-    public abstract Task ProcessReviewedFilesAsync(CancellationToken cancellationToken);
-    public abstract Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken);
+    // public virtual Task ProcessReviewedFilesAsync(CancellationToken cancellationToken)
+    // {
+    //     throw new not 
+    // }
+    // public abstract Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken);
 
     internal string RandomChannelBrandingText(string[] options)
     {

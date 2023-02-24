@@ -11,6 +11,11 @@ namespace Almostengr.VideoProcessor.Core.Music
                 throw new ArgumentException("File path is not valid", nameof(filePath));
             }
 
+            if (!File.Exists(filePath))
+            {
+                throw new ArgumentException("File path does not exist", nameof(filePath));
+            }
+
             FilePath = filePath;
             FileName = Path.GetFileName(FilePath);
         }

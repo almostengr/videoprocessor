@@ -3,14 +3,13 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
 
-public sealed class DashCamVideoFile : BaseVideoFile
+public sealed class DashCamVideoProjectArchive : BaseVideoProjectArchive
 {
     internal DashCamVideoType SubType { get; init; }
-
-    public DashCamVideoFile(string videoFilePath) : base(videoFilePath)
+    public DashCamVideoProjectArchive(string filePath) : base(filePath)
     {
         SubType = DashCamVideoType.Normal;
-        string title = Title.ToLower();
+        string title = Title();
 
         if (title.Contains("night"))
         {
@@ -24,22 +23,13 @@ public sealed class DashCamVideoFile : BaseVideoFile
         {
             SubType = DashCamVideoType.CarRepair;
         }
-    }
 
-    public override string[] BrandingTextOptions()
-    {
-        return new string[] { "Kenny Ram Dash Cam" };
-    }
-
-    protected override string SetTitle(string fileName)
-    {
-        if (fileName.ToLower().Contains("bad drivers of montgomery"))
+        if (filePath.ToLower().Contains("bad drivers of montgomery"))
         {
-            throw new ArgumentException("Title contains invalid text", nameof(fileName));
+            throw new ArgumentException("Title contains invalid text", nameof(filePath));
         }
-
-        return base.SetTitle(fileName.Split(Constant.SemiColon).First());
     }
+
 
     public override FfMpegColor DrawTextFilterBackgroundColor()
     {
@@ -68,12 +58,17 @@ public sealed class DashCamVideoFile : BaseVideoFile
     public string TitleDrawTextFilter()
     {
         return (new DrawTextFilter(
-            Title,
+            Title(),
             DrawTextFilterTextColor(),
             Opacity.Full,
             DrawTextFilterBackgroundColor(),
             Opacity.Medium,
             DrawTextPosition.UpperLeft)).ToString();
+    }
+
+    public override string[] BrandingTextOptions()
+    {
+        return new string[] { "Kenny Ram Dash Cam" };
     }
 
     internal enum DashCamVideoType
@@ -83,5 +78,4 @@ public sealed class DashCamVideoFile : BaseVideoFile
         Fireworks,
         CarRepair
     }
-
 }

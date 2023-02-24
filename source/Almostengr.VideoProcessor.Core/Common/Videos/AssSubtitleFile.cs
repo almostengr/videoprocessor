@@ -20,6 +20,11 @@ public sealed class AssSubtitleFile
             throw new ArgumentException("File path is not valid", nameof(filePath));
         }
 
+        if (!File.Exists(filePath))
+        {
+            throw new ArgumentException("File does not exist");
+        }
+
         FilePath = filePath;
         Subtitles = new List<SubtitleFileEntry>();
         FileName = Path.GetFileName(FilePath);

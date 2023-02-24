@@ -1,76 +1,98 @@
 using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Constants;
-using Almostengr.VideoProcessor.Core.Music;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public abstract class BaseVideoFile
+public abstract class BaseVideoProjectArchive
 {
-    public string Title { get; init; }
     public string FilePath { get; init; }
-    public string FileName { get; init; }
-    public string OutputMp4VideoFileName { get; init; }
-    public string OutputTsVideoFileName { get; init; }
     public AssSubtitleFile? GraphicsSubtitleFile { get; private set; }
-    public AudioFile AudioFile { get; private set; }
-    public string BrandingText { get; private set; } = string.Empty;
-    public string ThumbnailFileName { get; set; }
+    public string BrandingText { get; private set; }
 
-    public readonly string ROBINSON_SERVICES = "Robinson Handy and Technology Services";
-    public readonly string RHT_WEBSITE = "rhtservices.net";
-
-    public BaseVideoFile(string filePath)
+    public BaseVideoProjectArchive(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
+        if (
+            !filePath.ToLower().EndsWith(FileExtension.Tar.Value) &&
+            !filePath.ToLower().EndsWith(FileExtension.TarXz.Value) &&
+            !filePath.ToLower().EndsWith(FileExtension.TarGz.Value))
         {
-            throw new ArgumentException("File path is null or whitespace", nameof(filePath));
+            throw new ArgumentException("File path is not valid", nameof(filePath));
         }
 
-        if (!filePath.ToLower().EndsWith(FileExtension.Avi.Value) &&
-            !filePath.ToLower().EndsWith(FileExtension.Mkv.Value) &&
-            !filePath.ToLower().EndsWith(FileExtension.Mov.Value) &&
-            !filePath.ToLower().EndsWith(FileExtension.Mp4.Value) &&
-            !filePath.ToLower().EndsWith(FileExtension.Ts.Value)
-            )
+        if (!File.Exists(filePath))
         {
-            throw new ArgumentException("File path is not valid video file", nameof(filePath));
+            throw new ArgumentException("Project file does not exist", nameof(filePath));
         }
 
         FilePath = filePath;
-        FileName = Path.GetFileName(FilePath);
-        Title = SetTitle(FileName);
-        OutputMp4VideoFileName = FileName
-            .Replace(FileExtension.TarXz.Value, string.Empty)
-            .Replace(FileExtension.TarGz.Value, string.Empty)
-            .Replace(FileExtension.Tar.Value, string.Empty)
-            + FileExtension.Mp4;
-
-        OutputTsVideoFileName = OutputMp4VideoFileName.Replace(FileExtension.Mp4.Value, FileExtension.Ts.Value);
-        GraphicsSubtitleFile = null;
-        ThumbnailFileName = Path.GetFileNameWithoutExtension(FileName) + FileExtension.Jpg.Value;
+        BrandingText = Constant.RHT_WEBSITE;
     }
 
     public abstract string[] BrandingTextOptions();
+
+    public string ArchiveFilePath()
+    {
+        return FilePath.Replace($"/incoming/", $"/archive/");
+    }
+
+    public virtual string Title()
+    {
+        return Path.GetFileName(FileName())
+            .Replace(FileExtension.TarXz.Value, string.Empty)
+            .Replace(FileExtension.TarGz.Value, string.Empty)
+            .Replace(FileExtension.TarXz.Value, string.Empty)
+            .Replace(Constant.Colon, string.Empty);
+    }
+
+    public string OutputFileName()
+    {
+        return Path.GetFileName(FilePath)
+            .Replace(FileExtension.TarXz.Value, string.Empty)
+            .Replace(FileExtension.TarGz.Value, string.Empty)
+            .Replace(FileExtension.TarXz.Value, string.Empty)
+            .Replace(Constant.Colon, string.Empty)
+            + FileExtension.Mp4.Value;
+    }
+
+    public bool HasGraphicsSubtitle()
+    {
+        return GraphicsSubtitleFile == null;
+    }
+
+    public virtual FfMpegColor DrawTextFilterBackgroundColor()
+    {
+        return FfMpegColor.Black;
+    }
+
+    public virtual FfMpegColor DrawTextFilterTextColor()
+    {
+        return FfMpegColor.White;
+    }
+
+    public virtual void SetBrandingText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            throw new ArgumentNullException("Branding text cannot be null or empty");
+        }
+
+        BrandingText = text;
+    }
 
     public void SetGraphicsSubtitleFile(string filePath)
     {
         GraphicsSubtitleFile = new AssSubtitleFile(filePath);
     }
 
-    public void SetAudioFile(AudioFile audioFile)
+    public string FileName()
     {
-        AudioFile = audioFile;
+        return Path.GetFileName(FilePath);
     }
 
-    public void SetBrandingText(string brandingText)
+    public string ThumbnailFileName()
     {
-        if (string.IsNullOrWhiteSpace(brandingText))
-        {
-            throw new ArgumentException("Branding text cannot be null or whitespace", nameof(brandingText));
-        }
-
-        BrandingText = brandingText;
+        return Path.GetFileNameWithoutExtension(FileName()) + FileExtension.Jpg.Value;
     }
 
     public virtual string VideoFilters()
@@ -116,28 +138,6 @@ public abstract class BaseVideoFile
         return stringBuilder.ToString();
     }
 
-    protected virtual string SetTitle(string fileName)
-    {
-        if (string.IsNullOrWhiteSpace(fileName))
-        {
-            throw new ArgumentException("Video title cannot be null or whitespace", nameof(fileName));
-        }
-
-        return fileName.Replace(FileExtension.TarGz.Value, string.Empty.ToString())
-            .Replace(FileExtension.TarXz.Value, string.Empty.ToString())
-            .Replace(FileExtension.Tar.Value, string.Empty.ToString())
-            .Replace(Constant.Colon, string.Empty);
-    }
-
-    public virtual FfMpegColor DrawTextFilterBackgroundColor()
-    {
-        return FfMpegColor.Black;
-    }
-
-    public virtual FfMpegColor DrawTextFilterTextColor()
-    {
-        return FfMpegColor.White;
-    }
 
     protected sealed class DrawTextFilter
     {

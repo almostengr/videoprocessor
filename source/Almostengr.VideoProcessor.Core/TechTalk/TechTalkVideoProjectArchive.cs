@@ -3,19 +3,19 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk;
 
-public sealed class TechTalkVideoFile : BaseVideoFile
+public sealed class TechTalkVideoProjectArchive : BaseVideoProjectArchive
 {
     private TechTalkVideoSubType SubType { get; init; }
-
-    public TechTalkVideoFile(string archiveFilePath) : base(archiveFilePath)
+    
+    public TechTalkVideoProjectArchive(string filePath) : base(filePath)
     {
         SubType = TechTalkVideoSubType.TechTalk;
 
-        if (Title.ToLower().Contains("christmas light show"))
+        if (Title().ToLower().Contains("christmas light show"))
         {
             SubType = TechTalkVideoSubType.Christmas;
         }
-        else if (Title.ToLower().Contains("4th of july"))
+        else if (Title().ToLower().Contains("4th of july"))
         {
             SubType = TechTalkVideoSubType.IndependenceDay;
         }
@@ -25,7 +25,7 @@ public sealed class TechTalkVideoFile : BaseVideoFile
     {
         List<string> options = new();
         options.Add("Tech Talk with RHT Services");
-        options.Add(RHT_WEBSITE);
+        options.Add(Constant.RHT_WEBSITE);
         options.Add("@rhtservicestech");
         options.Add("#rhtservicestech");
         options.Add("rhtservices.net/techtalk");

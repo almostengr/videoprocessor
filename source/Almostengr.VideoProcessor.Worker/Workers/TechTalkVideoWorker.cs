@@ -32,7 +32,7 @@ internal sealed class TechTalkVideoWorker : BaseWorker
 
             try
             {
-                await _videoService.ProcessReviewedFilesAsync(cancellationToken);
+                // await _videoService.ProcessReviewedFilesAsync(cancellationToken);
             }
             catch (NoFilesMatchException)
             {

@@ -31,6 +31,10 @@ public sealed class ThumbnailService : IThumbnailService
                 webpageFileName = "tnhandyman.html";
                 break;
 
+            case ThumbnailType.DashCam:
+                webpageFileName = "tndashcam.html";
+                break;
+
             default:
                 throw new ArgumentException("invalid video type", nameof(type));
         }
