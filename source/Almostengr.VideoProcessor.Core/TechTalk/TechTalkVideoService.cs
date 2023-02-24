@@ -129,29 +129,31 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             foreach (var audioFile in audioFiles)
             {
-                var videoFilePath = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
+                var video = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
                     .Where(f => f.StartsWith(audioFile.FileName.Replace(FileExtension.Mp3.Value, string.Empty)))
                     // .Select(f => new TechTalkVideoFile(f))
+                    .Select(f => new VideoFile(f))
                     .Single();
 
-                // video.SetAudioFile(audioFile);
+                video.SetAudioFile(audioFile);
 
-                string tsOutputFilePath = Path.Combine(
-                    IncomingWorkDirectory,
-                    // Path.GetFileNameWithoutExtension(video.FileName) + FileExtension.Ts.Value);
-                    Path.GetFileNameWithoutExtension(videoFilePath) + FileExtension.Ts.Value);
+                // string tsOutputFilePath = Path.Combine(IncomingWorkDirectory, video.TsOutputFileName());
+                // Path.GetFileNameWithoutExtension(video.FileName) + FileExtension.Ts.Value);
+                // Path.GetFileNameWithoutExtension(video.FileName) + FileExtension.Ts.Value);
 
-                // await _ffmpegService.AddAccAudioToVideoAsync(
-                //     videoFilePath.FilePath, videoFilePath.AudioFile.FilePath, tsOutputFilePath, cancellationToken);
+                await _ffmpegService.AddAccAudioToVideoAsync(
+                    video.FilePath,
+                    video.AudioFile.FilePath,
+                    Path.Combine(IncomingWorkDirectory, video.TsOutputFileName()), // tsOutputFilePath, 
+                    cancellationToken);
 
                 // _fileSystemService.DeleteFile(videoFilePath.FilePath);
 
-                await _ffmpegService.AddAccAudioToVideoAsync(
-                    videoFilePath, audioFile.FilePath, tsOutputFilePath, cancellationToken);
+                // await _ffmpegService.AddAccAudioToVideoAsync(
+                //     video, audioFile.FilePath, tsOutputFilePath, cancellationToken);
 
-                _fileSystemService.DeleteFile(videoFilePath);
+                _fileSystemService.DeleteFile(video.FilePath);
             }
-
         }
         catch (NoFilesMatchException)
         {
@@ -204,7 +206,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             {
                 var video = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
                     .Where(f => f.StartsWith(audioFile.FileName.Replace(FileExtension.Mp3.Value, string.Empty)))
-                    .Select(f => new TechTalkVideoFile(f))
+                    .Select(f => new VideoFile(f))
                     .Single();
 
                 video.SetAudioFile(audioFile);
@@ -223,13 +225,13 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             var mp4MkvVideoFiles = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp4.Value) || f.EndsWith(FileExtension.Mkv.Value))
-                .Select(f => new TechTalkVideoFile(f));
+                .Select(f => new VideoFile(f));
 
             foreach (var video in mp4MkvVideoFiles)
             {
                 var result = await _ffmpegService.FfprobeAsync($"\"{video.FilePath}\"", IncomingWorkDirectory, cancellationToken);
 
-                if (result.stdErr.ToLower().Contains("audio"))
+                if (result.stdErr.ToLower().Contains(Constant.Audio))
                 {
                     await _ffmpegService.ConvertVideoFileToTsFormatAsync(
                         video.FilePath,
