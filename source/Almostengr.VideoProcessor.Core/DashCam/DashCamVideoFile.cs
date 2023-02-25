@@ -3,13 +3,32 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
 
-public sealed class DashCamVideoProjectArchive : BaseVideoProjectArchive
+public sealed class DashCamVideoFile : VideoFile
 {
-    internal DashCamVideoType SubType { get; init; }
-    public DashCamVideoProjectArchive(string filePath) : base(filePath)
+    internal DashCamVideoType SubType { get; private set; }
+
+    public DashCamVideoFile(string filePath) : base(filePath)
+    {
+        // string title = Title();
+        // SetSubtype(title);
+        ValidateArguments(filePath);
+        SetSubtype(FileName());
+
+        // if (filePath.ToLower().Contains("bad drivers of montgomery"))
+        // {
+        //     throw new ArgumentException("Title contains invalid text", nameof(filePath));
+        // }
+    }
+
+    public DashCamVideoFile(VideoProjectArchiveFile videoProjectArchiveFile) : base(videoProjectArchiveFile)
+    {
+        ValidateArguments(videoProjectArchiveFile.FilePath);
+        SetSubtype(FileName());
+    }
+
+    private void SetSubtype(string title)
     {
         SubType = DashCamVideoType.Normal;
-        string title = Title();
 
         if (title.Contains("night"))
         {
@@ -23,13 +42,15 @@ public sealed class DashCamVideoProjectArchive : BaseVideoProjectArchive
         {
             SubType = DashCamVideoType.CarRepair;
         }
-
-        if (filePath.ToLower().Contains("bad drivers of montgomery"))
-        {
-            throw new ArgumentException("Title contains invalid text", nameof(filePath));
-        }
     }
 
+    private void ValidateArguments(string filePath)
+    {
+        if (filePath.ToLower().Contains("bad drivers of montgomery"))
+        {
+            throw new ArgumentException("Title contains invalid text");
+        }
+    }
 
     public override FfMpegColor DrawTextFilterBackgroundColor()
     {
@@ -66,9 +87,14 @@ public sealed class DashCamVideoProjectArchive : BaseVideoProjectArchive
             DrawTextPosition.UpperLeft)).ToString();
     }
 
-    public override string[] BrandingTextOptions()
+    // public override string[] BrandingTextOptions()
+    // {
+    //     return new string[] { "Kenny Ram Dash Cam" };
+    // }
+
+    public override string BrandingText()
     {
-        return new string[] { "Kenny Ram Dash Cam" };
+        return "Kenny Ram Dash Cam";
     }
 
     internal enum DashCamVideoType

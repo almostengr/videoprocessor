@@ -3,21 +3,28 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Handyman;
 
-public sealed class HandymanVideoProjectArchive : BaseVideoProjectArchive
+public sealed class HandymanVideoFile : VideoFile
 {
-    public HandymanVideoProjectArchive(string filePath) : base(filePath)
+    public HandymanVideoFile(VideoProjectArchiveFile videoProjectArchiveFile) : base(videoProjectArchiveFile)
     {
     }
 
-    public override string[] BrandingTextOptions()
+    public HandymanVideoFile(string filePath) : base(filePath)
     {
+    }
+
+    public override string BrandingText()
+    {
+        Random random = new();
         List<string> options = new();
+
         options.Add(Constant.ROBINSON_SERVICES);
         options.Add(Constant.RHT_WEBSITE);
         options.Add("@rhtservicesllc");
         options.Add("#rhtservicesllc");
         options.Add("rhtservices.net/handyman");
-        return options.ToArray();
+
+        return options[random.Next(0, options.Count)];
     }
 
     public override FfMpegColor DrawTextFilterBackgroundColor()

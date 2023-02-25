@@ -206,12 +206,12 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     }
 
     public async Task<(string stdout, string stdErr)> RenderVideoWithFiltersAsync(
-        string videoFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken)
+        string ffmpegInputFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory =
-            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+            Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
         string arguments =
-            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{videoFilePath}\" -filter_hw_device foo -vf \"{videoFilters}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{outputFilePath}\"";
+            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -filter_hw_device foo -vf \"{videoFilters}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{outputFilePath}\"";
 
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }

@@ -29,15 +29,15 @@ internal sealed class HandymanVideoWorker : BaseWorker
                 await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
             }
 
-            try
-            {
-                await _videoService.ProcessReviewedFilesAsync(cancellationToken);
-            }
-            catch (NoFilesMatchException)
-            {
-                await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
-                await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
-            }
+            // try
+            // {
+            //     await _videoService.ProcessReviewedFilesAsync(cancellationToken);
+            // }
+            // catch (NoFilesMatchException)
+            // {
+            //     await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
+            //     await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
+            // }
         }
     }
 }

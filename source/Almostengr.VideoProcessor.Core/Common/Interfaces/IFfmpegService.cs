@@ -27,7 +27,7 @@ public interface IFfmpegService
     // Task<(string stdout, string stdErr)> RenderVideoAsync(
     //     string videoFilePath, string videoFilters, string outputFilePath, string workingDirectory, CancellationToken cancellationToken, string? audioFilePath);
     Task<(string stdout, string stdErr)> RenderVideoWithFiltersAsync(
-        string filePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken);
+        string ffmpegInputFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> ConcatTsFilesToMp4FileAsync(
         string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdOut, string stdErr)> RenderVideoWithAudioAndFiltersAsync(

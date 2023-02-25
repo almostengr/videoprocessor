@@ -19,7 +19,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Incoming);
-        IncomingWorkDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.IncomingWork);
+        WorkingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Working);
         ArchiveDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Archive);
         UploadingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Uploading);
         // ReviewingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Reviewing);
@@ -59,7 +59,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
     public override async Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken)
     {
         // ToastmastersIncomingTarballFile? tarball = null;
-        ToastmastersVideoProjectArchive? archive = null;
+        ToastmastersVideoFile? archiveFile = null;
 
         try
         {
@@ -67,33 +67,34 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 IncomingDirectory, FileExtension.Tar);
 
             // tarball = new ToastmastersIncomingTarballFile(selectedTarballFilePath);
-            archive = new ToastmastersVideoProjectArchive(selectedTarballFilePath);
+            archiveFile = new ToastmastersVideoFile(new VideoProjectArchiveFile(selectedTarballFilePath));
 
-            _fileSystemService.DeleteDirectory(IncomingWorkDirectory);
-            _fileSystemService.CreateDirectory(IncomingWorkDirectory);
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
+            _fileSystemService.CreateDirectory(WorkingDirectory);
 
             await _tarballService.ExtractTarballContentsAsync(
-                archive.FilePath, IncomingWorkDirectory, cancellationToken);
+                archiveFile.FilePath, WorkingDirectory, cancellationToken);
             // tarball.FilePath, IncomingWorkDirectory, cancellationToken);
 
-            string[] videoFiles = _fileSystemService.GetFilesInDirectory(IncomingWorkDirectory)
+            string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp4.Value))
                 .OrderBy(f => f)
                 .ToArray();
 
-            string ffmpegInputFilePath = Path.Combine(IncomingWorkDirectory, "videos" + FileExtension.FfmpegInput.Value);
+            string ffmpegInputFilePath = Path.Combine(WorkingDirectory, "videos" + FileExtension.FfmpegInput.Value);
             CreateFfmpegInputFile(videoFiles, ffmpegInputFilePath);
 
-            string outputFilePath = Path.Combine(IncomingWorkDirectory, archive.OutputFileName());
+            string outputFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
             // string outputFilePath = Path.Combine(IncomingWorkDirectory, tarball.VideoFileName);
 
             await _ffmpegService.RenderVideoAsCopyAsync(
                 ffmpegInputFilePath, outputFilePath, cancellationToken);
 
-            _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, archive.OutputFileName()));
+            _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, archiveFile.OutputFileName()));
             // _fileSystemService.MoveFile(outputFilePath, Path.Combine(ReviewingDirectory, tarball.FileName));
-            _fileSystemService.DeleteDirectory(IncomingWorkDirectory);
-            _fileSystemService.MoveFile(archive.FilePath, Path.Combine(ArchiveDirectory, archive.FileName()));
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
+            _fileSystemService.MoveFile(
+                archiveFile.FilePath, Path.Combine(ArchiveDirectory, archiveFile.FileName()));
             // _fileSystemService.MoveFile(tarball.FilePath, Path.Combine(ArchiveDirectory, tarball.FileName));
         }
         catch (NoFilesMatchException)
@@ -103,12 +104,14 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
-            // _fileSystemService.MoveFile(tarball.FilePath, tarball.FilePath + FileExtension.Err.Value);
-            if (archive != null)
+
+            if (archiveFile != null)
             {
-                _fileSystemService.MoveFile(archive.FilePath, archive.FilePath + FileExtension.Err.Value);
+                _loggerService.LogError(ex, $"Error when processing {archiveFile.FilePath}");
+                _fileSystemService.MoveFile(archiveFile.FilePath, archiveFile.FilePath + FileExtension.Err.Value);
             }
-            _fileSystemService.DeleteDirectory(IncomingWorkDirectory);
+
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
     }
 

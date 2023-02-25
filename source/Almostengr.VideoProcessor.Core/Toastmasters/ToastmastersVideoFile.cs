@@ -3,15 +3,21 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Toastmasters;
 
-public sealed class ToastmastersVideoProjectArchive : BaseVideoProjectArchive
+public sealed class ToastmastersVideoFile : VideoFile
 {
-    public ToastmastersVideoProjectArchive(string filePath) : base(filePath)
+    public ToastmastersVideoFile(VideoProjectArchiveFile videoProjectArchiveFile) : base(videoProjectArchiveFile)
     {
     }
 
-    public override string[] BrandingTextOptions()
+    public override string BrandingText()
     {
-        return new string[] { "towertoastmasters.org", "Tower Toastmasters", "toastmasters.org" };
+        Random random = new();
+        List<string> options = new();
+        options.Add("towertoastmasters.org");
+        options.Add("Tower Toastmasters");
+        options.Add("toastmasters.org");
+
+        return options[random.Next(0, options.Count)];
     }
 
     public override FfMpegColor DrawTextFilterBackgroundColor()

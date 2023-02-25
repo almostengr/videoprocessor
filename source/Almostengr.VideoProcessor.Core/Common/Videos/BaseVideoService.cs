@@ -20,9 +20,9 @@ public abstract class BaseVideoService : IBaseVideoService
     protected string IncomingDirectory { get; init; }
     protected string ArchiveDirectory { get; init; }
     protected string UploadingDirectory { get; init; }
-    protected string ReviewingDirectory { get; set; }
-    protected string ReviewWorkDirectory { get; init; }
-    protected string IncomingWorkDirectory { get; init; }
+    // protected string ReviewingDirectory { get; set; }
+    // protected string ReviewWorkDirectory { get; init; }
+    protected string WorkingDirectory { get; init; }
 
 
     protected BaseVideoService(
