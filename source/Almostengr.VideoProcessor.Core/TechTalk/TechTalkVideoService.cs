@@ -225,7 +225,8 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             var mp4MkvVideoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp4.Value) || f.EndsWith(FileExtension.Mkv.Value))
-                .Select(f => new TechTalkVideoFile(f));
+                .Select(f => new TechTalkVideoFile(f))
+                .ToList();
 
             foreach (var video in mp4MkvVideoFiles)
             {
@@ -275,7 +276,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             // await _ffmpegService.ConcatTsFilesToMp4FileAsync(
             // ffmpegInputFilePath, outputVideoFilePath, cancellationToken);
             await _ffmpegService.RenderVideoWithFiltersAsync(
-                    ffmpegInputFilePath, archiveFile.VideoFilters(), outputVideoFilePath, cancellationToken);
+                ffmpegInputFilePath, archiveFile.VideoFilters(), outputVideoFilePath, cancellationToken);
 
             _fileSystemService.SaveFileContents(
                 Path.Combine(IncomingDirectory, archiveFile.ThumbnailFileName()), archiveFile.Title());
@@ -393,12 +394,8 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         try
         {
             var thumbnailFiles = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
-                .Where(f => f.ToLower().EndsWith(FileExtension.ThumbTxt.Value));
-
-            if (thumbnailFiles.Count() == 0)
-            {
-                return;
-            }
+                .Where(f => f.ToLower().EndsWith(FileExtension.ThumbTxt.Value))
+                .ToList();
 
             foreach (var thumbnailFile in thumbnailFiles)
             {

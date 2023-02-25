@@ -89,7 +89,7 @@ public sealed class FileSystemService : IFileSystemService
         }
         catch (DirectoryNotFoundException)
         {
-            CreateDirectory(Path.GetDirectoryName(destination));
+            CreateDirectory(Path.GetDirectoryName(destination) ?? throw new VideoProcessorException("Directory is null"));
             File.Move(source, destination);
         }
     }

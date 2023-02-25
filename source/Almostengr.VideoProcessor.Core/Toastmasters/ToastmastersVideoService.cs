@@ -87,8 +87,11 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             string outputFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
             // string outputFilePath = Path.Combine(IncomingWorkDirectory, tarball.VideoFileName);
 
-            await _ffmpegService.RenderVideoAsCopyAsync(
-                ffmpegInputFilePath, outputFilePath, cancellationToken);
+            // await _ffmpegService.RenderVideoAsCopyAsync(
+            //     ffmpegInputFilePath, outputFilePath, cancellationToken);
+
+            await _ffmpegService.RenderVideoWithFiltersAsync(
+                ffmpegInputFilePath, archiveFile.VideoFilters(), outputFilePath, cancellationToken);
 
             _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, archiveFile.OutputFileName()));
             // _fileSystemService.MoveFile(outputFilePath, Path.Combine(ReviewingDirectory, tarball.FileName));

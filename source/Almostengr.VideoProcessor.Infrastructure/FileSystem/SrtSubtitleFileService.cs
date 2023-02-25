@@ -18,7 +18,7 @@ public sealed class SrtSubtitleFileService : ISrtSubtitleFileService
         List<SubtitleFileEntry> subtitles = new List<SubtitleFileEntry>();
         using (var reader = new StreamReader(filePath))
         {
-            string line;
+            string? line;
             int index = 0;
             TimeSpan startTime = new TimeSpan();
             TimeSpan endTime = new TimeSpan();

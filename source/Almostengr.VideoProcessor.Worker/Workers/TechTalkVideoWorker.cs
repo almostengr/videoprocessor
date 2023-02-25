@@ -28,14 +28,6 @@ internal sealed class TechTalkVideoWorker : BaseWorker
             catch (NoFilesMatchException)
             {
                 await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
-            }
-
-            try
-            {
-                // await _videoService.ProcessReviewedFilesAsync(cancellationToken);
-            }
-            catch (NoFilesMatchException)
-            {
                 await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
                 await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
             }

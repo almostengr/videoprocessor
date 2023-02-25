@@ -1,4 +1,5 @@
 using Almostengr.VideoProcessor.Core.Common;
+using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Common.Videos;
 using OpenQA.Selenium;
@@ -21,7 +22,7 @@ public sealed class ThumbnailService : IThumbnailService
     {
         string webpageFileName = string.Empty;
 
-        switch(type)
+        switch (type)
         {
             case ThumbnailType.TechTalk:
                 webpageFileName = "tntechtalk.html";
@@ -53,6 +54,65 @@ public sealed class ThumbnailService : IThumbnailService
 
             Screenshot screenshot = ((ITakesScreenshot)driver).GetScreenshot();
             screenshot.SaveAsFile(Path.Combine(uploadDirectory, thumbnailFileName));
+
+            QuitBrowser(driver);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            QuitBrowser(driver);
+            throw;
+        }
+    }
+
+    public void GenerateThumbnail(ThumbnailType type, string uploadDirectory, List<string> thumbnailFilePaths)
+    {
+        string webpageFileName = string.Empty;
+
+        switch (type)
+        {
+            case ThumbnailType.TechTalk:
+                webpageFileName = "tntechtalk.html";
+                break;
+
+            case ThumbnailType.Handyman:
+                webpageFileName = "tnhandyman.html";
+                break;
+
+            case ThumbnailType.DashCam:
+                webpageFileName = "tndashcam.html";
+                break;
+
+            default:
+                throw new ArgumentException("Invalid video type", nameof(type));
+        }
+
+        IWebDriver? driver = null;
+
+        try
+        {
+            ChromeOptions options = new ChromeOptions();
+            options.AddArgument("--window-size=1920,1080");
+            options.AddArgument("--headless");
+            driver = new ChromeDriver(_appSettings.ChromeDriverPath, options);
+
+            driver.Manage().Window.Maximize();
+
+            foreach (var thumbnailFilePath in thumbnailFilePaths)
+            {
+                string title = File.ReadAllText(thumbnailFilePath);
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    _logger.LogWarning("No contents in thumbnail file. Skipping");
+                    continue;
+                }
+
+                driver.Navigate().GoToUrl($"https://rhtservices.net/{webpageFileName}?videoTitle={title}");
+
+                Screenshot screenshot = ((ITakesScreenshot)driver).GetScreenshot();
+                // screenshot.SaveAsFile(Path.Combine(uploadDirectory, thumbnailFileName));
+                screenshot.SaveAsFile(Path.Combine(uploadDirectory, Path.GetFileNameWithoutExtension(thumbnailFilePath) + FileExtension.Jpg.Value));
+            }
 
             QuitBrowser(driver);
         }
