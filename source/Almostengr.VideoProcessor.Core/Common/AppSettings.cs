@@ -30,7 +30,7 @@ public sealed class AppSettings
             ToastmastersDirectory = $"{pbaseDirectory}/toastmasters";
             WorkerDelay = TimeSpan.FromMinutes(60);
             YouTubeApiKey = Environment.GetEnvironmentVariable("YouTubeApiKey") ?? throw new ArgumentNullException("YouTube API key not valid");
-            ChromeDriverPath = string.Empty; // todo define the path
+            ChromeDriverPath = "/home/iamadmin/Downloads";
             return;
         }
 
