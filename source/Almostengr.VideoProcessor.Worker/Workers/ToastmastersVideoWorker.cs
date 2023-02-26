@@ -29,8 +29,6 @@ internal sealed class ToastmastersVideoWorker : BaseWorker
                 await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
                 await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
             }
-
         }
     }
-    
 }

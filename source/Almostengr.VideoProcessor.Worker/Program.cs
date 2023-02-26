@@ -36,8 +36,8 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IAssSubtitleFileService, AssSubtitleFileService>();
 
         services.AddHostedService<DashCamVideoWorker>();
-        // services.AddHostedService<HandymanVideoWorker>();
-        // services.AddHostedService<TechTalkVideoWorker>();
+        services.AddHostedService<HandymanVideoWorker>();
+        services.AddHostedService<TechTalkVideoWorker>();
         // services.AddHostedService<SubtitleWorker>();
         services.AddHostedService<ToastmastersVideoWorker>();
     })

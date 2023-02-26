@@ -50,14 +50,8 @@ public sealed class FileSystemService : IFileSystemService
 
     public string GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
     {
-        // IEnumerable<string> filePaths = GetFilesInDirectory(directory)
-
         try
         {
-            // var filePath = GetFilesInDirectory(directory)
-            //     .Where(f => f.ToLower().Contains(extension.Value) && !f.ToLower().EndsWith(FileExtension.Err.Value))
-            //     .First();
-
             return GetFilesInDirectory(directory)
                 .Where(f => f.ToLower().Contains(extension.Value) && !f.ToLower().EndsWith(FileExtension.Err.Value))
                 .First();
@@ -66,13 +60,6 @@ public sealed class FileSystemService : IFileSystemService
         {
             throw new NoFilesMatchException();
         }
-
-        // if (filePaths.Count() == 0)
-        // {
-        //     throw new NoFilesMatchException();
-        // }
-
-        // return filePaths.OrderBy(f => _randomService.Next()).Take(1).First();
     }
 
     public bool IsDiskSpaceAvailable(string directory)

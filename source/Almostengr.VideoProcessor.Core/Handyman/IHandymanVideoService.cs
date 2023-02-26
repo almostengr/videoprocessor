@@ -4,5 +4,6 @@ namespace Almostengr.VideoProcessor.Core.Handyman
 {
     public interface IHandymanVideoService : IBaseVideoService
     {
+        void CreateThumbnails();
     }
 }

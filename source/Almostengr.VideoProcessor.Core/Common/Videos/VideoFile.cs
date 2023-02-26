@@ -11,13 +11,10 @@ public abstract class VideoFile
     public string FilePath { get; init; }
     private AudioFile? AudioFile { get; set; }
     private AssSubtitleFile? GraphicsSubtitleFile { get; set; }
-    // public VideoProjectArchiveFile? ProjectArchive { get; init; }
 
     public VideoFile(VideoProjectArchiveFile videoProjectArchiveFile)
     {
-        // ProjectArchive = videoProjectArchiveFile;
         FilePath = videoProjectArchiveFile.FilePath;
-        // FileName = Path.GetFileName(ProjectArchive.FilePath);
     }
 
     public VideoFile(string filePath)
@@ -26,13 +23,6 @@ public abstract class VideoFile
         FilePath = filePath;
         AudioFile = null;
     }
-
-    // public VideoFile(string filePath, AudioFile audio)
-    // {
-    //     ValidateVideoFile(filePath);
-    //     FilePath = filePath;
-    //     AudioFile = audio;
-    // }
 
     public string FileName()
     {
@@ -99,8 +89,6 @@ public abstract class VideoFile
         GraphicsSubtitleFile = subtitleFile;
     }
 
-    // public abstract string[] BrandingTextOptions();
-
     public virtual string Title()
     {
         return FileName()
@@ -113,7 +101,6 @@ public abstract class VideoFile
 
     public string OutputFileName()
     {
-        // return Path.GetFileName(FilePath)
         return FileName()
             .Replace(FileExtension.TarXz.Value, string.Empty)
             .Replace(FileExtension.TarGz.Value, string.Empty)
@@ -136,21 +123,6 @@ public abstract class VideoFile
     {
         return Title() + FileExtension.ThumbTxt.Value;
     }
-
-    // public virtual void SetBrandingText(string text)
-    // {
-    //     if (string.IsNullOrEmpty(text))
-    //     {
-    //         throw new ArgumentNullException("Branding text cannot be null or empty");
-    //     }
-
-    //     BrandingText = text;
-    // }
-
-    // public string ThumbnailFileName()
-    // {
-    //     return Path.GetFileNameWithoutExtension(FileName) + FileExtension.Jpg.Value;
-    // }
 
     public virtual string VideoFilters()
     {
@@ -250,7 +222,6 @@ public abstract class VideoFile
             Text = text.Replace("=", "\\=").Replace(":", "\\:");
             Position = position;
 
-            // font size 
             if (Position.ToString() == DrawTextPosition.SubtitlePrimary.ToString() && Text.Length <= 60)
             {
                 if (Text.Length > 60)

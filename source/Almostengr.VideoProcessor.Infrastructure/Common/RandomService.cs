@@ -15,10 +15,5 @@ public sealed class RandomService : IRandomService
     {
         return _random.Next(minInt, maxInt);
     }
-
-    public int Next()
-    {
-        return _random.Next();
-    }
     
 }

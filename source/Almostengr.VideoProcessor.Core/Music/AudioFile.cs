@@ -4,6 +4,8 @@ namespace Almostengr.VideoProcessor.Core.Music;
 
 public sealed class AudioFile
 {
+    public string FilePath { get; private set; }
+
     public AudioFile(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath) || !filePath.ToLower().EndsWith(FileExtension.Mp3.Value))
@@ -17,9 +19,10 @@ public sealed class AudioFile
         }
 
         FilePath = filePath;
-        FileName = Path.GetFileName(FilePath);
     }
-
-    public string FilePath { get; private set; }
-    public string FileName { get; private set; }
+    
+    public string FileName()
+    {
+        return Path.GetFileName(FilePath);
+    }
 }

@@ -31,7 +31,6 @@ public sealed class TechTalkVideoFile : VideoFile
         }
     }
 
-    // public override string[] BrandingTextOptions()
     public override string BrandingText()
     {
         Random random = new();
@@ -43,7 +42,6 @@ public sealed class TechTalkVideoFile : VideoFile
         options.Add("#rhtservicestech");
         options.Add("rhtservices.net/techtalk");
         
-        // return options.ToArray();
         return options[random.Next(0, options.Count)];
     }
 
@@ -61,10 +59,6 @@ public sealed class TechTalkVideoFile : VideoFile
                 return FfMpegColor.Green;
         }
     }
-
-    // {
-    //     throw new NotImplementedException();
-    // }
 
     enum TechTalkVideoSubType
     {
