@@ -1,37 +1,44 @@
-using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.Interfaces;
-using Almostengr.VideoProcessor.Domain.Music.Services;
-using Almostengr.VideoProcessor.Worker.Workers;
+using Almostengr.VideoProcessor.Core.Common;
+using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem;
 using Almostengr.VideoProcessor.Infrastructure.Logging;
 using Almostengr.VideoProcessor.Infrastructure.Processes;
-using Almostengr.VideoProcessor.Domain.Videos.DashCam;
-using Almostengr.VideoProcessor.Domain.Subtitles.HandymanSubtitle;
-using Almostengr.VideoProcessor.Domain.Videos.Handyman;
-using Almostengr.VideoProcessor.Domain.Toastmasters;
-using Almostengr.VideoProcessor.Domain.Videos.ChristmasLightShow;
+using Almostengr.VideoProcessor.Core.Handyman;
+using Almostengr.VideoProcessor.Worker.Workers;
+using Almostengr.VideoProcessor.Infrastructure.Common;
+using Almostengr.VideoProcessor.Core.Toastmasters;
+using Almostengr.VideoProcessor.Core.TechTalk;
+using Almostengr.VideoProcessor.Core.Music.Services;
+using Almostengr.VideoProcessor.Core.DashCam;
+using Almostengr.VideoProcessor.Infrastructure.Web;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
         services.AddSingleton(new AppSettings());
 
-        services.AddSingleton<IChristmasLightVideoService, ChristmasLightVideoService>();
         services.AddSingleton<IDashCamVideoService, DashCamVideoService>();
-        services.AddSingleton<IFfmpeg, Ffmpeg>();
-        services.AddSingleton<IFileSystem, FileSystem>();
-        services.AddSingleton<IHandymanSubtitleService, HandymanSubtitleService>();
+        services.AddSingleton<IFfmpegService, FfmpegService>();
+        services.AddSingleton<IFileSystemService, FileSystemService>();
+        services.AddSingleton<IFileCompressionService, XzService>();
+        services.AddSingleton<IGzFileCompressionService, GzipService>();
+        services.AddSingleton<IXzFileCompressionService, XzService>();
         services.AddSingleton<IHandymanVideoService, HandymanVideoService>();
         services.AddSingleton<IMusicService, MusicService>();
-        services.AddSingleton<ITarball, Tarball>();
+        services.AddSingleton<IRandomService, RandomService>();
+        services.AddSingleton<ITarballService, TarballService>();
+        services.AddSingleton<ITechTalkVideoService, TechTalkVideoService>();
         services.AddSingleton<IToastmastersVideoService, ToastmastersVideoService>();
         services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
+        services.AddSingleton<IThumbnailService, ThumbnailService>();
 
-        // services.AddHostedService<ChristmasLightVideoWorker>();
-        // services.AddHostedService<DashCamVideoWorker>();
-        // services.AddHostedService<HandymanSubtitleWorker>();
-        // services.AddHostedService<HandymanVideoWorker>();
-        // services.AddHostedService<TechnologyVideoWorker>();
+        services.AddSingleton<ISrtSubtitleFileService, SrtSubtitleFileService>();
+        services.AddSingleton<IAssSubtitleFileService, AssSubtitleFileService>();
+
+        services.AddHostedService<DashCamVideoWorker>();
+        services.AddHostedService<HandymanVideoWorker>();
+        services.AddHostedService<TechTalkVideoWorker>();
+        // services.AddHostedService<SubtitleWorker>();
         services.AddHostedService<ToastmastersVideoWorker>();
     })
     .UseSystemd()

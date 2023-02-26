@@ -1,6 +1,8 @@
+using Almostengr.VideoProcessor.Core.Common;
+
 namespace Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 
-public sealed class TarballCreationException : Exception
+public sealed class TarballCreationException : VideoProcessorException
 {
     public TarballCreationException()
     {

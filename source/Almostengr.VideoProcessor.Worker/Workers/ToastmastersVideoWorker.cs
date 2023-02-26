@@ -1,5 +1,6 @@
-using Almostengr.VideoProcessor.Domain.Common;
-using Almostengr.VideoProcessor.Domain.Toastmasters;
+using Almostengr.VideoProcessor.Core.Common;
+using Almostengr.VideoProcessor.Core.Toastmasters;
+using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Worker.Workers;
 
@@ -15,12 +16,19 @@ internal sealed class ToastmastersVideoWorker : BaseWorker
         _appSettings = appSettings;
     }
 
-    protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected async override Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
-            await _videoService.ProcessVideosAsync(stoppingToken);
-            await Task.Delay(_appSettings.WorkerDelay, stoppingToken);
+            try
+            {
+                await _videoService.ProcessIncomingTarballFilesAsync(cancellationToken);
+            }
+            catch (NoFilesMatchException)
+            {
+                await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
+                await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
+            }
         }
     }
 }

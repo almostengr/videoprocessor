@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Domain.Interfaces;
+using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Logging;
