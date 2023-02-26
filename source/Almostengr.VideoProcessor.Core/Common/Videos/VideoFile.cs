@@ -105,7 +105,7 @@ public abstract class VideoFile
 
         if (title.Length > MAX_TITLE_LENGTH)
         {
-            throw new TitleTooLongException($"Title is {title.Length} characters long, greater than {MAX_TITLE_LENGTH}");
+            throw new VideoTitleTooLongException($"Title is {title.Length} characters long, greater than {MAX_TITLE_LENGTH}");
         }
 
         return title;
