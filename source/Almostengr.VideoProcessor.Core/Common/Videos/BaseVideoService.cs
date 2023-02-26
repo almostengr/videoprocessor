@@ -42,11 +42,6 @@ public abstract class BaseVideoService : IBaseVideoService
     public abstract Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
     public abstract Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken);
 
-    // internal string RandomChannelBrandingText(string[] options)
-    // {
-    //     return options.ElementAt(_randomService.Next(0, options.Count()));
-    // }
-
     internal async Task CompressTarballsInArchiveFolderAsync(
         string archiveDirectory, CancellationToken cancellationToken)
     {
@@ -70,23 +65,6 @@ public abstract class BaseVideoService : IBaseVideoService
 
         _fileSystemService.SaveFileContents(inputFilePath, text.ToString());
     }
-
-    // protected async Task ConvertVideoAudioFilesToAudioOnly(
-    //     string workingDirectory, CancellationToken cancellationToken)
-    // {
-    //     var audioAsVideoFiles = _fileSystemService.GetFilesInDirectory(workingDirectory)
-    //         .Where(f => f.EndsWith(FileExtension.AudioMkv.Value) || f.EndsWith(FileExtension.AudioMp4.Value));
-
-    //     foreach (var file in audioAsVideoFiles)
-    //     {
-    //         string outputFilePath = Path.Combine(workingDirectory,
-    //             file.Replace(FileExtension.AudioMkv.Value, FileExtension.Mp3.Value)
-    //                 .Replace(FileExtension.AudioMp4.Value, FileExtension.Mp3.Value));
-
-    //         await _ffmpegService.ConvertVideoFileToMp3FileAsync(
-    //             file, outputFilePath, workingDirectory, cancellationToken);
-    //     }
-    // }
 
     public async Task CreateTarballsFromDirectoriesAsync(string incomingDirectory, CancellationToken cancellationToken)
     {

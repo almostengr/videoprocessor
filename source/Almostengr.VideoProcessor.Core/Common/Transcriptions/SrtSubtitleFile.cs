@@ -40,7 +40,7 @@ public abstract class SrtSubtitleFile
 
     public string BlogFileName()
     {
-        return Path.Combine(FilePath).Replace(FileExtension.Srt.ToString(), FileExtension.Md.ToString());
+        return Path.Combine(FilePath).Replace(FileExtension.Srt.Value, FileExtension.Md.Value);
     }
 
     public virtual string BlogPostText()
