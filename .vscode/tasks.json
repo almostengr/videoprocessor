@@ -64,30 +64,18 @@
             "dependsOn": ["Clean Release Project"]
         },
         {
-            "label": "Deploy Local",
+            "label": "Deploy Production",
             "command": "scp",
             "type": "shell",
             "args": [
                 "-pr",
-                "${workspaceRoot}/LinuxService/thermometerapi.service",
-                "${workspaceRoot}/Almostengr.VideoProcessor.Api/bin/Release/net6.0/linux-x64/publish/*",
-                "iamadmin@media://home/iamadmin/videoprocessor/",
+                "/home/almostengineer/Downloads/chromedriver",
+                "${workspaceRoot}/systemd/videoProcessorWorker.service",
+                "${workspaceRoot}/source/Almostengr.VideoProcessor.Worker/bin/Release/net6.0/linux-x64/publish/*",
+                "iamadmin@192.168.1.119://home/iamadmin/videoprocessor/",
             ],
             "group": "none",
-            "dependsOn": ["Publish Release"],
-        },
-        {
-            "label": "Package TAR Release",
-            "command": "tar",
-            "type": "shell",
-            "args": [
-                "-czvf",
-                "${workspaceRoot}/Almostengr.VideoProcessor.Api.tar.gz",
-                "-C",
-                "${workspaceRoot}/Almostengr.VideoProcessor.Api/bin/Release/net6.0/linux-x64/publish",
-                "."
-            ],
-            "dependsOn": ["Publish Release"],
+            "dependsOn": ["Tag Release"],
         },
         {
             "label": "Tag Release",
@@ -100,7 +88,7 @@
                 "-m",
                 "\"version 6.$(date +%Y.%m.%d)\""
             ],
-            "dependsOn": ["Package TAR Release"],
+            "dependsOn": ["Publish Release"],
         }
     ]
 }
