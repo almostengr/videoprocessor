@@ -1,5 +1,6 @@
 using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
+using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Constants;
 using Almostengr.VideoProcessor.Core.Music;
 
@@ -22,6 +23,8 @@ public abstract class VideoFile
         ValidateVideoFile(filePath);
         FilePath = filePath;
         AudioFile = null;
+
+        Title();
     }
 
     public string FileName()
@@ -91,12 +94,21 @@ public abstract class VideoFile
 
     public virtual string Title()
     {
-        return FileName()
+        string title = FileName()
             .Replace(FileExtension.Mp4.Value, string.Empty)
             .Replace(FileExtension.TarXz.Value, string.Empty)
             .Replace(FileExtension.TarGz.Value, string.Empty)
             .Replace(FileExtension.Tar.Value, string.Empty)
             .Replace(Constant.Colon, string.Empty);
+
+        const int MAX_TITLE_LENGTH = 100;
+
+        if (title.Length > MAX_TITLE_LENGTH)
+        {
+            throw new TitleTooLongException($"Title is {title.Length} characters long, greater than {MAX_TITLE_LENGTH}");
+        }
+
+        return title;
     }
 
     public string OutputFileName()
