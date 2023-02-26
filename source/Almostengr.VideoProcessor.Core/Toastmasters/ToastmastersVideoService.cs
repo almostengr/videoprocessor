@@ -22,15 +22,8 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
         WorkingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Working);
         ArchiveDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Archive);
         UploadingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Uploading);
-        // ReviewingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Reviewing);
-        // ReviewWorkDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.ReviewWork);
         _loggerService = loggerService;
     }
-
-    // public override async Task ProcessIncomingSubtitlesAsync(CancellationToken cancellationToken)
-    // {
-    //     throw new NotImplementedException();
-    // }
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
@@ -58,7 +51,6 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
     public override async Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken)
     {
-        // ToastmastersIncomingTarballFile? tarball = null;
         ToastmastersVideoFile? archiveFile = null;
 
         try
@@ -66,7 +58,6 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             string selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
                 IncomingDirectory, FileExtension.Tar);
 
-            // tarball = new ToastmastersIncomingTarballFile(selectedTarballFilePath);
             archiveFile = new ToastmastersVideoFile(new VideoProjectArchiveFile(selectedTarballFilePath));
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
@@ -74,7 +65,6 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
             await _tarballService.ExtractTarballContentsAsync(
                 archiveFile.FilePath, WorkingDirectory, cancellationToken);
-            // tarball.FilePath, IncomingWorkDirectory, cancellationToken);
 
             string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp4.Value))
@@ -85,20 +75,14 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             CreateFfmpegInputFile(videoFiles, ffmpegInputFilePath);
 
             string outputFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
-            // string outputFilePath = Path.Combine(IncomingWorkDirectory, tarball.VideoFileName);
-
-            // await _ffmpegService.RenderVideoAsCopyAsync(
-            //     ffmpegInputFilePath, outputFilePath, cancellationToken);
 
             await _ffmpegService.RenderVideoWithFiltersAsync(
                 ffmpegInputFilePath, archiveFile.VideoFilters(), outputFilePath, cancellationToken);
 
             _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, archiveFile.OutputFileName()));
-            // _fileSystemService.MoveFile(outputFilePath, Path.Combine(ReviewingDirectory, tarball.FileName));
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.MoveFile(
                 archiveFile.FilePath, Path.Combine(ArchiveDirectory, archiveFile.FileName()));
-            // _fileSystemService.MoveFile(tarball.FilePath, Path.Combine(ArchiveDirectory, tarball.FileName));
         }
         catch (NoFilesMatchException)
         {
@@ -117,58 +101,5 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
     }
-
-    // public override async Task ProcessReviewedFilesAsync(CancellationToken cancellationToken)
-    // {
-    //     AssSubtitleFile? subtitleFile = null;
-
-    //     try
-    //     {
-    //         string subtitleFilePath =
-    //             _fileSystemService.GetRandomFileByExtensionFromDirectory(ReviewingDirectory, FileExtension.GraphicsAss);
-
-    //         subtitleFile = new AssSubtitleFile(subtitleFilePath);
-
-    //         _loggerService.LogInformation($"Processing {subtitleFilePath}");
-
-    //         string archiveFilePath = _fileSystemService.GetFilesInDirectory(ReviewingDirectory)
-    //             .Where(f => f.StartsWith(subtitleFile.FileName) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
-    //             .Single();
-
-    //         // ToastmastersVideoFile video = new ToastmastersVideoFile(videoFilePath);
-    //         ToastmastersVideoProjectArchive archive = new ToastmastersVideoProjectArchive(archiveFilePath);
-    //         video.SetGraphicsSubtitleFile(subtitleFilePath);
-    //         video.GraphicsSubtitleFile.SetSubtitles(_assSubtitleFileService.ReadFile(video.GraphicsSubtitleFile.FilePath));
-
-    //         _fileSystemService.DeleteDirectory(ReviewWorkDirectory);
-    //         _fileSystemService.CreateDirectory(ReviewWorkDirectory);
-
-    //         video.SetBrandingText(RandomChannelBrandingText(video.BrandingTextOptions()));
-    //         string videoFilters = video.VideoFilters();
-
-    //         /// render video
-    //         string outputFilePath = Path.Combine(ReviewWorkDirectory, video.FileName);
-
-    //         await _ffmpegService.RenderVideoWithFiltersAsync(
-    //             video.FilePath, video.VideoFilters(), outputFilePath, cancellationToken);
-
-    //         _fileSystemService.MoveFile(
-    //             video.GraphicsSubtitleFile.FilePath,
-    //             Path.Combine(ArchiveDirectory, video.GraphicsSubtitleFile.FileName));
-    //         _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, video.FileName));
-    //         _fileSystemService.DeleteDirectory(ReviewWorkDirectory);
-
-    //         _loggerService.LogInformation($"Completed processing {subtitleFilePath}");
-    //     }
-    //     catch (NoFilesMatchException)
-    //     {
-    //         throw;
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         _loggerService.LogError(ex, ex.Message);
-    //         _fileSystemService.MoveFile(subtitleFile.FilePath, subtitleFile.FilePath + FileExtension.Err.Value);
-    //     }
-    // }
 
 }
