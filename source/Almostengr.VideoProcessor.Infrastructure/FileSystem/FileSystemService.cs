@@ -50,16 +50,29 @@ public sealed class FileSystemService : IFileSystemService
 
     public string GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
     {
-        IEnumerable<string> filePaths = GetFilesInDirectory(directory)
-            .Where(f => f.ToLower().Contains(extension.Value) && !f.ToLower().EndsWith(FileExtension.Err.Value));
+        // IEnumerable<string> filePaths = GetFilesInDirectory(directory)
 
-        if (filePaths.Count() == 0)
+        try
+        {
+            // var filePath = GetFilesInDirectory(directory)
+            //     .Where(f => f.ToLower().Contains(extension.Value) && !f.ToLower().EndsWith(FileExtension.Err.Value))
+            //     .First();
+
+            return GetFilesInDirectory(directory)
+                .Where(f => f.ToLower().Contains(extension.Value) && !f.ToLower().EndsWith(FileExtension.Err.Value))
+                .First();
+        }
+        catch (InvalidOperationException)
         {
             throw new NoFilesMatchException();
         }
 
-        return filePaths.OrderBy(f => _randomService.Next()).Take(1)
-            .First();
+        // if (filePaths.Count() == 0)
+        // {
+        //     throw new NoFilesMatchException();
+        // }
+
+        // return filePaths.OrderBy(f => _randomService.Next()).Take(1).First();
     }
 
     public bool IsDiskSpaceAvailable(string directory)
@@ -102,6 +115,12 @@ public sealed class FileSystemService : IFileSystemService
     public IEnumerable<string> GetFilesInDirectory(string directory)
     {
         return Directory.GetFiles(directory);
+    }
+
+    public FileInfo[] GetFilesInDirectoryWithFileInfo(string directory)
+    {
+        DirectoryInfo directoryInfo = new DirectoryInfo(directory);
+        return directoryInfo.GetFiles();
     }
 
     public IEnumerable<string> GetDirectoriesInDirectory(string directory)

@@ -33,5 +33,7 @@ public interface IFfmpegService
     Task<(string stdOut, string stdErr)> RenderVideoWithAudioAndFiltersAsync(
         string videoFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdOut, string stdErr)> RenderVideoAsync(
-        string ffmpegInputFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken);
+        string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken);
+    // Task<(string stdOut, string stdErr)> RenderVideoAsync(
+    //     string ffmpegInputFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken);
 }

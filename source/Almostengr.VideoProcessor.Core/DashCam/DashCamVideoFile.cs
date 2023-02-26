@@ -9,15 +9,8 @@ public sealed class DashCamVideoFile : VideoFile
 
     public DashCamVideoFile(string filePath) : base(filePath)
     {
-        // string title = Title();
-        // SetSubtype(title);
         ValidateArguments(filePath);
         SetSubtype(FileName());
-
-        // if (filePath.ToLower().Contains("bad drivers of montgomery"))
-        // {
-        //     throw new ArgumentException("Title contains invalid text", nameof(filePath));
-        // }
     }
 
     public DashCamVideoFile(VideoProjectArchiveFile videoProjectArchiveFile) : base(videoProjectArchiveFile)
@@ -86,11 +79,6 @@ public sealed class DashCamVideoFile : VideoFile
             Opacity.Medium,
             DrawTextPosition.UpperLeft)).ToString();
     }
-
-    // public override string[] BrandingTextOptions()
-    // {
-    //     return new string[] { "Kenny Ram Dash Cam" };
-    // }
 
     public override string BrandingText()
     {

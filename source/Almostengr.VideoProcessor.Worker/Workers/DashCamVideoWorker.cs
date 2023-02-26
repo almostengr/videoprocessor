@@ -22,23 +22,23 @@ internal sealed class DashCamVideoWorker : BaseWorker
         {
             try
             {
+                await _videoService.ProcessIncomingVideosWithGraphicsAsync(cancellationToken);
+            }
+            catch (NoFilesMatchException)
+            {
+            }
+
+            try
+            {
                 await _videoService.ProcessIncomingTarballFilesAsync(cancellationToken);
             }
             catch (NoFilesMatchException)
             {
                 await _videoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
-            }
-
-            try
-            {
-                // await _videoService.ProcessReviewedFilesAsync(cancellationToken);
-            }
-            catch (NoFilesMatchException)
-            {
-                await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
+                // await _videoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
                 await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
             }
-            
+
         }
     }
 }

@@ -1,4 +1,3 @@
-using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
@@ -57,12 +56,12 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     }
 
     public async Task<(string stdOut, string stdErr)> RenderVideoAsync(
-        string ffmpegInputFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
+        string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory =
             Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
         string arguments =
-            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{outputFilePath}\"";
+            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -filter_hw_device foo -vf \"format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{outputFilePath}\"";
 
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
@@ -70,10 +69,15 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     public async Task<(string stdOut, string stdErr)> RenderVideoWithAudioAndFiltersAsync(
         string videoFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
     {
+        if (!string.IsNullOrEmpty(videoFilter))
+        {
+            videoFilter += ",";
+        }
+
         string workingDirectory =
             Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
         string arguments =
-            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i \"{videoFilePath}\" -i \"{audioTrackFilePath}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
+            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i \"{videoFilePath}\" -i \"{audioTrackFilePath}\" -filter_hw_device foo -vf \"{videoFilter} format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
 
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
@@ -179,31 +183,31 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken);
     }
 
-    public async Task<(string stdout, string stdErr)> ConvertEndScreenImageToMp4VideoAsync(
-        string endScreenImageFilePath, string endScreenAudioFilePath, string endScreenOutputFilePath, CancellationToken cancellationToken)
-    {
-        if (!endScreenAudioFilePath.EndsWith(FileExtension.Mp3.Value))
-        {
-            throw new VideoProcessorException("Audio file in wrong format");
-        }
+    // public async Task<(string stdout, string stdErr)> ConvertEndScreenImageToMp4VideoAsync(
+    //     string endScreenImageFilePath, string endScreenAudioFilePath, string endScreenOutputFilePath, CancellationToken cancellationToken)
+    // {
+    //     if (!endScreenAudioFilePath.EndsWith(FileExtension.Mp3.Value))
+    //     {
+    //         throw new VideoProcessorException("Audio file in wrong format");
+    //     }
 
-        if (!endScreenImageFilePath.EndsWith(FileExtension.Png.Value) && !endScreenImageFilePath.EndsWith(FileExtension.Jpg.Value))
-        {
-            throw new VideoProcessorException("Image file in wrong format");
-        }
+    //     if (!endScreenImageFilePath.EndsWith(FileExtension.Png.Value) && !endScreenImageFilePath.EndsWith(FileExtension.Jpg.Value))
+    //     {
+    //         throw new VideoProcessorException("Image file in wrong format");
+    //     }
 
-        if (!endScreenOutputFilePath.EndsWith(FileExtension.Mp4.Value))
-        {
-            throw new VideoProcessorException("Output file must be in MP4 format");
-        }
+    //     if (!endScreenOutputFilePath.EndsWith(FileExtension.Mp4.Value))
+    //     {
+    //         throw new VideoProcessorException("Output file must be in MP4 format");
+    //     }
 
-        string workingDirectory = Path.GetDirectoryName(endScreenImageFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+    //     string workingDirectory = Path.GetDirectoryName(endScreenImageFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
 
-        return await FfmpegAsync(
-            $"-y -framerate 0.1 -i \"{endScreenImageFilePath}\" -i \"{endScreenAudioFilePath}\" -map 0:v:0 -map 1:a:0 -c:v libx264 -r 30 -shortest \"{endScreenOutputFilePath}\"",
-            workingDirectory,
-            cancellationToken);
-    }
+    //     return await FfmpegAsync(
+    //         $"-y -framerate 0.1 -i \"{endScreenImageFilePath}\" -i \"{endScreenAudioFilePath}\" -map 0:v:0 -map 1:a:0 -c:v libx264 -r 30 -shortest \"{endScreenOutputFilePath}\"",
+    //         workingDirectory,
+    //         cancellationToken);
+    // }
 
     public async Task<(string stdout, string stdErr)> RenderVideoWithFiltersAsync(
         string ffmpegInputFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken)

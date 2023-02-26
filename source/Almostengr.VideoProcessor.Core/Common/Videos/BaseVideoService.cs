@@ -120,7 +120,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public void StopProcessingIfFfmpegInputTxtFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.Value))
+            .Where(f => f.ToLower().Contains("ffmpeg"))
             .Any();
 
         if (fileExists)
