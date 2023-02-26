@@ -14,6 +14,11 @@ channels have a predefined structure for each video. Thus they are easy to autom
 content or on screen text needs to be displayed, the automation for that particular channel is modified
 accordingly.
 
+Thumbnails are generated using a custom webpage and Selenium Webdriver. Selenium Webdriver is used 
+to connect to a specified URL which includes the video title in the URL. That title is use to 
+display text on the page. From there, Webdriver then takes a screenshot of the page with the title, 
+so that it can be used for the video thumbnail.
+
 ## Additional Resources
 
 * Video on [Getting API Key to Use with YouTube API](https://www.youtube.com/watch?v=JbWnRhHfTDA)
