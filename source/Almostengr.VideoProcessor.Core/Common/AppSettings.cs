@@ -29,7 +29,7 @@ public sealed class AppSettings
             TechnologyDirectory = $"{pbaseDirectory}/technology";
             ToastmastersDirectory = $"{pbaseDirectory}/toastmasters";
             WorkerDelay = TimeSpan.FromMinutes(60);
-            YouTubeApiKey = Environment.GetEnvironmentVariable("YouTubeApiKey") ?? throw new ArgumentNullException("YouTube API key not valid");
+            YouTubeApiKey = Environment.GetEnvironmentVariable("YouTubeApiKey") ?? string.Empty;
             ChromeDriverPath = "/home/iamadmin/videoprocessor/chromedriver";
             return;
         }

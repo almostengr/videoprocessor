@@ -150,7 +150,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken);
     }
 
-    public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
+    public async Task<(string stdout, string stdErr)> ConvertMp4VideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
 
@@ -169,6 +169,29 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
 
         return await FfmpegAsync(
             $"-i \"{videoFilePath}\" -c copy -bsf:v h264_mp4toannexb -f mpegts \"{outputFilePath}\"",
+            workingDirectory,
+            cancellationToken
+        );
+    }
+    public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
+        string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
+    {
+
+        if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
+        {
+            throw new InvalidPathException("Invalid paths provided");
+        }
+
+        if (!IsVideoFile(videoFilePath))
+        {
+            return ("Not a video file", string.Empty);
+        }
+
+        string workingDirectory =
+            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+
+        return await FfmpegAsync(
+            $"-i \"{videoFilePath}\" -c copy -f mpegts \"{outputFilePath}\"",
             workingDirectory,
             cancellationToken
         );

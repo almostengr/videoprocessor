@@ -122,7 +122,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
                 if (result.stdErr.ToLower().Contains(Constant.Audio))
                 {
-                    await _ffmpegService.ConvertVideoFileToTsFormatAsync(
+                    await _ffmpegService.ConvertMp4VideoFileToTsFormatAsync(
                         video.FilePath,
                         video.FilePath.Replace(FileExtension.Mp4.Value, FileExtension.Ts.Value).Replace(FileExtension.Mkv.Value, FileExtension.Ts.Value),
                         cancellationToken);

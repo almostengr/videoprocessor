@@ -8,7 +8,7 @@ public interface IFfmpegService
         string arguments, string directory, CancellationToken cancellationToken);
     Task<(string stdOut, string stdErr)> RenderVideoAsCopyAsync(
         string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken);
-    Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
+    Task<(string stdout, string stdErr)> ConvertMp4VideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> AddAccAudioToVideoAsync(
         string videoFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken);

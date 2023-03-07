@@ -48,6 +48,26 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
+            var nonMovVideoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.EndsWith(FileExtension.Mp4.Value) || f.EndsWith(FileExtension.Mkv.Value))
+                .Select(f => new DashCamVideoFile(f))
+                .ToList();
+
+            // if (nonMovVideoFiles.Count() > 0)
+            // {
+            //     // convert files to ts format
+
+            // }
+            foreach (var video in nonMovVideoFiles)
+            {
+                await _ffmpegService.ConvertMp4VideoFileToTsFormatAsync(
+                    video.FilePath,
+                    video.FilePath.Replace(FileExtension.Mov.Value, string.Empty).Replace(FileExtension.Mp4.Value, string.Empty) + FileExtension.Ts.Value,
+                    cancellationToken);
+
+                _fileSystemService.DeleteFile(video.FilePath);
+            }
+
             string? ffmpegInputFilePath = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWith(FileExtension.FfmpegInput.Value))
                 .SingleOrDefault();
@@ -55,8 +75,8 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             if (string.IsNullOrEmpty(ffmpegInputFilePath))
             {
                 var videoFiles = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
-                    .Where(f => f.Name.ToLower().EndsWith(FileExtension.Mov.Value))
-                    .OrderBy(f => f.CreationTime)
+                    .Where(f => f.Name.ToLower().EndsWith(FileExtension.Mov.Value) || f.Name.ToLower().EndsWith(FileExtension.Ts.Value))
+                    .OrderBy(f => f.Name)
                     .Select(f => f.FullName);
 
                 ffmpegInputFilePath = Path.Combine(WorkingDirectory, "videos" + FileExtension.FfmpegInput.Value);
