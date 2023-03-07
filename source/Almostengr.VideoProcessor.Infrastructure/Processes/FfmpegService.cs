@@ -173,6 +173,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken
         );
     }
+    
     public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
@@ -189,12 +190,9 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
 
         string workingDirectory =
             Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+        string arguments = $"-i \"{videoFilePath}\" -c:v copy -f mpegts \"{outputFilePath}\"";
 
-        return await FfmpegAsync(
-            $"-i \"{videoFilePath}\" -c copy -f mpegts \"{outputFilePath}\"",
-            workingDirectory,
-            cancellationToken
-        );
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
     public async Task<(string stdout, string stdErr)> ConvertVideoFileToMp3FileAsync(

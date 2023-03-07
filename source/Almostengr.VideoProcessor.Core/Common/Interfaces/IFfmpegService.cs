@@ -22,4 +22,5 @@ public interface IFfmpegService
         string videoFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken);
     Task<(string stdOut, string stdErr)> RenderVideoAsync(
         string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken);
+    Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(string filePath, string outFilePath, CancellationToken cancellationToken);
 }

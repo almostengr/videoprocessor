@@ -48,24 +48,33 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
-            var nonMovVideoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp4.Value) || f.EndsWith(FileExtension.Mkv.Value))
-                .Select(f => new DashCamVideoFile(f))
+            foreach (var filePath in _fileSystemService.GetFilesInDirectory(WorkingDirectory))
+            {
+                string newFilePath = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileName(filePath).ToLower());
+
+                if (filePath == newFilePath)
+                {
+                    continue;
+                }
+
+                _fileSystemService.MoveFile(filePath, newFilePath);
+            }
+
+            var videoFiles = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
+                .Where(f => f.FullName.ToLower().EndsWith(FileExtension.Mov.Value) || f.FullName.ToLower().EndsWith(FileExtension.Mkv.Value) || f.FullName.ToLower().EndsWith(FileExtension.Mp4.Value))
+                // .OrderBy(f => f.CreationTime)
+                .OrderBy(f => f.Name)
+                .Select(f => new DashCamVideoFile(f.FullName))
                 .ToList();
 
-            // if (nonMovVideoFiles.Count() > 0)
-            // {
-            //     // convert files to ts format
-
-            // }
-            foreach (var video in nonMovVideoFiles)
+            foreach (var video in videoFiles)
             {
-                await _ffmpegService.ConvertMp4VideoFileToTsFormatAsync(
-                    video.FilePath,
-                    video.FilePath.Replace(FileExtension.Mov.Value, string.Empty).Replace(FileExtension.Mp4.Value, string.Empty) + FileExtension.Ts.Value,
-                    cancellationToken);
+                string outFilePath = video.FilePath
+                    .Replace(FileExtension.Mov.Value, string.Empty)
+                    .Replace(FileExtension.Mp4.Value, string.Empty) + FileExtension.Ts.Value;
 
-                _fileSystemService.DeleteFile(video.FilePath);
+                await _ffmpegService.ConvertVideoFileToTsFormatAsync(
+                    video.FilePath, outFilePath, cancellationToken);
             }
 
             string? ffmpegInputFilePath = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
@@ -74,22 +83,22 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
 
             if (string.IsNullOrEmpty(ffmpegInputFilePath))
             {
-                var videoFiles = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
-                    .Where(f => f.Name.ToLower().EndsWith(FileExtension.Mov.Value) || f.Name.ToLower().EndsWith(FileExtension.Ts.Value))
+                var tsVideoFiles = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
+                    .Where(f => f.Name.ToLower().EndsWith(FileExtension.Ts.Value))
                     .OrderBy(f => f.Name)
                     .Select(f => f.FullName);
 
                 ffmpegInputFilePath = Path.Combine(WorkingDirectory, "videos" + FileExtension.FfmpegInput.Value);
-                CreateFfmpegInputFile(videoFiles.ToArray(), ffmpegInputFilePath);
+                CreateFfmpegInputFile(tsVideoFiles.ToArray(), ffmpegInputFilePath);
             }
-
-            _fileSystemService.SaveFileContents(
-                Path.Combine(IncomingDirectory, archiveFile.Title() + FileExtension.ThumbTxt.Value),
-                archiveFile.Title());
 
             string outputFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
 
             await _ffmpegService.RenderVideoAsync(ffmpegInputFilePath, outputFilePath, cancellationToken);
+
+            _fileSystemService.SaveFileContents(
+                Path.Combine(IncomingDirectory, archiveFile.Title() + FileExtension.ThumbTxt.Value),
+                archiveFile.Title());
 
             _fileSystemService.MoveFile(archiveFile.FilePath, Path.Combine(ArchiveDirectory, archiveFile.FileName()));
             _fileSystemService.MoveFile(outputFilePath, Path.Combine(IncomingDirectory, archiveFile.OutputFileName()));
