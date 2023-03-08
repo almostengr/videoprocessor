@@ -155,7 +155,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
 
             string outputVideoFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
 
-            await _ffmpegService.RenderVideoWithFiltersAsync(
+            await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
                 ffmpegInputFilePath, archiveFile.VideoFilters(), outputVideoFilePath, cancellationToken);
 
             _fileSystemService.SaveFileContents(

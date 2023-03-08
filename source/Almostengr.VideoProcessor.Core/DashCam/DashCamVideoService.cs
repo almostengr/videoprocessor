@@ -155,12 +155,13 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
-            string videoFilters = video.VideoFilters() + Constant.CommaSpace + video.TitleDrawTextFilter();
+            string videoFilters = video.VideoFilters();
 
             string outputFilePath = Path.Combine(WorkingDirectory, video.FileName());
 
             if (video.SubType != DashCamVideoFile.DashCamVideoType.CarRepair)
             {
+                videoFilters += Constant.CommaSpace + video.TitleDrawTextFilter();
                 video.SetAudioFile(_musicService.GetRandomMixTrack());
 
                 await _ffmpegService.RenderVideoWithAudioAndFiltersAsync(
@@ -172,10 +173,11 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
                     video.FilePath, videoFilters, outputFilePath, cancellationToken);
             }
 
-            _fileSystemService.MoveFile(
-                video.GraphicsFilePath(), Path.Combine(ArchiveDirectory, video.GraphicsFilePath()));
             _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, video.FileName()));
+            _fileSystemService.DeleteFile(video.FilePath);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
+            _fileSystemService.MoveFile(
+                video.GraphicsFilePath(), Path.Combine(ArchiveDirectory, Path.GetFileName(video.GraphicsFilePath())));
         }
         catch (NoFilesMatchException)
         {

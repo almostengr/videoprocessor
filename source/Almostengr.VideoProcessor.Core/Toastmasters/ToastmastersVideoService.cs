@@ -76,7 +76,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
             string outputFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
 
-            await _ffmpegService.RenderVideoWithFiltersAsync(
+            await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
                 ffmpegInputFilePath, archiveFile.VideoFilters(), outputFilePath, cancellationToken);
 
             _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, archiveFile.OutputFileName()));
