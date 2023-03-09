@@ -4,10 +4,9 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public abstract class SrtSubtitleFile
+public sealed class SrtSubtitleFile
 {
     public string FilePath { get; init; }
-    public string FileName {get; init;}
     public IList<SubtitleFileEntry> Subtitles { get; private set; }
 
     public SrtSubtitleFile(string filePath)
@@ -24,7 +23,11 @@ public abstract class SrtSubtitleFile
 
         FilePath = filePath;
         Subtitles = new List<SubtitleFileEntry>();
-        FileName = Path.GetFileName(FilePath);
+    }
+
+    public string FileName()
+    {
+        return Path.GetFileName(FilePath);
     }
 
     public void SetSubtitles(IList<SubtitleFileEntry> subtitles)
@@ -43,7 +46,7 @@ public abstract class SrtSubtitleFile
         return Path.Combine(FilePath).Replace(FileExtension.Srt.Value, FileExtension.Md.Value);
     }
 
-    public virtual string BlogPostText()
+    public string BlogPostText()
     {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -87,4 +90,5 @@ public abstract class SrtSubtitleFile
             .Replace("rht services", "RHT Services")
         ;
     }
+
 }

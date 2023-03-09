@@ -8,13 +8,13 @@ using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
 
-public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
+public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 {
-    private readonly ILoggerService<DashCamVideoService> _loggerService;
+    private readonly ILoggerService<DashCamService> _loggerService;
 
-    public DashCamVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
+    public DashCamService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
-        ILoggerService<DashCamVideoService> loggerService, IMusicService musicService,
+        ILoggerService<DashCamService> loggerService, IMusicService musicService,
         IAssSubtitleFileService assSubtitleFileService,
         IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)

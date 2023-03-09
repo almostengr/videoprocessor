@@ -8,14 +8,14 @@ using Almostengr.VideoProcessor.Core.Music.Services;
 
 namespace Almostengr.VideoProcessor.Core.Toastmasters;
 
-public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVideoService
+public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoService
 {
-    private readonly ILoggerService<ToastmastersVideoService> _loggerService;
+    private readonly ILoggerService<ToastmastersService> _loggerService;
 
-    public ToastmastersVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService compressionService,
+    public ToastmastersService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService compressionService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         IGzFileCompressionService gzipService, IAssSubtitleFileService assSubtitleFileService,
-        ILoggerService<ToastmastersVideoService> loggerService, IMusicService musicService) :
+        ILoggerService<ToastmastersService> loggerService, IMusicService musicService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Incoming);
