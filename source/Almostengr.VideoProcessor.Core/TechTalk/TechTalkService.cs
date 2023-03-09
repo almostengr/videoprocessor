@@ -214,9 +214,9 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         }
     }
 
-    public async Task ProcessSrtSubtitlesAsync(CancellationToken cancellationToken)
+    public void ProcessSrtSubtitles(CancellationToken cancellationToken)
     {
-        SrtSubtitleFile srtFile = null;
+        SrtSubtitleFile? srtFile = null;
 
         try
         {

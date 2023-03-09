@@ -201,9 +201,9 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
         }
     }
 
-    public async Task ProcessSrtSubtitlesAsync(CancellationToken cancellationToken)
+    public void ProcessSrtSubtitles(CancellationToken cancellationToken)
     {
-        SrtSubtitleFile srtFile = null;
+        SrtSubtitleFile? srtFile = null;
 
         try
         {
