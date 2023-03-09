@@ -61,7 +61,9 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             }
 
             var videoFiles = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
-                .Where(f => f.FullName.ToLower().EndsWith(FileExtension.Mov.Value) || f.FullName.ToLower().EndsWith(FileExtension.Mkv.Value) || f.FullName.ToLower().EndsWith(FileExtension.Mp4.Value))
+                .Where(f => f.FullName.EndsWith(FileExtension.Mov.Value, StringComparison.OrdinalIgnoreCase) || 
+                    f.FullName.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase) || 
+                    f.FullName.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
                 // .OrderBy(f => f.CreationTime)
                 .OrderBy(f => f.Name)
                 .Select(f => new DashCamVideoFile(f.FullName))
@@ -84,7 +86,7 @@ public sealed class DashCamVideoService : BaseVideoService, IDashCamVideoService
             if (string.IsNullOrEmpty(ffmpegInputFilePath))
             {
                 var tsVideoFiles = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
-                    .Where(f => f.Name.ToLower().EndsWith(FileExtension.Ts.Value))
+                    .Where(f => f.Name.EndsWith(FileExtension.Ts.Value, StringComparison.OrdinalIgnoreCase))
                     .OrderBy(f => f.Name)
                     .Select(f => f.FullName);
 

@@ -88,7 +88,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             // todo normailze audio files
 
             var audioFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp3.Value))
+                .Where(f => f.EndsWith(FileExtension.Mp3.Value, StringComparison.OrdinalIgnoreCase))
                 .Select(f => new AudioFile(f))
                 .ToList();
 
@@ -112,7 +112,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             }
 
             var mp4MkvVideoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp4.Value) || f.EndsWith(FileExtension.Mkv.Value))
+                .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase) || f.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase))
                 .Select(f => new TechTalkVideoFile(f))
                 .ToList();
 
@@ -146,7 +146,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
             if (string.IsNullOrEmpty(ffmpegInputFilePath))
             {
                 var tsVideoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                    .Where(f => f.EndsWith(FileExtension.Ts.Value))
+                    .Where(f => f.EndsWith(FileExtension.Ts.Value, StringComparison.OrdinalIgnoreCase))
                     .OrderBy(f => f);
 
                 ffmpegInputFilePath = Path.Combine(WorkingDirectory, "videos" + FileExtension.FfmpegInput.Value);
@@ -190,7 +190,7 @@ public sealed class TechTalkVideoService : BaseVideoService, ITechTalkVideoServi
         try
         {
             var thumbnailFiles = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
-                .Where(f => f.ToLower().EndsWith(FileExtension.ThumbTxt.Value))
+                .Where(f => f.EndsWith(FileExtension.ThumbTxt.Value, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
             foreach (var thumbnailFile in thumbnailFiles)

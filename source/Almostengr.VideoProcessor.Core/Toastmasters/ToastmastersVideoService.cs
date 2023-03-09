@@ -67,7 +67,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 archiveFile.FilePath, WorkingDirectory, cancellationToken);
 
             string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp4.Value))
+                .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(f => f)
                 .ToArray();
 
