@@ -150,7 +150,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken);
     }
 
-    public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
+    public async Task<(string stdout, string stdErr)> ConvertMp4VideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
 
@@ -173,6 +173,27 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken
         );
     }
+    
+    public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
+        string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
+    {
+
+        if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
+        {
+            throw new InvalidPathException("Invalid paths provided");
+        }
+
+        if (!IsVideoFile(videoFilePath))
+        {
+            return ("Not a video file", string.Empty);
+        }
+
+        string workingDirectory =
+            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+        string arguments = $"-i \"{videoFilePath}\" -c:v copy -f mpegts \"{outputFilePath}\"";
+
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
 
     public async Task<(string stdout, string stdErr)> ConvertVideoFileToMp3FileAsync(
         string videoInputFilePath, string audioOutputFilePath, string workingDirectory, CancellationToken cancellationToken)
@@ -184,6 +205,17 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     }
 
     public async Task<(string stdout, string stdErr)> RenderVideoWithFiltersAsync(
+        string videoFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken)
+    {
+        string workingDirectory =
+            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+        string arguments =
+            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i \"{videoFilePath}\" -filter_hw_device foo -vf \"{videoFilters}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{outputFilePath}\"";
+
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
+    public async Task<(string stdout, string stdErr)> RenderVideoWithInputFileAndFiltersAsync(
         string ffmpegInputFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory =

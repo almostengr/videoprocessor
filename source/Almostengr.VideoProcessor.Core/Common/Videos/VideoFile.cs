@@ -181,6 +181,11 @@ public abstract class VideoFile
 
     internal void SetSubtitles(List<SubtitleFileEntry> subtitleFileEntries)
     {
+        if (subtitleFileEntries.Count == 0)
+        {
+            return;
+        }
+        
         GraphicsSubtitleFile.SetSubtitles(subtitleFileEntries);
     }
 

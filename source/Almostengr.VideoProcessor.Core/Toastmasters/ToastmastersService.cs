@@ -8,14 +8,14 @@ using Almostengr.VideoProcessor.Core.Music.Services;
 
 namespace Almostengr.VideoProcessor.Core.Toastmasters;
 
-public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVideoService
+public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoService
 {
-    private readonly ILoggerService<ToastmastersVideoService> _loggerService;
+    private readonly ILoggerService<ToastmastersService> _loggerService;
 
-    public ToastmastersVideoService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService compressionService,
+    public ToastmastersService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService compressionService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         IGzFileCompressionService gzipService, IAssSubtitleFileService assSubtitleFileService,
-        ILoggerService<ToastmastersVideoService> loggerService, IMusicService musicService) :
+        ILoggerService<ToastmastersService> loggerService, IMusicService musicService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.ToastmastersDirectory, DirectoryName.Incoming);
@@ -67,7 +67,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
                 archiveFile.FilePath, WorkingDirectory, cancellationToken);
 
             string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp4.Value))
+                .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(f => f)
                 .ToArray();
 
@@ -76,7 +76,7 @@ public sealed class ToastmastersVideoService : BaseVideoService, IToastmastersVi
 
             string outputFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
 
-            await _ffmpegService.RenderVideoWithFiltersAsync(
+            await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
                 ffmpegInputFilePath, archiveFile.VideoFilters(), outputFilePath, cancellationToken);
 
             _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, archiveFile.OutputFileName()));

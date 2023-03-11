@@ -17,18 +17,18 @@ IHost host = Host.CreateDefaultBuilder(args)
     {
         services.AddSingleton(new AppSettings());
 
-        services.AddSingleton<IDashCamVideoService, DashCamVideoService>();
+        services.AddSingleton<IDashCamVideoService, DashCamService>();
         services.AddSingleton<IFfmpegService, FfmpegService>();
         services.AddSingleton<IFileSystemService, FileSystemService>();
         services.AddSingleton<IFileCompressionService, XzService>();
         services.AddSingleton<IGzFileCompressionService, GzipService>();
         services.AddSingleton<IXzFileCompressionService, XzService>();
-        services.AddSingleton<IHandymanVideoService, HandymanVideoService>();
+        services.AddSingleton<IHandymanVideoService, HandymanService>();
         services.AddSingleton<IMusicService, MusicService>();
         services.AddSingleton<IRandomService, RandomService>();
         services.AddSingleton<ITarballService, TarballService>();
-        services.AddSingleton<ITechTalkVideoService, TechTalkVideoService>();
-        services.AddSingleton<IToastmastersVideoService, ToastmastersVideoService>();
+        services.AddSingleton<ITechTalkVideoService, TechTalkService>();
+        services.AddSingleton<IToastmastersVideoService, ToastmastersService>();
         services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
         services.AddSingleton<IThumbnailService, ThumbnailService>();
 

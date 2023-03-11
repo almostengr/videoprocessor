@@ -22,6 +22,7 @@ public sealed class DashCamVideoFile : VideoFile
     private void SetSubtype(string title)
     {
         SubType = DashCamVideoType.Normal;
+        title = title.ToLower();
 
         if (title.Contains("night"))
         {
@@ -31,7 +32,7 @@ public sealed class DashCamVideoFile : VideoFile
         {
             SubType = DashCamVideoType.Fireworks;
         }
-        else if (title.Contains("altima") || title.Contains("sierra"))
+        else if (title.Contains("nissan altima") || title.Contains("gmc sierra"))
         {
             SubType = DashCamVideoType.CarRepair;
         }

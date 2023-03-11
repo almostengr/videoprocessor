@@ -11,3 +11,8 @@ public interface IReviewVideoService : IBaseVideoService
 {
     Task ProcessReviewedFilesAsync(CancellationToken cancellationToken);
 }
+
+public interface ITranscriptionService : IReviewVideoService
+{
+    Task ProcessSrtSubtitlesAsync(CancellationToken cancellationToken);
+}
