@@ -71,6 +71,11 @@ public abstract class BaseVideoService : IBaseVideoService
         var directories = _fileSystemService.GetDirectoriesInDirectory(incomingDirectory);
         foreach (var directory in directories)
         {
+            if (_fileSystemService.GetFilesInDirectory(directory).Count() == 0)
+            {
+                continue;
+            }
+
             await _tarballService.CreateTarballFromDirectoryAsync(directory, cancellationToken);
             _fileSystemService.DeleteDirectory(directory);
         }
