@@ -83,11 +83,6 @@ public abstract class VideoFile
         return Path.GetFileNameWithoutExtension(FileName()) + FileExtension.Ts.Value;
     }
 
-    internal string TsOutputFilePath()
-    {
-        return Path.GetFileNameWithoutExtension(FilePath) + FileExtension.Ts.Value;
-    }
-
     internal void SetGraphicsSubtitleFile(string subtitleFilePath)
     {
         GraphicsSubtitleFile = new AssSubtitleFile(subtitleFilePath);

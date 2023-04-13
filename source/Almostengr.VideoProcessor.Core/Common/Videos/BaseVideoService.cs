@@ -63,7 +63,7 @@ public abstract class BaseVideoService : IBaseVideoService
             .ToList();
     }
 
-    internal IEnumerable<string> GetVideoFilesInDirecotry(string directory)
+    internal IEnumerable<string> GetVideoFilesInDirectory(string directory)
     {
         return _fileSystemService.GetFilesInDirectory(directory)
             .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase) ||

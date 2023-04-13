@@ -102,7 +102,7 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
                 _fileSystemService.DeleteFile(video.FilePath);
             }
 
-            var videoSegmentFiles = GetVideoFilesInDirecotry(WorkingDirectory)
+            var videoSegmentFiles = GetVideoFilesInDirectory(WorkingDirectory)
                 .Select(f => new HandymanVideoFile(f));
 
             foreach (var video in videoSegmentFiles)
@@ -113,7 +113,7 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
                 {
                     await _ffmpegService.ConvertMp4VideoFileToTsFormatAsync(
                         video.FilePath,
-                        video.TsOutputFilePath(),
+                        Path.Combine(WorkingDirectory, video.TsOutputFileName()),
                         cancellationToken);
                     continue;
                 }
