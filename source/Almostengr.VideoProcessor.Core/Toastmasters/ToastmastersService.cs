@@ -2,7 +2,6 @@ using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Common.Videos;
-using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Constants;
 using Almostengr.VideoProcessor.Core.Music.Services;
 
@@ -55,8 +54,13 @@ public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoSe
 
         try
         {
-            string selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
+            string? selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
                 IncomingDirectory, FileExtension.Tar);
+
+            if (string.IsNullOrEmpty(selectedTarballFilePath))
+            {
+                return;
+            }
 
             archiveFile = new ToastmastersVideoFile(new VideoProjectArchiveFile(selectedTarballFilePath));
 
@@ -71,7 +75,7 @@ public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoSe
                 .OrderBy(f => f)
                 .ToArray();
 
-            string ffmpegInputFilePath = Path.Combine(WorkingDirectory, "videos" + FileExtension.FfmpegInput.Value);
+            string ffmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
             CreateFfmpegInputFile(videoFiles, ffmpegInputFilePath);
 
             string outputFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
@@ -84,17 +88,13 @@ public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoSe
             _fileSystemService.MoveFile(
                 archiveFile.FilePath, Path.Combine(ArchiveDirectory, archiveFile.FileName()));
         }
-        catch (NoFilesMatchException)
-        {
-            throw;
-        }
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
 
             if (archiveFile != null)
             {
-                _loggerService.LogError(ex, $"Error when processing {archiveFile.FilePath}");
+                _loggerService.LogErrorProcessingFile(archiveFile.FilePath, ex);
                 _fileSystemService.MoveFile(archiveFile.FilePath, archiveFile.FilePath + FileExtension.Err.Value);
             }
 

@@ -13,6 +13,6 @@ public interface IFileSystemService
     void PrepareAllFilesInDirectory(string directory);
     void DeleteFile(string ffmpegInputFilePath);
     void SaveFileContents(string filePath, string content);
-    string GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension);
+    string? GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension);
     FileInfo[] GetFilesInDirectoryWithFileInfo(string directory);
 }

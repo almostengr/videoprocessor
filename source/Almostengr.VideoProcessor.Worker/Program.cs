@@ -35,11 +35,8 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<ISrtSubtitleFileService, SrtSubtitleFileService>();
         services.AddSingleton<IAssSubtitleFileService, AssSubtitleFileService>();
 
-        services.AddHostedService<DashCamVideoWorker>();
-        services.AddHostedService<HandymanVideoWorker>();
-        services.AddHostedService<TechTalkVideoWorker>();
-        // services.AddHostedService<SubtitleWorker>();
-        services.AddHostedService<ToastmastersVideoWorker>();
+        // services.AddSingleton<SubtitleWorker>();
+        services.AddSingleton<VideoWorker>();
     })
     .UseSystemd()
     .Build();

@@ -4,7 +4,7 @@ using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Constants;
 using Almostengr.VideoProcessor.Core.Music.Services;
 using Almostengr.VideoProcessor.Core.Common.Videos;
-using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
+using System.Globalization;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
 
@@ -32,8 +32,13 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 
         try
         {
-            string selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
+            string? selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
                 IncomingDirectory, FileExtension.Tar);
+
+            if (string.IsNullOrEmpty(selectedTarballFilePath))
+            {
+                return;
+            }
 
             archiveFile = new DashCamVideoFile(new VideoProjectArchiveFile(selectedTarballFilePath));
 
@@ -45,6 +50,7 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 
             StopProcessingIfKdenliveFileExists(WorkingDirectory);
             StopProcessingIfDetailsTxtFileExists(WorkingDirectory);
+            StopProcessingIfFfmpegInputTxtFileExists(WorkingDirectory);
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
@@ -64,7 +70,6 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
                 .Where(f => f.FullName.EndsWith(FileExtension.Mov.Value, StringComparison.OrdinalIgnoreCase) || 
                     f.FullName.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase) || 
                     f.FullName.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
-                // .OrderBy(f => f.CreationTime)
                 .OrderBy(f => f.Name)
                 .Select(f => new DashCamVideoFile(f.FullName))
                 .ToList();
@@ -72,8 +77,9 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
             foreach (var video in videoFiles)
             {
                 string outFilePath = video.FilePath
-                    .Replace(FileExtension.Mov.Value, string.Empty)
-                    .Replace(FileExtension.Mp4.Value, string.Empty) + FileExtension.Ts.Value;
+                    .Replace(FileExtension.Mov.Value, string.Empty, StringComparison.OrdinalIgnoreCase)
+                    .Replace(FileExtension.Mkv.Value, string.Empty, StringComparison.OrdinalIgnoreCase)
+                    .Replace(FileExtension.Mp4.Value, string.Empty, StringComparison.OrdinalIgnoreCase) + FileExtension.Ts.Value;
 
                 await _ffmpegService.ConvertVideoFileToTsFormatAsync(
                     video.FilePath, outFilePath, cancellationToken);
@@ -90,7 +96,7 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
                     .OrderBy(f => f.Name)
                     .Select(f => f.FullName);
 
-                ffmpegInputFilePath = Path.Combine(WorkingDirectory, "videos" + FileExtension.FfmpegInput.Value);
+                ffmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
                 CreateFfmpegInputFile(tsVideoFiles.ToArray(), ffmpegInputFilePath);
             }
 
@@ -106,7 +112,7 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
             _fileSystemService.MoveFile(outputFilePath, Path.Combine(IncomingDirectory, archiveFile.OutputFileName()));
 
             var graphicsFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.ToLower().EndsWith(FileExtension.GraphicsAss.Value))
+                .Where(f => f.EndsWith(FileExtension.GraphicsAss.Value, StringComparison.OrdinalIgnoreCase))
                 .SingleOrDefault();
 
             if (graphicsFile != null)
@@ -117,17 +123,14 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
-        catch (NoFilesMatchException)
-        {
-            throw;
-        }
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
 
             if (archiveFile != null)
             {
-                _loggerService.LogError(ex, $"Error when processing {archiveFile.FilePath}");
+                // _loggerService.LogError(ex, $"Error when processing {archiveFile.FilePath}");
+                _loggerService.LogErrorProcessingFile(archiveFile.FilePath, ex);
                 _fileSystemService.MoveFile(archiveFile.FilePath, archiveFile.FilePath + FileExtension.Err.Value);
             }
 
@@ -141,13 +144,19 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 
         try
         {
-            string selectGraphicsFile = _fileSystemService.GetRandomFileByExtensionFromDirectory(
+            string? selectGraphicsFile = _fileSystemService.GetRandomFileByExtensionFromDirectory(
                 IncomingDirectory, FileExtension.GraphicsAss);
+            
+            if (string.IsNullOrEmpty(selectGraphicsFile))
+            {
+                return;
+            }
 
             graphicsFile = new AssSubtitleFile(selectGraphicsFile);
 
             var video = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
-                .Where(f => f.StartsWith(graphicsFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && f.ToLower().EndsWith(FileExtension.Mp4.Value))
+                .Where(f => f.StartsWith(graphicsFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) && 
+                    f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
                 .Select(f => new DashCamVideoFile(f))
                 .Single();
 
@@ -181,17 +190,14 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
             _fileSystemService.MoveFile(
                 video.GraphicsFilePath(), Path.Combine(ArchiveDirectory, Path.GetFileName(video.GraphicsFilePath())));
         }
-        catch (NoFilesMatchException)
-        {
-            throw;
-        }
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
 
             if (graphicsFile != null)
             {
-                _loggerService.LogError(ex, $"Error when processing {graphicsFile.FilePath}");
+                // _loggerService.LogError(ex, $"Error when processing {graphicsFile.FilePath}");
+                _loggerService.LogErrorProcessingFile(graphicsFile.FilePath, ex);
                 _fileSystemService.MoveFile(graphicsFile.FilePath, graphicsFile.FilePath + FileExtension.Err.Value);
             }
         }

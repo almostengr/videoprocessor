@@ -2,6 +2,7 @@ using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
+using Almostengr.VideoProcessor.Core.Music;
 using Almostengr.VideoProcessor.Core.Music.Services;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
@@ -54,6 +55,22 @@ public abstract class BaseVideoService : IBaseVideoService
         }
     }
 
+    internal IEnumerable<AudioFile> GetAudioFilesInDirectory(string directory)
+    {
+        return _fileSystemService.GetFilesInDirectory(directory)
+            .Where(f => f.EndsWith(FileExtension.Mp3.Value, StringComparison.OrdinalIgnoreCase))
+            .Select(f => new AudioFile(f))
+            .ToList();
+    }
+
+    internal IEnumerable<string> GetVideoFilesInDirecotry(string directory)
+    {
+        return _fileSystemService.GetFilesInDirectory(directory)
+            .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase) ||
+                f.EndsWith(FileExtension.Mov.Value, StringComparison.OrdinalIgnoreCase) || 
+                f.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase));
+    }
+
     internal void CreateFfmpegInputFile(string[] filesInDirectory, string inputFilePath)
     {
         StringBuilder text = new();
@@ -84,7 +101,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public void StopProcessingIfDetailsTxtFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.ToLower().Contains("details.txt"))
+            .Where(f => f.Contains("details.txt", StringComparison.OrdinalIgnoreCase))
             .Any();
 
         if (fileExists)
@@ -96,7 +113,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public void StopProcessingIfFfmpegInputTxtFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.ToLower().Contains("ffmpeg"))
+            .Where(f => f.Contains("ffmpeg", StringComparison.OrdinalIgnoreCase))
             .Any();
 
         if (fileExists)
@@ -108,7 +125,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public void StopProcessingIfKdenliveFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.ToLower().EndsWith(FileExtension.Kdenlive.Value))
+            .Where(f => f.EndsWith(FileExtension.Kdenlive.Value, StringComparison.OrdinalIgnoreCase))
             .Any();
 
         if (fileExists)

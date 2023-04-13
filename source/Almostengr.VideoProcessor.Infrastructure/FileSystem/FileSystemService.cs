@@ -48,18 +48,11 @@ public sealed class FileSystemService : IFileSystemService
         }
     }
 
-    public string GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
+    public string? GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
     {
-        try
-        {
-            return GetFilesInDirectory(directory)
-                .Where(f => f.ToLower().Contains(extension.Value) && !f.ToLower().EndsWith(FileExtension.Err.Value))
-                .First();
-        }
-        catch (InvalidOperationException)
-        {
-            throw new NoFilesMatchException();
-        }
+        return GetFilesInDirectory(directory)
+            .Where(f => f.ToLower().Contains(extension.Value) && !f.ToLower().EndsWith(FileExtension.Err.Value))
+            .FirstOrDefault();
     }
 
     public bool IsDiskSpaceAvailable(string directory)

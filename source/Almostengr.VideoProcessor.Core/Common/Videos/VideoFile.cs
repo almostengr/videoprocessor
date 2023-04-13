@@ -12,6 +12,7 @@ public abstract class VideoFile
     public string FilePath { get; init; }
     private AudioFile? AudioFile { get; set; }
     private AssSubtitleFile? GraphicsSubtitleFile { get; set; }
+    private bool ConvertToCommonFormat { get; init; }
 
     public VideoFile(VideoProjectArchiveFile videoProjectArchiveFile)
     {
@@ -80,6 +81,11 @@ public abstract class VideoFile
     internal string TsOutputFileName()
     {
         return Path.GetFileNameWithoutExtension(FileName()) + FileExtension.Ts.Value;
+    }
+
+    internal string TsOutputFilePath()
+    {
+        return Path.GetFileNameWithoutExtension(FilePath) + FileExtension.Ts.Value;
     }
 
     internal void SetGraphicsSubtitleFile(string subtitleFilePath)
@@ -185,7 +191,7 @@ public abstract class VideoFile
         {
             return;
         }
-        
+
         GraphicsSubtitleFile.SetSubtitles(subtitleFileEntries);
     }
 

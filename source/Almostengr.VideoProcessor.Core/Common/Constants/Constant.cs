@@ -1,3 +1,5 @@
+using Almostengr.VideoProcessor.Core.Common.Constants;
+
 namespace Almostengr.VideoProcessor.Core.Constants;
 
 public static class Constant
@@ -13,4 +15,5 @@ public static class Constant
     public static readonly string RHT_WEBSITE = "rhtservices.net";
 
     public static readonly string Audio = "audio";
+    public static readonly string FfmpegInputFileName = "video.ffmpeginput";
 }

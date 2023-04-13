@@ -1,5 +1,4 @@
 using Almostengr.VideoProcessor.Core.Common;
-using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Handyman;
 using Almostengr.VideoProcessor.Core.TechTalk;
 
@@ -23,30 +22,9 @@ internal sealed class SubtitleWorker : BaseWorker
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            int count = 0;
-
-            try
-            {
-                // await _handymanService.ProcessIncomingSubtitlesAsync(cancellationToken);
-            }
-            catch (NoFilesMatchException)
-            {
-                count++;
-            }
-
-            try
-            {
-                // await _techTalkService.ProcessIncomingSubtitlesAsync(cancellationToken);
-            }
-            catch (NoFilesMatchException)
-            {
-                count++;
-            }
-
-            if (count >= 2)
-            {
-                await Task.Delay(_appSettings.WorkerDelay);
-            }
+            // await _handymanService.ProcessIncomingSubtitlesAsync(cancellationToken);
+            // await _techTalkService.ProcessIncomingSubtitlesAsync(cancellationToken);
+            await Task.Delay(_appSettings.WorkerDelay);
         }
     }
 }

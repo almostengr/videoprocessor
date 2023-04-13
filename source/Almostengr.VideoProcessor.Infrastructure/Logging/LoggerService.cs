@@ -26,4 +26,9 @@ public sealed class LoggerService<T> : ILoggerService<T>
     {
         _logger.LogInformation(message, args);
     }
+
+    public void LogErrorProcessingFile(string fileName, Exception? exception)
+    {
+        LogError(exception, $"Error processing file {fileName}");
+    }
 }

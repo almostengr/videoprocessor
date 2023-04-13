@@ -2,9 +2,7 @@ using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Common.Videos;
-using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Constants;
-using Almostengr.VideoProcessor.Core.Music;
 using Almostengr.VideoProcessor.Core.Music.Services;
 using Almostengr.VideoProcessor.Core.TechTalk;
 
@@ -62,8 +60,13 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
 
         try
         {
-            string selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
+            string? selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
                 IncomingDirectory, FileExtension.Tar);
+
+            if (string.IsNullOrEmpty(selectedTarballFilePath))
+            {
+                return;
+            }
 
             archiveFile = new HandymanVideoFile(new VideoProjectArchiveFile(selectedTarballFilePath));
 
@@ -73,15 +76,13 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
             await _tarballService.ExtractTarballContentsAsync(archiveFile.FilePath, WorkingDirectory, cancellationToken);
 
             StopProcessingIfKdenliveFileExists(WorkingDirectory);
+            StopProcessingIfDetailsTxtFileExists(WorkingDirectory);
             StopProcessingIfFfmpegInputTxtFileExists(WorkingDirectory);
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
-            var audioFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp3.Value))
-                .Select(f => new AudioFile(f))
-                .ToList();
-
+            var audioFiles = GetAudioFilesInDirectory(WorkingDirectory);
+                
             // normalize audio
 
             foreach (var audioFile in audioFiles)
@@ -101,11 +102,10 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
                 _fileSystemService.DeleteFile(video.FilePath);
             }
 
-            var mp4MkvVideoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase) || f.EndsWith(FileExtension.Mkv.Value))
+            var videoSegmentFiles = GetVideoFilesInDirecotry(WorkingDirectory)
                 .Select(f => new HandymanVideoFile(f));
 
-            foreach (var video in mp4MkvVideoFiles)
+            foreach (var video in videoSegmentFiles)
             {
                 var result = await _ffmpegService.FfprobeAsync($"\"{video.FilePath}\"", WorkingDirectory, cancellationToken);
 
@@ -113,7 +113,7 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
                 {
                     await _ffmpegService.ConvertMp4VideoFileToTsFormatAsync(
                         video.FilePath,
-                        video.FilePath.Replace(FileExtension.Mp4.Value, FileExtension.Ts.Value).Replace(FileExtension.Mkv.Value, FileExtension.Ts.Value),
+                        video.TsOutputFilePath(),
                         cancellationToken);
                     continue;
                 }
@@ -138,7 +138,7 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
                     .Where(f => f.EndsWith(FileExtension.Ts.Value, StringComparison.OrdinalIgnoreCase))
                     .OrderBy(f => f);
 
-                ffmpegInputFilePath = Path.Combine(WorkingDirectory, "videos" + FileExtension.FfmpegInput.Value);
+                ffmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
                 CreateFfmpegInputFile(tsVideoFiles.ToArray(), ffmpegInputFilePath);
             }
 
@@ -156,17 +156,13 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
-        catch (NoFilesMatchException)
-        {
-            throw;
-        }
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
 
             if (archiveFile != null)
             {
-                _loggerService.LogError(ex, $"Error when processing {archiveFile.FilePath}");
+                _loggerService.LogErrorProcessingFile(archiveFile.FilePath, ex);
                 _fileSystemService.MoveFile(archiveFile.FilePath, archiveFile.FilePath + FileExtension.Err.Value);
             }
 
@@ -240,7 +236,7 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
 
             if (srtFile != null)
             {
-                _loggerService.LogError(ex, $"Error when processing {srtFile.FilePath}");
+                _loggerService.LogErrorProcessingFile(srtFile.FilePath, ex);
                 _fileSystemService.MoveFile(srtFile.FilePath, srtFile.FilePath + FileExtension.Err.Value);
             }
 
