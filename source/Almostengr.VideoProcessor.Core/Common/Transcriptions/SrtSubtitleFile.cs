@@ -4,21 +4,21 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public sealed class SrtSubtitleFile
+public abstract class SrtSubtitleFile
 {
     public string FilePath { get; init; }
     public IList<SubtitleFileEntry> Subtitles { get; private set; }
 
     public SrtSubtitleFile(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
+        if (!File.Exists(filePath))
         {
-            throw new ArgumentException("File path not provided", nameof(filePath));
+            throw new ArgumentException(Constant.FileDoesNotExist, nameof(filePath));
         }
 
-        if (!filePath.ToLower().EndsWith(FileExtension.Srt.Value))
+        if (!filePath.EndsWith(FileExtension.Srt.Value,  StringComparison.OrdinalIgnoreCase))
         {
-            throw new ArgumentException("File path is not valid", nameof(filePath));
+            throw new ArgumentException(Constant.FileTypeIsIncorrect, nameof(filePath));
         }
 
         FilePath = filePath;
@@ -43,10 +43,10 @@ public sealed class SrtSubtitleFile
 
     public string BlogFileName()
     {
-        return Path.Combine(FilePath).Replace(FileExtension.Srt.Value, FileExtension.Md.Value);
+        return Path.Combine(FilePath).Replace(FileExtension.Srt.Value, FileExtension.Md.Value, StringComparison.OrdinalIgnoreCase);
     }
 
-    public string BlogPostText()
+    public virtual string BlogPostText()
     {
         StringBuilder stringBuilder = new StringBuilder();
 
