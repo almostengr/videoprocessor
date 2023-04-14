@@ -173,7 +173,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken
         );
     }
-    
+
     public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
@@ -223,6 +223,27 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         string arguments =
             $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -filter_hw_device foo -vf \"{videoFilters}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{outputFilePath}\"";
 
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
+    public async Task<(string stdOut, string stdErr)> AnalyzeAudioVolumeAsync(string inputFilePath, CancellationToken cancellationToken)
+    {
+        string workingDirectory = Path.GetDirectoryName(inputFilePath) ?? throw new ArgumentException("Invalid directory", nameof(inputFilePath));
+        string arguments = $"-i \"{inputFilePath}\" -af \"volumedetect\" -vn -sn -dn -f /dev/null";
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
+    public async Task<(string stdOut, string stdErr)> AdjustAudioVolumeAsync(string inputFilePath, string outputFilePath, float maxVolume, CancellationToken cancellationToken)
+    {
+        if (!outputFilePath.EndsWith(FileExtension.Mp3.Value, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Invalid output file name");
+        }
+
+        const float NORMALIZED_DB_THRESHOLD = 1.0F;
+        string workingDirectory = Path.GetDirectoryName(inputFilePath) ?? throw new ArgumentException("Invalid directory", nameof(inputFilePath));
+        int adjustmentDb = (int)(NORMALIZED_DB_THRESHOLD - maxVolume);
+        string arguments = $"-i \"{inputFilePath}\" -af \"volume={adjustmentDb}dB\" \"{outputFilePath}\" ";
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 }

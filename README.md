@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Ask any YouTuber and they will tell you that creating YouTube videos is a time consuming process.
+Ask any content creator and they will tell you that creating videos is a time consuming process.
 For me, the most mundane and worse part of the process is waiting on the videos to render and uploading them
 to YouTube.
 

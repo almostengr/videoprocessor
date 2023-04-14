@@ -10,7 +10,7 @@ internal sealed class VideoWorker : BaseWorker
 {
     private readonly IDashCamVideoService _dashCamVideoService;
     private readonly IHandymanVideoService _handymanVideoService;
-    private readonly ITechTalkVideoService _techtalkVideoService;
+    private readonly ITechTalkVideoService _techTalkVideoService;
     private readonly IToastmastersVideoService _toastmastersVideoService;
     private readonly AppSettings _appSettings;
     private readonly TimeSpan _delayLoopTime;
@@ -21,7 +21,7 @@ internal sealed class VideoWorker : BaseWorker
     {
         _dashCamVideoService = dashCamVideoService;
         _handymanVideoService = handymanVideoService;
-        _techtalkVideoService = techTalkVideoService;
+        _techTalkVideoService = techTalkVideoService;
         _toastmastersVideoService = toastmastersVideoService;
         _appSettings = appSettings;
 
@@ -38,15 +38,13 @@ internal sealed class VideoWorker : BaseWorker
             await _dashCamVideoService.ProcessIncomingTarballFilesAsync(cancellationToken);
             await _dashCamVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
 
-            _handymanVideoService.CreateThumbnails();
             // await _handymanVideoService.ProcessIncomingTarballFilesAsync(cancellationToken);
             // await _handymanVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
             await _handymanVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
 
-            _techtalkVideoService.CreateThumbnails();
             // await _techtalkVideoService.ProcessIncomingTarballFilesAsync(cancellationToken);
             // await _techtalkVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
-            await _techtalkVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
+            await _techTalkVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
 
             await _toastmastersVideoService.ProcessIncomingTarballFilesAsync(cancellationToken);
             await _toastmastersVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
@@ -59,7 +57,7 @@ internal sealed class VideoWorker : BaseWorker
     {
         if ((previousTime - DateTime.Now) < _delayLoopTime)
         {
-            await Task.Delay(_appSettings.WorkerDelay, cancellationToken);
+            await Task.Delay(_appSettings.LongWorkerDelay, cancellationToken);
         }
 
         return DateTime.Now;

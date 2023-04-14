@@ -1,4 +1,5 @@
 using Almostengr.VideoProcessor.Core.Common.Constants;
+using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
@@ -13,12 +14,12 @@ public sealed class VideoProjectArchiveFile
             !filePath.ToLower().EndsWith(FileExtension.TarXz.Value) &&
             !filePath.ToLower().EndsWith(FileExtension.TarGz.Value))
         {
-            throw new ArgumentException("File path is not valid", nameof(filePath));
+            throw new ArgumentException(Constant.FileTypeIsIncorrect, nameof(filePath));
         }
 
         if (!File.Exists(filePath))
         {
-            throw new ArgumentException("Project file does not exist", nameof(filePath));
+            throw new ArgumentException(Constant.FileDoesNotExist, nameof(filePath));
         }
 
         FilePath = filePath;

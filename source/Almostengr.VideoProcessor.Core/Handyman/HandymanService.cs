@@ -82,7 +82,7 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
             var audioFiles = GetAudioFilesInDirectory(WorkingDirectory);
-                
+
             // normalize audio
 
             foreach (var audioFile in audioFiles)
@@ -174,21 +174,16 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
     {
         try
         {
-            var thumbnailFiles = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
-                .Where(f => f.EndsWith(FileExtension.ThumbTxt.Value, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            var thumbnailFiles = GetThumbnailFiles(IncomingDirectory)
+                .Select(f => new HandymanThumbnailFile(f));
+
+            _thumbnailService.GenerateThumbnails<HandymanThumbnailFile>(UploadingDirectory, thumbnailFiles);
 
             foreach (var thumbnailFile in thumbnailFiles)
             {
-                _thumbnailService.GenerateThumbnail(
-                    ThumbnailType.Handyman,
-                    UploadingDirectory,
-                    Path.GetFileNameWithoutExtension(thumbnailFile) + FileExtension.Jpg.Value,
-                    Path.GetFileNameWithoutExtension(thumbnailFile));
-
                 _fileSystemService.MoveFile(
-                    thumbnailFile,
-                    Path.Combine(ArchiveDirectory, Path.GetFileName(thumbnailFile)));
+                    thumbnailFile.ThumbTxtFilePath,
+                    Path.Combine(ArchiveDirectory, thumbnailFile.ThumbTxtFileName()));
             }
         }
         catch (Exception ex)

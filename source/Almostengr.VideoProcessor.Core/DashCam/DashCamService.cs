@@ -4,7 +4,6 @@ using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Constants;
 using Almostengr.VideoProcessor.Core.Music.Services;
 using Almostengr.VideoProcessor.Core.Common.Videos;
-using System.Globalization;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
 

@@ -21,11 +21,11 @@ public sealed class TechTalkVideoFile : VideoFile
     {
         SubType = TechTalkVideoSubType.TechTalk;
 
-        if (Title().ToLower().Contains("christmas light show"))
+        if (Title().Contains("christmas light show", StringComparison.OrdinalIgnoreCase))
         {
             SubType = TechTalkVideoSubType.Christmas;
         }
-        else if (Title().ToLower().Contains("4th of july"))
+        else if (Title().Contains("4th of july", StringComparison.OrdinalIgnoreCase))
         {
             SubType = TechTalkVideoSubType.IndependenceDay;
         }

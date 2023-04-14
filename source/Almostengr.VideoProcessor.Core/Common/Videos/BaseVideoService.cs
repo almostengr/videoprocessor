@@ -134,4 +134,10 @@ public abstract class BaseVideoService : IBaseVideoService
         }
     }
 
+    public IEnumerable<string> GetThumbnailFiles(string directory)
+    {
+         return _fileSystemService.GetFilesInDirectory(directory)
+            .Where(f => f.EndsWith(FileExtension.ThumbTxt.Value, StringComparison.OrdinalIgnoreCase));
+    }
+
 }

@@ -37,7 +37,7 @@ public abstract class VideoFile
     {
         if (!File.Exists(filePath))
         {
-            throw new ArgumentException("File does not exist");
+            throw new ArgumentException(Constant.FileDoesNotExist, nameof(filePath));
         }
 
         if (
@@ -47,7 +47,7 @@ public abstract class VideoFile
             !filePath.ToLower().EndsWith(FileExtension.Mp4.Value)
         )
         {
-            throw new ArgumentException("File type is not correct", nameof(filePath));
+            throw new ArgumentException(Constant.FileTypeIsIncorrect, nameof(filePath));
         }
     }
 

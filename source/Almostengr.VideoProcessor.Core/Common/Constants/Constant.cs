@@ -16,4 +16,8 @@ public static class Constant
 
     public static readonly string Audio = "audio";
     public static readonly string FfmpegInputFileName = "video.ffmpeginput";
+
+    // exception and error messages
+    public static readonly string FileTypeIsIncorrect = "File type is not correct";
+    public static readonly string FileDoesNotExist = "File does not exist";
 }

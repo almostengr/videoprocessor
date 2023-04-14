@@ -26,4 +26,8 @@ public interface IFfmpegService
         string filePath, string outFilePath, CancellationToken cancellationToken);
     Task<(string stdout, string stdErr)> RenderVideoWithFiltersAsync(
         string videoFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken);
+    Task<(string stdOut, string stdErr)> AdjustAudioVolumeAsync(
+        string inputFilePath, string outputFilePath, float maxVolume, CancellationToken cancellationToken);
+    Task<(string stdOut, string stdErr)> AnalyzeAudioVolumeAsync(
+        string inputFilePath, CancellationToken cancellationToken);
 }

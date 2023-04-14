@@ -24,7 +24,7 @@ internal sealed class SubtitleWorker : BaseWorker
         {
             // await _handymanService.ProcessIncomingSubtitlesAsync(cancellationToken);
             // await _techTalkService.ProcessIncomingSubtitlesAsync(cancellationToken);
-            await Task.Delay(_appSettings.WorkerDelay);
+            await Task.Delay(_appSettings.LongWorkerDelay);
         }
     }
 }

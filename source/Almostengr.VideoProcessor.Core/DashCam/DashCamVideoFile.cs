@@ -22,17 +22,17 @@ public sealed class DashCamVideoFile : VideoFile
     private void SetSubtype(string title)
     {
         SubType = DashCamVideoType.Normal;
-        title = title.ToLower();
 
-        if (title.Contains("night"))
+        if (title.Contains("night", StringComparison.OrdinalIgnoreCase))
         {
             SubType = DashCamVideoType.Night;
         }
-        else if (title.Contains("firework"))
+        else if (title.Contains("firework", StringComparison.OrdinalIgnoreCase))
         {
             SubType = DashCamVideoType.Fireworks;
         }
-        else if (title.Contains("nissan altima") || title.Contains("gmc sierra"))
+        else if (title.Contains("nissan altima", StringComparison.OrdinalIgnoreCase) ||
+            title.Contains("gmc sierra", StringComparison.OrdinalIgnoreCase))
         {
             SubType = DashCamVideoType.CarRepair;
         }
@@ -40,7 +40,7 @@ public sealed class DashCamVideoFile : VideoFile
 
     private void ValidateArguments(string filePath)
     {
-        if (filePath.ToLower().Contains("bad drivers of montgomery"))
+        if (filePath.Contains("bad drivers of montgomery", StringComparison.OrdinalIgnoreCase))
         {
             throw new ArgumentException("Title contains invalid text");
         }

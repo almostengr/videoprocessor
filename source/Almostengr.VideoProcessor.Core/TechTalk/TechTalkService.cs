@@ -93,6 +93,12 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
 
             // todo normailze audio files
 
+            // scan directory for existing audio files
+            // each video file that does not already have separate mp3 file, analyze audio of the video
+            // normalize the audio from the video file if needed, output to mp3 file
+            // render ts file from the separated video and audio file
+            //
+
             var audioFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp3.Value, StringComparison.OrdinalIgnoreCase))
                 .Select(f => new AudioFile(f))
@@ -191,21 +197,16 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
     {
         try
         {
-            var thumbnailFiles = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
-                .Where(f => f.EndsWith(FileExtension.ThumbTxt.Value, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            var thumbnailFiles = GetThumbnailFiles(IncomingDirectory)
+                .Select(f => new TechTalkThumbnailFile(f));
+
+            _thumbnailService.GenerateThumbnails<TechTalkThumbnailFile>(UploadingDirectory, thumbnailFiles);
 
             foreach (var thumbnailFile in thumbnailFiles)
             {
-                _thumbnailService.GenerateThumbnail(
-                    ThumbnailType.TechTalk,
-                    UploadingDirectory,
-                    Path.GetFileNameWithoutExtension(thumbnailFile) + FileExtension.Jpg.Value,
-                    Path.GetFileNameWithoutExtension(thumbnailFile));
-
                 _fileSystemService.MoveFile(
-                    thumbnailFile,
-                    Path.Combine(ArchiveDirectory, Path.GetFileName(thumbnailFile)));
+                    thumbnailFile.ThumbTxtFilePath,
+                    Path.Combine(ArchiveDirectory, thumbnailFile.ThumbTxtFileName()));
             }
         }
         catch (Exception ex)
