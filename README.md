@@ -33,9 +33,8 @@ so that it can be used for the video thumbnail.
 ## Video Schedule By Channel
 
 * Kenny Ram Dash Cam - Videos released weekly
-* Robinson Handy and Technology Services - Videos released on 2nd and 4th Saturdays
-* Tech Talk with RHT Services - released on 1st and 3rd Tuesdays
-* Latter two channels may release videos on 5th Saturday or Tuesday respectively
+* Robinson Handy and Technology Services - Videos released on Saturdays
+* Tech Talk with RHT Services - released on Tuesdays
 * [rhtservices.net](https://rhtservices.net) website will be updated monthly with the transcriptions of the videos released
 
 ## References
