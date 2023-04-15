@@ -34,8 +34,8 @@ internal sealed class VideoWorker : BaseWorker
 
         while (cancellationToken.IsCancellationRequested)
         {
-            await _dashCamVideoService.ProcessIncomingVideosWithGraphicsAsync(cancellationToken);
-            await _dashCamVideoService.ProcessIncomingTarballFilesAsync(cancellationToken);
+            await _dashCamVideoService.ProcessIncomingVideoWithGraphicsAsync(cancellationToken);
+            await _dashCamVideoService.ProcessVideoProjectAsync(cancellationToken);
             await _dashCamVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
 
             // await _handymanVideoService.ProcessIncomingTarballFilesAsync(cancellationToken);
@@ -46,7 +46,7 @@ internal sealed class VideoWorker : BaseWorker
             // await _techtalkVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
             await _techTalkVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
 
-            await _toastmastersVideoService.ProcessIncomingTarballFilesAsync(cancellationToken);
+            await _toastmastersVideoService.ProcessVideoProjectAsync(cancellationToken);
             await _toastmastersVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
 
             previousTime = await DelayWhenLoopingQuickly(cancellationToken, previousTime);

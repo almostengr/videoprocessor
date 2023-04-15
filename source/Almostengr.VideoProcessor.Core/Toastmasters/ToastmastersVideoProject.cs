@@ -3,9 +3,9 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Toastmasters;
 
-public sealed class ToastmastersVideoFile : VideoFile
+public sealed class ToastmastersVideoProject : BaseVideoProject
 {
-    public ToastmastersVideoFile(VideoProjectArchiveFile videoProjectArchiveFile) : base(videoProjectArchiveFile)
+    public ToastmastersVideoProject(string filePath) : base(filePath)
     {
     }
 
@@ -16,6 +16,7 @@ public sealed class ToastmastersVideoFile : VideoFile
         options.Add("towertoastmasters.org");
         options.Add("Tower Toastmasters");
         options.Add("toastmasters.org");
+        options.Add("facebook.com/TowerToastmasters");
 
         return options[random.Next(0, options.Count)];
     }

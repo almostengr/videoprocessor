@@ -22,9 +22,9 @@ internal sealed class SubtitleWorker : BaseWorker
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            // await _handymanService.ProcessIncomingSubtitlesAsync(cancellationToken);
-            // await _techTalkService.ProcessIncomingSubtitlesAsync(cancellationToken);
-            await Task.Delay(_appSettings.LongWorkerDelay);
+            _handymanService.ProcessSrtSubtitleFile();
+            _techTalkService.ProcessSrtSubtitleFile();
+            await Task.Delay(_appSettings.ShortWorkerDelay);
         }
     }
 }

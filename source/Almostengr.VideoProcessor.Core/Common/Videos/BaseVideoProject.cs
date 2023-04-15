@@ -2,95 +2,46 @@ using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Constants;
-using Almostengr.VideoProcessor.Core.Music;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public abstract class VideoFile
+public abstract class BaseVideoProject
 {
-
     public string FilePath { get; init; }
-    private AudioFile? AudioFile { get; set; }
-    private AssSubtitleFile? GraphicsSubtitleFile { get; set; }
-    private bool ConvertToCommonFormat { get; init; }
 
-    public VideoFile(ProjectArchiveFile videoProjectArchiveFile)
+    public BaseVideoProject(string filePath)
     {
-        FilePath = videoProjectArchiveFile.FilePath;
-    }
-
-    public VideoFile(string filePath)
-    {
-        ValidateVideoFile(filePath);
-        FilePath = filePath;
-        AudioFile = null;
-
-        Title();
-    }
-
-    public string FileName()
-    {
-        return Path.GetFileName(FilePath);
-    }
-
-    private static void ValidateVideoFile(string filePath)
-    {
-        if (!File.Exists(filePath))
+        if (string.IsNullOrWhiteSpace(filePath))
         {
-            throw new ArgumentException(Constant.FileDoesNotExist, nameof(filePath));
+            throw new ArgumentException(Constant.ArgumentCannotBeNullOrEmpty, nameof(filePath));
         }
 
         if (
-            !filePath.ToLower().EndsWith(FileExtension.Avi.Value) &&
-            !filePath.ToLower().EndsWith(FileExtension.Mkv.Value) &&
-            !filePath.ToLower().EndsWith(FileExtension.Mov.Value) &&
-            !filePath.ToLower().EndsWith(FileExtension.Mp4.Value)
-        )
+            !filePath.EndsWith(FileExtension.Tar.Value, StringComparison.OrdinalIgnoreCase) &&
+            !filePath.EndsWith(FileExtension.TarGz.Value, StringComparison.OrdinalIgnoreCase) &&
+            !filePath.EndsWith(FileExtension.TarXz.Value, StringComparison.OrdinalIgnoreCase))
         {
             throw new ArgumentException(Constant.FileTypeIsIncorrect, nameof(filePath));
         }
-    }
 
-    public string AudioFilePath()
-    {
-        if (AudioFile == null)
-        {
-            throw new VideoProcessorException("Audio file path has not been set");
-        }
-
-        return AudioFile.FilePath;
-    }
-
-    public string GraphicsFilePath()
-    {
-        if (GraphicsSubtitleFile == null)
-        {
-            throw new VideoProcessorException("Graphics file path has not been set");
-        }
-
-        return GraphicsSubtitleFile.FilePath;
+        FilePath = filePath;
     }
 
     public abstract string BrandingText();
 
-    internal void SetAudioFile(AudioFile audioFile)
+    public virtual FfMpegColor DrawTextFilterBackgroundColor()
     {
-        AudioFile = audioFile;
+        return FfMpegColor.Black;
     }
 
-    internal string TsOutputFileName()
+    public virtual FfMpegColor DrawTextFilterTextColor()
     {
-        return Path.GetFileNameWithoutExtension(FileName()) + FileExtension.Ts.Value;
+        return FfMpegColor.White;
     }
 
-    internal void SetGraphicsSubtitleFile(string subtitleFilePath)
+    public string ThumbnailFileName()
     {
-        GraphicsSubtitleFile = new AssSubtitleFile(subtitleFilePath);
-    }
-
-    internal void SetGraphicsSubtitleFile(AssSubtitleFile subtitleFile)
-    {
-        GraphicsSubtitleFile = subtitleFile;
+        return Title() + FileExtension.ThumbTxt.Value;
     }
 
     public virtual string Title()
@@ -112,30 +63,21 @@ public abstract class VideoFile
         return title;
     }
 
-    public string OutputFileName()
+    public string VideoFileName()
     {
-        return FileName()
-            .Replace(FileExtension.TarXz.Value, string.Empty)
-            .Replace(FileExtension.TarGz.Value, string.Empty)
-            .Replace(FileExtension.Tar.Value, string.Empty)
+        return Path.GetFileName(FilePath)
+            .Replace(FileExtension.TarXz.Value, string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace(FileExtension.TarGz.Value, string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace(FileExtension.Tar.Value, string.Empty, StringComparison.OrdinalIgnoreCase)
             .Replace(Constant.Colon, string.Empty)
             + FileExtension.Mp4.Value;
     }
 
-    public virtual FfMpegColor DrawTextFilterBackgroundColor()
+    public string FileName()
     {
-        return FfMpegColor.Black;
+        return Path.GetFileName(FilePath);
     }
 
-    public virtual FfMpegColor DrawTextFilterTextColor()
-    {
-        return FfMpegColor.White;
-    }
-
-    public string ThumbnailFileName()
-    {
-        return Title() + FileExtension.ThumbTxt.Value;
-    }
 
     public virtual string VideoFilters()
     {
@@ -146,54 +88,40 @@ public abstract class VideoFile
             DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.ChannelBrand).ToString()
             );
 
-        if (GraphicsSubtitleFile == null)
-        {
-            return stringBuilder.ToString();
-        }
+        // if (GraphicsSubtitleFile == null)
+        // {
+        //     return stringBuilder.ToString();
+        // }
 
-        foreach (var subtitle in GraphicsSubtitleFile.Subtitles)
-        {
-            if (string.IsNullOrWhiteSpace(subtitle.Text))
-            {
-                continue;
-            }
+        // foreach (var subtitle in GraphicsSubtitleFile.Subtitles)
+        // {
+        //     if (string.IsNullOrWhiteSpace(subtitle.Text))
+        //     {
+        //         continue;
+        //     }
 
-            stringBuilder.Append(Constant.CommaSpace);
+        //     stringBuilder.Append(Constant.CommaSpace);
 
-            var splitTitle = subtitle.Text.Split(Constant.SemiColon);
+        //     var splitTitle = subtitle.Text.Split(Constant.SemiColon);
 
-            stringBuilder.Append(
-                new DrawTextFilter(splitTitle.First(), DrawTextFilterTextColor(), Opacity.Full,
-                DrawTextFilterBackgroundColor(), Opacity.Full, DrawTextPosition.SubtitlePrimary,
-                subtitle.StartTime, subtitle.EndTime).ToString());
+        //     stringBuilder.Append(
+        //         new DrawTextFilter(splitTitle.First(), DrawTextFilterTextColor(), Opacity.Full,
+        //         DrawTextFilterBackgroundColor(), Opacity.Full, DrawTextPosition.SubtitlePrimary,
+        //         subtitle.StartTime, subtitle.EndTime).ToString());
 
-            if (splitTitle.Length == 2)
-            {
-                stringBuilder.Append(Constant.CommaSpace);
-                stringBuilder.Append(
-                    new DrawTextFilter(splitTitle.Last(), DrawTextFilterBackgroundColor(), Opacity.Full,
-                    DrawTextFilterTextColor(), Opacity.Full, DrawTextPosition.SubtitleSecondary,
-                    subtitle.StartTime, subtitle.EndTime).ToString());
-            }
-        }
+        //     if (splitTitle.Length == 2)
+        //     {
+        //         stringBuilder.Append(Constant.CommaSpace);
+        //         stringBuilder.Append(
+        //             new DrawTextFilter(splitTitle.Last(), DrawTextFilterBackgroundColor(), Opacity.Full,
+        //             DrawTextFilterTextColor(), Opacity.Full, DrawTextPosition.SubtitleSecondary,
+        //             subtitle.StartTime, subtitle.EndTime).ToString());
+        //     }
+        // }
 
         return stringBuilder.ToString();
     }
 
-    internal void SetSubtitles(List<SubtitleFileEntry> subtitleFileEntries)
-    {
-        if (subtitleFileEntries.Count == 0)
-        {
-            return;
-        }
-
-        GraphicsSubtitleFile.SetSubtitles(subtitleFileEntries);
-    }
-
-    internal string GraphicsFileName()
-    {
-        return GraphicsSubtitleFile.FileName;
-    }
 
     protected sealed class DrawTextFilter
     {

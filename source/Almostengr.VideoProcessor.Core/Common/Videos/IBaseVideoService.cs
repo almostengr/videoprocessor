@@ -4,7 +4,8 @@ public interface IBaseVideoService
 {
     Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
     Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
-    Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken);
+    // Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken);
+    Task ProcessVideoProjectAsync(CancellationToken cancellationToken);
 }
 
 public interface IReviewVideoService : IBaseVideoService

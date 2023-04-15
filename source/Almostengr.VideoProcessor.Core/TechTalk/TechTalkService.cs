@@ -79,7 +79,7 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
                 return;
             }
 
-            archiveFile = new TechTalkVideoFile(new VideoProjectArchiveFile(selectedTarballFilePath));
+            archiveFile = new TechTalkVideoFile(new ProjectArchiveFile(selectedTarballFilePath));
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
@@ -215,7 +215,7 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         }
     }
 
-    public void ProcessSrtSubtitles(CancellationToken cancellationToken)
+    public void ProcessSrtSubtitleFile()
     {
         SrtSubtitleFile? srtFile = null;
 
@@ -229,7 +229,7 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
                 return;
             }
 
-            srtFile = new SrtSubtitleFile(randomFile);
+            srtFile = new TechTalkSrtSubtitleFile(randomFile);
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
@@ -269,4 +269,42 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         }
     }
 
+    public override async Task ProcessVideoProjectAsync(CancellationToken cancellationToken)
+    {
+        TechTalkVideoProject? project = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
+            .Where(f => f.Contains(FileExtension.Tar.Value, StringComparison.OrdinalIgnoreCase))
+            .Select(f => new TechTalkVideoProject(f))
+            .FirstOrDefault();
+
+        if (project == null)
+        {
+            return;
+        }
+
+        try
+        {
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
+            _fileSystemService.CreateDirectory(WorkingDirectory);
+
+            await _tarballService.ExtractTarballContentsAsync(
+                project.FilePath, WorkingDirectory, cancellationToken);
+
+            StopProcessingIfDetailsTxtFileExists(WorkingDirectory);
+            StopProcessingIfFfmpegInputTxtFileExists(WorkingDirectory);
+            StopProcessingIfKdenliveFileExists(WorkingDirectory);
+
+            _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
+
+            var videoClips = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase) || f.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(f => f);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+            _loggerService.LogErrorProcessingFile(project.FilePath, ex);
+            _fileSystemService.MoveFile(project.FilePath, project.FilePath + FileExtension.Err.Value);
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
+        }
+    }
 }

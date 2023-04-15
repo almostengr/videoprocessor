@@ -54,32 +54,131 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
         }
     }
 
-    public override async Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken)
+    public void CreateThumbnails()
     {
-        HandymanVideoFile? archiveFile = null;
+        try
+        {
+            var thumbnailFiles = GetThumbnailFiles(IncomingDirectory)
+                .Select(f => new HandymanThumbnailFile(f));
+
+            _thumbnailService.GenerateThumbnails<HandymanThumbnailFile>(UploadingDirectory, thumbnailFiles);
+
+            foreach (var thumbnailFile in thumbnailFiles)
+            {
+                _fileSystemService.MoveFile(
+                    thumbnailFile.ThumbTxtFilePath,
+                    Path.Combine(ArchiveDirectory, thumbnailFile.ThumbTxtFileName()));
+            }
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
+    }
+
+    public void ProcessSrtSubtitleFile()
+    {
+        SrtSubtitleFile? srtFile = null;
 
         try
         {
-            string? selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
-                IncomingDirectory, FileExtension.Tar);
+            string? srtFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
+                WorkingDirectory, FileExtension.Srt);
 
-            if (string.IsNullOrEmpty(selectedTarballFilePath))
+            if (string.IsNullOrEmpty(srtFilePath))
             {
                 return;
             }
 
-            archiveFile = new HandymanVideoFile(new VideoProjectArchiveFile(selectedTarballFilePath));
+            srtFile = new HandymanSrtSubtitleFile(srtFilePath);
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
-            await _tarballService.ExtractTarballContentsAsync(archiveFile.FilePath, WorkingDirectory, cancellationToken);
+            srtFile.SetSubtitles(_srtSubtitleService.ReadFile(srtFile.FileName()));
+
+            _srtSubtitleService.WriteFile(
+                Path.Combine(WorkingDirectory, srtFile.FileName()), srtFile.Subtitles);
+
+            _srtSubtitleService.WriteFile(
+                Path.Combine(WorkingDirectory, srtFile.BlogFileName()), srtFile.Subtitles);
+
+            _fileSystemService.MoveFile(
+                Path.Combine(WorkingDirectory, srtFile.FileName()),
+                Path.Combine(UploadingDirectory, srtFile.BlogFileName()));
+
+            _fileSystemService.MoveFile(
+                Path.Combine(WorkingDirectory, srtFile.FileName()),
+                Path.Combine(UploadingDirectory, srtFile.FileName()));
+
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
+
+            _fileSystemService.MoveFile(
+                srtFile.FilePath, Path.Combine(UploadingDirectory, srtFile.FileName()));
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+
+            if (srtFile != null)
+            {
+                _loggerService.LogErrorProcessingFile(srtFile.FilePath, ex);
+                _fileSystemService.MoveFile(srtFile.FilePath, srtFile.FilePath + FileExtension.Err.Value);
+            }
+
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
+        }
+    }
+
+    public override async Task ProcessVideoProjectAsync(CancellationToken cancellationToken)
+    {
+        HandymanVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
+            .Select(f => new HandymanVideoProject(f))
+            .FirstOrDefault();
+
+        if (project == null)
+        {
+            return;
+        }
+
+        try
+        {
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
+            _fileSystemService.CreateDirectory(WorkingDirectory);
+
+            await _tarballService.ExtractTarballContentsAsync(
+                project.FilePath, WorkingDirectory, cancellationToken);
 
             StopProcessingIfKdenliveFileExists(WorkingDirectory);
             StopProcessingIfDetailsTxtFileExists(WorkingDirectory);
             StopProcessingIfFfmpegInputTxtFileExists(WorkingDirectory);
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
+
+            var videoClips = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
+                .Where(f => f.FullName.EndsWith(FileExtension.Mov.Value, StringComparison.OrdinalIgnoreCase) ||
+                    f.FullName.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase) ||
+                    f.FullName.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(f => f.Name);
+
+
+
+            // todo
+            
+            // for each video file
+            // check if it has audio
+            // if no audio, then check for separate audio file, 
+            // if separate audio, then copy mix track with same name as video; continue to next file
+            // check the max volume of audio
+            // if audio has not already been normalized, then normalize it by splitting it from video
+            
+            // merge each audio and video pair into a ts file
+
+            // combine the ts files into a single output file
+
+            // move final output to upload directory
+            // move project tarball to archive directory
+            // delete working directory
 
             var audioFiles = GetAudioFilesInDirectory(WorkingDirectory);
 
@@ -142,99 +241,25 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
                 CreateFfmpegInputFile(tsVideoFiles.ToArray(), ffmpegInputFilePath);
             }
 
-            string outputVideoFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
+            string outputVideoFilePath = Path.Combine(WorkingDirectory, project.VideoFileName());
 
             await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
-                ffmpegInputFilePath, archiveFile.VideoFilters(), outputVideoFilePath, cancellationToken);
+                ffmpegInputFilePath, project.VideoFilters(), outputVideoFilePath, cancellationToken);
 
             _fileSystemService.SaveFileContents(
-                Path.Combine(IncomingDirectory, archiveFile.ThumbnailFileName()), archiveFile.Title());
+                Path.Combine(IncomingDirectory, project.ThumbnailFileName()), project.Title());
 
-            _fileSystemService.MoveFile(archiveFile.FilePath, Path.Combine(ArchiveDirectory, archiveFile.FileName()));
+            _fileSystemService.MoveFile(project.FilePath, Path.Combine(ArchiveDirectory, project.FileName()));
             _fileSystemService.MoveFile(
-                outputVideoFilePath, Path.Combine(UploadingDirectory, archiveFile.OutputFileName()));
+                outputVideoFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
-
-            if (archiveFile != null)
-            {
-                _loggerService.LogErrorProcessingFile(archiveFile.FilePath, ex);
-                _fileSystemService.MoveFile(archiveFile.FilePath, archiveFile.FilePath + FileExtension.Err.Value);
-            }
-
-            _fileSystemService.DeleteDirectory(WorkingDirectory);
-        }
-    }
-
-    public void CreateThumbnails()
-    {
-        try
-        {
-            var thumbnailFiles = GetThumbnailFiles(IncomingDirectory)
-                .Select(f => new HandymanThumbnailFile(f));
-
-            _thumbnailService.GenerateThumbnails<HandymanThumbnailFile>(UploadingDirectory, thumbnailFiles);
-
-            foreach (var thumbnailFile in thumbnailFiles)
-            {
-                _fileSystemService.MoveFile(
-                    thumbnailFile.ThumbTxtFilePath,
-                    Path.Combine(ArchiveDirectory, thumbnailFile.ThumbTxtFileName()));
-            }
-        }
-        catch (Exception ex)
-        {
-            _loggerService.LogError(ex, ex.Message);
-        }
-    }
-
-    public void ProcessSrtSubtitles(CancellationToken cancellationToken)
-    {
-        SrtSubtitleFile? srtFile = null;
-
-        try
-        {
-            srtFile = new SrtSubtitleFile(_fileSystemService.GetRandomFileByExtensionFromDirectory(
-                WorkingDirectory, FileExtension.Srt));
-
-            _fileSystemService.DeleteDirectory(WorkingDirectory);
-            _fileSystemService.CreateDirectory(WorkingDirectory);
-
-            srtFile.SetSubtitles(_srtSubtitleService.ReadFile(srtFile.FileName()));
-
-            _srtSubtitleService.WriteFile(
-                Path.Combine(WorkingDirectory, srtFile.FileName()), srtFile.Subtitles);
-
-            _srtSubtitleService.WriteFile(
-                Path.Combine(WorkingDirectory, srtFile.BlogFileName()), srtFile.Subtitles);
-
-            _fileSystemService.MoveFile(
-                Path.Combine(WorkingDirectory, srtFile.FileName()),
-                Path.Combine(UploadingDirectory, srtFile.BlogFileName()));
-
-            _fileSystemService.MoveFile(
-                Path.Combine(WorkingDirectory, srtFile.FileName()),
-                Path.Combine(UploadingDirectory, srtFile.FileName()));
-
-            _fileSystemService.DeleteDirectory(WorkingDirectory);
-
-            _fileSystemService.MoveFile(
-                srtFile.FilePath, Path.Combine(UploadingDirectory, srtFile.FileName()));
-        }
-        catch (Exception ex)
-        {
-            _loggerService.LogError(ex, ex.Message);
-
-            if (srtFile != null)
-            {
-                _loggerService.LogErrorProcessingFile(srtFile.FilePath, ex);
-                _fileSystemService.MoveFile(srtFile.FilePath, srtFile.FilePath + FileExtension.Err.Value);
-            }
-
+            _loggerService.LogErrorProcessingFile(project.FilePath, ex);
+            _fileSystemService.MoveFile(project.FilePath, project.FilePath + FileExtension.Err.Value);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
     }

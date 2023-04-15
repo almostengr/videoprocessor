@@ -3,13 +3,9 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Handyman;
 
-public sealed class HandymanVideoFile : VideoFile
+public sealed class HandymanVideoProject : BaseVideoProject
 {
-    public HandymanVideoFile(VideoProjectArchiveFile videoProjectArchiveFile) : base(videoProjectArchiveFile)
-    {
-    }
-
-    public HandymanVideoFile(string filePath) : base(filePath)
+    public HandymanVideoProject(string filePath) : base(filePath)
     {
     }
 

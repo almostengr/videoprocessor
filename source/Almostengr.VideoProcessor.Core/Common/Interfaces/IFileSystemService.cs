@@ -15,4 +15,5 @@ public interface IFileSystemService
     void SaveFileContents(string filePath, string content);
     string? GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension);
     FileInfo[] GetFilesInDirectoryWithFileInfo(string directory);
+    IEnumerable<string> GetTarballFilesInDirectory(string directory);
 }

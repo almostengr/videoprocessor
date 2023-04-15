@@ -4,5 +4,5 @@ namespace Almostengr.VideoProcessor.Core.DashCam;
 
 public interface IDashCamVideoService : IBaseVideoService
 {
-    Task ProcessIncomingVideosWithGraphicsAsync(CancellationToken cancellationToken);
+    Task ProcessIncomingVideoWithGraphicsAsync(CancellationToken cancellationToken);
 }

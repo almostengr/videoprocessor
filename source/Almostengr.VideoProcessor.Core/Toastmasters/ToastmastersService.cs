@@ -48,58 +48,107 @@ public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoSe
         }
     }
 
-    public override async Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken)
+    public override async Task ProcessVideoProjectAsync(CancellationToken cancellationToken)
     {
-        ToastmastersVideoFile? archiveFile = null;
+        ToastmastersVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
+            .Select(f => new ToastmastersVideoProject(f))
+            .FirstOrDefault();
+
+        if (project == null)
+        {
+            return;
+        }
 
         try
         {
-            string? selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
-                IncomingDirectory, FileExtension.Tar);
-
-            if (string.IsNullOrEmpty(selectedTarballFilePath))
-            {
-                return;
-            }
-
-            archiveFile = new ToastmastersVideoFile(new VideoProjectArchiveFile(selectedTarballFilePath));
-
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
             await _tarballService.ExtractTarballContentsAsync(
-                archiveFile.FilePath, WorkingDirectory, cancellationToken);
+                project.FilePath, WorkingDirectory, cancellationToken);
 
-            string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+            StopProcessingIfDetailsTxtFileExists(WorkingDirectory);
+            StopProcessingIfFfmpegInputTxtFileExists(WorkingDirectory);
+            StopProcessingIfKdenliveFileExists(WorkingDirectory);
+
+            var videoClips = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
-                .OrderBy(f => f)
-                .ToArray();
+                .OrderBy(f => f);
 
             string ffmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
-            CreateFfmpegInputFile(videoFiles, ffmpegInputFilePath);
+            CreateFfmpegInputFile(videoClips, ffmpegInputFilePath);
 
-            string outputFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
+            string outputFilePath = Path.Combine(WorkingDirectory, project.VideoFileName());
 
             await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
-                ffmpegInputFilePath, archiveFile.VideoFilters(), outputFilePath, cancellationToken);
+                ffmpegInputFilePath, project.VideoFilters(), outputFilePath, cancellationToken);
 
-            _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, archiveFile.OutputFileName()));
+            _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.MoveFile(
-                archiveFile.FilePath, Path.Combine(ArchiveDirectory, archiveFile.FileName()));
+                project.FilePath, Path.Combine(ArchiveDirectory, project.FileName()));
         }
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
-
-            if (archiveFile != null)
-            {
-                _loggerService.LogErrorProcessingFile(archiveFile.FilePath, ex);
-                _fileSystemService.MoveFile(archiveFile.FilePath, archiveFile.FilePath + FileExtension.Err.Value);
-            }
-
+            _loggerService.LogErrorProcessingFile(project.FilePath, ex);
+            _fileSystemService.MoveFile(project.FilePath, project.FilePath + FileExtension.Err.Value);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
     }
+
+    // public override async Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken)
+    // {
+    //     ToastmastersVideoProject? archiveFile = null;
+
+    //     try
+    //     {
+    //         string? selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
+    //             IncomingDirectory, FileExtension.Tar);
+
+    //         if (string.IsNullOrEmpty(selectedTarballFilePath))
+    //         {
+    //             return;
+    //         }
+
+    //         archiveFile = new ToastmastersVideoFile(new ProjectArchiveFile(selectedTarballFilePath));
+
+    //         _fileSystemService.DeleteDirectory(WorkingDirectory);
+    //         _fileSystemService.CreateDirectory(WorkingDirectory);
+
+    //         await _tarballService.ExtractTarballContentsAsync(
+    //             archiveFile.FilePath, WorkingDirectory, cancellationToken);
+
+    //         string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+    //             .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
+    //             .OrderBy(f => f)
+    //             .ToArray();
+
+    //         string ffmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
+    //         CreateFfmpegInputFile(videoFiles, ffmpegInputFilePath);
+
+    //         string outputFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
+
+    //         await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
+    //             ffmpegInputFilePath, archiveFile.VideoFilters(), outputFilePath, cancellationToken);
+
+    //         _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, archiveFile.OutputFileName()));
+    //         _fileSystemService.DeleteDirectory(WorkingDirectory);
+    //         _fileSystemService.MoveFile(
+    //             archiveFile.FilePath, Path.Combine(ArchiveDirectory, archiveFile.FileName()));
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _loggerService.LogError(ex, ex.Message);
+
+    //         if (archiveFile != null)
+    //         {
+    //             _loggerService.LogErrorProcessingFile(archiveFile.FilePath, ex);
+    //             _fileSystemService.MoveFile(archiveFile.FilePath, archiveFile.FilePath + FileExtension.Err.Value);
+    //         }
+
+    //         _fileSystemService.DeleteDirectory(WorkingDirectory);
+    //     }
+    // }
 
 }

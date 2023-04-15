@@ -41,7 +41,8 @@ public abstract class BaseVideoService : IBaseVideoService
 
     public abstract Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
     public abstract Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
-    public abstract Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken);
+    // public abstract Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken);
+    public abstract Task ProcessVideoProjectAsync(CancellationToken cancellationToken);
 
     internal async Task CompressTarballsInArchiveFolderAsync(
         string archiveDirectory, CancellationToken cancellationToken)
@@ -71,7 +72,8 @@ public abstract class BaseVideoService : IBaseVideoService
                 f.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase));
     }
 
-    internal void CreateFfmpegInputFile(string[] filesInDirectory, string inputFilePath)
+    internal void CreateFfmpegInputFile(IEnumerable<string> filesInDirectory, string inputFilePath)
+    // internal void CreateFfmpegInputFile(string[] filesInDirectory, string inputFilePath)
     {
         StringBuilder text = new();
         const string FILE = "file";

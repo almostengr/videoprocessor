@@ -3,6 +3,7 @@ using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
+using Almostengr.VideoProcessor.Core.Common.Videos;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
@@ -90,6 +91,15 @@ public sealed class FileSystemService : IFileSystemService
     public FileInfo[] GetFilesInDirectoryWithInfo(string directory)
     {
         return (new DirectoryInfo(directory)).GetFiles();
+    }
+
+    public IEnumerable<string> GetTarballFilesInDirectory(string directory)
+    {
+        return Directory.GetFiles(directory)
+            .Where(
+                f => f.EndsWith(FileExtension.TarGz.Value, StringComparison.OrdinalIgnoreCase) ||
+                f.EndsWith(FileExtension.TarXz.Value, StringComparison.OrdinalIgnoreCase) ||
+                f.EndsWith(FileExtension.Tar.Value, StringComparison.OrdinalIgnoreCase));
     }
 
     public IEnumerable<string> GetFilesInDirectory(string directory)
