@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
 
-public sealed class DashCamVideoProject : BaseVideoProject
+public sealed partial class DashCamVideoProject : BaseVideoProject
 {
     internal DashCamVideoType SubType { get; private set; }
 
@@ -82,13 +82,5 @@ public sealed class DashCamVideoProject : BaseVideoProject
     public override string BrandingText()
     {
         return "Kenny Ram Dash Cam";
-    }
-
-    internal enum DashCamVideoType
-    {
-        Normal,
-        Night,
-        Fireworks,
-        CarRepair
     }
 }

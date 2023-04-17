@@ -1,8 +1,9 @@
 using System.Runtime.Serialization;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
+
 [Serializable]
-internal class ProjectFileDoesNotExistException : Exception
+internal class ProjectFileDoesNotExistException : VideoProcessorException
 {
     public ProjectFileDoesNotExistException()
     {

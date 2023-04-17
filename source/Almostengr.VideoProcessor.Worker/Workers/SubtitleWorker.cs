@@ -8,7 +8,6 @@ internal sealed class SubtitleWorker : BaseWorker
 {
     private readonly IHandymanVideoService _handymanService;
     private readonly ITechTalkVideoService _techTalkService;
-    private readonly AppSettings _appSettings;
 
     public SubtitleWorker(IHandymanVideoService handymanService, ITechTalkVideoService techTalkService,
         AppSettings appSettings) : base(appSettings)
@@ -20,11 +19,13 @@ internal sealed class SubtitleWorker : BaseWorker
 
     protected async override Task ExecuteAsync(CancellationToken cancellationToken)
     {
+        DateTime previousTime = DateTime.Now;
+
         while (!cancellationToken.IsCancellationRequested)
         {
             _handymanService.ProcessSrtSubtitleFile();
             _techTalkService.ProcessSrtSubtitleFile();
-            await Task.Delay(_appSettings.ShortWorkerDelay);
+            previousTime = await DelayWhenLoopingQuickly(_delayLoopTime, cancellationToken, previousTime);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Almostengr.VideoProcessor.Core.TechTalk;
 
 public sealed class TechTalkVideoProject : BaseVideoProject
 {
-    private TechTalkVideoSubType SubType { get; set; }
+    public TechTalkVideoSubType SubType { get; private set; }
 
     public TechTalkVideoProject(string filePath) : base(filePath)
     {
@@ -30,7 +30,6 @@ public sealed class TechTalkVideoProject : BaseVideoProject
         options.Add(Constant.RHT_WEBSITE);
         options.Add("@rhtservicestech");
         options.Add("#rhtservicestech");
-        options.Add("#TechTuesday");
         options.Add("rhtservices.net/techtalk");
 
         return options[random.Next(0, options.Count)];
@@ -51,7 +50,24 @@ public sealed class TechTalkVideoProject : BaseVideoProject
         }
     }
 
-    enum TechTalkVideoSubType
+    public override string VideoFilters()
+    {
+        var filters = base.VideoFilters();
+
+        switch (SubType)
+        {
+            case TechTalkVideoSubType.Christmas:
+            case TechTalkVideoSubType.IndependenceDay:
+                filters += Constant.CommaSpace +
+                    new DrawTextFilter(Title(), DrawTextFilterTextColor(), Opacity.Full,
+                        DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.LowerLeft).ToString();
+                break;
+        }
+
+        return filters;
+    }
+
+    public enum TechTalkVideoSubType
     {
         TechTalk,
         Christmas,

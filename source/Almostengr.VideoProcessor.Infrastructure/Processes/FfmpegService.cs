@@ -33,7 +33,8 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     public async Task<(string stdOut, string stdErr)> FfmpegAsync(
         string arguments, string workingDirectory, CancellationToken cancellationToken)
     {
-        arguments = $"-y -hide_banner -loglevel error {arguments}";
+        // arguments = $"-y -hide_banner -loglevel error {arguments}";
+        arguments = $"-y -hide_banner {arguments}";
         var results = await RunProcessAsync(FfmpegBinary, arguments, workingDirectory, cancellationToken);
 
         if (results.exitCode > 0)
@@ -229,7 +230,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     public async Task<(string stdOut, string stdErr)> AnalyzeAudioVolumeAsync(string inputFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory = Path.GetDirectoryName(inputFilePath) ?? throw new ArgumentException("Invalid directory", nameof(inputFilePath));
-        string arguments = $"-i \"{inputFilePath}\" -af \"volumedetect\" -vn -sn -dn -f /dev/null";
+        string arguments = $"-i \"{inputFilePath}\" -af \"volumedetect\" -vn -sn -dn -f null /dev/null";
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
@@ -240,10 +241,17 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             throw new ArgumentException("Invalid output file name");
         }
 
-        const float NORMALIZED_DB_THRESHOLD = 1.0F;
+        const float NORMALIZED_DB_THRESHOLD = -1.0F;
         string workingDirectory = Path.GetDirectoryName(inputFilePath) ?? throw new ArgumentException("Invalid directory", nameof(inputFilePath));
         int adjustmentDb = (int)(NORMALIZED_DB_THRESHOLD - maxVolume);
+
+        if (adjustmentDb < 1)
+        {
+            return await Task.FromResult((string.Empty, string.Empty));
+        }
+
         string arguments = $"-i \"{inputFilePath}\" -af \"volume={adjustmentDb}dB\" \"{outputFilePath}\" ";
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
+
 }

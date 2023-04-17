@@ -2,7 +2,7 @@ using Almostengr.VideoProcessor.Core.Common.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public sealed class AssSubtitleFile
+public class AssSubtitleFile
 {
     public string FilePath { get; init; }
     public string FileName { get; init; }

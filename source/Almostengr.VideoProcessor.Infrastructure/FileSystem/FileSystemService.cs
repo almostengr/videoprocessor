@@ -2,8 +2,6 @@ using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
-using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
-using Almostengr.VideoProcessor.Core.Common.Videos;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
@@ -173,4 +171,11 @@ public sealed class FileSystemService : IFileSystemService
         File.WriteAllText(filePath, content);
     }
 
+    public IEnumerable<FileInfo> GetVideoFilesInDirectoryWithFileInfo(string directory)
+    {
+        return GetFilesInDirectoryWithFileInfo(directory)
+                .Where(f => f.FullName.EndsWith(FileExtension.Mov.Value, StringComparison.OrdinalIgnoreCase) ||
+                    f.FullName.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase) ||
+                    f.FullName.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase));
+    }
 }

@@ -16,4 +16,5 @@ public interface IFileSystemService
     string? GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension);
     FileInfo[] GetFilesInDirectoryWithFileInfo(string directory);
     IEnumerable<string> GetTarballFilesInDirectory(string directory);
+    IEnumerable<FileInfo> GetVideoFilesInDirectoryWithFileInfo(string directory);
 }

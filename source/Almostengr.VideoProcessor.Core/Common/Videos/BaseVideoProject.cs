@@ -82,42 +82,10 @@ public abstract class BaseVideoProject
     public virtual string VideoFilters()
     {
         StringBuilder stringBuilder = new();
-
         stringBuilder.Append(
             new DrawTextFilter(BrandingText(), DrawTextFilterTextColor(), Opacity.Full,
             DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.ChannelBrand).ToString()
             );
-
-        // if (GraphicsSubtitleFile == null)
-        // {
-        //     return stringBuilder.ToString();
-        // }
-
-        // foreach (var subtitle in GraphicsSubtitleFile.Subtitles)
-        // {
-        //     if (string.IsNullOrWhiteSpace(subtitle.Text))
-        //     {
-        //         continue;
-        //     }
-
-        //     stringBuilder.Append(Constant.CommaSpace);
-
-        //     var splitTitle = subtitle.Text.Split(Constant.SemiColon);
-
-        //     stringBuilder.Append(
-        //         new DrawTextFilter(splitTitle.First(), DrawTextFilterTextColor(), Opacity.Full,
-        //         DrawTextFilterBackgroundColor(), Opacity.Full, DrawTextPosition.SubtitlePrimary,
-        //         subtitle.StartTime, subtitle.EndTime).ToString());
-
-        //     if (splitTitle.Length == 2)
-        //     {
-        //         stringBuilder.Append(Constant.CommaSpace);
-        //         stringBuilder.Append(
-        //             new DrawTextFilter(splitTitle.Last(), DrawTextFilterBackgroundColor(), Opacity.Full,
-        //             DrawTextFilterTextColor(), Opacity.Full, DrawTextPosition.SubtitleSecondary,
-        //             subtitle.StartTime, subtitle.EndTime).ToString());
-        //     }
-        // }
 
         return stringBuilder.ToString();
     }

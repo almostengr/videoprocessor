@@ -25,13 +25,11 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
         _loggerService = loggerService;
     }
 
-    public async Task ProcessIncomingVideoWithGraphicsAsync(CancellationToken cancellationToken)
+    public async Task ProcessReviewedFilesAsync(CancellationToken cancellationToken)
     {
-        AssSubtitleFile? graphicsFile = null;
-
-        graphicsFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+        DashCamGraphicsFile? graphicsFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
             .Where(f => f.EndsWith(FileExtension.GraphicsAss.Value))
-            .Select(f => new AssSubtitleFile(f))
+            .Select(f => new DashCamGraphicsFile(f))
             .SingleOrDefault();
 
         if (graphicsFile == null)
@@ -46,18 +44,15 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
                     f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
                 .Single();
 
-            string videoFileName = Path.GetFileName(videoFilePath);
-
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
-            string outputFilePath = Path.Combine(WorkingDirectory, videoFileName);
+            string outputFilePath = Path.Combine(WorkingDirectory, graphicsFile.VideoFileName());
 
             if (videoFilePath.Contains(Constant.GmcSierra, StringComparison.OrdinalIgnoreCase) ||
                 videoFilePath.Contains(Constant.NissanAltima, StringComparison.OrdinalIgnoreCase))
             {
-                await _ffmpegService.RenderVideoWithFiltersAsync(
-                    videoFilePath, string.Empty, outputFilePath, cancellationToken);
+                await _ffmpegService.RenderVideoAsync(videoFilePath, outputFilePath, cancellationToken);
             }
             else
             {
@@ -67,7 +62,7 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
             }
 
             _fileSystemService.MoveFile(
-                outputFilePath, Path.Combine(UploadingDirectory, videoFileName));
+                outputFilePath, Path.Combine(UploadingDirectory, graphicsFile.VideoFileName()));
 
             _fileSystemService.MoveFile(
                 graphicsFile.FilePath, Path.Combine(ArchiveDirectory, graphicsFile.FileName));

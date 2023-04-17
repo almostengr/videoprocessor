@@ -41,7 +41,6 @@ public abstract class BaseVideoService : IBaseVideoService
 
     public abstract Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
     public abstract Task CreateTarballsFromDirectoriesAsync(CancellationToken cancellationToken);
-    // public abstract Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken);
     public abstract Task ProcessVideoProjectAsync(CancellationToken cancellationToken);
 
     internal async Task CompressTarballsInArchiveFolderAsync(
@@ -73,7 +72,6 @@ public abstract class BaseVideoService : IBaseVideoService
     }
 
     internal void CreateFfmpegInputFile(IEnumerable<string> filesInDirectory, string inputFilePath)
-    // internal void CreateFfmpegInputFile(string[] filesInDirectory, string inputFilePath)
     {
         StringBuilder text = new();
         const string FILE = "file";
@@ -140,6 +138,21 @@ public abstract class BaseVideoService : IBaseVideoService
     {
          return _fileSystemService.GetFilesInDirectory(directory)
             .Where(f => f.EndsWith(FileExtension.ThumbTxt.Value, StringComparison.OrdinalIgnoreCase));
+    }
+
+    protected async Task AnalyzeAndNormalizeAudioAsync(string audioClipFilePath, CancellationToken cancellationToken)
+    {
+        var analyzeResult = await _ffmpegService.AnalyzeAudioVolumeAsync(
+            audioClipFilePath, cancellationToken);
+
+        var output = analyzeResult.stdErr.Split(Environment.NewLine);
+        float maxVolume = float.Parse(output.Where(l => l.Contains("max_volume")).Single().Split(" ")[4]);
+
+        string audioClipFilePathTemp = Path.Combine(WorkingDirectory, "tempaudio" + FileExtension.Mp3.Value);
+        var normalizeResult = await _ffmpegService.AdjustAudioVolumeAsync(
+            audioClipFilePath, audioClipFilePathTemp, maxVolume, cancellationToken);
+
+        _fileSystemService.MoveFile(audioClipFilePathTemp, audioClipFilePath);
     }
 
 }

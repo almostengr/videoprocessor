@@ -3,7 +3,6 @@ using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Common.Videos;
 using Almostengr.VideoProcessor.Core.Constants;
-using Almostengr.VideoProcessor.Core.Music;
 using Almostengr.VideoProcessor.Core.Music.Services;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk;
@@ -65,153 +64,34 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         }
     }
 
-    public override async Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken)
-    {
-        TechTalkVideoFile? archiveFile = null;
-
-        try
-        {
-            string? selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
-                IncomingDirectory, FileExtension.Tar);
-
-            if (string.IsNullOrEmpty(selectedTarballFilePath))
-            {
-                return;
-            }
-
-            archiveFile = new TechTalkVideoFile(new ProjectArchiveFile(selectedTarballFilePath));
-
-            _fileSystemService.DeleteDirectory(WorkingDirectory);
-            _fileSystemService.CreateDirectory(WorkingDirectory);
-
-            await _tarballService.ExtractTarballContentsAsync(archiveFile.FilePath, WorkingDirectory, cancellationToken);
-
-            StopProcessingIfKdenliveFileExists(WorkingDirectory);
-            StopProcessingIfFfmpegInputTxtFileExists(WorkingDirectory);
-
-            _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
-
-            // todo normailze audio files
-
-            // scan directory for existing audio files
-            // each video file that does not already have separate mp3 file, analyze audio of the video
-            // normalize the audio from the video file if needed, output to mp3 file
-            // render ts file from the separated video and audio file
-            //
-
-            var audioFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp3.Value, StringComparison.OrdinalIgnoreCase))
-                .Select(f => new AudioFile(f))
-                .ToList();
-
-            foreach (var audioFile in audioFiles)
-            {
-                var video = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                    .Where(f => f.StartsWith(audioFile.FilePath.Replace(FileExtension.Mp3.Value, string.Empty, StringComparison.OrdinalIgnoreCase)) && !f.Equals(audioFile.FilePath))
-                    .Select(f => new TechTalkVideoFile(f))
-                    .Single();
-
-                video.SetAudioFile(audioFile);
-
-                string tsOutputFilePath = Path.Combine(
-                    WorkingDirectory,
-                    Path.GetFileNameWithoutExtension(video.FileName()) + FileExtension.Ts.Value);
-
-                await _ffmpegService.AddAccAudioToVideoAsync(
-                    video.FilePath, video.AudioFilePath(), tsOutputFilePath, cancellationToken);
-
-                _fileSystemService.DeleteFile(video.FilePath);
-            }
-
-            var videoSegment = GetVideoFilesInDirectory(WorkingDirectory)
-                .Select(f => new TechTalkVideoFile(f))
-                .ToList();
-
-            foreach (var video in videoSegment)
-            {
-                var result = await _ffmpegService.FfprobeAsync($"\"{video.FilePath}\"", WorkingDirectory, cancellationToken);
-
-                if (result.stdErr.ToLower().Contains(Constant.Audio))
-                {
-                    await _ffmpegService.ConvertMp4VideoFileToTsFormatAsync(
-                        video.FilePath,
-                        video.FilePath.Replace(FileExtension.Mp4.Value, FileExtension.Ts.Value)
-                            .Replace(FileExtension.Mkv.Value, FileExtension.Ts.Value),
-                        cancellationToken);
-                    continue;
-                }
-
-                video.SetAudioFile(_musicService.GetRandomMixTrack());
-
-                string tsOutputFilePath = Path.Combine(WorkingDirectory, video.TsOutputFileName());
-
-                await _ffmpegService.AddAccAudioToVideoAsync(
-                    video.FilePath, video.AudioFilePath(), tsOutputFilePath, cancellationToken);
-
-                _fileSystemService.DeleteFile(video.FilePath);
-            }
-
-            string? ffmpegInputFilePath = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.FfmpegInput.Value))
-                .SingleOrDefault();
-
-            if (string.IsNullOrEmpty(ffmpegInputFilePath))
-            {
-                var tsVideoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                    .Where(f => f.EndsWith(FileExtension.Ts.Value, StringComparison.OrdinalIgnoreCase))
-                    .OrderBy(f => f);
-
-                ffmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
-                CreateFfmpegInputFile(tsVideoFiles.ToArray(), ffmpegInputFilePath);
-            }
-
-            string outputVideoFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
-
-            await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
-                ffmpegInputFilePath, archiveFile.VideoFilters(), outputVideoFilePath, cancellationToken);
-
-            _fileSystemService.SaveFileContents(
-                Path.Combine(IncomingDirectory, archiveFile.ThumbnailFileName()), archiveFile.Title());
-
-            _fileSystemService.MoveFile(archiveFile.FilePath, Path.Combine(ArchiveDirectory, archiveFile.FileName()));
-            _fileSystemService.MoveFile(
-                outputVideoFilePath, Path.Combine(UploadingDirectory, archiveFile.OutputFileName()));
-
-            _fileSystemService.DeleteDirectory(WorkingDirectory);
-        }
-        catch (Exception ex)
-        {
-            _loggerService.LogError(ex, ex.Message);
-
-            if (archiveFile != null)
-            {
-                _loggerService.LogErrorProcessingFile(archiveFile.FilePath, ex);
-                _fileSystemService.MoveFile(archiveFile.FilePath, archiveFile.FilePath + FileExtension.Err.Value);
-            }
-
-            _fileSystemService.DeleteDirectory(WorkingDirectory);
-        }
-    }
-
     public void CreateThumbnails()
     {
-        try
+        IEnumerable<TechTalkThumbnailFile>? thumbnailFiles = GetThumbnailFiles(IncomingDirectory)
+            .Select(f => new TechTalkThumbnailFile(f));
+
+        if (thumbnailFiles.Any())
         {
-            var thumbnailFiles = GetThumbnailFiles(IncomingDirectory)
-                .Select(f => new TechTalkThumbnailFile(f));
+            return;
+        }
 
-            _thumbnailService.GenerateThumbnails<TechTalkThumbnailFile>(UploadingDirectory, thumbnailFiles);
-
-            foreach (var thumbnailFile in thumbnailFiles)
+        foreach (TechTalkThumbnailFile thumbnailFile in thumbnailFiles)
+        {
+            try
             {
+                _thumbnailService.GenerateThumbnail<TechTalkThumbnailFile>(
+                    UploadingDirectory, thumbnailFile);
+
                 _fileSystemService.MoveFile(
                     thumbnailFile.ThumbTxtFilePath,
-                    Path.Combine(ArchiveDirectory, thumbnailFile.ThumbTxtFileName()));
+                    Path.Combine(ArchiveDirectory, Path.GetFileName(thumbnailFile.ThumbTxtFileName())));
             }
-        }
-        catch (Exception ex)
-        {
-            _loggerService.LogError(ex, ex.Message);
+            catch (Exception ex)
+            {
+                _loggerService.LogError(ex, ex.Message);
+                _fileSystemService.MoveFile(
+                    thumbnailFile.ThumbTxtFilePath,
+                    thumbnailFile.ThumbTxtFilePath + FileExtension.Err.Value);
+            }
         }
     }
 
@@ -271,8 +151,7 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
 
     public override async Task ProcessVideoProjectAsync(CancellationToken cancellationToken)
     {
-        TechTalkVideoProject? project = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
-            .Where(f => f.Contains(FileExtension.Tar.Value, StringComparison.OrdinalIgnoreCase))
+        TechTalkVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
             .Select(f => new TechTalkVideoProject(f))
             .FirstOrDefault();
 
@@ -289,15 +168,71 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
             await _tarballService.ExtractTarballContentsAsync(
                 project.FilePath, WorkingDirectory, cancellationToken);
 
+            StopProcessingIfKdenliveFileExists(WorkingDirectory);
             StopProcessingIfDetailsTxtFileExists(WorkingDirectory);
             StopProcessingIfFfmpegInputTxtFileExists(WorkingDirectory);
-            StopProcessingIfKdenliveFileExists(WorkingDirectory);
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
-            var videoClips = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase) || f.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase))
+            var videoClips = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
+                .Where(f => f.FullName.EndsWith(FileExtension.Mov.Value, StringComparison.OrdinalIgnoreCase) ||
+                    f.FullName.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase) ||
+                    f.FullName.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(f => f.Name);
+
+            foreach (var videoClip in videoClips)
+            {
+                string audioClipFilePath =
+                    Path.Combine(WorkingDirectory, Path.GetFileNameWithoutExtension(videoClip.Name) + FileExtension.Mp3.Value);
+
+                if (File.Exists(audioClipFilePath))
+                {
+                    await AnalyzeAndNormalizeAudioAsync(audioClipFilePath, cancellationToken);
+                    goto RenderTs;
+                }
+
+                var result = await _ffmpegService.FfprobeAsync($"\"{videoClip.FullName}\"", WorkingDirectory, cancellationToken);
+
+                if (result.stdErr.Contains(Constant.Audio, StringComparison.OrdinalIgnoreCase))
+                {
+                    var audioConversionResult = await _ffmpegService.ConvertVideoFileToMp3FileAsync(
+                        videoClip.FullName, audioClipFilePath, WorkingDirectory, cancellationToken);
+
+                    await AnalyzeAndNormalizeAudioAsync(audioClipFilePath, cancellationToken);
+                }
+                else
+                {
+                    audioClipFilePath = _musicService.GetRandomMixTrack().FilePath;
+                }
+
+            RenderTs:
+                string tsFilePath =
+                    Path.Combine(WorkingDirectory, Path.GetFileNameWithoutExtension(videoClip.Name) + FileExtension.Ts.Value);
+
+                await _ffmpegService.AddAccAudioToVideoAsync(
+                    videoClip.FullName, audioClipFilePath, tsFilePath, cancellationToken);
+            }
+
+            var tsVideoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.EndsWith(FileExtension.Ts.Value, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(f => f);
+
+            string ffmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
+            CreateFfmpegInputFile(tsVideoFiles.ToArray(), ffmpegInputFilePath);
+
+            string outputVideoFilePath = Path.Combine(WorkingDirectory, project.VideoFileName());
+
+            await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
+                ffmpegInputFilePath, project.VideoFilters(), outputVideoFilePath, cancellationToken);
+
+            _fileSystemService.SaveFileContents(
+                Path.Combine(IncomingDirectory, project.ThumbnailFileName()), project.Title());
+
+            _fileSystemService.MoveFile(project.FilePath, Path.Combine(ArchiveDirectory, project.FileName()));
+            _fileSystemService.MoveFile(
+                outputVideoFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
+
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
         catch (Exception ex)
         {

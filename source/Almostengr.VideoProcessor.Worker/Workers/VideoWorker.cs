@@ -12,8 +12,6 @@ internal sealed class VideoWorker : BaseWorker
     private readonly IHandymanVideoService _handymanVideoService;
     private readonly ITechTalkVideoService _techTalkVideoService;
     private readonly IToastmastersVideoService _toastmastersVideoService;
-    private readonly AppSettings _appSettings;
-    private readonly TimeSpan _delayLoopTime;
 
     public VideoWorker(IDashCamVideoService dashCamVideoService,
         IHandymanVideoService handymanVideoService, ITechTalkVideoService techTalkVideoService,
@@ -23,44 +21,32 @@ internal sealed class VideoWorker : BaseWorker
         _handymanVideoService = handymanVideoService;
         _techTalkVideoService = techTalkVideoService;
         _toastmastersVideoService = toastmastersVideoService;
-        _appSettings = appSettings;
-
-        _delayLoopTime = new TimeSpan(0, 0, 5);
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         DateTime previousTime = DateTime.Now;
 
-        while (cancellationToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
-            await _dashCamVideoService.ProcessIncomingVideoWithGraphicsAsync(cancellationToken);
-            await _dashCamVideoService.ProcessVideoProjectAsync(cancellationToken);
-            await _dashCamVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
-
-            // await _handymanVideoService.ProcessIncomingTarballFilesAsync(cancellationToken);
+            // await _handymanVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
             // await _handymanVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
-            await _handymanVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
+            // await _handymanVideoService.ProcessVideoProjectAsync(cancellationToken);
 
-            // await _techtalkVideoService.ProcessIncomingTarballFilesAsync(cancellationToken);
-            // await _techtalkVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
-            await _techTalkVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
+            // await _techTalkVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
+            await _techTalkVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
+            await _techTalkVideoService.ProcessVideoProjectAsync(cancellationToken);
 
-            await _toastmastersVideoService.ProcessVideoProjectAsync(cancellationToken);
-            await _toastmastersVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
+            // await _toastmastersVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
+            // await _toastmastersVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
+            // await _toastmastersVideoService.ProcessVideoProjectAsync(cancellationToken);
 
-            previousTime = await DelayWhenLoopingQuickly(cancellationToken, previousTime);
+            // await _dashCamVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
+            // await _dashCamVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
+            // await _dashCamVideoService.ProcessReviewedFilesAsync(cancellationToken);
+            // await _dashCamVideoService.ProcessVideoProjectAsync(cancellationToken);
+
+            previousTime = await DelayWhenLoopingQuickly(_delayLoopTime, cancellationToken, previousTime);
         }
     }
-
-    private async Task<DateTime> DelayWhenLoopingQuickly(CancellationToken cancellationToken, DateTime previousTime)
-    {
-        if ((previousTime - DateTime.Now) < _delayLoopTime)
-        {
-            await Task.Delay(_appSettings.LongWorkerDelay, cancellationToken);
-        }
-
-        return DateTime.Now;
-    }
-
 }
