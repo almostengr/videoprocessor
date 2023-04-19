@@ -8,11 +8,12 @@ using Almostengr.VideoProcessor.Core.TechTalk;
 
 namespace Almostengr.VideoProcessor.Core.Handyman;
 
-public sealed class HandymanService : BaseVideoService, IHandymanVideoService, IHandymanTranscriptionService
+public sealed class HandymanService : BaseVideoAudioService, IHandymanVideoService, IHandymanTranscriptionService
 {
     private readonly ILoggerService<HandymanService> _loggerService;
     private readonly ISrtSubtitleFileService _srtSubtitleService;
     private readonly IThumbnailService _thumbnailService;
+    private readonly string IncomingAudioDirectory;
 
     public HandymanService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
@@ -22,13 +23,21 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Incoming);
+        IncomingAudioDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.IncomingAudio);
         ArchiveDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Archive);
         WorkingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Working);
         UploadingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Uploading);
         _loggerService = loggerService;
         _srtSubtitleService = srtSubtitleFileService;
         _thumbnailService = thumbnailService;
+
+
+        _fileSystemService.CreateDirectory(IncomingDirectory);
+        _fileSystemService.CreateDirectory(UploadingDirectory);
+        _fileSystemService.CreateDirectory(ArchiveDirectory);
+        _fileSystemService.CreateDirectory(IncomingAudioDirectory);
     }
+
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
@@ -39,6 +48,40 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
+        }
+    }
+
+    public override async Task ConvertVideoToMp3AudioAsync(CancellationToken cancellationToken)
+    {
+        var videoFilePaths = _fileSystemService.GetFilesInDirectory(IncomingAudioDirectory)
+            .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase) ||
+                f.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (videoFilePaths.Count() == 0)
+        {
+            return;
+        }
+
+        foreach (var videoFilePath in videoFilePaths)
+        {
+            try
+            {
+                string audioFilePath =
+                    Path.Combine(Path.GetDirectoryName(videoFilePath), Path.GetFileNameWithoutExtension(videoFilePath) + FileExtension.Mp3.Value);
+
+                await _ffmpegService.ConvertVideoFileToMp3FileAsync(
+                    videoFilePath, audioFilePath, Path.GetDirectoryName(videoFilePath), cancellationToken);
+
+                // move audio file from working directory to incoming directory
+                _fileSystemService.MoveFile(
+                    videoFilePath, Path.Combine(ArchiveDirectory, Path.GetFileName(videoFilePath)));
+            }
+            catch (Exception ex)
+            {
+                _loggerService.LogError(ex, ex.Message);
+                _fileSystemService.MoveFile(videoFilePath, videoFilePath + FileExtension.Err.Value);
+            }
         }
     }
 

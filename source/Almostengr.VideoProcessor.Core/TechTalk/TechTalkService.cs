@@ -7,7 +7,7 @@ using Almostengr.VideoProcessor.Core.Music.Services;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk;
 
-public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, ITechTalkTranscriptionService
+public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoService, ITechTalkTranscriptionService
 {
     private readonly ILoggerService<TechTalkService> _loggerService;
     private readonly ISrtSubtitleFileService _srtService;
@@ -15,6 +15,7 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
     private readonly IXzFileCompressionService _xzFileService;
     private readonly IThumbnailService _thumbnailService;
     private readonly ISrtSubtitleFileService _srtSubtitleService;
+    private readonly string IncomingAudioDirectory;
 
     public TechTalkService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
@@ -28,6 +29,7 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         WorkingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Working);
         ArchiveDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Archive);
         UploadingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Uploading);
+        IncomingAudioDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.IncomingAudio);
         _loggerService = loggerService;
         _srtService = srtSubtitleFileService;
         _xzFileService = xzFileService;
@@ -38,6 +40,7 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         _fileSystemService.CreateDirectory(IncomingDirectory);
         _fileSystemService.CreateDirectory(UploadingDirectory);
         _fileSystemService.CreateDirectory(ArchiveDirectory);
+        _fileSystemService.CreateDirectory(IncomingAudioDirectory);
     }
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
@@ -49,6 +52,41 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
+        }
+    }
+
+
+    public override async Task ConvertVideoToMp3AudioAsync(CancellationToken cancellationToken)
+    {
+        var videoFilePaths = _fileSystemService.GetFilesInDirectory(IncomingAudioDirectory)
+            .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase) ||
+                f.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (videoFilePaths.Count() == 0)
+        {
+            return;
+        }
+
+        foreach (var videoFilePath in videoFilePaths)
+        {
+            try
+            {
+                string audioFilePath =
+                    Path.Combine(Path.GetDirectoryName(videoFilePath), Path.GetFileNameWithoutExtension(videoFilePath) + FileExtension.Mp3.Value);
+
+                await _ffmpegService.ConvertVideoFileToMp3FileAsync(
+                    videoFilePath, audioFilePath, Path.GetDirectoryName(videoFilePath), cancellationToken);
+
+                // move audio file from working directory to incoming directory
+                _fileSystemService.MoveFile(
+                    videoFilePath, Path.Combine(ArchiveDirectory, Path.GetFileName(videoFilePath)));
+            }
+            catch (Exception ex)
+            {
+                _loggerService.LogError(ex, ex.Message);
+                _fileSystemService.MoveFile(videoFilePath, videoFilePath + FileExtension.Err.Value);
+            }
         }
     }
 

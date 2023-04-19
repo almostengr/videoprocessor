@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Core.Common.Videos;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk
 {
-    public interface ITechTalkVideoService : IBaseVideoService, IBaseTranscriptionService
+    public interface ITechTalkVideoService : IBaseVideoAudioService, IBaseTranscriptionService
     {
         void CreateThumbnails();
         

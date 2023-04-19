@@ -3,7 +3,7 @@ using Almostengr.VideoProcessor.Core.Common.Videos;
 
 namespace Almostengr.VideoProcessor.Core.Handyman
 {
-    public interface IHandymanVideoService : IBaseVideoService, IBaseTranscriptionService
+    public interface IHandymanVideoService : IBaseVideoAudioService, IBaseTranscriptionService
     {
         void CreateThumbnails();
     }

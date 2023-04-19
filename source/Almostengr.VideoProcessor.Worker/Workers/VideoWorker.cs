@@ -31,10 +31,12 @@ internal sealed class VideoWorker : BaseWorker
         {
             // await _handymanVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
             // await _handymanVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
+            // await _techTalkVideoService.ConvertVideoToMp3AudioAsync(cancellationToken);
             // await _handymanVideoService.ProcessVideoProjectAsync(cancellationToken);
 
             // await _techTalkVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
             await _techTalkVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
+            await _techTalkVideoService.ConvertVideoToMp3AudioAsync(cancellationToken);
             await _techTalkVideoService.ProcessVideoProjectAsync(cancellationToken);
 
             // await _toastmastersVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
