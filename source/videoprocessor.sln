@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Core", "Almostengr.VideoProcessor.Core\Almostengr.VideoProcessor.Core.csproj", "{174573DF-0F61-4C19-99CF-9FAA3208AC26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Infrastructure", "Almostengr.VideoProcessor.Infrastructure\Almostengr.VideoProcessor.Infrastructure.csproj", "{857BA4F6-3E18-4C6A-917E-23A5A583F999}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Almostengr.VideoProcessor.Worker", "Almostengr.VideoProcessor.Worker\Almostengr.VideoProcessor.Worker.csproj", "{44F1ABB7-6249-44AC-83C3-3C303F156F63}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{174573DF-0F61-4C19-99CF-9FAA3208AC26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{174573DF-0F61-4C19-99CF-9FAA3208AC26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{174573DF-0F61-4C19-99CF-9FAA3208AC26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{174573DF-0F61-4C19-99CF-9FAA3208AC26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{857BA4F6-3E18-4C6A-917E-23A5A583F999}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{857BA4F6-3E18-4C6A-917E-23A5A583F999}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{857BA4F6-3E18-4C6A-917E-23A5A583F999}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{857BA4F6-3E18-4C6A-917E-23A5A583F999}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44F1ABB7-6249-44AC-83C3-3C303F156F63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44F1ABB7-6249-44AC-83C3-3C303F156F63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44F1ABB7-6249-44AC-83C3-3C303F156F63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44F1ABB7-6249-44AC-83C3-3C303F156F63}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
