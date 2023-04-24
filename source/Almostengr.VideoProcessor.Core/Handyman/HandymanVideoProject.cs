@@ -9,23 +9,15 @@ public sealed class HandymanVideoProject : BaseVideoProject
     {
     }
 
-    public override string BrandingText()
+    public override IEnumerable<string> BrandingTextOptions()
     {
-        Random random = new();
-        List<string> options = new();
-
-        options.Add(Constant.ROBINSON_SERVICES);
-        options.Add(Constant.RHT_WEBSITE);
-        options.Add("@rhtservicesllc");
-        options.Add("#rhtservicesllc");
-        options.Add("rhtservices.net/handyman");
-
-        return options[random.Next(0, options.Count)];
-    }
-
-    public override FfMpegColor DrawTextFilterBackgroundColor()
-    {
-        return FfMpegColor.Black;
+        return new string[] {
+            Constant.ROBINSON_SERVICES,
+            Constant.RHT_WEBSITE,
+            "@rhtservicesllc",
+            "#rhtservicesllc",
+            "rhtservices.net/handyman",
+        };
     }
 
     public override FfMpegColor DrawTextFilterTextColor()

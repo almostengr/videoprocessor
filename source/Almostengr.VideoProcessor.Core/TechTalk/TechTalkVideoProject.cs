@@ -1,3 +1,5 @@
+using System.Text;
+using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Videos;
 using Almostengr.VideoProcessor.Core.Constants;
 
@@ -11,28 +13,25 @@ public sealed class TechTalkVideoProject : BaseVideoProject
     {
         SubType = TechTalkVideoSubType.TechTalk;
 
-        if (Title().Contains("christmas light show", StringComparison.OrdinalIgnoreCase))
+        if (Title().ContainsIgnoringCase("christmas light show"))
         {
             SubType = TechTalkVideoSubType.Christmas;
         }
-        else if (Title().Contains("4th of july", StringComparison.OrdinalIgnoreCase))
+        else if (Title().ContainsIgnoringCase("4th of july"))
         {
             SubType = TechTalkVideoSubType.IndependenceDay;
         }
     }
 
-    public override string BrandingText()
+    public override IEnumerable<string> BrandingTextOptions()
     {
-        Random random = new();
-
-        List<string> options = new();
-        options.Add("Tech Talk with RHT Services");
-        options.Add(Constant.RHT_WEBSITE);
-        options.Add("@rhtservicestech");
-        options.Add("#rhtservicestech");
-        options.Add("rhtservices.net/techtalk");
-
-        return options[random.Next(0, options.Count)];
+        return new string[] {
+            "Tech Talk with RHT Services",
+            Constant.RHT_WEBSITE,
+            "@rhtservicestech",
+            "#rhtservicestech",
+            "rhtservices.net/techtalk",
+        };
     }
 
     public override FfMpegColor DrawTextFilterBackgroundColor()
@@ -50,21 +49,21 @@ public sealed class TechTalkVideoProject : BaseVideoProject
         }
     }
 
-    public override string VideoFilters()
+    internal string VideoGraphics(string brandingText)
     {
-        var filters = base.VideoFilters();
+        StringBuilder stringBuilder = new(base.ChannelBrandDrawTextFilter(brandingText));
 
         switch (SubType)
         {
             case TechTalkVideoSubType.Christmas:
             case TechTalkVideoSubType.IndependenceDay:
-                filters += Constant.CommaSpace +
-                    new DrawTextFilter(Title(), DrawTextFilterTextColor(), Opacity.Full,
-                        DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.LowerLeft).ToString();
+                stringBuilder.Append(Constant.CommaSpace);
+                stringBuilder.Append(new DrawTextFilter(Title(), DrawTextFilterTextColor(), Opacity.Full,
+                        DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.LowerLeft).ToString());
                 break;
         }
 
-        return filters;
+        return stringBuilder.ToString();
     }
 
     public enum TechTalkVideoSubType

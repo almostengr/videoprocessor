@@ -9,21 +9,18 @@ public sealed class ToastmastersVideoProject : BaseVideoProject
     {
     }
 
-    public override string BrandingText()
+    public override IEnumerable<string> BrandingTextOptions()
     {
-        Random random = new();
-        List<string> options = new();
-        options.Add("towertoastmasters.org");
-        options.Add("Tower Toastmasters");
-        options.Add("toastmasters.org");
-        options.Add("facebook.com/TowerToastmasters");
-
-        return options[random.Next(0, options.Count)];
+        return new string[] {
+            "towertoastmasters.org",
+            "Tower Toastmasters",
+            "toastmasters.org",
+            "facebook.com/TowerToastmasters",
+        };
     }
 
     public override FfMpegColor DrawTextFilterBackgroundColor()
     {
         return FfMpegColor.SteelBlue;
     }
-
 }

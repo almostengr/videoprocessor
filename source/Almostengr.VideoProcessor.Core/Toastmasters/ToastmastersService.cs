@@ -72,16 +72,18 @@ public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoSe
             StopProcessingIfKdenliveFileExists(WorkingDirectory);
 
             var videoClips = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
+                .Where(f => f.EndsWithIgnoringCase(FileExtension.Mp4.Value))
                 .OrderBy(f => f);
 
             string ffmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
             CreateFfmpegInputFile(videoClips, ffmpegInputFilePath);
 
+            var textOptions = project.BrandingTextOptions().ToList();
+            string brandingText = textOptions[_randomService.Next(0, textOptions.Count)];
             string outputFilePath = Path.Combine(WorkingDirectory, project.VideoFileName());
-
+            
             await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
-                ffmpegInputFilePath, project.VideoFilters(), outputFilePath, cancellationToken);
+                ffmpegInputFilePath, project.ChannelBrandDrawTextFilter(brandingText), outputFilePath, cancellationToken);
 
             _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
             _fileSystemService.MoveFile(

@@ -14,7 +14,6 @@ public sealed class ThumbnailService : IThumbnailService
     public ThumbnailService(ILoggerService<ThumbnailService> logger, AppSettings appsettings)
     {
         _appSettings = appsettings;
-
         _driver = new ChromeDriver(_appSettings.ChromeDriverPath, BrowserOptions());
     }
 
@@ -44,24 +43,6 @@ public sealed class ThumbnailService : IThumbnailService
         catch (Exception)
         {
             QuitBrowser(_driver);
-            throw;
-        }
-    }
-
-    public void GenerateThumbnails<T>(string uploadDirectory, IEnumerable<T> thumbnailFiles) where T : BaseThumbnailFile
-    {
-        try
-        {
-            foreach (T thumbnailFile in thumbnailFiles)
-            {
-                _driver.Navigate().GoToUrl($"https://rhtservices.net/{thumbnailFile.WebPageFileName()}?videoTitle={thumbnailFile.Title()}");
-
-                Screenshot screenshot = ((ITakesScreenshot)_driver).GetScreenshot();
-                screenshot.SaveAsFile(Path.Combine(uploadDirectory, thumbnailFile.ThumbnailFileName()));
-            }
-        }
-        catch (Exception)
-        {
             throw;
         }
     }

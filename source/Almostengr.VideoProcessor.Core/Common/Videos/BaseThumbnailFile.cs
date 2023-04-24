@@ -9,7 +9,7 @@ public abstract class BaseThumbnailFile
 
     public BaseThumbnailFile(string thumbTxtFilePath)
     {
-        if (!thumbTxtFilePath.EndsWith(FileExtension.ThumbTxt.Value, StringComparison.OrdinalIgnoreCase))
+        if (!thumbTxtFilePath.EndsWithIgnoringCase(FileExtension.ThumbTxt.Value))
         {
             throw new ArgumentException(Constant.FileTypeIsIncorrect, nameof(thumbTxtFilePath));
         }
@@ -32,7 +32,7 @@ public abstract class BaseThumbnailFile
     public string ThumbnailFileName()
     {
         return Path.GetFileName(ThumbTxtFilePath)
-            .Replace(FileExtension.ThumbTxt.Value, FileExtension.Jpg.Value, StringComparison.OrdinalIgnoreCase);
+            .ReplaceIgnoringCase(FileExtension.ThumbTxt.Value, FileExtension.Jpg.Value);
     }
 
     public string ThumbTxtFileName()

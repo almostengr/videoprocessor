@@ -1,3 +1,5 @@
+using System.Text;
+using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Videos;
 using Almostengr.VideoProcessor.Core.Constants;
 
@@ -10,7 +12,7 @@ public sealed partial class DashCamVideoProject : BaseVideoProject
     public DashCamVideoProject(string filePath) : base(filePath)
     {
 
-        if (filePath.Contains("bad drivers of montgomery", StringComparison.OrdinalIgnoreCase))
+        if (filePath.ContainsIgnoringCase("bad drivers of montgomery"))
         {
             throw new ArgumentException("Title contains invalid text");
         }
@@ -22,16 +24,15 @@ public sealed partial class DashCamVideoProject : BaseVideoProject
     {
         SubType = DashCamVideoType.Normal;
 
-        if (title.Contains("night", StringComparison.OrdinalIgnoreCase))
+        if (title.ContainsIgnoringCase("night"))
         {
             SubType = DashCamVideoType.Night;
         }
-        else if (title.Contains("firework", StringComparison.OrdinalIgnoreCase))
+        else if (title.ContainsIgnoringCase("firework"))
         {
             SubType = DashCamVideoType.Fireworks;
         }
-        else if (title.Contains(Constant.NissanAltima, StringComparison.OrdinalIgnoreCase) ||
-            title.Contains(Constant.GmcSierra, StringComparison.OrdinalIgnoreCase))
+        else if (title.ContainsIgnoringCase(Constant.NissanAltima) || title.ContainsIgnoringCase(Constant.GmcSierra))
         {
             SubType = DashCamVideoType.CarRepair;
         }
@@ -61,26 +62,26 @@ public sealed partial class DashCamVideoProject : BaseVideoProject
         }
     }
 
-    public string TitleDrawTextFilter()
+    internal string ChannelBrandAndTitleGraphics(string brandingText)
     {
+        StringBuilder stringBuilder = new(base.ChannelBrandDrawTextFilter(brandingText));
+        
         switch (SubType)
         {
             case DashCamVideoType.CarRepair:
-                return string.Empty;
+                break;
 
             default:
-                return (new DrawTextFilter(
-                    Title(),
-                    DrawTextFilterTextColor(),
-                    Opacity.Full,
-                    DrawTextFilterBackgroundColor(),
-                    Opacity.Medium,
-                    DrawTextPosition.UpperLeft)).ToString();
+                stringBuilder.Append(
+                    new DrawTextFilter(Title(), DrawTextFilterTextColor(), Opacity.Full,
+                    DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.UpperLeft).ToString());
+                break;
         }
+        return stringBuilder.ToString();
     }
 
-    public override string BrandingText()
+    public override IEnumerable<string> BrandingTextOptions()
     {
-        return "Kenny Ram Dash Cam";
+        return new string[] { "Kenny Ram Dash Cam" };
     }
 }

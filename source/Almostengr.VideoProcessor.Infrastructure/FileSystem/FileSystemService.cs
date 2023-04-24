@@ -20,7 +20,7 @@ public sealed class FileSystemService : IFileSystemService
     {
         if (string.IsNullOrWhiteSpace(directory))
         {
-            throw new VideoProcessorException("Directory cannot be null or whitespace");
+            throw new ArgumentException("Directory cannot be null or whitespace");
         }
 
         if (Directory.Exists(directory))
@@ -50,7 +50,7 @@ public sealed class FileSystemService : IFileSystemService
     public string? GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
     {
         return GetFilesInDirectory(directory)
-            .Where(f => f.ToLower().Contains(extension.Value) && !f.ToLower().EndsWith(FileExtension.Err.Value))
+            .Where(f => f.ContainsIgnoringCase(extension.Value) && !f.EndsWithIgnoringCase(FileExtension.Err.Value))
             .FirstOrDefault();
     }
 
@@ -94,10 +94,9 @@ public sealed class FileSystemService : IFileSystemService
     public IEnumerable<string> GetTarballFilesInDirectory(string directory)
     {
         return Directory.GetFiles(directory)
-            .Where(
-                f => f.EndsWith(FileExtension.TarGz.Value, StringComparison.OrdinalIgnoreCase) ||
-                f.EndsWith(FileExtension.TarXz.Value, StringComparison.OrdinalIgnoreCase) ||
-                f.EndsWith(FileExtension.Tar.Value, StringComparison.OrdinalIgnoreCase));
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.TarGz.Value) ||
+                        f.EndsWithIgnoringCase(FileExtension.TarXz.Value) ||
+                        f.EndsWithIgnoringCase(FileExtension.Tar.Value));
     }
 
     public IEnumerable<string> GetFilesInDirectory(string directory)
@@ -147,25 +146,16 @@ public sealed class FileSystemService : IFileSystemService
     {
         if (string.IsNullOrWhiteSpace(filePath))
         {
-            throw new SaveFilePathIsNullOrEmptyException();
+            throw new ArgumentException("File path is not valid", nameof(filePath));
         }
 
         if (string.IsNullOrWhiteSpace(content))
         {
-            throw new SaveFileContentIsNullOrEmptyException();
+            throw new ArgumentException("Contents is null or white space", nameof(content));
         }
 
-        var directoryName = Path.GetDirectoryName(filePath);
-
-        if (string.IsNullOrEmpty(directoryName))
-        {
-            throw new SaveFileDirectoryIsNullOrEmptyException();
-        }
-
-        if (!Directory.Exists(Path.GetDirectoryName(filePath)))
-        {
-            throw new VideoProcessorException("Directories do not exist");
-        }
+        string directoryName =
+            Path.GetDirectoryName(filePath) ?? throw new VideoProcessorException("Directory cannot be null");
 
         CreateDirectory(directoryName);
         File.WriteAllText(filePath, content);
@@ -174,8 +164,8 @@ public sealed class FileSystemService : IFileSystemService
     public IEnumerable<FileInfo> GetVideoFilesInDirectoryWithFileInfo(string directory)
     {
         return GetFilesInDirectoryWithFileInfo(directory)
-                .Where(f => f.FullName.EndsWith(FileExtension.Mov.Value, StringComparison.OrdinalIgnoreCase) ||
-                    f.FullName.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase) ||
-                    f.FullName.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase));
+            .Where(f => f.FullName.EndsWithIgnoringCase(FileExtension.Mov.Value) ||
+                        f.FullName.EndsWithIgnoringCase(FileExtension.Mkv.Value) ||
+                        f.FullName.EndsWithIgnoringCase(FileExtension.Mp4.Value));
     }
 }

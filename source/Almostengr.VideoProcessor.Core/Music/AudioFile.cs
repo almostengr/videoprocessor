@@ -1,3 +1,4 @@
+using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Music;
@@ -8,7 +9,7 @@ public sealed class AudioFile
 
     public AudioFile(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath) || !filePath.ToLower().EndsWith(FileExtension.Mp3.Value))
+        if (string.IsNullOrWhiteSpace(filePath) || !filePath.EndsWithIgnoringCase(FileExtension.Mp3.Value))
         {
             throw new ArgumentException("File path is not valid", nameof(filePath));
         }

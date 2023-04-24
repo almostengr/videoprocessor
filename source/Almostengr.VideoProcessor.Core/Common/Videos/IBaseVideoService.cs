@@ -16,8 +16,3 @@ public interface ITranscriptionService : IBaseVideoService
 {
     Task ProcessSrtSubtitlesAsync(CancellationToken cancellationToken);
 }
-
-public interface IBaseVideoAudioService : IBaseVideoService
-{
-    Task ConvertVideoToMp3AudioAsync(CancellationToken cancellationToken);
-}

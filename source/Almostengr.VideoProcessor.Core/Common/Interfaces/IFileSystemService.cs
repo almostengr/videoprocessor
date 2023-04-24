@@ -4,7 +4,6 @@ namespace Almostengr.VideoProcessor.Core.Common.Interfaces;
 
 public interface IFileSystemService
 {
-    bool IsDiskSpaceAvailable(string directory);
     void DeleteDirectory(string directory);
     void CreateDirectory(string directory);
     void MoveFile(string sourceFilePath, string destinationDirectory);
@@ -13,7 +12,6 @@ public interface IFileSystemService
     void PrepareAllFilesInDirectory(string directory);
     void DeleteFile(string ffmpegInputFilePath);
     void SaveFileContents(string filePath, string content);
-    string? GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension);
     FileInfo[] GetFilesInDirectoryWithFileInfo(string directory);
     IEnumerable<string> GetTarballFilesInDirectory(string directory);
     IEnumerable<FileInfo> GetVideoFilesInDirectoryWithFileInfo(string directory);

@@ -7,7 +7,7 @@ using Almostengr.VideoProcessor.Core.Music.Services;
 
 namespace Almostengr.VideoProcessor.Core.TechTalk;
 
-public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoService, ITechTalkTranscriptionService
+public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, ITechTalkTranscriptionService
 {
     private readonly ILoggerService<TechTalkService> _loggerService;
     private readonly ISrtSubtitleFileService _srtService;
@@ -15,7 +15,6 @@ public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoServi
     private readonly IXzFileCompressionService _xzFileService;
     private readonly IThumbnailService _thumbnailService;
     private readonly ISrtSubtitleFileService _srtSubtitleService;
-    private readonly string IncomingAudioDirectory;
 
     public TechTalkService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
@@ -29,7 +28,6 @@ public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoServi
         WorkingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Working);
         ArchiveDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Archive);
         UploadingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Uploading);
-        IncomingAudioDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.IncomingAudio);
         _loggerService = loggerService;
         _srtService = srtSubtitleFileService;
         _xzFileService = xzFileService;
@@ -40,7 +38,6 @@ public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoServi
         _fileSystemService.CreateDirectory(IncomingDirectory);
         _fileSystemService.CreateDirectory(UploadingDirectory);
         _fileSystemService.CreateDirectory(ArchiveDirectory);
-        _fileSystemService.CreateDirectory(IncomingAudioDirectory);
     }
 
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
@@ -52,41 +49,6 @@ public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoServi
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
-        }
-    }
-
-
-    public override async Task ConvertVideoToMp3AudioAsync(CancellationToken cancellationToken)
-    {
-        var videoFilePaths = _fileSystemService.GetFilesInDirectory(IncomingAudioDirectory)
-            .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase) ||
-                f.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        if (videoFilePaths.Count() == 0)
-        {
-            return;
-        }
-
-        foreach (var videoFilePath in videoFilePaths)
-        {
-            try
-            {
-                string audioFilePath =
-                    Path.Combine(Path.GetDirectoryName(videoFilePath), Path.GetFileNameWithoutExtension(videoFilePath) + FileExtension.Mp3.Value);
-
-                await _ffmpegService.ConvertVideoFileToMp3FileAsync(
-                    videoFilePath, audioFilePath, Path.GetDirectoryName(videoFilePath), cancellationToken);
-
-                // move audio file from working directory to incoming directory
-                _fileSystemService.MoveFile(
-                    videoFilePath, Path.Combine(ArchiveDirectory, Path.GetFileName(videoFilePath)));
-            }
-            catch (Exception ex)
-            {
-                _loggerService.LogError(ex, ex.Message);
-                _fileSystemService.MoveFile(videoFilePath, videoFilePath + FileExtension.Err.Value);
-            }
         }
     }
 
@@ -107,7 +69,7 @@ public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoServi
         IEnumerable<TechTalkThumbnailFile>? thumbnailFiles = GetThumbnailFiles(IncomingDirectory)
             .Select(f => new TechTalkThumbnailFile(f));
 
-        if (thumbnailFiles.Any())
+        if (!thumbnailFiles.Any())
         {
             return;
         }
@@ -135,20 +97,18 @@ public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoServi
 
     public void ProcessSrtSubtitleFile()
     {
-        SrtSubtitleFile? srtFile = null;
+        TechTalkSrtSubtitleFile? srtFile = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.Srt.Value))
+            .Select(f => new TechTalkSrtSubtitleFile(f))
+            .FirstOrDefault();
+
+        if (srtFile == null)
+        {
+            return;
+        }
 
         try
         {
-            string? randomFile = _fileSystemService.GetRandomFileByExtensionFromDirectory(
-                WorkingDirectory, FileExtension.Srt);
-
-            if (string.IsNullOrEmpty(randomFile))
-            {
-                return;
-            }
-
-            srtFile = new TechTalkSrtSubtitleFile(randomFile);
-
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
@@ -176,13 +136,8 @@ public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoServi
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
-
-            if (srtFile != null)
-            {
-                _loggerService.LogErrorProcessingFile(srtFile.FilePath, ex);
-                _fileSystemService.MoveFile(srtFile.FilePath, srtFile.FilePath + FileExtension.Err.Value);
-            }
-
+            _loggerService.LogErrorProcessingFile(srtFile.FilePath, ex);
+            _fileSystemService.MoveFile(srtFile.FilePath, srtFile.FilePath + FileExtension.Err.Value);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
     }
@@ -213,9 +168,7 @@ public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoServi
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
             var videoClips = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
-                .Where(f => f.FullName.EndsWith(FileExtension.Mov.Value, StringComparison.OrdinalIgnoreCase) ||
-                    f.FullName.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase) ||
-                    f.FullName.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
+                .Where(f => f.FullName.IsVideoFile())
                 .OrderBy(f => f.Name);
 
             foreach (var videoClip in videoClips)
@@ -231,17 +184,17 @@ public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoServi
 
                 var result = await _ffmpegService.FfprobeAsync($"\"{videoClip.FullName}\"", WorkingDirectory, cancellationToken);
 
-                if (result.stdErr.Contains(Constant.Audio, StringComparison.OrdinalIgnoreCase))
+                if (result.stdErr.DoesNotContainIgnoringCase(Constant.Audio))
                 {
-                    var audioConversionResult = await _ffmpegService.ConvertVideoFileToMp3FileAsync(
-                        videoClip.FullName, audioClipFilePath, WorkingDirectory, cancellationToken);
+                    // throw new NoAudioTrackException("The video track does not have audio nor an audio file");
+                    _loggerService.LogWarning(
+                        $"Video clip {videoClip.Name} in project {project.FileName()} does not contain audio");
+                }
 
-                    await AnalyzeAndNormalizeAudioAsync(audioClipFilePath, cancellationToken);
-                }
-                else
-                {
-                    audioClipFilePath = _musicService.GetRandomMixTrack().FilePath;
-                }
+                var audioConversionResult = await _ffmpegService.ConvertVideoFileToMp3FileAsync(
+                    videoClip.FullName, audioClipFilePath, WorkingDirectory, cancellationToken);
+
+                await AnalyzeAndNormalizeAudioAsync(audioClipFilePath, cancellationToken);
 
             RenderTs:
                 string tsFilePath =
@@ -252,23 +205,25 @@ public sealed class TechTalkService : BaseVideoAudioService, ITechTalkVideoServi
             }
 
             var tsVideoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Ts.Value, StringComparison.OrdinalIgnoreCase))
+                .Where(f => f.EndsWithIgnoringCase(FileExtension.Ts.Value))
                 .OrderBy(f => f);
 
             string ffmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
             CreateFfmpegInputFile(tsVideoFiles.ToArray(), ffmpegInputFilePath);
 
-            string outputVideoFilePath = Path.Combine(WorkingDirectory, project.VideoFileName());
+            string outputFilePath = Path.Combine(WorkingDirectory, project.VideoFileName());
 
+            var textOptions = project.BrandingTextOptions().ToList();
+            string brandingText = textOptions[_randomService.Next(0, textOptions.Count)];
             await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
-                ffmpegInputFilePath, project.VideoFilters(), outputVideoFilePath, cancellationToken);
+                ffmpegInputFilePath, project.VideoGraphics(brandingText), outputFilePath, cancellationToken);
 
             _fileSystemService.SaveFileContents(
                 Path.Combine(IncomingDirectory, project.ThumbnailFileName()), project.Title());
 
             _fileSystemService.MoveFile(project.FilePath, Path.Combine(ArchiveDirectory, project.FileName()));
             _fileSystemService.MoveFile(
-                outputVideoFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
+                outputFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }

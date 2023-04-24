@@ -16,7 +16,7 @@ public abstract class SrtSubtitleFile
             throw new ArgumentException(Constant.FileDoesNotExist, nameof(filePath));
         }
 
-        if (!filePath.EndsWith(FileExtension.Srt.Value,  StringComparison.OrdinalIgnoreCase))
+        if (!filePath.EndsWithIgnoringCase(FileExtension.Srt.Value))
         {
             throw new ArgumentException(Constant.FileTypeIsIncorrect, nameof(filePath));
         }
@@ -43,7 +43,7 @@ public abstract class SrtSubtitleFile
 
     public string BlogFileName()
     {
-        return Path.Combine(FilePath).Replace(FileExtension.Srt.Value, FileExtension.Md.Value, StringComparison.OrdinalIgnoreCase);
+        return Path.Combine(FilePath).ReplaceIgnoringCase(FileExtension.Srt.Value, FileExtension.Md.Value);
     }
 
     public virtual string BlogPostText()
@@ -83,11 +83,11 @@ public abstract class SrtSubtitleFile
         const string RHT_SERVICES_WEBSITE = "['rhtservices.net'](/)";
 
         return stringBuilder.ToString()
-            .Replace("and so", string.Empty)
-            .Replace("[music]", "(music)")
-            .Replace("rhtservices.net", RHT_SERVICES_WEBSITE)
-            .Replace("r h t services dot net", RHT_SERVICES_WEBSITE)
-            .Replace("rht services", "RHT Services")
+            .ReplaceIgnoringCase("and so", string.Empty)
+            .ReplaceIgnoringCase("[music]", "(music)")
+            .ReplaceIgnoringCase("rhtservices.net", RHT_SERVICES_WEBSITE)
+            .ReplaceIgnoringCase("r h t services dot net", RHT_SERVICES_WEBSITE)
+            .ReplaceIgnoringCase("rht services", "RHT Services")
         ;
     }
 

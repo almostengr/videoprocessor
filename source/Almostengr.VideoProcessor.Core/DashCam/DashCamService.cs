@@ -28,7 +28,7 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
     public async Task ProcessReviewedFilesAsync(CancellationToken cancellationToken)
     {
         DashCamGraphicsFile? graphicsFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-            .Where(f => f.EndsWith(FileExtension.GraphicsAss.Value))
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.GraphicsAss.Value))
             .Select(f => new DashCamGraphicsFile(f))
             .SingleOrDefault();
 
@@ -40,8 +40,8 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
         try
         {
             var videoFilePath = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
-                .Where(f => f.StartsWith(graphicsFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) &&
-                    f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
+                .Where(f => f.StartsWith(graphicsFile.FilePath.ReplaceIgnoringCase(FileExtension.GraphicsAss.Value, string.Empty)) &&
+                    f.EndsWithIgnoringCase(FileExtension.Mp4.Value))
                 .Single();
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
@@ -49,17 +49,9 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 
             string outputFilePath = Path.Combine(WorkingDirectory, graphicsFile.VideoFileName());
 
-            if (videoFilePath.Contains(Constant.GmcSierra, StringComparison.OrdinalIgnoreCase) ||
-                videoFilePath.Contains(Constant.NissanAltima, StringComparison.OrdinalIgnoreCase))
-            {
-                await _ffmpegService.RenderVideoAsync(videoFilePath, outputFilePath, cancellationToken);
-            }
-            else
-            {
-                var audioFile = _musicService.GetRandomMixTrack();
-                await _ffmpegService.RenderVideoWithAudioAndFiltersAsync(
-                    videoFilePath, audioFile.FilePath, string.Empty, outputFilePath, cancellationToken);
-            }
+            var audioFile = _musicService.GetRandomMixTrack();
+            await _ffmpegService.RenderVideoWithAudioAndFiltersAsync(
+                videoFilePath, audioFile.FilePath, string.Empty, outputFilePath, cancellationToken);
 
             _fileSystemService.MoveFile(
                 outputFilePath, Path.Combine(UploadingDirectory, graphicsFile.VideoFileName()));
@@ -128,17 +120,15 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
             var videoClips = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
-                .Where(f => f.FullName.EndsWith(FileExtension.Mov.Value, StringComparison.OrdinalIgnoreCase) ||
-                    f.FullName.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase) ||
-                    f.FullName.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
+                .Where(f => f.FullName.IsVideoFile())
                 .OrderBy(f => f.Name);
 
             foreach (var video in videoClips)
             {
                 string outFilePath = video.FullName
-                    .Replace(FileExtension.Mov.Value, string.Empty, StringComparison.OrdinalIgnoreCase)
-                    .Replace(FileExtension.Mkv.Value, string.Empty, StringComparison.OrdinalIgnoreCase)
-                    .Replace(FileExtension.Mp4.Value, string.Empty, StringComparison.OrdinalIgnoreCase)
+                    .ReplaceIgnoringCase(FileExtension.Mov.Value, string.Empty)
+                    .ReplaceIgnoringCase(FileExtension.Mkv.Value, string.Empty)
+                    .ReplaceIgnoringCase(FileExtension.Mp4.Value, string.Empty)
                     + FileExtension.Ts.Value;
 
                 await _ffmpegService.ConvertVideoFileToTsFormatAsync(
@@ -146,13 +136,13 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
             }
 
             string? ffmpegInputFilePath = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.FfmpegInput.Value))
+                .Where(f => f.EndsWithIgnoringCase(FileExtension.FfmpegInput.Value))
                 .SingleOrDefault();
 
             if (string.IsNullOrEmpty(ffmpegInputFilePath))
             {
                 var tsVideoFiles = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
-                    .Where(f => f.Name.EndsWith(FileExtension.Ts.Value, StringComparison.OrdinalIgnoreCase))
+                    .Where(f => f.Name.EndsWithIgnoringCase(FileExtension.Ts.Value))
                     .OrderBy(f => f.Name)
                     .Select(f => f.FullName);
 
@@ -162,16 +152,26 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 
             string outputFilePath = Path.Combine(WorkingDirectory, project.VideoFileName());
 
-            await _ffmpegService.RenderVideoAsync(ffmpegInputFilePath, outputFilePath, cancellationToken);
+            var textOptions = project.BrandingTextOptions().ToList();
+            string brandingText = textOptions[_randomService.Next(0, textOptions.Count)];
+            await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
+                ffmpegInputFilePath, project.ChannelBrandDrawTextFilter(brandingText), outputFilePath, cancellationToken);
 
             _fileSystemService.SaveFileContents(
                 Path.Combine(IncomingDirectory, project.ThumbnailFileName()), project.Title());
 
             _fileSystemService.MoveFile(project.FilePath, Path.Combine(ArchiveDirectory, project.FileName()));
-            _fileSystemService.MoveFile(outputFilePath, Path.Combine(IncomingDirectory, project.VideoFileName()));
+
+            string destinationDir = IncomingDirectory;
+            if (project.SubType == DashCamVideoProject.DashCamVideoType.CarRepair)
+            {
+                destinationDir = UploadingDirectory;
+            }
+
+            _fileSystemService.MoveFile(outputFilePath, Path.Combine(destinationDir, project.VideoFileName()));
 
             string? graphicsFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.GraphicsAss.Value, StringComparison.OrdinalIgnoreCase))
+                .Where(f => f.EndsWithIgnoringCase(FileExtension.GraphicsAss.Value))
                 .SingleOrDefault();
 
             if (graphicsFile != null)

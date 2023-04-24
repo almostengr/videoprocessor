@@ -5,7 +5,7 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public abstract class BaseVideoProject
+public abstract partial class BaseVideoProject
 {
     public string FilePath { get; init; }
 
@@ -17,9 +17,9 @@ public abstract class BaseVideoProject
         }
 
         if (
-            !filePath.EndsWith(FileExtension.Tar.Value, StringComparison.OrdinalIgnoreCase) &&
-            !filePath.EndsWith(FileExtension.TarGz.Value, StringComparison.OrdinalIgnoreCase) &&
-            !filePath.EndsWith(FileExtension.TarXz.Value, StringComparison.OrdinalIgnoreCase))
+            !filePath.EndsWithIgnoringCase(FileExtension.Tar.Value) &&
+            !filePath.EndsWithIgnoringCase(FileExtension.TarGz.Value) &&
+            !filePath.EndsWithIgnoringCase(FileExtension.TarXz.Value))
         {
             throw new ArgumentException(Constant.FileTypeIsIncorrect, nameof(filePath));
         }
@@ -27,7 +27,7 @@ public abstract class BaseVideoProject
         FilePath = filePath;
     }
 
-    public abstract string BrandingText();
+    public abstract IEnumerable<string> BrandingTextOptions();
 
     public virtual FfMpegColor DrawTextFilterBackgroundColor()
     {
@@ -47,10 +47,10 @@ public abstract class BaseVideoProject
     public virtual string Title()
     {
         string title = FileName()
-            .Replace(FileExtension.Mp4.Value, string.Empty)
-            .Replace(FileExtension.TarXz.Value, string.Empty)
-            .Replace(FileExtension.TarGz.Value, string.Empty)
-            .Replace(FileExtension.Tar.Value, string.Empty)
+            .ReplaceIgnoringCase(FileExtension.Mp4.Value, string.Empty)
+            .ReplaceIgnoringCase(FileExtension.TarXz.Value, string.Empty)
+            .ReplaceIgnoringCase(FileExtension.TarGz.Value, string.Empty)
+            .ReplaceIgnoringCase(FileExtension.Tar.Value, string.Empty)
             .Replace(Constant.Colon, string.Empty);
 
         const int MAX_TITLE_LENGTH = 100;
@@ -66,9 +66,9 @@ public abstract class BaseVideoProject
     public string VideoFileName()
     {
         return Path.GetFileName(FilePath)
-            .Replace(FileExtension.TarXz.Value, string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace(FileExtension.TarGz.Value, string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace(FileExtension.Tar.Value, string.Empty, StringComparison.OrdinalIgnoreCase)
+            .ReplaceIgnoringCase(FileExtension.TarXz.Value, string.Empty)
+            .ReplaceIgnoringCase(FileExtension.TarGz.Value, string.Empty)
+            .ReplaceIgnoringCase(FileExtension.Tar.Value, string.Empty)
             .Replace(Constant.Colon, string.Empty)
             + FileExtension.Mp4.Value;
     }
@@ -78,110 +78,14 @@ public abstract class BaseVideoProject
         return Path.GetFileName(FilePath);
     }
 
-
-    public virtual string VideoFilters()
+    internal string ChannelBrandDrawTextFilter(string brandingText)
     {
         StringBuilder stringBuilder = new();
         stringBuilder.Append(
-            new DrawTextFilter(BrandingText(), DrawTextFilterTextColor(), Opacity.Full,
+            new DrawTextFilter(brandingText, DrawTextFilterTextColor(), Opacity.Full,
             DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.ChannelBrand).ToString()
             );
-
         return stringBuilder.ToString();
-    }
-
-
-    protected sealed class DrawTextFilter
-    {
-        private string Text { get; init; }
-        private FfMpegColor TextColor { get; init; }
-        private Opacity TextBrightness { get; init; }
-        private FfmpegFontSize FontSize { get; init; }
-        private DrawTextPosition Position { get; init; }
-        private FfMpegColor BackgroundColor { get; init; }
-        private Opacity BackgroundBrightness { get; init; }
-        private uint BorderWidth { get; init; }
-        private TimeSpan? StartTime { get; init; }
-        private TimeSpan? EndTime { get; init; }
-
-        public DrawTextFilter(string text, FfMpegColor textColor, Opacity textBrightness,
-            FfMpegColor backgroundColor, Opacity backgroundBrightness, DrawTextPosition position,
-            TimeSpan? startTime = null, TimeSpan? endTime = null)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                throw new ArgumentException("Text is null or whitespace");
-            }
-
-            if (textBrightness.ToString() == Opacity.None.ToString())
-            {
-                throw new ArgumentException("Text brightness cannot be none");
-            }
-
-            if (textColor.ToString() == backgroundColor.ToString())
-            {
-                throw new ArgumentException("Text and background color cannot be the same");
-            }
-
-            if (endTime < startTime)
-            {
-                throw new ArgumentException("Start time must be before end time");
-            }
-
-            if (text.Length > 80)
-            {
-                throw new ArgumentException($"Text length is too long: {text}", nameof(text));
-            }
-
-            Text = text.Replace("=", "\\=").Replace(":", "\\:");
-            Position = position;
-
-            if (Position.ToString() == DrawTextPosition.SubtitlePrimary.ToString() && Text.Length <= 60)
-            {
-                if (Text.Length > 60)
-                {
-                    throw new ArgumentException($"Primary subtitle length is too long: {text}", nameof(text));
-                }
-                FontSize = FfmpegFontSize.XLarge;
-            }
-            else if (Position.ToString() == DrawTextPosition.SubtitleSecondary.ToString() ||
-                Position.ToString() == DrawTextPosition.DashCamInfo.ToString())
-            {
-                FontSize = FfmpegFontSize.Large;
-            }
-            else
-            {
-                FontSize = FfmpegFontSize.Medium;
-            }
-
-            TextColor = textColor;
-            TextBrightness = textBrightness;
-            BackgroundColor = backgroundColor;
-            BackgroundBrightness = backgroundBrightness;
-            BorderWidth = 20;
-            StartTime = startTime;
-            EndTime = endTime;
-        }
-
-        public override string ToString()
-        {
-            StringBuilder stringBuilder = new();
-            stringBuilder.Append($"drawtext=textfile:'{Text.Trim()}':");
-            stringBuilder.Append($"fontcolor={TextColor.ToString()}@{TextBrightness.ToString()}:");
-            stringBuilder.Append($"fontsize={FontSize.ToString()}:");
-            stringBuilder.Append($"{Position.ToString()}:");
-            stringBuilder.Append(Constant.BorderBox);
-            stringBuilder.Append($"boxborderw={BorderWidth.ToString()}:");
-            stringBuilder.Append($"boxcolor={BackgroundColor.ToString()}@{BackgroundBrightness.ToString()}");
-
-            if (StartTime != null && EndTime != null)
-            {
-                stringBuilder.Append(Constant.Colon);
-                stringBuilder.Append($"enable='between(t, {(uint)StartTime.Value.TotalSeconds}, {(uint)EndTime.Value.TotalSeconds})'");
-            }
-
-            return stringBuilder.ToString();
-        }
     }
 
 }

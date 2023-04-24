@@ -1,3 +1,4 @@
+using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Videos;
 
 namespace Almostengr.VideoProcessor.Core.Handyman;
@@ -10,10 +11,10 @@ public sealed class HandymanSrtSubtitleFile : SrtSubtitleFile
 
     public override string BlogPostText()
     {
-        return base.BlogPostText().ToString().ToLower()
-            .Replace("youtube", "<a href=\"https://www.youtube.com/c/RobinsonHandyandTechnologyServices?sub_confirmation=1\" target=\"_blank\">YouTube</a>")
-            .Replace("facebook", "<a href=\"https://www.facebook.com/rhtservicesllc/\" target=\"_blank\">Facebook</a>")
-            .Replace("instagram", "<a href=\"https://www.instagram.com/rhtservicesllc/\" target=\"_blank\">Instagram</a>")
+        return base.BlogPostText().ToString()
+            .ReplaceIgnoringCase("youtube", "<a href=\"https://www.youtube.com/c/RobinsonHandyandTechnologyServices?sub_confirmation=1\" target=\"_blank\">YouTube</a>")
+            .ReplaceIgnoringCase("facebook", "<a href=\"https://www.facebook.com/rhtservicesllc/\" target=\"_blank\">Facebook</a>")
+            .ReplaceIgnoringCase("instagram", "<a href=\"https://www.instagram.com/rhtservicesllc/\" target=\"_blank\">Instagram</a>")
             ;
     }
 }

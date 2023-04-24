@@ -18,10 +18,10 @@ public abstract class BaseVideoService : IBaseVideoService
     protected readonly IMusicService _musicService;
     protected readonly IAssSubtitleFileService _assSubtitleFileService;
 
-    protected string IncomingDirectory { get; init; }
-    protected string ArchiveDirectory { get; init; }
-    protected string UploadingDirectory { get; init; }
-    protected string WorkingDirectory { get; init; }
+    protected string IncomingDirectory { get; init; } = string.Empty;
+    protected string ArchiveDirectory { get; init; } = string.Empty;
+    protected string UploadingDirectory { get; init; } = string.Empty;
+    protected string WorkingDirectory { get; init; } = string.Empty;
 
 
     protected BaseVideoService(
@@ -47,7 +47,7 @@ public abstract class BaseVideoService : IBaseVideoService
         string archiveDirectory, CancellationToken cancellationToken)
     {
         var archiveTarballs = _fileSystemService.GetFilesInDirectory(archiveDirectory)
-            .Where(f => f.EndsWith(FileExtension.Tar.Value) && !f.Contains(FileExtension.DraftTar.Value));
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.Tar.Value) && !f.ContainsIgnoringCase(FileExtension.DraftTar.Value));
 
         foreach (var archive in archiveTarballs)
         {
@@ -58,7 +58,7 @@ public abstract class BaseVideoService : IBaseVideoService
     internal IEnumerable<AudioFile> GetAudioFilesInDirectory(string directory)
     {
         return _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.EndsWith(FileExtension.Mp3.Value, StringComparison.OrdinalIgnoreCase))
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.Mp3.Value))
             .Select(f => new AudioFile(f))
             .ToList();
     }
@@ -66,9 +66,9 @@ public abstract class BaseVideoService : IBaseVideoService
     internal IEnumerable<string> GetVideoFilesInDirectory(string directory)
     {
         return _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase) ||
-                f.EndsWith(FileExtension.Mov.Value, StringComparison.OrdinalIgnoreCase) || 
-                f.EndsWith(FileExtension.Mkv.Value, StringComparison.OrdinalIgnoreCase));
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.Mp4.Value) ||
+                        f.EndsWithIgnoringCase(FileExtension.Mov.Value) ||
+                        f.EndsWithIgnoringCase(FileExtension.Mkv.Value));
     }
 
     internal void CreateFfmpegInputFile(IEnumerable<string> filesInDirectory, string inputFilePath)
@@ -101,7 +101,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public void StopProcessingIfDetailsTxtFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.Contains("details.txt", StringComparison.OrdinalIgnoreCase))
+            .Where(f => f.ContainsIgnoringCase("details.txt"))
             .Any();
 
         if (fileExists)
@@ -113,7 +113,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public void StopProcessingIfFfmpegInputTxtFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.Contains("ffmpeg", StringComparison.OrdinalIgnoreCase))
+            .Where(f => f.ContainsIgnoringCase("ffmpeg"))
             .Any();
 
         if (fileExists)
@@ -125,7 +125,7 @@ public abstract class BaseVideoService : IBaseVideoService
     public void StopProcessingIfKdenliveFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.EndsWith(FileExtension.Kdenlive.Value, StringComparison.OrdinalIgnoreCase))
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.Kdenlive.Value))
             .Any();
 
         if (fileExists)
@@ -136,8 +136,8 @@ public abstract class BaseVideoService : IBaseVideoService
 
     public IEnumerable<string> GetThumbnailFiles(string directory)
     {
-         return _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.EndsWith(FileExtension.ThumbTxt.Value, StringComparison.OrdinalIgnoreCase));
+        return _fileSystemService.GetFilesInDirectory(directory)
+           .Where(f => f.EndsWithIgnoringCase(FileExtension.ThumbTxt.Value));
     }
 
     protected async Task AnalyzeAndNormalizeAudioAsync(string audioClipFilePath, CancellationToken cancellationToken)
@@ -155,4 +155,18 @@ public abstract class BaseVideoService : IBaseVideoService
         _fileSystemService.MoveFile(audioClipFilePathTemp, audioClipFilePath);
     }
 
+    protected async Task ConvertImageToVideoClipAsync(string imageFilePath, CancellationToken cancellationToken)
+    {
+        string? workingDir = Path.GetDirectoryName(imageFilePath);
+
+        if (string.IsNullOrWhiteSpace(workingDir))
+        {
+            throw new ArgumentException("Path is null or empty", nameof(imageFilePath));
+        }
+
+        string outputFilePath =
+            Path.Combine(workingDir, Path.GetFileNameWithoutExtension(imageFilePath) + FileExtension.Ts.Value);
+
+        await _ffmpegService.RenderTsVideoFileFromImageAsync(imageFilePath, outputFilePath, cancellationToken);
+    }
 }

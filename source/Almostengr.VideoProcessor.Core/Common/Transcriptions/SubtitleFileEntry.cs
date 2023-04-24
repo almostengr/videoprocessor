@@ -23,10 +23,10 @@ public sealed class SubtitleFileEntry
 
         StartTime = startTime;
         EndTime = endTime;
-        Text = text.Replace("um", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace("uh", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace("[music] you", "[music]", StringComparison.OrdinalIgnoreCase)
-            .Replace("all right", "alright", StringComparison.OrdinalIgnoreCase)
+        Text = text.ReplaceIgnoringCase("um", string.Empty)
+            .ReplaceIgnoringCase("uh", string.Empty)
+            .ReplaceIgnoringCase("[music] you", "[music]")
+            .ReplaceIgnoringCase("all right", "alright")
             .Replace(Constant.DoubleWhitespace, Constant.Whitespace)
             .Trim();
     }

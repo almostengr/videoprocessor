@@ -8,7 +8,7 @@ public struct DrawTextPosition
         Value = value;
     }
 
-    private const int PADDING = 70;
+    private const uint PADDING = 70;
     public static readonly DrawTextPosition UpperLeft = new($"x={PADDING}:y={PADDING}");
     public static readonly DrawTextPosition UpperCenter = new($"x=(w-tw)/2:y={PADDING}");
     public static readonly DrawTextPosition UpperRight = new($"x=w-tw-{PADDING}:y={PADDING}");

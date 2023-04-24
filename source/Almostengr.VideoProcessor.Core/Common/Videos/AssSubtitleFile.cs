@@ -15,14 +15,14 @@ public class AssSubtitleFile
             throw new ArgumentException("File path not provided", nameof(filePath));
         }
 
-        if (!filePath.ToLower().EndsWith(FileExtension.GraphicsAss.Value))
+        if (!filePath.EndsWithIgnoringCase(FileExtension.GraphicsAss.Value))
         {
             throw new ArgumentException("File path is not valid", nameof(filePath));
         }
 
         if (!File.Exists(filePath))
         {
-            throw new ArgumentException("File does not exist");
+            throw new ArgumentException("File does not exist", nameof(filePath));
         }
 
         FilePath = filePath;
@@ -39,5 +39,10 @@ public class AssSubtitleFile
 
         Subtitles.Clear();
         Subtitles = subtitles;
+    }
+
+    public string VideoFileName()
+    {
+        return Path.GetFileNameWithoutExtension(FilePath) + FileExtension.Mp4.Value;
     }
 }

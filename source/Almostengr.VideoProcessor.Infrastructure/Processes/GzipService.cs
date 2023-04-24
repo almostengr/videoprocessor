@@ -1,14 +1,14 @@
+using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
-using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
 using Almostengr.VideoProcessor.Core.Common.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
 public sealed class GzipService : BaseProcess<GzipService>, IFileCompressionService, IGzFileCompressionService
 {
-    private const string Gzip = "/usr/bin/gzip";
-    private const string Gunzip = "/usr/bin/gunzip";
+    private const string GZIP = "/usr/bin/gzip";
+    private const string GUNZIP = "/usr/bin/gunzip";
 
     public GzipService(ILoggerService<GzipService> loggerService) : base(loggerService)
     {
@@ -17,15 +17,15 @@ public sealed class GzipService : BaseProcess<GzipService>, IFileCompressionServ
     public async Task<(string stdOut, string stdErr)> CompressFileAsync(
         string filePath, CancellationToken cancellationToken)
     {
-        if (filePath.EndsWith(FileExtension.TarXz.Value) || filePath.EndsWith(FileExtension.TarGz.Value))
+        if (filePath.EndsWithIgnoringCase(FileExtension.TarXz.Value) || filePath.EndsWithIgnoringCase(FileExtension.TarGz.Value))
         {
-            throw new FileAlreadyCompressedException();
+            return await Task.FromResult((string.Empty, string.Empty));
         }
 
         string workingDirectory = Path.GetDirectoryName(filePath) ?? string.Empty;
 
         var result = await RunProcessAsync(
-            Gzip, $"\"{filePath}\"", workingDirectory, cancellationToken);
+            GZIP, $"\"{filePath}\"", workingDirectory, cancellationToken);
 
         if (result.exitCode > 0)
         {
@@ -38,7 +38,7 @@ public sealed class GzipService : BaseProcess<GzipService>, IFileCompressionServ
     public async Task<(string stdOut, string stdErr)> DecompressFileAsync(
         string filePath, CancellationToken stoppingToken)
     {
-        if (!filePath.EndsWith(FileExtension.TarGz.Value))
+        if (!filePath.EndsWithIgnoringCase(FileExtension.TarGz.Value))
         {
             throw new UnableToDecompressFileException();
         }
@@ -46,7 +46,7 @@ public sealed class GzipService : BaseProcess<GzipService>, IFileCompressionServ
         string workingDirectory = Path.GetDirectoryName(filePath) ?? string.Empty;
 
         var result = await RunProcessAsync(
-            Gunzip, $"\"{filePath}\"", workingDirectory, stoppingToken);
+            GUNZIP, $"\"{filePath}\"", workingDirectory, stoppingToken);
 
         if (result.exitCode > 0)
         {
