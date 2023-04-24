@@ -230,10 +230,10 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
 
     public async Task ProcessReviewedFilesAsync(CancellationToken cancellationToken)
     {
-        HandymanGraphicsFile? graphicsFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+        HandymanGraphicsFile? graphicsFile = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
             .Where(f => f.EndsWithIgnoringCase(FileExtension.GraphicsAss.Value))
             .Select(f => new HandymanGraphicsFile(f))
-            .SingleOrDefault();
+            .FirstOrDefault();
 
         if (graphicsFile == null)
         {
