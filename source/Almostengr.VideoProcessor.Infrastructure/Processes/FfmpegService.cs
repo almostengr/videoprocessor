@@ -3,6 +3,7 @@ using Almostengr.VideoProcessor.Core.Common.Constants;
 using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
+using System.IO;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
@@ -262,6 +263,15 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         _ = outputFilePath ?? throw new ArgumentException("invalid output path", nameof(outputFilePath));
         const int CLIP_DURATION = 3;
         string arguments = $"-loop 1 -i \"{imageFilePath}\" -c:v libx264 -t {CLIP_DURATION} -s 1920x1080 -pix_fmt yuv420p -f mpegts \"{outputFilePath}\"";
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
+    public async Task<(string stdout, string stdErr)> RenderTimelapseVideoAsync(string videoFilePath, CancellationToken cancellationToken)
+    {
+        string workingDirectory = Path.GetDirectoryName(videoFilePath) ?? throw new ArgumentException("Invalid directory", nameof(videoFilePath));
+        string outputFilePath =
+            Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(videoFilePath) + ".tmp" + Path.GetExtension(videoFilePath));
+        string arguments = $"-i \"{videoFilePath}\" -filter:v \"setpts=0.5*PTS\" -an \"{outputFilePath}\"";
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 }

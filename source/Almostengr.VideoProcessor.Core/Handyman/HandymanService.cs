@@ -181,6 +181,8 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
                     // throw new NoAudioTrackException("The video track does not have audio nor an audio file");
                     _loggerService.LogWarning(
                         $"Video clip {videoClip.Name} in project {project.FileName()} does not contain audio");
+                    audioClipFilePath  = _musicService.GetRandomMixTrack().FilePath;
+                    goto RenderTs;
                 }
 
                 var audioConversionResult = await _ffmpegService.ConvertVideoFileToMp3FileAsync(

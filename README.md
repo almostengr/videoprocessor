@@ -44,3 +44,27 @@ so that it can be used for the video thumbnail.
 * https://stackoverflow.com/questions/44280903/ffmpeg-vaapi-and-drawtext
 * https://trac.ffmpeg.org/wiki/Hardware/VAAPI
 * https://stackoverflow.com/questions/7333232/how-to-concatenate-two-mp4-files-using-ffmpeg
+
+## Additional FFMPEG Commands
+
+Occasionally, there are some additional FFMPEG commands that I need to run to create the videos
+that I desire to have. Since the commands are rarely used, I chose to not add the functionality
+that uses these commands into the application, but instead note them here for future reference.
+
+### Timelapse Video Without Audio
+
+```bash
+ffmpeg -i FILE0710.MOV -filter:v "setpts=0.5*PTS" -an FILE0710.timelapse.MOV
+```
+
+### Create Video without Audio
+
+```bash
+ffmpeg -i out165.mov -an -c:v copy uncut165.mp4
+```
+
+### Scale Video Resolution
+
+```bash
+ffmpeg -i out165.mov -an -vf scale=1920:1080 scaled165.mov
+```
