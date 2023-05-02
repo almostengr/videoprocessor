@@ -27,6 +27,11 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 
     public async Task ProcessReviewedFilesAsync(CancellationToken cancellationToken)
     {
+        if (_fileSystemService.IsSkipProcesssingFilePresent(IncomingDirectory))
+        {
+            return;
+        }
+        
         DashCamGraphicsFile? graphicsFile = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
             .Where(f => f.EndsWithIgnoringCase(FileExtension.GraphicsAss.Value))
             .Select(f => new DashCamGraphicsFile(f))

@@ -17,6 +17,7 @@ public struct FileExtension
     public static readonly FileExtension GraphicsAss = new FileExtension(".graphics.ass");
     public static readonly FileExtension Jpg = new FileExtension(".jpg");
     public static readonly FileExtension Kdenlive = new FileExtension(".kdenlive");
+    public static readonly FileExtension NoProcessing = new FileExtension(".noprocessing");
     public static readonly FileExtension Md = new FileExtension(".md");
     public static readonly FileExtension Mkv = new FileExtension(".mkv");
     public static readonly FileExtension Mov = new FileExtension(".mov");

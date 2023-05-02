@@ -144,6 +144,11 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
 
     public override async Task ProcessVideoProjectAsync(CancellationToken cancellationToken)
     {
+        if (_fileSystemService.IsSkipProcesssingFilePresent(IncomingDirectory))
+        {
+            return;
+        }
+        
         TechTalkVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
             .Select(f => new TechTalkVideoProject(f))
             .FirstOrDefault();
@@ -186,9 +191,10 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
 
                 if (result.stdErr.DoesNotContainIgnoringCase(Constant.Audio))
                 {
+                    throw new NoAudioTrackException($"The video track {videoClip.Name} in project {project.FileName()} does not have audio nor an audio file");
                     // throw new NoAudioTrackException("The video track does not have audio nor an audio file");
-                    _loggerService.LogWarning(
-                        $"Video clip {videoClip.Name} in project {project.FileName()} does not contain audio");
+                    // _loggerService.LogWarning(
+                    //     $"Video clip {videoClip.Name} in project {project.FileName()} does not contain audio");
                 }
 
                 var audioConversionResult = await _ffmpegService.ConvertVideoFileToMp3FileAsync(

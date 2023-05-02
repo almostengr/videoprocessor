@@ -4,6 +4,7 @@ namespace Almostengr.VideoProcessor.Core.Common.Interfaces;
 
 public interface IFileSystemService
 {
+    bool IsSkipProcesssingFilePresent(string directory);
     void DeleteDirectory(string directory);
     void CreateDirectory(string directory);
     void MoveFile(string sourceFilePath, string destinationDirectory);

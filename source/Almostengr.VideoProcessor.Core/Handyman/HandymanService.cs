@@ -137,6 +137,11 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
 
     public override async Task ProcessVideoProjectAsync(CancellationToken cancellationToken)
     {
+        if (_fileSystemService.IsSkipProcesssingFilePresent(IncomingDirectory))
+        {
+            return;
+        }
+        
         HandymanVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
             .Select(f => new HandymanVideoProject(f))
             .FirstOrDefault();
@@ -178,11 +183,11 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
 
                 if (result.stdErr.DoesNotContainIgnoringCase(Constant.Audio))
                 {
-                    // throw new NoAudioTrackException("The video track does not have audio nor an audio file");
-                    _loggerService.LogWarning(
-                        $"Video clip {videoClip.Name} in project {project.FileName()} does not contain audio");
-                    audioClipFilePath  = _musicService.GetRandomMixTrack().FilePath;
-                    goto RenderTs;
+                    throw new NoAudioTrackException($"The video track {videoClip.Name} in project {project.FileName()} does not have audio nor an audio file");
+                    // _loggerService.LogWarning(
+                    //     $"Video clip {videoClip.Name} in project {project.FileName()} does not contain audio");
+                    // audioClipFilePath  = _musicService.GetRandomMixTrack().FilePath;
+                    // goto RenderTs;
                 }
 
                 var audioConversionResult = await _ffmpegService.ConvertVideoFileToMp3FileAsync(

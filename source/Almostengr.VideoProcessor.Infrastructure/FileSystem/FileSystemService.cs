@@ -16,6 +16,13 @@ public sealed class FileSystemService : IFileSystemService
         _appSettings = appSettings;
     }
 
+    public bool IsSkipProcesssingFilePresent(string directory)
+    {
+        return GetFilesInDirectory(directory)
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.NoProcessing.Value))
+            .Any();
+    }
+
     public void CreateDirectory(string directory)
     {
         if (string.IsNullOrWhiteSpace(directory))
