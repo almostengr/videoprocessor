@@ -27,10 +27,10 @@ public sealed class TechTalkVideoProject : BaseVideoProject
     {
         return new string[] {
             "Tech Talk with RHT Services",
+            Constant.ROBINSON_SERVICES,
             Constant.RHT_WEBSITE,
             "@rhtservicestech",
             "#rhtservicestech",
-            "rhtservices.net/techtalk",
         };
     }
 

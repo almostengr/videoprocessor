@@ -65,7 +65,7 @@ public sealed partial class DashCamVideoProject : BaseVideoProject
     internal string ChannelBrandAndTitleGraphics(string brandingText)
     {
         StringBuilder stringBuilder = new(base.ChannelBrandDrawTextFilter(brandingText));
-        
+
         switch (SubType)
         {
             case DashCamVideoType.CarRepair:
@@ -73,8 +73,13 @@ public sealed partial class DashCamVideoProject : BaseVideoProject
 
             default:
                 stringBuilder.Append(
-                    new DrawTextFilter(Title(), DrawTextFilterTextColor(), Opacity.Full,
-                    DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.UpperLeft).ToString());
+                    new DrawTextFilter(Title(),
+                        DrawTextFilterTextColor(),
+                        Opacity.Full, DrawTextFilterBackgroundColor(),
+                        Opacity.Medium,
+                        DrawTextPosition.UpperLeft,
+                        new TimeSpan(0, 0, 0),
+                        new TimeSpan(0, 0, 30)).ToString());
                 break;
         }
         return stringBuilder.ToString();

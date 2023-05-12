@@ -16,7 +16,6 @@ public sealed class HandymanVideoProject : BaseVideoProject
             Constant.RHT_WEBSITE,
             "@rhtservicesllc",
             "#rhtservicesllc",
-            "rhtservices.net/handyman",
         };
     }
 
