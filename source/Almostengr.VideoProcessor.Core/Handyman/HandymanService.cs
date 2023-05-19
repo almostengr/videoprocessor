@@ -105,26 +105,25 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
-            srtFile.SetSubtitles(_srtSubtitleService.ReadFile(srtFile.FileName()));
+            srtFile.SetSubtitles(_srtSubtitleService.ReadFile(srtFile.FilePath));
 
-            _srtSubtitleService.WriteFile(
-                Path.Combine(WorkingDirectory, srtFile.FileName()), srtFile.Subtitles);
+            string workingSrtFilePath = Path.Combine(WorkingDirectory, srtFile.FileName());
+            _srtSubtitleService.WriteFile(workingSrtFilePath, srtFile.Subtitles);
 
-            _srtSubtitleService.WriteFile(
-                Path.Combine(WorkingDirectory, srtFile.BlogFileName()), srtFile.Subtitles);
+            string workingBlogFilePath = Path.Combine(WorkingDirectory, srtFile.BlogFileName());
+            // _srtSubtitleService.WriteFile(workingBlogFilePath, srtFile.BlogPostText());
+            _fileSystemService.SaveFileContents(workingBlogFilePath, srtFile.BlogPostText());
 
-            _fileSystemService.MoveFile(
-                Path.Combine(WorkingDirectory, srtFile.FileName()),
-                Path.Combine(UploadingDirectory, srtFile.BlogFileName()));
+            string uploadSrtFilePath = Path.Combine(UploadingDirectory, srtFile.FileName());
+            string uploadBlogFilePath = Path.Combine(UploadingDirectory, srtFile.BlogFileName());
 
-            _fileSystemService.MoveFile(
-                Path.Combine(WorkingDirectory, srtFile.FileName()),
-                Path.Combine(UploadingDirectory, srtFile.FileName()));
+            _fileSystemService.MoveFile(workingSrtFilePath, uploadSrtFilePath);
+            _fileSystemService.MoveFile(workingBlogFilePath, uploadBlogFilePath);
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
 
             _fileSystemService.MoveFile(
-                srtFile.FilePath, Path.Combine(UploadingDirectory, srtFile.FileName()));
+                srtFile.FilePath, Path.Combine(ArchiveDirectory, srtFile.FileName()));
         }
         catch (Exception ex)
         {
@@ -184,10 +183,6 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
                 if (result.stdErr.DoesNotContainIgnoringCase(Constant.Audio))
                 {
                     throw new NoAudioTrackException($"The video track {videoClip.Name} in project {project.FileName()} does not have audio nor an audio file");
-                    // _loggerService.LogWarning(
-                    //     $"Video clip {videoClip.Name} in project {project.FileName()} does not contain audio");
-                    // audioClipFilePath  = _musicService.GetRandomMixTrack().FilePath;
-                    // goto RenderTs;
                 }
 
                 var audioConversionResult = await _ffmpegService.ConvertVideoFileToMp3FileAsync(
@@ -232,50 +227,6 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
             _loggerService.LogErrorProcessingFile(project.FilePath, ex);
             _fileSystemService.MoveFile(project.FilePath, project.FilePath + FileExtension.Err.Value);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
-        }
-    }
-
-    public async Task ProcessReviewedFilesAsync(CancellationToken cancellationToken)
-    {
-        HandymanGraphicsFile? graphicsFile = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
-            .Where(f => f.EndsWithIgnoringCase(FileExtension.GraphicsAss.Value))
-            .Select(f => new HandymanGraphicsFile(f))
-            .FirstOrDefault();
-
-        if (graphicsFile == null)
-        {
-            return;
-        }
-
-        try
-        {
-            var videoFilePath = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
-                .Where(f => f.StartsWith(graphicsFile.FilePath.Replace(FileExtension.GraphicsAss.Value, string.Empty)) &&
-                    f.EndsWithIgnoringCase(FileExtension.Mp4.Value))
-                .Single();
-
-            _fileSystemService.DeleteDirectory(WorkingDirectory);
-            _fileSystemService.CreateDirectory(WorkingDirectory);
-
-            string outputFilePath = Path.Combine(WorkingDirectory, graphicsFile.VideoFileName());
-
-            await _ffmpegService.RenderVideoWithFiltersAsync(
-                videoFilePath, string.Empty, outputFilePath, cancellationToken);
-
-            _fileSystemService.MoveFile(
-                outputFilePath, Path.Combine(UploadingDirectory, graphicsFile.VideoFileName()));
-
-            _fileSystemService.MoveFile(
-                graphicsFile.FilePath, Path.Combine(ArchiveDirectory, graphicsFile.FileName));
-
-            _fileSystemService.DeleteFile(videoFilePath);
-            _fileSystemService.DeleteDirectory(WorkingDirectory);
-        }
-        catch (Exception ex)
-        {
-            _loggerService.LogError(ex, ex.Message);
-            _loggerService.LogErrorProcessingFile(graphicsFile.FilePath, ex);
-            _fileSystemService.MoveFile(graphicsFile.FilePath, graphicsFile.FilePath + FileExtension.Err.Value);
         }
     }
 }

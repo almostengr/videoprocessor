@@ -30,6 +30,11 @@ public abstract class SrtSubtitleFile
         return Path.GetFileName(FilePath);
     }
 
+    public string BlogFileName()
+    {
+        return Path.GetFileNameWithoutExtension(FilePath) + FileExtension.Md.Value;
+    }
+
     public void SetSubtitles(IList<SubtitleFileEntry> subtitles)
     {
         if (subtitles.Count() == 0)
@@ -41,21 +46,16 @@ public abstract class SrtSubtitleFile
         Subtitles = subtitles;
     }
 
-    public string BlogFileName()
-    {
-        return Path.Combine(FilePath).ReplaceIgnoringCase(FileExtension.Srt.Value, FileExtension.Md.Value);
-    }
-
     public virtual string BlogPostText()
     {
         StringBuilder stringBuilder = new StringBuilder();
 
         foreach (var subtitle in Subtitles)
         {
-            stringBuilder.Append(subtitle.Text);
+            stringBuilder.Append(subtitle.Text + Constant.Whitespace);
         }
 
-        var words = stringBuilder.ToString().Split(" ");
+        var words = stringBuilder.ToString().Split(Constant.Whitespace);
         stringBuilder.Clear();
         string previousWord = string.Empty;
 
@@ -88,6 +88,7 @@ public abstract class SrtSubtitleFile
             .ReplaceIgnoringCase("rhtservices.net", RHT_SERVICES_WEBSITE)
             .ReplaceIgnoringCase("r h t services dot net", RHT_SERVICES_WEBSITE)
             .ReplaceIgnoringCase("rht services", "RHT Services")
+            .ReplaceIgnoringCase("robinson handy and technology services", "Robinson Handy and Technology Services")
         ;
     }
 

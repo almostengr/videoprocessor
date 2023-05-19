@@ -125,8 +125,9 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         string workingDirectory =
             Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
 
+        // todo - removed "-shortest" to prevent video from being cut off
         return await FfmpegAsync(
-            $"-hwaccel vaapi -hwaccel_output_format vaapi -i \"{videoFilePath}\" -i \"{audioFilePath}\" -c:v h264_vaapi -c:a aac -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"",
+            $"-hwaccel vaapi -hwaccel_output_format vaapi -i \"{videoFilePath}\" -i \"{audioFilePath}\" -c:v h264_vaapi -c:a aac -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"",
             workingDirectory,
             cancellationToken
         );

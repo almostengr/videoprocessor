@@ -192,9 +192,6 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
                 if (result.stdErr.DoesNotContainIgnoringCase(Constant.Audio))
                 {
                     throw new NoAudioTrackException($"The video track {videoClip.Name} in project {project.FileName()} does not have audio nor an audio file");
-                    // throw new NoAudioTrackException("The video track does not have audio nor an audio file");
-                    // _loggerService.LogWarning(
-                    //     $"Video clip {videoClip.Name} in project {project.FileName()} does not contain audio");
                 }
 
                 var audioConversionResult = await _ffmpegService.ConvertVideoFileToMp3FileAsync(
