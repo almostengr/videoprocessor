@@ -23,17 +23,11 @@ public sealed class SubtitleFileEntry
 
         StartTime = startTime;
         EndTime = endTime;
-        Text = FixMisspellings(text);
-    }
-
-    private string FixMisspellings(string input)
-    {
-        return input
-            .Replace("um", string.Empty)
-            .Replace("uh", string.Empty)
-            .Replace("[music] you", "[music]")
+        Text = text.ReplaceIgnoringCase("um", string.Empty)
+            .ReplaceIgnoringCase("uh", string.Empty)
+            .ReplaceIgnoringCase("[music] you", "[music]")
+            .ReplaceIgnoringCase("all right", "alright")
             .Replace(Constant.DoubleWhitespace, Constant.Whitespace)
-            .Replace("all right", "alright")
             .Trim();
     }
 }

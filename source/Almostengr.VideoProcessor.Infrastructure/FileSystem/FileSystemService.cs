@@ -2,7 +2,6 @@ using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Infrastructure.FileSystem.Exceptions;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
-using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
@@ -17,11 +16,18 @@ public sealed class FileSystemService : IFileSystemService
         _appSettings = appSettings;
     }
 
+    public bool IsSkipProcesssingFilePresent(string directory)
+    {
+        return GetFilesInDirectory(directory)
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.NoProcessing.Value))
+            .Any();
+    }
+
     public void CreateDirectory(string directory)
     {
         if (string.IsNullOrWhiteSpace(directory))
         {
-            throw new VideoProcessorException("Directory cannot be null or whitespace");
+            throw new ArgumentException("Directory cannot be null or whitespace");
         }
 
         if (Directory.Exists(directory))
@@ -48,18 +54,11 @@ public sealed class FileSystemService : IFileSystemService
         }
     }
 
-    public string GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
+    public string? GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
     {
-        try
-        {
-            return GetFilesInDirectory(directory)
-                .Where(f => f.ToLower().Contains(extension.Value) && !f.ToLower().EndsWith(FileExtension.Err.Value))
-                .First();
-        }
-        catch (InvalidOperationException)
-        {
-            throw new NoFilesMatchException();
-        }
+        return GetFilesInDirectory(directory)
+            .Where(f => f.ContainsIgnoringCase(extension.Value) && !f.EndsWithIgnoringCase(FileExtension.Err.Value))
+            .FirstOrDefault();
     }
 
     public bool IsDiskSpaceAvailable(string directory)
@@ -97,6 +96,14 @@ public sealed class FileSystemService : IFileSystemService
     public FileInfo[] GetFilesInDirectoryWithInfo(string directory)
     {
         return (new DirectoryInfo(directory)).GetFiles();
+    }
+
+    public IEnumerable<string> GetTarballFilesInDirectory(string directory)
+    {
+        return Directory.GetFiles(directory)
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.TarGz.Value) ||
+                        f.EndsWithIgnoringCase(FileExtension.TarXz.Value) ||
+                        f.EndsWithIgnoringCase(FileExtension.Tar.Value));
     }
 
     public IEnumerable<string> GetFilesInDirectory(string directory)
@@ -146,28 +153,26 @@ public sealed class FileSystemService : IFileSystemService
     {
         if (string.IsNullOrWhiteSpace(filePath))
         {
-            throw new SaveFilePathIsNullOrEmptyException();
+            throw new ArgumentException("File path is not valid", nameof(filePath));
         }
 
         if (string.IsNullOrWhiteSpace(content))
         {
-            throw new SaveFileContentIsNullOrEmptyException();
+            throw new ArgumentException("Contents is null or white space", nameof(content));
         }
 
-        var directoryName = Path.GetDirectoryName(filePath);
-
-        if (string.IsNullOrEmpty(directoryName))
-        {
-            throw new SaveFileDirectoryIsNullOrEmptyException();
-        }
-
-        if (!Directory.Exists(Path.GetDirectoryName(filePath)))
-        {
-            throw new VideoProcessorException("Directories do not exist");
-        }
+        string directoryName =
+            Path.GetDirectoryName(filePath) ?? throw new VideoProcessorException("Directory cannot be null");
 
         CreateDirectory(directoryName);
         File.WriteAllText(filePath, content);
     }
 
+    public IEnumerable<FileInfo> GetVideoFilesInDirectoryWithFileInfo(string directory)
+    {
+        return GetFilesInDirectoryWithFileInfo(directory)
+            .Where(f => f.FullName.EndsWithIgnoringCase(FileExtension.Mov.Value) ||
+                        f.FullName.EndsWithIgnoringCase(FileExtension.Mkv.Value) ||
+                        f.FullName.EndsWithIgnoringCase(FileExtension.Mp4.Value));
+    }
 }

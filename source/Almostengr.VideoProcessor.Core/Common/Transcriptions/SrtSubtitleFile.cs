@@ -4,21 +4,21 @@ using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
 
-public sealed class SrtSubtitleFile
+public abstract class SrtSubtitleFile
 {
     public string FilePath { get; init; }
     public IList<SubtitleFileEntry> Subtitles { get; private set; }
 
     public SrtSubtitleFile(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
+        if (!File.Exists(filePath))
         {
-            throw new ArgumentException("File path not provided", nameof(filePath));
+            throw new ArgumentException(Constant.FileDoesNotExist, nameof(filePath));
         }
 
-        if (!filePath.ToLower().EndsWith(FileExtension.Srt.Value))
+        if (!filePath.EndsWithIgnoringCase(FileExtension.Srt.Value))
         {
-            throw new ArgumentException("File path is not valid", nameof(filePath));
+            throw new ArgumentException(Constant.FileTypeIsIncorrect, nameof(filePath));
         }
 
         FilePath = filePath;
@@ -28,6 +28,11 @@ public sealed class SrtSubtitleFile
     public string FileName()
     {
         return Path.GetFileName(FilePath);
+    }
+
+    public string BlogFileName()
+    {
+        return Path.GetFileNameWithoutExtension(FilePath) + FileExtension.Md.Value;
     }
 
     public void SetSubtitles(IList<SubtitleFileEntry> subtitles)
@@ -41,21 +46,16 @@ public sealed class SrtSubtitleFile
         Subtitles = subtitles;
     }
 
-    public string BlogFileName()
-    {
-        return Path.Combine(FilePath).Replace(FileExtension.Srt.Value, FileExtension.Md.Value);
-    }
-
-    public string BlogPostText()
+    public virtual string BlogPostText()
     {
         StringBuilder stringBuilder = new StringBuilder();
 
         foreach (var subtitle in Subtitles)
         {
-            stringBuilder.Append(subtitle.Text);
+            stringBuilder.Append(subtitle.Text + Constant.Whitespace);
         }
 
-        var words = stringBuilder.ToString().Split(" ");
+        var words = stringBuilder.ToString().Split(Constant.Whitespace);
         stringBuilder.Clear();
         string previousWord = string.Empty;
 
@@ -83,11 +83,12 @@ public sealed class SrtSubtitleFile
         const string RHT_SERVICES_WEBSITE = "['rhtservices.net'](/)";
 
         return stringBuilder.ToString()
-            .Replace("and so", string.Empty)
-            .Replace("[music]", "(music)")
-            .Replace("rhtservices.net", RHT_SERVICES_WEBSITE)
-            .Replace("r h t services dot net", RHT_SERVICES_WEBSITE)
-            .Replace("rht services", "RHT Services")
+            .ReplaceIgnoringCase("and so", string.Empty)
+            .ReplaceIgnoringCase("[music]", "(music)")
+            .ReplaceIgnoringCase("rhtservices.net", RHT_SERVICES_WEBSITE)
+            .ReplaceIgnoringCase("r h t services dot net", RHT_SERVICES_WEBSITE)
+            .ReplaceIgnoringCase("rht services", "RHT Services")
+            .ReplaceIgnoringCase("robinson handy and technology services", "Robinson Handy and Technology Services")
         ;
     }
 

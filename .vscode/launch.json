@@ -25,13 +25,4 @@
             "request": "attach"
         },
     ],
-    // "compounds": [
-    //     {
-    //         "name": "Worker and API",
-    //         "configurations": [
-    //             "API Service",
-    //             "Worker Service"
-    //         ]
-    //     }
-    // ]
 }

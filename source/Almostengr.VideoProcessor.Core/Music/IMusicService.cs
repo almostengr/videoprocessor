@@ -2,6 +2,6 @@ namespace Almostengr.VideoProcessor.Core.Music.Services;
 
 public interface IMusicService
 {
-    AudioFile GetRandomNonMixTrack();
+    Task GenerateMixTrackAsync(CancellationToken cancellationToken);
     AudioFile GetRandomMixTrack();
 }

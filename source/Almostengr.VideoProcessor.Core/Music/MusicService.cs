@@ -1,3 +1,4 @@
+using System.Text;
 using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
@@ -9,21 +10,26 @@ public sealed class MusicService : IMusicService
 {
     private readonly IFileSystemService _fileSystemService;
     private readonly IRandomService _randomService;
+    private readonly IFfmpegService _ffmpegService;
+    private readonly ILoggerService<MusicService> _loggerService;
     private readonly AppSettings _appSettings;
     private const string MIX = "mix";
 
     public MusicService(IFileSystemService fileSystemService, ILoggerService<MusicService> logger,
-    IRandomService randomService, AppSettings appSettings)
+        IFfmpegService ffmpegService,
+        IRandomService randomService, AppSettings appSettings)
     {
         _fileSystemService = fileSystemService;
         _randomService = randomService;
         _appSettings = appSettings;
+        _ffmpegService = ffmpegService;
+        _loggerService = logger;
     }
 
     public AudioFile GetRandomMixTrack()
     {
         var musicMixes = _fileSystemService.GetFilesInDirectory(_appSettings.MusicDirectory)
-            .Where(x => x.ToLower().Contains(MIX) && x.ToLower().EndsWith(FileExtension.Mp3.Value))
+            .Where(x => x.ContainsIgnoringCase(MIX) && x.EndsWithIgnoringCase(FileExtension.Mp3.Value))
             .Select(x => new AudioFile(x));
 
         if (musicMixes.Count() == 0)
@@ -34,17 +40,38 @@ public sealed class MusicService : IMusicService
         return musicMixes.ElementAt(_randomService.Next(0, musicMixes.Count()));
     }
 
-    public AudioFile GetRandomNonMixTrack()
+    public async Task GenerateMixTrackAsync(CancellationToken cancellationToken)
     {
-        var nonMusicMixes = _fileSystemService.GetFilesInDirectory(_appSettings.MusicDirectory)
-            .Where(x => !x.ToLower().Contains(MIX) && x.ToLower().EndsWith(FileExtension.Mp3.Value))
-            .Select(x => new AudioFile(x));
+        var musicFiles = _fileSystemService.GetFilesInDirectory(_appSettings.MusicDirectory)
+            .Where(f => f.DoesNotContainIgnoringCase(MIX) && f.EndsWithIgnoringCase(FileExtension.Mp3.Value));
 
-        if (nonMusicMixes.Count() == 0)
+        StringBuilder sb = new();
+        while (sb.Length < musicFiles.Count())
         {
-            throw new MusicTracksNotAvailableException();
+            int randomIndex = _randomService.Next(0, musicFiles.Count());
+            string musicFilePath = musicFiles.ElementAt(randomIndex);
+
+            if (sb.ToString().Contains(musicFilePath) == false)
+            {
+                sb.Append($"file '{musicFilePath}'{Environment.NewLine}");
+            }
         }
 
-        return nonMusicMixes.ElementAt(_randomService.Next(0, nonMusicMixes.Count()));
+        string ffmpegInputFile = Path.Combine(_appSettings.MusicDirectory, "music" + FileExtension.FfmpegInput);
+        
+        try
+        {
+            _fileSystemService.SaveFileContents(ffmpegInputFile, sb.ToString());
+
+            string outputFile = Path.Combine(_appSettings.MusicDirectory, $"{MIX}{DateTime.Now.ToString("yyyyMMddHHmm")}{FileExtension.Mp3.Value}");
+            string arguments = $"-i \"{ffmpegInputFile}\" -c:a copy \"{outputFile}\"";
+            await _ffmpegService.FfmpegAsync(arguments, _appSettings.MusicDirectory, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex, ex.Message);
+        }
+
+        _fileSystemService.DeleteFile(ffmpegInputFile);
     }
 }

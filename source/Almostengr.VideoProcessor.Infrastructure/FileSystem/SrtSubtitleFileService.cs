@@ -43,8 +43,8 @@ public sealed class SrtSubtitleFileService : ISrtSubtitleFileService
                 else if (index == 1)
                 {
                     string[] times = line.Split(TIME_SEPARATOR);
-                    startTime = TimeSpan.Parse(times[0]);
-                    endTime = TimeSpan.Parse(times[1]);
+                    startTime = TimeSpan.Parse(times[0].Replace(",", "."));
+                    endTime = TimeSpan.Parse(times[1].Replace(",", "."));
                     index++;
                 }
                 else
@@ -71,7 +71,7 @@ public sealed class SrtSubtitleFileService : ISrtSubtitleFileService
             {
                 writer.WriteLine((i + 1).ToString());
                 writer.WriteLine(subtitles[i].StartTime.ToString(TIME_FORMAT) + TIME_SEPARATOR + subtitles[i].EndTime.ToString(TIME_FORMAT));
-                writer.WriteLine(subtitles[i].Text);
+                writer.WriteLine(subtitles[i].Text.ToUpper());
                 writer.WriteLine();
             }
         }

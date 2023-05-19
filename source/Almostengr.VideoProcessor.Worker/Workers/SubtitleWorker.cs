@@ -1,5 +1,4 @@
 using Almostengr.VideoProcessor.Core.Common;
-using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Handyman;
 using Almostengr.VideoProcessor.Core.TechTalk;
 
@@ -9,7 +8,6 @@ internal sealed class SubtitleWorker : BaseWorker
 {
     private readonly IHandymanVideoService _handymanService;
     private readonly ITechTalkVideoService _techTalkService;
-    private readonly AppSettings _appSettings;
 
     public SubtitleWorker(IHandymanVideoService handymanService, ITechTalkVideoService techTalkService,
         AppSettings appSettings) : base(appSettings)
@@ -21,32 +19,13 @@ internal sealed class SubtitleWorker : BaseWorker
 
     protected async override Task ExecuteAsync(CancellationToken cancellationToken)
     {
+        DateTime previousTime = DateTime.Now;
+
         while (!cancellationToken.IsCancellationRequested)
         {
-            int count = 0;
-
-            try
-            {
-                // await _handymanService.ProcessIncomingSubtitlesAsync(cancellationToken);
-            }
-            catch (NoFilesMatchException)
-            {
-                count++;
-            }
-
-            try
-            {
-                // await _techTalkService.ProcessIncomingSubtitlesAsync(cancellationToken);
-            }
-            catch (NoFilesMatchException)
-            {
-                count++;
-            }
-
-            if (count >= 2)
-            {
-                await Task.Delay(_appSettings.WorkerDelay);
-            }
+            _handymanService.ProcessSrtSubtitleFile();
+            _techTalkService.ProcessSrtSubtitleFile();
+            previousTime = await DelayWhenLoopingQuickly(_delayLoopTime, cancellationToken, previousTime);
         }
     }
 }

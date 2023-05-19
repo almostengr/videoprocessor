@@ -4,5 +4,5 @@ namespace Almostengr.VideoProcessor.Core.Common.Interfaces;
 
 public interface IThumbnailService
 {
-    void GenerateThumbnail(ThumbnailType type, string uploadDirectory, string thumbnailFileName, string title);
+    void GenerateThumbnail<T>(string uploadDirectory, T thumbnailFile) where T : BaseThumbnailFile;
 }

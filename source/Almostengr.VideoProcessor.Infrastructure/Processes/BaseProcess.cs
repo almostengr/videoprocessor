@@ -7,8 +7,8 @@ namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 public abstract class BaseProcess<T>
 {
     private readonly ILoggerService<T> _loggerService;
-    internal const string BashBinary = "/bin/bash";
-    internal const string GrepBinary = "/usr/bin/grep";
+    internal const string BASH_BINARY = "/bin/bash";
+    internal const string GREP_BINARY = "/usr/bin/grep";
 
     protected BaseProcess(ILoggerService<T> loggerService)
     {
@@ -20,7 +20,7 @@ public abstract class BaseProcess<T>
     {
         if (string.IsNullOrWhiteSpace(binary))
         {
-            throw new ProgramPathIsInvalidException();
+            throw new ArgumentException("Program path is not valid", nameof(binary));
         }
 
         if (string.IsNullOrWhiteSpace(workingDirectory))
@@ -28,7 +28,7 @@ public abstract class BaseProcess<T>
             throw new ProgramWorkingDirectoryIsInvalidException();
         }
 
-        _loggerService.LogInformation($"Running command {binary} {arguments}");
+        _loggerService.LogInformation($"Running {binary} {arguments}");
 
         using Process process = new Process
         {

@@ -6,7 +6,7 @@ namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
 public sealed class TarballService : BaseProcess<TarballService>, ITarballService
 {
-    private const string TarBinary = "/usr/bin/tar";
+    private const string TAR_BINARY = "/usr/bin/tar";
 
     public TarballService(ILoggerService<TarballService> loggerService) : base(loggerService)
     {
@@ -16,7 +16,7 @@ public sealed class TarballService : BaseProcess<TarballService>, ITarballServic
             string tarballFilePath, string filePathToAdd, string workingDirectory, CancellationToken cancellationToken)
     {
         var result = await RunProcessAsync(
-            TarBinary,
+            TAR_BINARY,
             $"-rf \"{tarballFilePath}\" \"{Path.GetFileName(filePathToAdd)}\"",
             workingDirectory,
             cancellationToken
@@ -30,27 +30,12 @@ public sealed class TarballService : BaseProcess<TarballService>, ITarballServic
         return await Task.FromResult((result.stdOut, result.stdErr));
     }
 
-    public async Task<bool> DoesTarballContainFileAsync(
-        string tarballFilePath, string fileNameToLocate, CancellationToken cancellationToken)
-    {
-        string workingDirectory = Path.GetDirectoryName(tarballFilePath) ?? string.Empty;
-
-        var result = await RunProcessAsync(
-            BashBinary,
-            $"-c \"{TarBinary} -tf \\\"{tarballFilePath}\\\" | {GrepBinary} -i {fileNameToLocate}\"",
-            workingDirectory,
-            cancellationToken
-        );
-
-        return await Task.FromResult(result.stdOut.ToLower().Contains(fileNameToLocate.ToLower()));
-    }
-
     public async Task<(string stdOut, string stdErr)> CreateTarballFromDirectoryAsync(
         string workingDirectory, CancellationToken cancellationToken)
     {
         var result = await RunProcessAsync(
-            BashBinary,
-            $"-c \"cd \\\"{workingDirectory}\\\" && {TarBinary} -cvf \\\"{workingDirectory + FileExtension.Tar.Value}\\\" *\"",
+            BASH_BINARY,
+            $"-c \"cd \\\"{workingDirectory}\\\" && {TAR_BINARY} -cvf \\\"{workingDirectory + FileExtension.Tar.Value}\\\" *\"",
             workingDirectory,
             cancellationToken
         );
@@ -73,7 +58,7 @@ public sealed class TarballService : BaseProcess<TarballService>, ITarballServic
         }
 
         var result = await RunProcessAsync(
-            TarBinary, $"-xvf \"{tarballFilePath}\" -C \"{directory}\"", directory, cancellationToken);
+            TAR_BINARY, $"-xvf \"{tarballFilePath}\" -C \"{directory}\"", directory, cancellationToken);
 
         if (result.exitCode > 0)
         {

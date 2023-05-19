@@ -7,7 +7,8 @@ public sealed class AppSettings
     public string TechnologyDirectory { get; init; }
     public string ToastmastersDirectory { get; init; }
     public string MusicDirectory { get; init; }
-    public TimeSpan WorkerDelay { get; init; }
+    public TimeSpan LongWorkerDelay { get; init; }
+    public TimeSpan ShortWorkerDelay { get; init; }
     public double DiskSpaceThreshold { get; init; }
     public int DeleteFilesAfterDays { get; init; }
     public string YouTubeApiKey { get; init; }
@@ -28,7 +29,8 @@ public sealed class AppSettings
             MusicDirectory = string.Empty;
             TechnologyDirectory = $"{pbaseDirectory}/technology";
             ToastmastersDirectory = $"{pbaseDirectory}/toastmasters";
-            WorkerDelay = TimeSpan.FromMinutes(60);
+            LongWorkerDelay = TimeSpan.FromHours(2);
+            ShortWorkerDelay = TimeSpan.FromMinutes(60);
             YouTubeApiKey = Environment.GetEnvironmentVariable("YouTubeApiKey") ?? string.Empty;
             ChromeDriverPath = "/home/iamadmin/videoprocessor/chromedriver";
             return;
@@ -42,7 +44,8 @@ public sealed class AppSettings
         MusicDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music";
         TechnologyDirectory = $"{baseDirectory}/technology";
         ToastmastersDirectory = $"{baseDirectory}/toastmasters";
-        WorkerDelay = TimeSpan.FromSeconds(15);
+        LongWorkerDelay = TimeSpan.FromSeconds(30);
+        ShortWorkerDelay = TimeSpan.FromSeconds(15);
         YouTubeApiKey = string.Empty;
         ChromeDriverPath = "/home/almostengineer/Downloads";
     }

@@ -30,16 +30,15 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<ITechTalkVideoService, TechTalkService>();
         services.AddSingleton<IToastmastersVideoService, ToastmastersService>();
         services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
-        services.AddSingleton<IThumbnailService, ThumbnailService>();
+        
+        services.AddTransient<IThumbnailService, ThumbnailService>();
 
         services.AddSingleton<ISrtSubtitleFileService, SrtSubtitleFileService>();
         services.AddSingleton<IAssSubtitleFileService, AssSubtitleFileService>();
 
-        services.AddHostedService<DashCamVideoWorker>();
-        services.AddHostedService<HandymanVideoWorker>();
-        services.AddHostedService<TechTalkVideoWorker>();
-        // services.AddHostedService<SubtitleWorker>();
-        services.AddHostedService<ToastmastersVideoWorker>();
+        services.AddHostedService<SubtitleWorker>();
+        // services.AddHostedService<ThumbnailWorker>();
+        // services.AddHostedService<VideoWorker>();
     })
     .UseSystemd()
     .Build();

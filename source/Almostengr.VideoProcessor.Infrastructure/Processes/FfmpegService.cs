@@ -1,13 +1,16 @@
+using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
+using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Infrastructure.Processes.Exceptions;
+using System.IO;
 
 namespace Almostengr.VideoProcessor.Infrastructure.Processes;
 
 public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
 {
-    private const string FfmpegBinary = "/usr/bin/ffmpeg";
-    private const string FfprobeBinary = "/usr/bin/ffprobe";
+    private const string FFMPEG_BINARY = "/usr/bin/ffmpeg";
+    private const string FFPROBE_BINARY = "/usr/bin/ffprobe";
     private readonly IFileSystemService _fileSystem;
 
     public FfmpegService(IFileSystemService fileSystemService, ILoggerService<FfmpegService> loggerService) :
@@ -20,7 +23,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         string videoFileName, string workingDirectory, CancellationToken cancellationToken)
     {
         string arguments = $"-hide_banner \"{videoFileName}\"";
-        var results = await RunProcessAsync(FfprobeBinary, arguments, workingDirectory, cancellationToken);
+        var results = await RunProcessAsync(FFPROBE_BINARY, arguments, workingDirectory, cancellationToken);
 
         if (results.exitCode > 0)
         {
@@ -33,8 +36,15 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     public async Task<(string stdOut, string stdErr)> FfmpegAsync(
         string arguments, string workingDirectory, CancellationToken cancellationToken)
     {
-        arguments = $"-y -hide_banner -loglevel error {arguments}";
-        var results = await RunProcessAsync(FfmpegBinary, arguments, workingDirectory, cancellationToken);
+        StringBuilder args = new();
+        args.Append("-y -hide_banner ");
+        if (!arguments.Contains("volumedetect"))
+        {
+            args.Append("-loglevel error ");
+        }
+        args.Append(arguments);
+
+        var results = await RunProcessAsync(FFMPEG_BINARY, args.ToString(), workingDirectory, cancellationToken);
 
         if (results.exitCode > 0)
         {
@@ -69,7 +79,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     public async Task<(string stdOut, string stdErr)> RenderVideoWithAudioAndFiltersAsync(
         string videoFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrEmpty(videoFilter))
+        if (videoFilter.IsNotNullOrWhiteSpace())
         {
             videoFilter += ",";
         }
@@ -115,17 +125,12 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         string workingDirectory =
             Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
 
+        // todo - removed "-shortest" to prevent video from being cut off
         return await FfmpegAsync(
-            $"-hwaccel vaapi -hwaccel_output_format vaapi -i \"{videoFilePath}\" -i \"{audioFilePath}\" -c:v h264_vaapi -c:a aac -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"",
+            $"-hwaccel vaapi -hwaccel_output_format vaapi -i \"{videoFilePath}\" -i \"{audioFilePath}\" -c:v h264_vaapi -c:a aac -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"",
             workingDirectory,
             cancellationToken
         );
-    }
-
-    private bool IsVideoFile(string fileName)
-    {
-        return (fileName.EndsWith(FileExtension.Avi.Value) || fileName.EndsWith(FileExtension.Mkv.Value) ||
-            fileName.EndsWith(FileExtension.Mov.Value) || fileName.EndsWith(FileExtension.Mp4.Value));
     }
 
     public async Task<(string stdout, string stdErr)> ConcatTsFilesToMp4FileAsync(
@@ -159,9 +164,9 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             throw new InvalidPathException("Invalid paths provided");
         }
 
-        if (!IsVideoFile(videoFilePath))
+        if (!videoFilePath.IsVideoFile())
         {
-            return ("Not a video file", string.Empty);
+            throw new ArgumentException("Not a video file", nameof(videoFilePath));
         }
 
         string workingDirectory =
@@ -173,19 +178,19 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken
         );
     }
-    
+
     public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
 
         if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
         {
-            throw new InvalidPathException("Invalid paths provided");
+            throw new ArgumentException("Invalid path(s) provided");
         }
 
-        if (!IsVideoFile(videoFilePath))
+        if (!videoFilePath.IsVideoFile())
         {
-            return ("Not a video file", string.Empty);
+            throw new ArgumentException("Not a video file", nameof(videoFilePath));
         }
 
         string workingDirectory =
@@ -223,6 +228,51 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         string arguments =
             $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -filter_hw_device foo -vf \"{videoFilters}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{outputFilePath}\"";
 
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
+    public async Task<(string stdOut, string stdErr)> AnalyzeAudioVolumeAsync(string inputFilePath, CancellationToken cancellationToken)
+    {
+        string workingDirectory = Path.GetDirectoryName(inputFilePath) ?? throw new ArgumentException("Invalid directory", nameof(inputFilePath));
+        string arguments = $"-i \"{inputFilePath}\" -af \"volumedetect\" -vn -sn -dn -f null /dev/null";
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
+    public async Task<(string stdOut, string stdErr)> AdjustAudioVolumeAsync(string inputFilePath, string outputFilePath, float maxVolume, CancellationToken cancellationToken)
+    {
+        if (!outputFilePath.EndsWithIgnoringCase(FileExtension.Mp3.Value))
+        {
+            throw new ArgumentException("Invalid output file name");
+        }
+
+        const float NORMALIZED_DB_THRESHOLD = -3.0F;
+        string workingDirectory = Path.GetDirectoryName(inputFilePath) ?? throw new ArgumentException("Invalid directory", nameof(inputFilePath));
+        int adjustmentDb = (int)(NORMALIZED_DB_THRESHOLD - maxVolume);
+
+        string arguments = $"-i \"{inputFilePath}\" -af \"volume={adjustmentDb}dB\" \"{outputFilePath}\" ";
+        if (adjustmentDb < 1)
+        {
+            arguments = $"-i \"{inputFilePath}\" \"{outputFilePath}\" ";
+        }
+
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
+    public async Task<(string stdOut, string stdErr)> RenderTsVideoFileFromImageAsync(string imageFilePath, string outputFilePath, CancellationToken cancellationToken)
+    {
+        string workingDirectory = Path.GetDirectoryName(imageFilePath) ?? throw new ArgumentException("Invalid directory", nameof(imageFilePath));
+        _ = outputFilePath ?? throw new ArgumentException("invalid output path", nameof(outputFilePath));
+        const int CLIP_DURATION = 3;
+        string arguments = $"-loop 1 -i \"{imageFilePath}\" -c:v libx264 -t {CLIP_DURATION} -s 1920x1080 -pix_fmt yuv420p -f mpegts \"{outputFilePath}\"";
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
+    public async Task<(string stdout, string stdErr)> RenderTimelapseVideoAsync(string videoFilePath, CancellationToken cancellationToken)
+    {
+        string workingDirectory = Path.GetDirectoryName(videoFilePath) ?? throw new ArgumentException("Invalid directory", nameof(videoFilePath));
+        string outputFilePath =
+            Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(videoFilePath) + ".tmp" + Path.GetExtension(videoFilePath));
+        string arguments = $"-i \"{videoFilePath}\" -filter:v \"setpts=0.5*PTS\" -an \"{outputFilePath}\"";
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 }

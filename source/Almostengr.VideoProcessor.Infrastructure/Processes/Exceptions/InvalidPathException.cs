@@ -8,7 +8,7 @@ public sealed class InvalidPathException : VideoProcessorException
     {
     }
 
-    public InvalidPathException(string message) : base(message)
+    public InvalidPathException(string message) : base("Invalid path provided")
     {
     }
 }

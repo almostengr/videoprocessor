@@ -2,7 +2,6 @@ using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Common.Videos;
-using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Constants;
 using Almostengr.VideoProcessor.Core.Music.Services;
 
@@ -49,55 +48,53 @@ public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoSe
         }
     }
 
-    public override async Task ProcessIncomingTarballFilesAsync(CancellationToken cancellationToken)
+    public override async Task ProcessVideoProjectAsync(CancellationToken cancellationToken)
     {
-        ToastmastersVideoFile? archiveFile = null;
+        ToastmastersVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
+            .Select(f => new ToastmastersVideoProject(f))
+            .FirstOrDefault();
+
+        if (project == null)
+        {
+            return;
+        }
 
         try
         {
-            string selectedTarballFilePath = _fileSystemService.GetRandomFileByExtensionFromDirectory(
-                IncomingDirectory, FileExtension.Tar);
-
-            archiveFile = new ToastmastersVideoFile(new VideoProjectArchiveFile(selectedTarballFilePath));
-
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
             await _tarballService.ExtractTarballContentsAsync(
-                archiveFile.FilePath, WorkingDirectory, cancellationToken);
+                project.FilePath, WorkingDirectory, cancellationToken);
 
-            string[] videoFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWith(FileExtension.Mp4.Value, StringComparison.OrdinalIgnoreCase))
-                .OrderBy(f => f)
-                .ToArray();
+            StopProcessingIfDetailsTxtFileExists(WorkingDirectory);
+            StopProcessingIfFfmpegInputTxtFileExists(WorkingDirectory);
+            StopProcessingIfKdenliveFileExists(WorkingDirectory);
 
-            string ffmpegInputFilePath = Path.Combine(WorkingDirectory, "videos" + FileExtension.FfmpegInput.Value);
-            CreateFfmpegInputFile(videoFiles, ffmpegInputFilePath);
+            var videoClips = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.EndsWithIgnoringCase(FileExtension.Mp4.Value))
+                .OrderBy(f => f);
 
-            string outputFilePath = Path.Combine(WorkingDirectory, archiveFile.OutputFileName());
+            string ffmpegInputFilePath = Path.Combine(WorkingDirectory, Constant.FfmpegInputFileName);
+            CreateFfmpegInputFile(videoClips, ffmpegInputFilePath);
 
+            var textOptions = project.BrandingTextOptions().ToList();
+            string brandingText = textOptions[_randomService.Next(0, textOptions.Count)];
+            string outputFilePath = Path.Combine(WorkingDirectory, project.VideoFileName());
+            
             await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
-                ffmpegInputFilePath, archiveFile.VideoFilters(), outputFilePath, cancellationToken);
+                ffmpegInputFilePath, project.ChannelBrandDrawTextFilter(brandingText), outputFilePath, cancellationToken);
 
-            _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, archiveFile.OutputFileName()));
-            _fileSystemService.DeleteDirectory(WorkingDirectory);
+            _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
             _fileSystemService.MoveFile(
-                archiveFile.FilePath, Path.Combine(ArchiveDirectory, archiveFile.FileName()));
-        }
-        catch (NoFilesMatchException)
-        {
-            throw;
+                project.FilePath, Path.Combine(ArchiveDirectory, project.FileName()));
+            _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
-
-            if (archiveFile != null)
-            {
-                _loggerService.LogError(ex, $"Error when processing {archiveFile.FilePath}");
-                _fileSystemService.MoveFile(archiveFile.FilePath, archiveFile.FilePath + FileExtension.Err.Value);
-            }
-
+            _loggerService.LogErrorProcessingFile(project.FilePath, ex);
+            _fileSystemService.MoveFile(project.FilePath, project.FilePath + FileExtension.Err.Value);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
     }
