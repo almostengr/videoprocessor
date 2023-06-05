@@ -79,7 +79,7 @@ internal sealed class DrawTextFilter
     public override string ToString()
     {
         StringBuilder stringBuilder = new();
-        stringBuilder.Append($"drawtext=textfile:'{Text.Trim().ToUpper()}':");
+        stringBuilder.Append($"drawtext=textfile:'{Text.Trim()}':");
         stringBuilder.Append($"fontcolor={TextColor.ToString()}@{TextBrightness.ToString()}:");
         stringBuilder.Append($"fontsize={FontSize.ToString()}:");
         stringBuilder.Append($"{Position.ToString()}:");

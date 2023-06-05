@@ -4,16 +4,20 @@ using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Constants;
 using Almostengr.VideoProcessor.Core.Music.Services;
 using Almostengr.VideoProcessor.Core.Common.Videos;
+using System.Text;
 
 namespace Almostengr.VideoProcessor.Core.DashCam;
 
 public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 {
     private readonly ILoggerService<DashCamService> _loggerService;
+    private readonly ICsvGraphicsFileService _csvGraphicsFileService;
+    private readonly TimeSpan _subtitleDuration = TimeSpan.FromSeconds(5);
 
     public DashCamService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         ILoggerService<DashCamService> loggerService, IMusicService musicService,
+        ICsvGraphicsFileService csvGraphicsFileService,
         IAssSubtitleFileService assSubtitleFileService,
         IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
@@ -23,58 +27,9 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
         ArchiveDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Archive);
         UploadingDirectory = Path.Combine(_appSettings.DashCamDirectory, DirectoryName.Uploading);
         _loggerService = loggerService;
+        _csvGraphicsFileService = csvGraphicsFileService;
     }
-
-    public async Task ProcessReviewedFilesAsync(CancellationToken cancellationToken)
-    {
-        if (_fileSystemService.IsSkipProcesssingFilePresent(IncomingDirectory))
-        {
-            return;
-        }
-        
-        DashCamGraphicsFile? graphicsFile = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
-            .Where(f => f.EndsWithIgnoringCase(FileExtension.GraphicsAss.Value))
-            .Select(f => new DashCamGraphicsFile(f))
-            .FirstOrDefault();
-
-        if (graphicsFile == null)
-        {
-            return;
-        }
-
-        try
-        {
-            var videoFilePath = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
-                .Where(f => f.StartsWith(graphicsFile.FilePath.ReplaceIgnoringCase(FileExtension.GraphicsAss.Value, string.Empty)) &&
-                    f.EndsWithIgnoringCase(FileExtension.Mp4.Value))
-                .Single();
-
-            _fileSystemService.DeleteDirectory(WorkingDirectory);
-            _fileSystemService.CreateDirectory(WorkingDirectory);
-
-            string outputFilePath = Path.Combine(WorkingDirectory, graphicsFile.VideoFileName());
-
-            var audioFile = _musicService.GetRandomMixTrack();
-            await _ffmpegService.RenderVideoWithAudioAndFiltersAsync(
-                videoFilePath, audioFile.FilePath, string.Empty, outputFilePath, cancellationToken);
-
-            _fileSystemService.MoveFile(
-                outputFilePath, Path.Combine(UploadingDirectory, graphicsFile.VideoFileName()));
-
-            _fileSystemService.MoveFile(
-                graphicsFile.FilePath, Path.Combine(ArchiveDirectory, graphicsFile.FileName));
-
-            _fileSystemService.DeleteFile(videoFilePath);
-            _fileSystemService.DeleteDirectory(WorkingDirectory);
-        }
-        catch (Exception ex)
-        {
-            _loggerService.LogError(ex, ex.Message);
-            _loggerService.LogErrorProcessingFile(graphicsFile.FilePath, ex);
-            _fileSystemService.MoveFile(graphicsFile.FilePath, graphicsFile.FilePath + FileExtension.Err.Value);
-        }
-    }
-
+    
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
         try
@@ -101,9 +56,20 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 
     public override async Task ProcessVideoProjectAsync(CancellationToken cancellationToken)
     {
-        DashCamVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
-            .Select(f => new DashCamVideoProject(f))
+        string? readyFile = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.Ready.Value))
             .FirstOrDefault();
+
+        if (readyFile == null)
+        {
+            return;
+        }
+
+        string projectFileName = Path.GetFileNameWithoutExtension(readyFile) + FileExtension.Tar.Value;
+        DashCamVideoProject? project = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
+           .Where(f => f.ContainsIgnoringCase(projectFileName))
+           .Select(f => new DashCamVideoProject(f))
+           .SingleOrDefault();
 
         if (project == null)
         {
@@ -115,8 +81,7 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
-            await _tarballService.ExtractTarballContentsAsync(
-                project.FilePath, WorkingDirectory, cancellationToken);
+            await _tarballService.ExtractTarballContentsAsync(project.FilePath, WorkingDirectory, cancellationToken);
 
             StopProcessingIfKdenliveFileExists(WorkingDirectory);
             StopProcessingIfDetailsTxtFileExists(WorkingDirectory);
@@ -124,20 +89,58 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
+            var textOptions = project.BrandingTextOptions().ToList();
+            string brandingText = textOptions[_randomService.Next(0, textOptions.Count)];
+
+            StringBuilder videoFilters = new(project.ChannelBrandDrawTextFilter(brandingText));
+
             var videoClips = _fileSystemService.GetFilesInDirectoryWithFileInfo(WorkingDirectory)
                 .Where(f => f.FullName.IsVideoFile())
                 .OrderBy(f => f.Name);
 
-            foreach (var video in videoClips)
+            int counter = -1;
+            foreach (var clip in videoClips)
             {
-                string outFilePath = video.FullName
-                    .ReplaceIgnoringCase(FileExtension.Mov.Value, string.Empty)
-                    .ReplaceIgnoringCase(FileExtension.Mkv.Value, string.Empty)
-                    .ReplaceIgnoringCase(FileExtension.Mp4.Value, string.Empty)
-                    + FileExtension.Ts.Value;
+                counter++;
 
-                await _ffmpegService.ConvertVideoFileToTsFormatAsync(
-                    video.FullName, outFilePath, cancellationToken);
+                string outFilePath = clip.FullName + FileExtension.Ts.Value;
+
+                await _ffmpegService.ConvertVideoFileToTsFormatAsync(clip.FullName, outFilePath, cancellationToken);
+
+                string? streetsFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                    .Where(f => f.EndsWithIgnoringCase(Path.GetFileNameWithoutExtension(clip.FullName) + FileExtension.StreetsCsv.Value))
+                    .SingleOrDefault();
+
+                if (streetsFile == null)
+                {
+                    continue;
+                }
+
+                var graphicsContent = _csvGraphicsFileService.ReadFile(streetsFile);
+
+                foreach (var graphic in graphicsContent)
+                {
+                    videoFilters.Append(Constant.CommaSpace);
+
+                    FfMpegColor textColor = FfMpegColor.White;
+                    FfMpegColor bgColor = FfMpegColor.Green;
+                    Opacity bgOpacity = Opacity.Full;
+
+                    if (
+                        graphic.Text.ContainsIgnoringCase("info") ||
+                        graphic.Text.ContainsIgnoringCase("mile drive")
+                        )
+                    {
+                        bgColor = FfMpegColor.Black;
+                        bgOpacity = Opacity.Medium;
+                    }
+
+                    var startTime = graphic.StartTime.Add(new TimeSpan(0, counter * 2, 0));
+                    var endTime = startTime.Add(_subtitleDuration);
+                    videoFilters.Append(
+                        new DrawTextFilter(
+                            graphic.Text, textColor, Opacity.Full, bgColor, bgOpacity, DrawTextPosition.LowerLeft, startTime, endTime).ToString());
+                }
             }
 
             string? ffmpegInputFilePath = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
@@ -155,35 +158,34 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
                 CreateFfmpegInputFile(tsVideoFiles, ffmpegInputFilePath);
             }
 
+            int lowestTimeStamp = 21;
+            int maxTimeStamp = lowestTimeStamp + 240;
+            for (var i = 0; i < videoClips.Count(); i++)
+            {
+                int randomTime = _randomService.Next(lowestTimeStamp, maxTimeStamp);
+                lowestTimeStamp = randomTime;
+
+                if (i % 2 == 0)
+                {
+                    continue;
+                }
+
+                TimeSpan startTime = TimeSpan.FromSeconds(randomTime);
+                TimeSpan endTime = startTime.Add(_subtitleDuration);
+                videoFilters.Append(Constant.CommaSpace);
+                videoFilters.Append(new DrawTextFilter("Please like and subscribe!", FfMpegColor.White, Opacity.Full, FfMpegColor.Red, Opacity.Full, DrawTextPosition.LowerRight, startTime, endTime).ToString());
+            }
+
             string outputFilePath = Path.Combine(WorkingDirectory, project.VideoFileName());
+            var audioFile = _musicService.GetRandomMixTrack();
 
-            var textOptions = project.BrandingTextOptions().ToList();
-            string brandingText = textOptions[_randomService.Next(0, textOptions.Count)];
-            await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
-                ffmpegInputFilePath, project.ChannelBrandDrawTextFilter(brandingText), outputFilePath, cancellationToken);
-
-            _fileSystemService.SaveFileContents(
-                Path.Combine(IncomingDirectory, project.ThumbnailFileName()), project.Title());
+            await _ffmpegService.RenderVideoWithInputFileAndAudioAndFiltersAsync(
+                ffmpegInputFilePath, audioFile.FilePath, videoFilters.ToString(), outputFilePath, cancellationToken);
 
             _fileSystemService.MoveFile(project.FilePath, Path.Combine(ArchiveDirectory, project.FileName()));
 
-            string destinationDir = IncomingDirectory;
-            if (project.SubType == DashCamVideoProject.DashCamVideoType.CarRepair)
-            {
-                destinationDir = UploadingDirectory;
-            }
-
-            _fileSystemService.MoveFile(outputFilePath, Path.Combine(destinationDir, project.VideoFileName()));
-
-            string? graphicsFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
-                .Where(f => f.EndsWithIgnoringCase(FileExtension.GraphicsAss.Value))
-                .SingleOrDefault();
-
-            if (graphicsFile != null)
-            {
-                _fileSystemService.MoveFile(
-                    graphicsFile, Path.Combine(IncomingDirectory, Path.GetFileName(graphicsFile)));
-            }
+            _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
+            _fileSystemService.DeleteFile(readyFile);
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
@@ -191,7 +193,7 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
         {
             _loggerService.LogError(ex, ex.Message);
             _loggerService.LogErrorProcessingFile(project.FilePath, ex);
-            _fileSystemService.MoveFile(project.FilePath, project.FilePath + FileExtension.Err.Value);
+            _fileSystemService.MoveFile(readyFile, readyFile + FileExtension.Err.Value);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
 

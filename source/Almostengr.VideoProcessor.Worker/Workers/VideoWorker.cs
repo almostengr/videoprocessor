@@ -43,7 +43,6 @@ internal sealed class VideoWorker : BaseWorker
 
             await _dashCamVideoService.CompressTarballsInArchiveFolderAsync(cancellationToken);
             await _dashCamVideoService.CreateTarballsFromDirectoriesAsync(cancellationToken);
-            await _dashCamVideoService.ProcessReviewedFilesAsync(cancellationToken);
             await _dashCamVideoService.ProcessVideoProjectAsync(cancellationToken);
 
             previousTime = await DelayWhenLoopingQuickly(_delayLoopTime, cancellationToken, previousTime);

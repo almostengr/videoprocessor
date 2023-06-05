@@ -26,6 +26,6 @@ public interface IFfmpegService
         string inputFilePath, CancellationToken cancellationToken);
     Task<(string stdOut, string stdErr)> RenderTsVideoFileFromImageAsync(
         string imageFilePath, string outputFilePath, CancellationToken cancellationToken);
-    Task<(string stdout, string stdErr)> RenderTimelapseVideoAsync(
-        string videoFilePath, CancellationToken cancellationToken);
+    Task<(string stdout, string stdErr)> RenderVideoWithInputFileAndAudioAndFiltersAsync(
+        string ffmpegInputFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken);
 }

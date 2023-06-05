@@ -179,6 +179,29 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         );
     }
 
+
+    public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatWithFiltersAsync(
+        string videoFilePath, string outputFilePath, string videoFilters, CancellationToken cancellationToken)
+    {
+
+        if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
+        {
+            throw new ArgumentException("Invalid path(s) provided");
+        }
+
+        if (!videoFilePath.IsVideoFile())
+        {
+            throw new ArgumentException("Not a video file", nameof(videoFilePath));
+        }
+
+        string workingDirectory =
+            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+        // string arguments = $"-i \"{videoFilePath}\" -c:v copy -f mpegts \"{outputFilePath}\"";
+        string arguments = $"-i \"{videoFilePath}\" -vf \"{videoFilters}\" -f mpegts \"{outputFilePath}\"";
+
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
     public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
@@ -196,6 +219,20 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         string workingDirectory =
             Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
         string arguments = $"-i \"{videoFilePath}\" -c:v copy -f mpegts \"{outputFilePath}\"";
+
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
+    public async Task<(string stout, string stdErr)> ConvertImageFileToTsFormatAsync(
+        string imageFilePath, string outputFilePath, CancellationToken cancellationToken)
+    {
+        string workingDirectory =
+            Path.GetDirectoryName(imageFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+        string arguments = 
+            // $"-hwaccel vaapi -vaapi_device /dev/dri/renderD128 -i \"{imageFilePath}\" -vf 'format=nv12,hwupload' -c:v h264_vaapi -b:v 10M -vf \"scale=1920:1080\" -f mpegts \"{outputFilePath}\"";
+            // $"-hwaccel vaapi -hwaccel_output_format nv12 -vaapi_device /dev/dri/renderD128 -loop 1 -i \"{imageFilePath}\" -vf 'format=nv12,hwupload' -c:v h264_vaapi -b:v 10M -pix_fmt yuv420p -t 4 -f mpegts \"{outputFilePath}\"";
+            // $"-hwaccel vaapi -hwaccel_output_format nv12 -vaapi_device /dev/dri/renderD128 -loop 1 -i \"{imageFilePath}\" -vf 'format=nv12,hwupload' -c:v h264_vaapi -b:v 10M -vf \"scale=1920:1080\" -pix_fmt yuv 420p -t 4 -f mpegts \"{outputFilePath}\"";
+            $"-y -hide_banner -loglevel error -hwaccel vaapi -hwaccel_output_format nv12 -vaapi_device /dev/dri/renderD128 -loop 1 -i \"{imageFilePath}\" -vf 'format=nv12,hwupload' -c:v h264_vaapi -b:v 10M -pix_fmt yuv420p -t 4 -f mpegts \"{outputFilePath}\"";
 
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
@@ -231,6 +268,17 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
+    public async Task<(string stdout, string stdErr)> RenderVideoWithInputFileAndAudioAndFiltersAsync(
+        string ffmpegInputFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
+    {
+        string workingDirectory =
+            Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+        string arguments =
+            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -i \"{audioTrackFilePath}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
+
+        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    }
+
     public async Task<(string stdOut, string stdErr)> AnalyzeAudioVolumeAsync(string inputFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory = Path.GetDirectoryName(inputFilePath) ?? throw new ArgumentException("Invalid directory", nameof(inputFilePath));
@@ -262,7 +310,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     {
         string workingDirectory = Path.GetDirectoryName(imageFilePath) ?? throw new ArgumentException("Invalid directory", nameof(imageFilePath));
         _ = outputFilePath ?? throw new ArgumentException("invalid output path", nameof(outputFilePath));
-        const int CLIP_DURATION = 3;
+        const int CLIP_DURATION = 4;
         string arguments = $"-loop 1 -i \"{imageFilePath}\" -c:v libx264 -t {CLIP_DURATION} -s 1920x1080 -pix_fmt yuv420p -f mpegts \"{outputFilePath}\"";
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
@@ -275,4 +323,5 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         string arguments = $"-i \"{videoFilePath}\" -filter:v \"setpts=0.5*PTS\" -an \"{outputFilePath}\"";
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
+
 }

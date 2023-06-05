@@ -18,9 +18,10 @@ public sealed class FileSystemService : IFileSystemService
 
     public bool IsSkipProcesssingFilePresent(string directory)
     {
-        return GetFilesInDirectory(directory)
-            .Where(f => f.EndsWithIgnoringCase(FileExtension.NoProcessing.Value))
-            .Any();
+        // return GetFilesInDirectory(directory)
+        //     .Where(f => f.EndsWithIgnoringCase(FileExtension.NoProcessing.Value))
+        //     .Any();
+        return false; // todo - fix to not check for this
     }
 
     public void CreateDirectory(string directory)

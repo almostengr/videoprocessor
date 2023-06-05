@@ -13,10 +13,15 @@ using Almostengr.VideoProcessor.Core.DashCam;
 using Almostengr.VideoProcessor.Infrastructure.Web;
 
 IHost host = Host.CreateDefaultBuilder(args)
+    .ConfigureAppConfiguration((hostingContext, config) =>
+    {
+        config.Sources.Clear();
+    })
     .ConfigureServices(services =>
     {
         services.AddSingleton(new AppSettings());
 
+        services.AddSingleton<ICsvGraphicsFileService, CsvGraphicsFileService>();
         services.AddSingleton<IDashCamVideoService, DashCamService>();
         services.AddSingleton<IFfmpegService, FfmpegService>();
         services.AddSingleton<IFileSystemService, FileSystemService>();
@@ -30,7 +35,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<ITechTalkVideoService, TechTalkService>();
         services.AddSingleton<IToastmastersVideoService, ToastmastersService>();
         services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
-        
+
         services.AddTransient<IThumbnailService, ThumbnailService>();
 
         services.AddSingleton<ISrtSubtitleFileService, SrtSubtitleFileService>();
@@ -38,7 +43,7 @@ IHost host = Host.CreateDefaultBuilder(args)
 
         services.AddHostedService<SubtitleWorker>();
         // services.AddHostedService<ThumbnailWorker>();
-        // services.AddHostedService<VideoWorker>();
+        services.AddHostedService<VideoWorker>();
     })
     .UseSystemd()
     .Build();

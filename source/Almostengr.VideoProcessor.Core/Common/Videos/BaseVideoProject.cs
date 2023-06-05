@@ -82,8 +82,12 @@ public abstract partial class BaseVideoProject
     {
         StringBuilder stringBuilder = new();
         stringBuilder.Append(
-            new DrawTextFilter(brandingText, DrawTextFilterTextColor(), Opacity.Full,
-            DrawTextFilterBackgroundColor(), Opacity.Medium, DrawTextPosition.ChannelBrand).ToString()
+            new DrawTextFilter(brandingText, 
+            DrawTextFilterTextColor(), 
+            Opacity.Full,
+            DrawTextFilterBackgroundColor(), 
+            Opacity.Medium, 
+            DrawTextPosition.ChannelBrand).ToString()
             );
         return stringBuilder.ToString();
     }

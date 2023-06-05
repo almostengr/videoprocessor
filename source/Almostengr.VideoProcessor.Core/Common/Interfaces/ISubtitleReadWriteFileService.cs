@@ -21,3 +21,8 @@ public interface IAssSubtitleFileService : ISubtitleReadFileService
 {
 
 }
+
+public interface ICsvGraphicsFileService : ISubtitleReadFileService
+{
+
+}

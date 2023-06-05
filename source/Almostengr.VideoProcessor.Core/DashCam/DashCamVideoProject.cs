@@ -1,4 +1,3 @@
-using System.Text;
 using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Videos;
 using Almostengr.VideoProcessor.Core.Constants;
@@ -24,7 +23,7 @@ public sealed partial class DashCamVideoProject : BaseVideoProject
     {
         SubType = DashCamVideoType.Normal;
 
-        if (title.ContainsIgnoringCase("night"))
+        if (title.ContainsIgnoringCase("night") || title.ContainsIgnoringCase("sunset"))
         {
             SubType = DashCamVideoType.Night;
         }
@@ -62,31 +61,8 @@ public sealed partial class DashCamVideoProject : BaseVideoProject
         }
     }
 
-    internal string ChannelBrandAndTitleGraphics(string brandingText)
-    {
-        StringBuilder stringBuilder = new(base.ChannelBrandDrawTextFilter(brandingText));
-
-        switch (SubType)
-        {
-            case DashCamVideoType.CarRepair:
-                break;
-
-            default:
-                stringBuilder.Append(
-                    new DrawTextFilter(Title(),
-                        DrawTextFilterTextColor(),
-                        Opacity.Full, DrawTextFilterBackgroundColor(),
-                        Opacity.Medium,
-                        DrawTextPosition.UpperLeft,
-                        new TimeSpan(0, 0, 0),
-                        new TimeSpan(0, 0, 30)).ToString());
-                break;
-        }
-        return stringBuilder.ToString();
-    }
-
     public override IEnumerable<string> BrandingTextOptions()
     {
-        return new string[] { "Kenny Ram Dash Cam" };
+        return new string[] { "Kenny Ram Dash Cam", "#KennyRamDashCam" };
     }
 }
