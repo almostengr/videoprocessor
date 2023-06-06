@@ -71,7 +71,7 @@ internal sealed class DrawTextFilter
         TextBrightness = textBrightness;
         BackgroundColor = backgroundColor;
         BackgroundBrightness = backgroundBrightness;
-        BorderWidth = 20;
+        BorderWidth = 15;
         StartTime = startTime;
         EndTime = endTime;
     }
@@ -83,7 +83,7 @@ internal sealed class DrawTextFilter
         stringBuilder.Append($"fontcolor={TextColor.ToString()}@{TextBrightness.ToString()}:");
         stringBuilder.Append($"fontsize={FontSize.ToString()}:");
         stringBuilder.Append($"{Position.ToString()}:");
-        stringBuilder.Append(Constant.BorderBox);
+        stringBuilder.Append("box=1:");
         stringBuilder.Append($"boxborderw={BorderWidth.ToString()}:");
         stringBuilder.Append($"boxcolor={BackgroundColor.ToString()}@{BackgroundBrightness.ToString()}");
 

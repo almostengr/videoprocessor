@@ -16,12 +16,11 @@ public abstract class BaseVideoService : IBaseVideoService
     protected readonly IFileSystemService _fileSystemService;
     protected readonly IRandomService _randomService;
     protected readonly IMusicService _musicService;
-    protected readonly IAssSubtitleFileService _assSubtitleFileService;
 
-    protected string IncomingDirectory { get; init; } = string.Empty;
-    protected string ArchiveDirectory { get; init; } = string.Empty;
-    protected string UploadingDirectory { get; init; } = string.Empty;
-    protected string WorkingDirectory { get; init; } = string.Empty;
+    protected string IncomingDirectory { get; init; }
+    protected string ArchiveDirectory { get; init; }
+    protected string UploadingDirectory { get; init; }
+    protected string WorkingDirectory { get; init; }
 
 
     protected BaseVideoService(
@@ -36,7 +35,6 @@ public abstract class BaseVideoService : IBaseVideoService
         _fileSystemService = fileSystemService;
         _randomService = randomService;
         _musicService = musicService;
-        _assSubtitleFileService = assSubtitleFileService;
     }
 
     public abstract Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken);
@@ -95,6 +93,8 @@ public abstract class BaseVideoService : IBaseVideoService
 
             await _tarballService.CreateTarballFromDirectoryAsync(directory, cancellationToken);
             _fileSystemService.DeleteDirectory(directory);
+
+            _fileSystemService.SaveFileContents(directory + FileExtension.Tar + FileExtension.Ready, "ready");
         }
     }
 
@@ -125,12 +125,12 @@ public abstract class BaseVideoService : IBaseVideoService
     public void StopProcessingIfKdenliveFileExists(string directory)
     {
         bool fileExists = _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.EndsWithIgnoringCase(FileExtension.Kdenlive.Value))
+            .Where(f => f.EndsWithIgnoringCase(".kdenlive"))
             .Any();
 
         if (fileExists)
         {
-            throw new KdenliveFileExistsException("Archive has Kdenlive project file. Please repackage tarball file");
+            throw new KdenliveFileExistsException("Archive has Kdenlive project file. Please repackage");
         }
     }
 

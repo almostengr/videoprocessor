@@ -112,26 +112,24 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
             _fileSystemService.DeleteDirectory(WorkingDirectory);
             _fileSystemService.CreateDirectory(WorkingDirectory);
 
-            srtFile.SetSubtitles(_srtSubtitleService.ReadFile(srtFile.FileName()));
+            srtFile.SetSubtitles(_srtSubtitleService.ReadFile(srtFile.FilePath));
 
-            _srtSubtitleService.WriteFile(
-                Path.Combine(WorkingDirectory, srtFile.FileName()), srtFile.Subtitles);
+            string workingSrtFilePath = Path.Combine(WorkingDirectory, srtFile.FileName());
+            _srtSubtitleService.WriteFile(workingSrtFilePath, srtFile.Subtitles);
 
-            _srtSubtitleService.WriteFile(
-                Path.Combine(WorkingDirectory, srtFile.BlogFileName()), srtFile.Subtitles);
+            string workingBlogFilePath = Path.Combine(WorkingDirectory, srtFile.BlogFileName());
+            _fileSystemService.SaveFileContents(workingBlogFilePath, srtFile.BlogPostText());
 
-            _fileSystemService.MoveFile(
-                Path.Combine(WorkingDirectory, srtFile.FileName()),
-                Path.Combine(UploadingDirectory, srtFile.BlogFileName()));
+            string uploadSrtFilePath = Path.Combine(UploadingDirectory, srtFile.FileName());
+            string uploadBlogFilePath = Path.Combine(UploadingDirectory, srtFile.BlogFileName());
 
-            _fileSystemService.MoveFile(
-                Path.Combine(WorkingDirectory, srtFile.FileName()),
-                Path.Combine(UploadingDirectory, srtFile.FileName()));
+            _fileSystemService.MoveFile(workingSrtFilePath, uploadSrtFilePath);
+            _fileSystemService.MoveFile(workingBlogFilePath, uploadBlogFilePath);
 
             _fileSystemService.DeleteDirectory(WorkingDirectory);
 
             _fileSystemService.MoveFile(
-                srtFile.FilePath, Path.Combine(UploadingDirectory, srtFile.FileName()));
+                srtFile.FilePath, Path.Combine(ArchiveDirectory, srtFile.FileName()));
         }
         catch (Exception ex)
         {

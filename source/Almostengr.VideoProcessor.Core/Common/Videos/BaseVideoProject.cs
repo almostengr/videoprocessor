@@ -73,6 +73,16 @@ public abstract partial class BaseVideoProject
             + FileExtension.Mp4.Value;
     }
 
+    public string ChaptersFileName()
+    {
+        return Path.GetFileName(FilePath)
+            .ReplaceIgnoringCase(FileExtension.TarXz.Value, string.Empty)
+            .ReplaceIgnoringCase(FileExtension.TarGz.Value, string.Empty)
+            .ReplaceIgnoringCase(FileExtension.Tar.Value, string.Empty)
+            .Replace(Constant.Colon, string.Empty)
+            + ".chapters.txt";
+    }
+
     public string FileName()
     {
         return Path.GetFileName(FilePath);

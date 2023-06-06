@@ -36,7 +36,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IToastmastersVideoService, ToastmastersService>();
         services.AddSingleton(typeof(ILoggerService<>), typeof(LoggerService<>));
 
-        services.AddTransient<IThumbnailService, ThumbnailService>();
+        // services.AddTransient<IThumbnailService, ThumbnailService>();
 
         services.AddSingleton<ISrtSubtitleFileService, SrtSubtitleFileService>();
         services.AddSingleton<IAssSubtitleFileService, AssSubtitleFileService>();

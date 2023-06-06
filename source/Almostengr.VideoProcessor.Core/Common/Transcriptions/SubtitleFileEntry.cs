@@ -6,7 +6,7 @@ public sealed class SubtitleFileEntry
 {
     public TimeSpan StartTime { get; init; }
     public TimeSpan EndTime { get; init; }
-    public string Text { get; init; }
+    public string? Text { get; private set; }
 
     public SubtitleFileEntry(TimeSpan startTime, TimeSpan endTime, string text)
     {
@@ -29,5 +29,15 @@ public sealed class SubtitleFileEntry
             .ReplaceIgnoringCase("all right", "alright")
             .Replace(Constant.DoubleWhitespace, Constant.Whitespace)
             .Trim();
+    }
+
+    public void SetText(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+
+        Text = value;
     }
 }

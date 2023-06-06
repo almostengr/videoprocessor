@@ -29,7 +29,7 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
         _loggerService = loggerService;
         _csvGraphicsFileService = csvGraphicsFileService;
     }
-    
+
     public override async Task CompressTarballsInArchiveFolderAsync(CancellationToken cancellationToken)
     {
         try
@@ -99,6 +99,7 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
                 .OrderBy(f => f.Name);
 
             int counter = -1;
+            StringBuilder videoChapters = new();
             foreach (var clip in videoClips)
             {
                 counter++;
@@ -111,12 +112,15 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
                     .Where(f => f.EndsWithIgnoringCase(Path.GetFileNameWithoutExtension(clip.FullName) + FileExtension.StreetsCsv.Value))
                     .SingleOrDefault();
 
-                if (streetsFile == null)
+                if (streetsFile == null ||
+                    project.SubType == DashCamVideoProject.DashCamVideoType.Fireworks ||
+                    project.SubType == DashCamVideoProject.DashCamVideoType.CarRepair)
                 {
                     continue;
                 }
 
                 var graphicsContent = _csvGraphicsFileService.ReadFile(streetsFile);
+
 
                 foreach (var graphic in graphicsContent)
                 {
@@ -126,22 +130,34 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
                     FfMpegColor bgColor = FfMpegColor.Green;
                     Opacity bgOpacity = Opacity.Full;
 
+                    const string INFO = "info";
                     if (
-                        graphic.Text.ContainsIgnoringCase("info") ||
+                        graphic.Text.ContainsIgnoringCase(INFO) ||
                         graphic.Text.ContainsIgnoringCase("mile drive")
                         )
                     {
+                        graphic.SetText(graphic.Text.ReplaceIgnoringCase(INFO, string.Empty));
                         bgColor = FfMpegColor.Black;
                         bgOpacity = Opacity.Medium;
+                    }
+                    else if (graphic.Text.ContainsIgnoringCase("speed limit"))
+                    {
+                        bgColor = FfMpegColor.White;
+                        textColor = FfMpegColor.Black;
                     }
 
                     var startTime = graphic.StartTime.Add(new TimeSpan(0, counter * 2, 0));
                     var endTime = startTime.Add(_subtitleDuration);
                     videoFilters.Append(
                         new DrawTextFilter(
-                            graphic.Text, textColor, Opacity.Full, bgColor, bgOpacity, DrawTextPosition.LowerLeft, startTime, endTime).ToString());
+                            graphic.Text, textColor, Opacity.Full, bgColor, bgOpacity, DrawTextPosition.SubtitlePrimary, startTime, endTime).ToString());
+
+                    videoChapters.Append($"{startTime.ToString()} {graphic.Text}" + Environment.NewLine);
                 }
             }
+
+            string chaptersFilePath = Path.Combine(UploadingDirectory, project.ChaptersFileName());
+            _fileSystemService.SaveFileContents(chaptersFilePath, videoChapters.ToString());
 
             string? ffmpegInputFilePath = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWithIgnoringCase(FileExtension.FfmpegInput.Value))
@@ -179,14 +195,32 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
             string outputFilePath = Path.Combine(WorkingDirectory, project.VideoFileName());
             var audioFile = _musicService.GetRandomMixTrack();
 
-            await _ffmpegService.RenderVideoWithInputFileAndAudioAndFiltersAsync(
-                ffmpegInputFilePath, audioFile.FilePath, videoFilters.ToString(), outputFilePath, cancellationToken);
+            if (project.SubType == DashCamVideoProject.DashCamVideoType.CarRepair)
+            {
+                await _ffmpegService.RenderVideoWithFiltersAsync(
+                    ffmpegInputFilePath, videoFilters.ToString(), outputFilePath, cancellationToken);
+            }
+            else
+            {
+                await _ffmpegService.RenderVideoWithInputFileAndAudioAndFiltersAsync(
+                    ffmpegInputFilePath, audioFile.FilePath, videoFilters.ToString(), outputFilePath, cancellationToken);
+            }
 
             _fileSystemService.MoveFile(project.FilePath, Path.Combine(ArchiveDirectory, project.FileName()));
-
             _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
-            _fileSystemService.DeleteFile(readyFile);
 
+            const string DESCRIPTION_TXT = "description.txt";
+            var descriptionFile = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.EndsWithIgnoringCase(DESCRIPTION_TXT))
+                .SingleOrDefault();
+
+            string uploadDescriptionTxt = Path.Combine(UploadingDirectory, project.FileName() + DESCRIPTION_TXT);
+            if (descriptionFile != null)
+            {
+                _fileSystemService.MoveFile(descriptionFile, uploadDescriptionTxt);
+            }
+
+            _fileSystemService.DeleteFile(readyFile);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
         catch (Exception ex)
