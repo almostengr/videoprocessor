@@ -1,5 +1,3 @@
-using Almostengr.VideoProcessor.Core.Common.Constants;
-
 namespace Almostengr.VideoProcessor.Core.Common.Interfaces;
 
 public interface IFileSystemService
@@ -16,4 +14,5 @@ public interface IFileSystemService
     FileInfo[] GetFilesInDirectoryWithFileInfo(string directory);
     IEnumerable<string> GetTarballFilesInDirectory(string directory);
     IEnumerable<FileInfo> GetVideoFilesInDirectoryWithFileInfo(string directory);
+    bool DoesDirectoryExist(string directory);
 }

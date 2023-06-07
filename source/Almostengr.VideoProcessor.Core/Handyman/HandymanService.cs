@@ -12,13 +12,13 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
 {
     private readonly ILoggerService<HandymanService> _loggerService;
     private readonly ISrtSubtitleFileService _srtSubtitleService;
-    private readonly IThumbnailService _thumbnailService;
+    // private readonly IThumbnailService _thumbnailService;
 
     public HandymanService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         IMusicService musicService, ILoggerService<HandymanService> loggerService,
-        IAssSubtitleFileService assSubtitleFileService, ISrtSubtitleFileService srtSubtitleFileService,
-        IThumbnailService thumbnailService) :
+        IAssSubtitleFileService assSubtitleFileService, ISrtSubtitleFileService srtSubtitleFileService) :
+        // ,IThumbnailService thumbnailService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Incoming);
@@ -27,7 +27,7 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
         UploadingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Uploading);
         _loggerService = loggerService;
         _srtSubtitleService = srtSubtitleFileService;
-        _thumbnailService = thumbnailService;
+        // _thumbnailService = thumbnailService;
 
         _fileSystemService.CreateDirectory(IncomingDirectory);
         _fileSystemService.CreateDirectory(UploadingDirectory);
@@ -72,8 +72,8 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
         {
             try
             {
-                _thumbnailService.GenerateThumbnail<TechTalkThumbnailFile>(
-                    UploadingDirectory, thumbnailFile);
+                // _thumbnailService.GenerateThumbnail<TechTalkThumbnailFile>(
+                //     UploadingDirectory, thumbnailFile);
 
                 _fileSystemService.MoveFile(
                     thumbnailFile.ThumbTxtFilePath,

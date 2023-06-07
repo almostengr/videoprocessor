@@ -13,15 +13,15 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
     private readonly ISrtSubtitleFileService _srtService;
     private readonly IGzFileCompressionService _gzFileService;
     private readonly IXzFileCompressionService _xzFileService;
-    private readonly IThumbnailService _thumbnailService;
+    // private readonly IThumbnailService _thumbnailService;
     private readonly ISrtSubtitleFileService _srtSubtitleService;
 
     public TechTalkService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         ILoggerService<TechTalkService> loggerService, IMusicService musicService,
         ISrtSubtitleFileService srtSubtitleFileService, IAssSubtitleFileService assSubtitleFileService,
-        IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService,
-        IThumbnailService thumbnailService) :
+        IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService):
+        // ,IThumbnailService thumbnailService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Incoming);
@@ -32,7 +32,7 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         _srtService = srtSubtitleFileService;
         _xzFileService = xzFileService;
         _gzFileService = gzFileService;
-        _thumbnailService = thumbnailService;
+        // _thumbnailService = thumbnailService;
         _srtSubtitleService = srtSubtitleFileService;
 
         _fileSystemService.CreateDirectory(IncomingDirectory);
@@ -78,8 +78,8 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         {
             try
             {
-                _thumbnailService.GenerateThumbnail<TechTalkThumbnailFile>(
-                    UploadingDirectory, thumbnailFile);
+                // _thumbnailService.GenerateThumbnail<TechTalkThumbnailFile>(
+                //     UploadingDirectory, thumbnailFile);
 
                 _fileSystemService.MoveFile(
                     thumbnailFile.ThumbTxtFilePath,

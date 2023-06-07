@@ -2,7 +2,6 @@ using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
 using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
-using Almostengr.VideoProcessor.Core.Music;
 using Almostengr.VideoProcessor.Core.Music.Services;
 
 namespace Almostengr.VideoProcessor.Core.Common.Videos;
@@ -53,14 +52,6 @@ public abstract class BaseVideoService : IBaseVideoService
         }
     }
 
-    internal IEnumerable<AudioFile> GetAudioFilesInDirectory(string directory)
-    {
-        return _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.EndsWithIgnoringCase(FileExtension.Mp3.Value))
-            .Select(f => new AudioFile(f))
-            .ToList();
-    }
-
     internal IEnumerable<string> GetVideoFilesInDirectory(string directory)
     {
         return _fileSystemService.GetFilesInDirectory(directory)
@@ -83,18 +74,22 @@ public abstract class BaseVideoService : IBaseVideoService
 
     public async Task CreateTarballsFromDirectoriesAsync(string incomingDirectory, CancellationToken cancellationToken)
     {
-        var directories = _fileSystemService.GetDirectoriesInDirectory(incomingDirectory);
-        foreach (var directory in directories)
+        var readyFiles = _fileSystemService.GetFilesInDirectory(incomingDirectory)
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.Ready.Value))
+            .ToList();
+
+        foreach(var readyFile in readyFiles)
         {
-            if (_fileSystemService.GetFilesInDirectory(directory).Count() == 0)
+            string directory = readyFile.Replace(FileExtension.Ready.Value, string.Empty);
+            bool hasDirectory = _fileSystemService.DoesDirectoryExist(directory);
+
+            if (!hasDirectory)
             {
                 continue;
             }
 
             await _tarballService.CreateTarballFromDirectoryAsync(directory, cancellationToken);
             _fileSystemService.DeleteDirectory(directory);
-
-            _fileSystemService.SaveFileContents(directory + FileExtension.Tar + FileExtension.Ready, "ready");
         }
     }
 

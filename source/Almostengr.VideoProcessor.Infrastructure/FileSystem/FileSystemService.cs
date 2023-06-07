@@ -176,4 +176,9 @@ public sealed class FileSystemService : IFileSystemService
                         f.FullName.EndsWithIgnoringCase(FileExtension.Mkv.Value) ||
                         f.FullName.EndsWithIgnoringCase(FileExtension.Mp4.Value));
     }
+
+    public bool DoesDirectoryExist(string directory)
+    {
+        return Directory.Exists(directory);
+    }
 }
