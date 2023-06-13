@@ -84,3 +84,9 @@ ffmpeg -f concat -i input.txt -c:v copy output.mp4
 ```bash
 ffmpeg -framerate 1/3 -pattern_type glob -i '*.jpg' -c:v libx264 -r 30 -pix_fmt yuv420p output.mp4
 ```
+
+### Add Music To Video
+
+```bash
+fmpeg -i 20230401_110000.mp4 -i ../../../ytvideostructure/07music/mix03.mp3 -shortest -c:v copy -c:a copy -map 0:v:0 -map 1:a:0 output.mp4
+```
