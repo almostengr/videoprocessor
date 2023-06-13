@@ -142,19 +142,39 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
 
     public override async Task ProcessVideoProjectAsync(CancellationToken cancellationToken)
     {
-        if (_fileSystemService.IsSkipProcesssingFilePresent(IncomingDirectory))
+        string? readyFile = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.Ready.Value))
+            .FirstOrDefault();
+
+        if (readyFile == null)
         {
             return;
         }
-        
-        TechTalkVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
-            .Select(f => new TechTalkVideoProject(f))
-            .FirstOrDefault();
+
+        string projectFileName = Path.GetFileNameWithoutExtension(readyFile) + FileExtension.Tar.Value;
+        TechTalkVideoProject? project = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
+           .Where(f => f.ContainsIgnoringCase(projectFileName))
+           .Select(f => new TechTalkVideoProject(f))
+           .SingleOrDefault();
 
         if (project == null)
         {
             return;
         }
+
+        // if (_fileSystemService.IsSkipProcesssingFilePresent(IncomingDirectory))
+        // {
+        //     return;
+        // }
+        
+        // TechTalkVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
+        //     .Select(f => new TechTalkVideoProject(f))
+        //     .FirstOrDefault();
+
+        // if (project == null)
+        // {
+        //     return;
+        // }
 
         try
         {

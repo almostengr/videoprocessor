@@ -136,19 +136,39 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
 
     public override async Task ProcessVideoProjectAsync(CancellationToken cancellationToken)
     {
-        if (_fileSystemService.IsSkipProcesssingFilePresent(IncomingDirectory))
+        string? readyFile = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.Ready.Value))
+            .FirstOrDefault();
+
+        if (readyFile == null)
         {
             return;
         }
-        
-        HandymanVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
-            .Select(f => new HandymanVideoProject(f))
-            .FirstOrDefault();
+
+        string projectFileName = Path.GetFileNameWithoutExtension(readyFile) + FileExtension.Tar.Value;
+        HandymanVideoProject? project = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
+           .Where(f => f.ContainsIgnoringCase(projectFileName))
+           .Select(f => new HandymanVideoProject(f))
+           .SingleOrDefault();
 
         if (project == null)
         {
             return;
         }
+
+        // if (_fileSystemService.IsSkipProcesssingFilePresent(IncomingDirectory))
+        // {
+        //     return;
+        // }
+        
+        // HandymanVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
+        //     .Select(f => new HandymanVideoProject(f))
+        //     .FirstOrDefault();
+
+        // if (project == null)
+        // {
+        //     return;
+        // }
 
         try
         {

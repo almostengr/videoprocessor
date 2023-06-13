@@ -50,14 +50,34 @@ public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoSe
 
     public override async Task ProcessVideoProjectAsync(CancellationToken cancellationToken)
     {
-        ToastmastersVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
-            .Select(f => new ToastmastersVideoProject(f))
+        string? readyFile = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
+            .Where(f => f.EndsWithIgnoringCase(FileExtension.Ready.Value))
             .FirstOrDefault();
+
+        if (readyFile == null)
+        {
+            return;
+        }
+
+        string projectFileName = Path.GetFileNameWithoutExtension(readyFile) + FileExtension.Tar.Value;
+        ToastmastersVideoProject? project = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
+           .Where(f => f.ContainsIgnoringCase(projectFileName))
+           .Select(f => new ToastmastersVideoProject(f))
+           .SingleOrDefault();
 
         if (project == null)
         {
             return;
         }
+
+        // ToastmastersVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
+        //     .Select(f => new ToastmastersVideoProject(f))
+        //     .FirstOrDefault();
+
+        // if (project == null)
+        // {
+        //     return;
+        // }
 
         try
         {
