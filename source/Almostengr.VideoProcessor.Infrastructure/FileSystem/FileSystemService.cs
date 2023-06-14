@@ -55,13 +55,6 @@ public sealed class FileSystemService : IFileSystemService
         }
     }
 
-    public string? GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
-    {
-        return GetFilesInDirectory(directory)
-            .Where(f => f.ContainsIgnoringCase(extension.Value) && !f.EndsWithIgnoringCase(FileExtension.Err.Value))
-            .FirstOrDefault();
-    }
-
     public bool IsDiskSpaceAvailable(string directory)
     {
         DriveInfo driveInfo = new DriveInfo(directory);
@@ -92,19 +85,6 @@ public sealed class FileSystemService : IFileSystemService
             CreateDirectory(Path.GetDirectoryName(destination) ?? throw new VideoProcessorException("Directory is null"));
             File.Move(source, destination);
         }
-    }
-
-    public FileInfo[] GetFilesInDirectoryWithInfo(string directory)
-    {
-        return (new DirectoryInfo(directory)).GetFiles();
-    }
-
-    public IEnumerable<string> GetTarballFilesInDirectory(string directory)
-    {
-        return Directory.GetFiles(directory)
-            .Where(f => f.EndsWithIgnoringCase(FileExtension.TarGz.Value) ||
-                        f.EndsWithIgnoringCase(FileExtension.TarXz.Value) ||
-                        f.EndsWithIgnoringCase(FileExtension.Tar.Value));
     }
 
     public IEnumerable<string> GetFilesInDirectory(string directory)

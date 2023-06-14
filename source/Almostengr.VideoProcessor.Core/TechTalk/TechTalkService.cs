@@ -13,7 +13,6 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
     private readonly ISrtSubtitleFileService _srtService;
     private readonly IGzFileCompressionService _gzFileService;
     private readonly IXzFileCompressionService _xzFileService;
-    // private readonly IThumbnailService _thumbnailService;
     private readonly ISrtSubtitleFileService _srtSubtitleService;
 
     public TechTalkService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
@@ -21,7 +20,6 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         ILoggerService<TechTalkService> loggerService, IMusicService musicService,
         ISrtSubtitleFileService srtSubtitleFileService, IAssSubtitleFileService assSubtitleFileService,
         IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService):
-        // ,IThumbnailService thumbnailService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Incoming);
@@ -32,7 +30,6 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         _srtService = srtSubtitleFileService;
         _xzFileService = xzFileService;
         _gzFileService = gzFileService;
-        // _thumbnailService = thumbnailService;
         _srtSubtitleService = srtSubtitleFileService;
 
         _fileSystemService.CreateDirectory(IncomingDirectory);
@@ -78,9 +75,6 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         {
             try
             {
-                // _thumbnailService.GenerateThumbnail<TechTalkThumbnailFile>(
-                //     UploadingDirectory, thumbnailFile);
-
                 _fileSystemService.MoveFile(
                     thumbnailFile.ThumbTxtFilePath,
                     Path.Combine(ArchiveDirectory, Path.GetFileName(thumbnailFile.ThumbTxtFileName())));
@@ -162,20 +156,6 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
             return;
         }
 
-        // if (_fileSystemService.IsSkipProcesssingFilePresent(IncomingDirectory))
-        // {
-        //     return;
-        // }
-        
-        // TechTalkVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
-        //     .Select(f => new TechTalkVideoProject(f))
-        //     .FirstOrDefault();
-
-        // if (project == null)
-        // {
-        //     return;
-        // }
-
         try
         {
             _fileSystemService.DeleteDirectory(WorkingDirectory);
@@ -236,6 +216,7 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
 
             var textOptions = project.BrandingTextOptions().ToList();
             string brandingText = textOptions[_randomService.Next(0, textOptions.Count)];
+
             await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
                 ffmpegInputFilePath, project.VideoGraphics(brandingText), outputFilePath, cancellationToken);
 

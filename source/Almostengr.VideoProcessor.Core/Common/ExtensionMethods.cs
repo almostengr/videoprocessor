@@ -11,11 +11,21 @@ public static class ExtensionMethods
 
     public static bool ContainsIgnoringCase(this string haystack, string needle)
     {
+        if (string.IsNullOrEmpty(haystack))
+        {
+            return false;
+        }
+        
         return haystack.Contains(needle, StringComparison.OrdinalIgnoreCase);
     }
 
     public static bool EndsWithIgnoringCase(this string haystack, string needle)
     {
+        if (string.IsNullOrEmpty(haystack))
+        {
+            return false;
+        }
+        
         return haystack.EndsWith(needle, StringComparison.OrdinalIgnoreCase);
     }
 

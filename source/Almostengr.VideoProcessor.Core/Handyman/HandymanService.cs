@@ -12,13 +12,11 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
 {
     private readonly ILoggerService<HandymanService> _loggerService;
     private readonly ISrtSubtitleFileService _srtSubtitleService;
-    // private readonly IThumbnailService _thumbnailService;
 
     public HandymanService(AppSettings appSettings, IFfmpegService ffmpegService, IFileCompressionService gzipService,
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         IMusicService musicService, ILoggerService<HandymanService> loggerService,
         IAssSubtitleFileService assSubtitleFileService, ISrtSubtitleFileService srtSubtitleFileService) :
-        // ,IThumbnailService thumbnailService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Incoming);
@@ -27,7 +25,6 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
         UploadingDirectory = Path.Combine(_appSettings.HandymanDirectory, DirectoryName.Uploading);
         _loggerService = loggerService;
         _srtSubtitleService = srtSubtitleFileService;
-        // _thumbnailService = thumbnailService;
 
         _fileSystemService.CreateDirectory(IncomingDirectory);
         _fileSystemService.CreateDirectory(UploadingDirectory);
@@ -72,9 +69,6 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
         {
             try
             {
-                // _thumbnailService.GenerateThumbnail<TechTalkThumbnailFile>(
-                //     UploadingDirectory, thumbnailFile);
-
                 _fileSystemService.MoveFile(
                     thumbnailFile.ThumbTxtFilePath,
                     Path.Combine(ArchiveDirectory, Path.GetFileName(thumbnailFile.ThumbTxtFileName())));
@@ -156,20 +150,6 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
             return;
         }
 
-        // if (_fileSystemService.IsSkipProcesssingFilePresent(IncomingDirectory))
-        // {
-        //     return;
-        // }
-        
-        // HandymanVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
-        //     .Select(f => new HandymanVideoProject(f))
-        //     .FirstOrDefault();
-
-        // if (project == null)
-        // {
-        //     return;
-        // }
-
         try
         {
             _fileSystemService.DeleteDirectory(WorkingDirectory);
@@ -184,6 +164,17 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
 
             _fileSystemService.PrepareAllFilesInDirectory(WorkingDirectory);
 
+            var imageFiles = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
+                .Where(f => f.EndsWithIgnoringCase(FileExtension.Jpg.Value))
+                .ToList();
+
+            foreach (string imageFile in imageFiles)
+            {
+                string outputFilePath = Path.Combine(
+                    WorkingDirectory, Path.GetFileNameWithoutExtension(imageFile) + FileExtension.Mp4.Value);
+                await _ffmpegService.ConvertImageFileToVideoAsync(imageFile, outputFilePath, cancellationToken);
+            }
+
             var videoClips = _fileSystemService.GetVideoFilesInDirectoryWithFileInfo(WorkingDirectory)
                 .OrderBy(f => f.Name);
 
@@ -192,25 +183,28 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
                 string audioClipFilePath =
                     Path.Combine(WorkingDirectory, Path.GetFileNameWithoutExtension(videoClip.Name) + FileExtension.Mp3.Value);
 
-                if (File.Exists(audioClipFilePath))
+                bool normalizeAudio = true;
+                if (!File.Exists(audioClipFilePath))
+                {
+                    var result = await _ffmpegService.FfprobeAsync($"\"{videoClip.FullName}\"", WorkingDirectory, cancellationToken);
+
+                    if (result.stdErr.DoesNotContainIgnoringCase(Constant.Audio))
+                    {
+                        _loggerService.LogWarning($"{videoClip.FullName} does not contain any audio.");
+                        normalizeAudio = false;
+                    }
+                    else
+                    {
+                        var audioConversionResult = await _ffmpegService.ConvertVideoFileToMp3FileAsync(
+                            videoClip.FullName, audioClipFilePath, WorkingDirectory, cancellationToken);
+                    }
+                }
+
+                if (normalizeAudio)
                 {
                     await AnalyzeAndNormalizeAudioAsync(audioClipFilePath, cancellationToken);
-                    goto RenderTs;
                 }
 
-                var result = await _ffmpegService.FfprobeAsync($"\"{videoClip.FullName}\"", WorkingDirectory, cancellationToken);
-
-                if (result.stdErr.DoesNotContainIgnoringCase(Constant.Audio))
-                {
-                    throw new NoAudioTrackException($"The video track {videoClip.Name} in project {project.FileName()} does not have audio nor an audio file");
-                }
-
-                var audioConversionResult = await _ffmpegService.ConvertVideoFileToMp3FileAsync(
-                    videoClip.FullName, audioClipFilePath, WorkingDirectory, cancellationToken);
-
-                await AnalyzeAndNormalizeAudioAsync(audioClipFilePath, cancellationToken);
-
-            RenderTs:
                 string tsFilePath =
                     Path.Combine(WorkingDirectory, Path.GetFileNameWithoutExtension(videoClip.Name) + FileExtension.Ts.Value);
 

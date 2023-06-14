@@ -7,11 +7,6 @@ public interface IBaseVideoService
     Task ProcessVideoProjectAsync(CancellationToken cancellationToken);
 }
 
-public interface IReviewVideoService : IBaseVideoService
-{
-    Task ProcessReviewedFilesAsync(CancellationToken cancellationToken);
-}
-
 public interface ITranscriptionService : IBaseVideoService
 {
     Task ProcessSrtSubtitlesAsync(CancellationToken cancellationToken);

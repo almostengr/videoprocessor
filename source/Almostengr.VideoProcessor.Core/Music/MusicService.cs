@@ -63,9 +63,10 @@ public sealed class MusicService : IMusicService
         {
             _fileSystemService.SaveFileContents(ffmpegInputFile, sb.ToString());
 
-            string outputFile = Path.Combine(_appSettings.MusicDirectory, $"{MIX}{DateTime.Now.ToString("yyyyMMddHHmm")}{FileExtension.Mp3.Value}");
-            string arguments = $"-i \"{ffmpegInputFile}\" -c:a copy \"{outputFile}\"";
-            await _ffmpegService.FfmpegAsync(arguments, _appSettings.MusicDirectory, cancellationToken);
+            string outputFile = 
+                Path.Combine(_appSettings.MusicDirectory, $"{MIX}{DateTime.Now.ToString("yyyyMMddHHmm")}{FileExtension.Mp3.Value}");
+            await _ffmpegService.CreateMusicMixTrackAsync(
+                ffmpegInputFile, outputFile, _appSettings.MusicDirectory, cancellationToken);
         }
         catch (Exception ex)
         {

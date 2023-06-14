@@ -10,7 +10,6 @@ using Almostengr.VideoProcessor.Core.Toastmasters;
 using Almostengr.VideoProcessor.Core.TechTalk;
 using Almostengr.VideoProcessor.Core.Music.Services;
 using Almostengr.VideoProcessor.Core.DashCam;
-using Almostengr.VideoProcessor.Infrastructure.Web;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((hostingContext, config) =>

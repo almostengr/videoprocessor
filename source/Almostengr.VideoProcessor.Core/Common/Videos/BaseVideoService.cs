@@ -52,14 +52,6 @@ public abstract class BaseVideoService : IBaseVideoService
         }
     }
 
-    internal IEnumerable<string> GetVideoFilesInDirectory(string directory)
-    {
-        return _fileSystemService.GetFilesInDirectory(directory)
-            .Where(f => f.EndsWithIgnoringCase(FileExtension.Mp4.Value) ||
-                        f.EndsWithIgnoringCase(FileExtension.Mov.Value) ||
-                        f.EndsWithIgnoringCase(FileExtension.Mkv.Value));
-    }
-
     internal void CreateFfmpegInputFile(IEnumerable<string> filesInDirectory, string inputFilePath)
     {
         StringBuilder text = new();
@@ -148,20 +140,5 @@ public abstract class BaseVideoService : IBaseVideoService
             audioClipFilePath, audioClipFilePathTemp, maxVolume, cancellationToken);
 
         _fileSystemService.MoveFile(audioClipFilePathTemp, audioClipFilePath);
-    }
-
-    protected async Task ConvertImageToVideoClipAsync(string imageFilePath, CancellationToken cancellationToken)
-    {
-        string? workingDir = Path.GetDirectoryName(imageFilePath);
-
-        if (string.IsNullOrWhiteSpace(workingDir))
-        {
-            throw new ArgumentException("Path is null or empty", nameof(imageFilePath));
-        }
-
-        string outputFilePath =
-            Path.Combine(workingDir, Path.GetFileNameWithoutExtension(imageFilePath) + FileExtension.Ts.Value);
-
-        await _ffmpegService.RenderTsVideoFileFromImageAsync(imageFilePath, outputFilePath, cancellationToken);
     }
 }
