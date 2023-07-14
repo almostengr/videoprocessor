@@ -1,16 +1,14 @@
 using Almostengr.VideoProcessor.Core.Common;
-using Almostengr.VideoProcessor.Core.Common.Videos;
 using Almostengr.VideoProcessor.Core.Constants;
 
-namespace Almostengr.VideoProcessor.Core.DashCam;
+namespace Almostengr.VideoProcessor.Core.Videos;
 
 public sealed partial class DashCamVideoProject : BaseVideoProject
 {
     internal DashCamVideoType SubType { get; private set; }
 
-    public DashCamVideoProject(string filePath) : base(filePath)
+    public DashCamVideoProject(string filePath, string baseDirectory) : base(filePath, baseDirectory)
     {
-
         if (filePath.ContainsIgnoringCase("bad drivers of montgomery"))
         {
             throw new ArgumentException("Title contains invalid text");
@@ -18,6 +16,17 @@ public sealed partial class DashCamVideoProject : BaseVideoProject
 
         SetSubtype(FileName());
     }
+
+    public override string ArchiveDirectory()
+    {
+        return Path.Combine(BaseDirectory, "archivedashcam");
+    }
+
+    public override string UploadDirectory()
+    {
+        return Path.Combine(BaseDirectory, "uploaddashcam");
+    }
+
 
     private void SetSubtype(string title)
     {
@@ -61,8 +70,19 @@ public sealed partial class DashCamVideoProject : BaseVideoProject
         }
     }
 
-    public override IEnumerable<string> BrandingTextOptions()
+    public override List<string> BrandingTextOptions()
     {
-        return new string[] { "Kenny Ram Dash Cam", "#KennyRamDashCam" };
+        List<string> options = new();
+        options.Add("Kenny Ram Dash Cam");
+        options.Add("#KennyRamDashCam");
+        return options;
+    }
+
+    internal enum DashCamVideoType
+    {
+        Normal,
+        Night,
+        Fireworks,
+        CarRepair
     }
 }

@@ -1,4 +1,4 @@
-namespace Almostengr.VideoProcessor.Core.Constants;
+namespace Almostengr.VideoProcessor.Core.Videos;
 
 public struct FfMpegColor
 {

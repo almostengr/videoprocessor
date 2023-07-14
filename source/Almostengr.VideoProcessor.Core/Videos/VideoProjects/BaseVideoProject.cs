@@ -1,15 +1,17 @@
 using System.Text;
 using Almostengr.VideoProcessor.Core.Common.Constants;
-using Almostengr.VideoProcessor.Core.Common.Videos.Exceptions;
 using Almostengr.VideoProcessor.Core.Constants;
+using Almostengr.VideoProcessor.Core.Videos.Exceptions;
+using Almostengr.VideoProcessor.Core.Common;
 
-namespace Almostengr.VideoProcessor.Core.Common.Videos;
+namespace Almostengr.VideoProcessor.Core.Videos;
 
-public abstract partial class BaseVideoProject
+public abstract partial class BaseVideoProject : IVideoProject
 {
-    public string FilePath { get; init; }
+    public string _filePath { get; init; }
+    public string BaseDirectory { get; init; }
 
-    public BaseVideoProject(string filePath)
+    public BaseVideoProject(string filePath, string baseDirectory)
     {
         if (string.IsNullOrWhiteSpace(filePath))
         {
@@ -24,10 +26,19 @@ public abstract partial class BaseVideoProject
             throw new ArgumentException(Constant.FileTypeIsIncorrect, nameof(filePath));
         }
 
-        FilePath = filePath;
+        _filePath = filePath;
+
+        BaseDirectory = baseDirectory;
     }
 
-    public abstract IEnumerable<string> BrandingTextOptions();
+    public string FilePath()
+    {
+        return _filePath;
+    }
+
+    public abstract string ArchiveDirectory();
+    public abstract string UploadDirectory();
+    public abstract List<string> BrandingTextOptions();
 
     public virtual FfMpegColor DrawTextFilterBackgroundColor()
     {
@@ -38,6 +49,7 @@ public abstract partial class BaseVideoProject
     {
         return FfMpegColor.White;
     }
+
 
     public string ThumbnailFileName()
     {
@@ -65,7 +77,7 @@ public abstract partial class BaseVideoProject
 
     public string VideoFileName()
     {
-        return Path.GetFileName(FilePath)
+        return Path.GetFileName(_filePath)
             .ReplaceIgnoringCase(FileExtension.TarXz.Value, string.Empty)
             .ReplaceIgnoringCase(FileExtension.TarGz.Value, string.Empty)
             .ReplaceIgnoringCase(FileExtension.Tar.Value, string.Empty)
@@ -75,7 +87,7 @@ public abstract partial class BaseVideoProject
 
     public string ChaptersFileName()
     {
-        return Path.GetFileName(FilePath)
+        return Path.GetFileName(_filePath)
             .ReplaceIgnoringCase(FileExtension.TarXz.Value, string.Empty)
             .ReplaceIgnoringCase(FileExtension.TarGz.Value, string.Empty)
             .ReplaceIgnoringCase(FileExtension.Tar.Value, string.Empty)
@@ -85,10 +97,10 @@ public abstract partial class BaseVideoProject
 
     public string FileName()
     {
-        return Path.GetFileName(FilePath);
+        return Path.GetFileName(_filePath);
     }
 
-    internal string ChannelBrandDrawTextFilter(string brandingText)
+    public string ChannelBrandDrawTextFilter(string brandingText)
     {
         StringBuilder stringBuilder = new();
         stringBuilder.Append(

@@ -26,4 +26,11 @@ public struct FileExtension
     public static readonly FileExtension TarXz = new FileExtension(".tar.xz");
     public static readonly FileExtension ThumbTxt = new FileExtension(".thumbtxt");
     public static readonly FileExtension Ts = new FileExtension(".ts");
+
+    public static readonly FileExtension AutoRepairTar = new FileExtension(".autorepair.tar");
+    public static readonly FileExtension DashCamTar = new FileExtension(".dashcam.tar");
+    public static readonly FileExtension FireworksTar = new FileExtension(".fireworks.tar");
+    public static readonly FileExtension HandymanTar = new FileExtension(".handyman.tar");
+    public static readonly FileExtension TechnologyTar = new FileExtension(".technology.tar");
+    public static readonly FileExtension ToastmastersTar = new FileExtension(".toastmasters.tar");
 }

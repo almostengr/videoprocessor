@@ -139,7 +139,8 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
             return;
         }
 
-        string projectFileName = Path.GetFileNameWithoutExtension(readyFile) + FileExtension.Tar.Value;
+        string projectFileName =
+            Path.GetFileName(readyFile.ReplaceIgnoringCase(FileExtension.Ready.Value, FileExtension.Tar.Value));
         HandymanVideoProject? project = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
            .Where(f => f.ContainsIgnoringCase(projectFileName))
            .Select(f => new HandymanVideoProject(f))
@@ -232,14 +233,14 @@ public sealed class HandymanService : BaseVideoService, IHandymanVideoService, I
             _fileSystemService.MoveFile(project.FilePath, Path.Combine(ArchiveDirectory, project.FileName()));
             _fileSystemService.MoveFile(
                 outputVideoFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
-
+            _fileSystemService.DeleteFile(readyFile);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
             _loggerService.LogErrorProcessingFile(project.FilePath, ex);
-            _fileSystemService.MoveFile(project.FilePath, project.FilePath + FileExtension.Err.Value);
+            _fileSystemService.MoveFile(readyFile, readyFile + FileExtension.Err.Value);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
     }

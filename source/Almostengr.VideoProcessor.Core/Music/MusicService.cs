@@ -29,8 +29,8 @@ public sealed class MusicService : IMusicService
     public AudioFile GetRandomMixTrack()
     {
         var musicMixes = _fileSystemService.GetFilesInDirectory(_appSettings.MusicDirectory)
-            .Where(x => x.ContainsIgnoringCase(MIX) && x.EndsWithIgnoringCase(FileExtension.Mp3.Value))
-            .Select(x => new AudioFile(x));
+            .Where(f => f.ContainsIgnoringCase(MIX) && f.EndsWithIgnoringCase(FileExtension.Mp3.Value))
+            .Select(f => new AudioFile(f));
 
         if (musicMixes.Count() == 0)
         {

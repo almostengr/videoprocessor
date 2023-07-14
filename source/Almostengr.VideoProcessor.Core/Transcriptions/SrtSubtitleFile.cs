@@ -1,8 +1,8 @@
 using System.Text;
+using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Constants;
 using Almostengr.VideoProcessor.Core.Constants;
-
-namespace Almostengr.VideoProcessor.Core.Common.Videos;
+namespace Almostengr.VideoProcessor.Core.Transcriptions;
 
 public abstract class SrtSubtitleFile
 {

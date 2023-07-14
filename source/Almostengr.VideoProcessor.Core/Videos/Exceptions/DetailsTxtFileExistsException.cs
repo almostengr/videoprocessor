@@ -1,6 +1,7 @@
 using System.Runtime.Serialization;
+using Almostengr.VideoProcessor.Core.Common;
 
-namespace Almostengr.VideoProcessor.Core.Common.Videos.Exceptions
+namespace Almostengr.VideoProcessor.Core.Videos.Exceptions
 {
     [Serializable]
     internal class DetailsTxtFileExistsException : VideoProcessorException

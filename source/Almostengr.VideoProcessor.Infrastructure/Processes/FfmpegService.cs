@@ -10,6 +10,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
 {
     private const string FFMPEG_BINARY = "/usr/bin/ffmpeg";
     private const string FFPROBE_BINARY = "/usr/bin/ffprobe";
+    private const string HARDWARE_RENDERING_FAILED = "Hardware rendering failed. Using CPU rendering.";
     private readonly IFileSystemService _fileSystem;
     private readonly ILoggerService<FfmpegService> _logger;
 
@@ -37,6 +38,9 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     private async Task<(string stdOut, string stdErr)> FfmpegAsync(
         string arguments, string workingDirectory, CancellationToken cancellationToken)
     {
+        _ = arguments ?? throw new ArgumentException(nameof(arguments));
+        _ = workingDirectory ?? throw new ArgumentException(nameof(workingDirectory));
+
         StringBuilder args = new();
         args.Append("-y -hide_banner ");
         if (!arguments.Contains("volumedetect"))
@@ -93,7 +97,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
-    public async Task<(string stdout, string stdErr)> AddAudioToVideoAsync(
+    public async Task<(string stdOut, string stdErr)> AddAudioToVideoAsync(
         string videoFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory =
@@ -106,7 +110,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         );
     }
 
-    public async Task<(string stdout, string stdErr)> AddAccAudioToVideoAsync(
+    public async Task<(string stdOut, string stdErr)> AddAccAudioToVideoAsync(
         string videoFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory =
@@ -119,7 +123,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         );
     }
 
-    public async Task<(string stdout, string stdErr)> ConcatTsFilesToMp4FileAsync(
+    public async Task<(string stdOut, string stdErr)> ConcatTsFilesToMp4FileAsync(
         string ffmpegInputFilePath, string outputFilePath, string videoFilter, CancellationToken cancellationToken)
     {
         string workingDirectory = Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
@@ -130,7 +134,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken);
     }
 
-    public async Task<(string stdout, string stdErr)> ConcatTsFilesToMp4FileAsync(
+    public async Task<(string stdOut, string stdErr)> ConcatTsFilesToMp4FileAsync(
         string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory = Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
@@ -141,7 +145,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken);
     }
 
-    public async Task<(string stdout, string stdErr)> ConvertMp4VideoFileToTsFormatAsync(
+    public async Task<(string stdOut, string stdErr)> ConvertMp4VideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
 
@@ -166,7 +170,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
     }
 
 
-    public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatWithFiltersAsync(
+    public async Task<(string stdOut, string stdErr)> ConvertVideoFileToTsFormatWithFiltersAsync(
         string videoFilePath, string outputFilePath, string videoFilters, CancellationToken cancellationToken)
     {
 
@@ -187,13 +191,13 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
-    public async Task<(string stdout, string stdErr)> ConvertVideoFileToTsFormatAsync(
+    public async Task<(string stdOut, string stdErr)> ConvertVideoFileToTsFormatAsync(
         string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
 
         if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
         {
-            throw new ArgumentException("Invalid path(s) provided");
+            throw new ArgumentException("Invalid path(s) provided", nameof(videoFilePath));
         }
 
         if (!videoFilePath.IsVideoFile())
@@ -208,7 +212,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
-    public async Task<(string stdout, string stdErr)> ConvertVideoFileToMp3FileAsync(
+    public async Task<(string stdOut, string stdErr)> ConvertVideoFileToMp3FileAsync(
         string videoInputFilePath, string audioOutputFilePath, string workingDirectory, CancellationToken cancellationToken)
     {
         return await FfmpegAsync(
@@ -217,9 +221,12 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken);
     }
 
-    public async Task<(string stdout, string stdErr)> RenderVideoWithFiltersAsync(
+    public async Task<(string stdOut, string stdErr)> RenderVideoWithFiltersAsync(
         string videoFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken)
     {
+        _ = videoFilePath ?? throw new ArgumentException(nameof(videoFilePath));
+        _ = videoFilters ?? throw new ArgumentException(nameof(videoFilters));
+        _ = outputFilePath ?? throw new ArgumentException(nameof(outputFilePath));
         string workingDirectory =
             Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
         string arguments =
@@ -236,9 +243,12 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         }
     }
 
-    public async Task<(string stdout, string stdErr)> RenderVideoWithInputFileAndFiltersAsync(
+    public async Task<(string stdOut, string stdErr)> RenderVideoWithInputFileAndFiltersAsync(
         string ffmpegInputFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken)
     {
+        _ = ffmpegInputFilePath ?? throw new ArgumentException(nameof(ffmpegInputFilePath));
+        _ = videoFilters ?? throw new ArgumentException(nameof(videoFilters));
+        _ = outputFilePath ?? throw new ArgumentException(nameof(outputFilePath));
         string workingDirectory =
             Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
         string arguments =
@@ -250,15 +260,19 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         }
         catch (FfmpegRenderVideoException)
         {
-            _logger.LogWarning("Hardware rendering failed. Using CPU rendering.");
+            _logger.LogWarning(HARDWARE_RENDERING_FAILED);
             arguments = $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -vf \"{videoFilters}\" \"{outputFilePath}\"";
             return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
         }
     }
 
-    public async Task<(string stdout, string stdErr)> RenderVideoWithInputFileAndAudioAndFiltersAsync(
+    public async Task<(string stdOut, string stdErr)> RenderVideoWithInputFileAndAudioAndFiltersAsync(
         string ffmpegInputFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
     {
+        _ = ffmpegInputFilePath ?? throw new ArgumentException(nameof(ffmpegInputFilePath));
+        _ = audioTrackFilePath ?? throw new ArgumentException(nameof(audioTrackFilePath));
+        _ = outputFilePath ?? throw new ArgumentException(nameof(outputFilePath));
+
         string workingDirectory =
             Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
         string arguments =
@@ -270,7 +284,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         }
         catch (FfmpegRenderVideoException)
         {
-            _logger.LogWarning("Hardware rendering failed. Using CPU rendering.");
+            _logger.LogWarning(HARDWARE_RENDERING_FAILED);
             arguments = $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -i \"{audioTrackFilePath}\" -vf \"{videoFilter}\" -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
             return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
         }
@@ -285,9 +299,9 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
 
     public async Task<(string stdOut, string stdErr)> AdjustAudioVolumeAsync(string inputFilePath, string outputFilePath, float maxVolume, CancellationToken cancellationToken)
     {
-        if (!outputFilePath.EndsWithIgnoringCase(FileExtension.Mp3.Value))
+        if (!outputFilePath.EndsWithIgnoringCase(FileExtension.Mp3.Value) || string.IsNullOrEmpty(outputFilePath))
         {
-            throw new ArgumentException("Invalid output file name");
+            throw new ArgumentException("Invalid output file name", nameof(outputFilePath));
         }
 
         string workingDirectory = Path.GetDirectoryName(inputFilePath) ?? throw new ArgumentException("Invalid working directory", nameof(inputFilePath));
@@ -312,7 +326,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
-    public async Task<(string stdout, string stdErr)> RenderTimelapseVideoAsync(string videoFilePath, CancellationToken cancellationToken)
+    public async Task<(string stdOut, string stdErr)> RenderTimelapseVideoAsync(string videoFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory = Path.GetDirectoryName(videoFilePath) ?? throw new ArgumentException("Invalid working directory", nameof(videoFilePath));
         string outputFilePath =
@@ -321,7 +335,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
-    public async Task<(string stdout, string stdErr)> ConvertImageFileToVideoAsync(string imageFile, string outputFilePath, CancellationToken cancellationToken)
+    public async Task<(string stdOut, string stdErr)> ConvertImageFileToVideoAsync(string imageFile, string outputFilePath, CancellationToken cancellationToken)
     {
         string workingDirectory = Path.GetDirectoryName(outputFilePath) ?? throw new ArgumentException("Invalid working directory", nameof(outputFilePath));
         const int DURATION = 3;
@@ -329,7 +343,7 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
-    public async Task<(string stdout, string stdError)> CreateMusicMixTrackAsync(
+    public async Task<(string stdOut, string stdErr)> CreateMusicMixTrackAsync(
         string ffmpegInputFile, string outputFile, string workingDirectory, CancellationToken cancellationToken)
     {
         _ = ffmpegInputFile ?? throw new ArgumentNullException(nameof(ffmpegInputFile));

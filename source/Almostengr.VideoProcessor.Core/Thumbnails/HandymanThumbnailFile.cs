@@ -1,6 +1,4 @@
-using Almostengr.VideoProcessor.Core.Common.Videos;
-
-namespace Almostengr.VideoProcessor.Core.Handyman;
+namespace Almostengr.VideoProcessor.Core.Thumbnails;
 
 public sealed class HandymanThumbnailFile : BaseThumbnailFile
 {

@@ -6,6 +6,9 @@ public sealed class AppSettings
     public string HandymanDirectory { get; init; }
     public string TechnologyDirectory { get; init; }
     public string ToastmastersDirectory { get; init; }
+    public string IncomingVideoDirectory { get; init; }
+    public string WorkingVideoDirectory { get; init; }
+    public string BaseVideoDirectory {get; init;}
     public string MusicDirectory { get; init; }
     public TimeSpan LongWorkerDelay { get; init; }
     public TimeSpan ShortWorkerDelay { get; init; }
@@ -13,6 +16,7 @@ public sealed class AppSettings
     public int DeleteFilesAfterDays { get; init; }
     public string YouTubeApiKey { get; init; }
     public readonly string AppName;
+
     public string ChromeDriverPath { get; init; }
 
     public AppSettings()
@@ -22,30 +26,36 @@ public sealed class AppSettings
         if (IsReleaseMode())
         {
             const string pbaseDirectory = "/mnt/3761e00d-e29b-4073-b282-589ade503755";
+            BaseVideoDirectory = pbaseDirectory;
             DashCamDirectory = $"{pbaseDirectory}/dashcam";
             DeleteFilesAfterDays = 0;
             DiskSpaceThreshold = 0;
             HandymanDirectory = $"{pbaseDirectory}/handyman";
+            IncomingVideoDirectory = $"{pbaseDirectory}/incomingvideo";
             MusicDirectory = string.Empty;
             TechnologyDirectory = $"{pbaseDirectory}/technology";
             ToastmastersDirectory = $"{pbaseDirectory}/toastmasters";
             LongWorkerDelay = TimeSpan.FromHours(2);
             ShortWorkerDelay = TimeSpan.FromMinutes(60);
+            WorkingVideoDirectory = $"{pbaseDirectory}/workingvideo";
             YouTubeApiKey = Environment.GetEnvironmentVariable("YouTubeApiKey") ?? string.Empty;
             ChromeDriverPath = "/home/iamadmin/videoprocessor/chromedriver";
             return;
         }
 
         const string baseDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3";
+        BaseVideoDirectory = baseDirectory;
         DashCamDirectory = $"{baseDirectory}/dashcam";
         DeleteFilesAfterDays = 0; // 0 to disable
         DiskSpaceThreshold = 0; // 0.0 to disable
         HandymanDirectory = $"{baseDirectory}/handyman";
+        IncomingVideoDirectory = $"{baseDirectory}/incomingvideo";
         MusicDirectory = "/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music";
         TechnologyDirectory = $"{baseDirectory}/technology";
         ToastmastersDirectory = $"{baseDirectory}/toastmasters";
         LongWorkerDelay = TimeSpan.FromSeconds(30);
         ShortWorkerDelay = TimeSpan.FromSeconds(15);
+        WorkingVideoDirectory = $"{baseDirectory}/workingvideo";
         YouTubeApiKey = string.Empty;
         ChromeDriverPath = "/home/almostengineer/Downloads";
     }

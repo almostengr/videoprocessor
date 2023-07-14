@@ -1,7 +1,7 @@
 using System.Text;
 using Almostengr.VideoProcessor.Core.Constants;
 
-namespace Almostengr.VideoProcessor.Core.Common.Videos;
+namespace Almostengr.VideoProcessor.Core.Videos;
 
 internal sealed class DrawTextFilter
 {

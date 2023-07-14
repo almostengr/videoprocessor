@@ -65,7 +65,8 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
             return;
         }
 
-        string projectFileName = Path.GetFileNameWithoutExtension(readyFile) + FileExtension.Tar.Value;
+        string projectFileName =
+            Path.GetFileName(readyFile.ReplaceIgnoringCase(FileExtension.Ready.Value, FileExtension.Tar.Value));
         DashCamVideoProject? project = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
            .Where(f => f.ContainsIgnoringCase(projectFileName))
            .Select(f => new DashCamVideoProject(f))
@@ -121,7 +122,6 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
 
                 var graphicsContent = _csvGraphicsFileService.ReadFile(streetsFile);
 
-
                 foreach (var graphic in graphicsContent)
                 {
                     videoFilters.Append(Constant.CommaSpace);
@@ -129,8 +129,8 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
                     FfMpegColor textColor = FfMpegColor.White;
                     FfMpegColor bgColor = FfMpegColor.Green;
                     Opacity bgOpacity = Opacity.Full;
-
                     const string INFO = "info";
+
                     if (
                         graphic.Text.ContainsIgnoringCase(INFO) ||
                         graphic.Text.ContainsIgnoringCase("mile drive")
@@ -156,8 +156,8 @@ public sealed class DashCamService : BaseVideoService, IDashCamVideoService
                 }
             }
 
-            string chaptersFilePath = Path.Combine(UploadingDirectory, project.ChaptersFileName());
-            _fileSystemService.SaveFileContents(chaptersFilePath, videoChapters.ToString());
+            // string chaptersFilePath = Path.Combine(UploadingDirectory, project.ChaptersFileName());
+            // _fileSystemService.SaveFileContents(chaptersFilePath, videoChapters.ToString());
 
             string? ffmpegInputFilePath = _fileSystemService.GetFilesInDirectory(WorkingDirectory)
                 .Where(f => f.EndsWithIgnoringCase(FileExtension.FfmpegInput.Value))

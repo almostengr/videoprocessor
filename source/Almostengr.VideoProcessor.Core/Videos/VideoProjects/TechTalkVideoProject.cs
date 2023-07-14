@@ -1,15 +1,14 @@
 using System.Text;
 using Almostengr.VideoProcessor.Core.Common;
-using Almostengr.VideoProcessor.Core.Common.Videos;
 using Almostengr.VideoProcessor.Core.Constants;
 
-namespace Almostengr.VideoProcessor.Core.TechTalk;
+namespace Almostengr.VideoProcessor.Core.Videos;
 
 public sealed class TechTalkVideoProject : BaseVideoProject
 {
     public TechTalkVideoSubType SubType { get; private set; }
 
-    public TechTalkVideoProject(string filePath) : base(filePath)
+    public TechTalkVideoProject(string filePath, string baseDirectory) : base(filePath, baseDirectory)
     {
         SubType = TechTalkVideoSubType.TechTalk;
 
@@ -23,15 +22,15 @@ public sealed class TechTalkVideoProject : BaseVideoProject
         }
     }
 
-    public override IEnumerable<string> BrandingTextOptions()
+    public override List<string> BrandingTextOptions()
     {
-        return new string[] {
-            "Tech Talk with RHT Services",
-            Constant.ROBINSON_SERVICES,
-            Constant.RHT_WEBSITE,
-            "@rhtservicestech",
-            "#rhtservicestech",
-        };
+        List<string> options = new();
+        options.Add("Tech Talk with RHT Services");
+        options.Add(Constant.ROBINSON_SERVICES);
+        options.Add(Constant.RHT_WEBSITE);
+        options.Add("@rhtservicestech");
+        options.Add("#rhtservicestech");
+        return options;
     }
 
     public override FfMpegColor DrawTextFilterBackgroundColor()
@@ -64,6 +63,16 @@ public sealed class TechTalkVideoProject : BaseVideoProject
         }
 
         return stringBuilder.ToString();
+    }
+
+    public override string ArchiveDirectory()
+    {
+        return Path.Combine(BaseDirectory, "archivetech");
+    }
+
+    public override string UploadDirectory()
+    {
+        return Path.Combine(BaseDirectory, "uploadtech");
     }
 
     public enum TechTalkVideoSubType

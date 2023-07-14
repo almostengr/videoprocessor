@@ -1,7 +1,6 @@
 using Almostengr.VideoProcessor.Core.Common;
-using Almostengr.VideoProcessor.Core.Common.Videos;
 
-namespace Almostengr.VideoProcessor.Core.Handyman;
+namespace Almostengr.VideoProcessor.Core.Transcriptions;
 
 public sealed class HandymanSrtSubtitleFile : SrtSubtitleFile
 {

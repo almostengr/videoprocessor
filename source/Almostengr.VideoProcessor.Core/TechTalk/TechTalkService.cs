@@ -19,7 +19,7 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
         ITarballService tarballService, IFileSystemService fileSystemService, IRandomService randomService,
         ILoggerService<TechTalkService> loggerService, IMusicService musicService,
         ISrtSubtitleFileService srtSubtitleFileService, IAssSubtitleFileService assSubtitleFileService,
-        IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService):
+        IXzFileCompressionService xzFileService, IGzFileCompressionService gzFileService) :
         base(appSettings, ffmpegService, gzipService, tarballService, fileSystemService, randomService, musicService, assSubtitleFileService)
     {
         IncomingDirectory = Path.Combine(_appSettings.TechnologyDirectory, DirectoryName.Incoming);
@@ -145,7 +145,8 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
             return;
         }
 
-        string projectFileName = Path.GetFileNameWithoutExtension(readyFile) + FileExtension.Tar.Value;
+        string projectFileName =
+            Path.GetFileName(readyFile.ReplaceIgnoringCase(FileExtension.Ready.Value, FileExtension.Tar.Value));
         TechTalkVideoProject? project = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
            .Where(f => f.ContainsIgnoringCase(projectFileName))
            .Select(f => new TechTalkVideoProject(f))
@@ -226,14 +227,14 @@ public sealed class TechTalkService : BaseVideoService, ITechTalkVideoService, I
             _fileSystemService.MoveFile(project.FilePath, Path.Combine(ArchiveDirectory, project.FileName()));
             _fileSystemService.MoveFile(
                 outputFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
-
+            _fileSystemService.DeleteFile(readyFile);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
             _loggerService.LogErrorProcessingFile(project.FilePath, ex);
-            _fileSystemService.MoveFile(project.FilePath, project.FilePath + FileExtension.Err.Value);
+            _fileSystemService.MoveFile(readyFile, readyFile + FileExtension.Err.Value);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
     }

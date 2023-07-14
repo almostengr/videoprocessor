@@ -59,7 +59,8 @@ public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoSe
             return;
         }
 
-        string projectFileName = Path.GetFileNameWithoutExtension(readyFile) + FileExtension.Tar.Value;
+        string projectFileName =
+            Path.GetFileName(readyFile.ReplaceIgnoringCase(FileExtension.Ready.Value, FileExtension.Tar.Value));
         ToastmastersVideoProject? project = _fileSystemService.GetFilesInDirectory(IncomingDirectory)
            .Where(f => f.ContainsIgnoringCase(projectFileName))
            .Select(f => new ToastmastersVideoProject(f))
@@ -69,15 +70,6 @@ public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoSe
         {
             return;
         }
-
-        // ToastmastersVideoProject? project = _fileSystemService.GetTarballFilesInDirectory(IncomingDirectory)
-        //     .Select(f => new ToastmastersVideoProject(f))
-        //     .FirstOrDefault();
-
-        // if (project == null)
-        // {
-        //     return;
-        // }
 
         try
         {
@@ -101,20 +93,21 @@ public sealed class ToastmastersService : BaseVideoService, IToastmastersVideoSe
             var textOptions = project.BrandingTextOptions().ToList();
             string brandingText = textOptions[_randomService.Next(0, textOptions.Count)];
             string outputFilePath = Path.Combine(WorkingDirectory, project.VideoFileName());
-            
+
             await _ffmpegService.RenderVideoWithInputFileAndFiltersAsync(
                 ffmpegInputFilePath, project.ChannelBrandDrawTextFilter(brandingText), outputFilePath, cancellationToken);
 
             _fileSystemService.MoveFile(outputFilePath, Path.Combine(UploadingDirectory, project.VideoFileName()));
             _fileSystemService.MoveFile(
                 project.FilePath, Path.Combine(ArchiveDirectory, project.FileName()));
+            _fileSystemService.DeleteFile(readyFile);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
         catch (Exception ex)
         {
             _loggerService.LogError(ex, ex.Message);
             _loggerService.LogErrorProcessingFile(project.FilePath, ex);
-            _fileSystemService.MoveFile(project.FilePath, project.FilePath + FileExtension.Err.Value);
+            _fileSystemService.MoveFile(readyFile, readyFile + FileExtension.Err.Value);
             _fileSystemService.DeleteDirectory(WorkingDirectory);
         }
     }
