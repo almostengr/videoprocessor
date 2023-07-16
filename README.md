@@ -32,10 +32,9 @@ so that it can be used for the video thumbnail.
 
 ## Video Schedule By Channel
 
-* Kenny Ram Dash Cam - Videos released weekly
+* Kenny Ram Dash Cam - Videos released weekly on Sundays
 * Robinson Handy and Technology Services - Videos released on Saturdays
 * Tech Talk with RHT Services - released on Tuesdays
-* [rhtservices.net](https://rhtservices.net) website will be updated monthly with the transcriptions of the videos released
 
 ## References
 
@@ -67,4 +66,27 @@ ffmpeg -i out165.mov -an -c:v copy uncut165.mp4
 
 ```bash
 ffmpeg -i out165.mov -an -vf scale=1920:1080 scaled165.mov
+```
+
+### Concat Video Timelapse Files
+
+```bash
+for file in *MP4
+do
+echo "file $file" >> input.txt
+done
+
+ffmpeg -f concat -i input.txt -c:v copy output.mp4
+```
+
+### Create Video With Image Files
+
+```bash
+ffmpeg -framerate 1/3 -pattern_type glob -i '*.jpg' -c:v libx264 -r 30 -pix_fmt yuv420p output.mp4
+```
+
+### Add Music To Video
+
+```bash
+fmpeg -i 20230401_110000.mp4 -i ../../../ytvideostructure/07music/mix03.mp3 -shortest -c:v copy -c:a copy -map 0:v:0 -map 1:a:0 output.mp4
 ```

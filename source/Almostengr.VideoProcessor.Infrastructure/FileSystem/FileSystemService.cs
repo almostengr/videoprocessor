@@ -16,13 +16,6 @@ public sealed class FileSystemService : IFileSystemService
         _appSettings = appSettings;
     }
 
-    public bool IsSkipProcesssingFilePresent(string directory)
-    {
-        return GetFilesInDirectory(directory)
-            .Where(f => f.EndsWithIgnoringCase(FileExtension.NoProcessing.Value))
-            .Any();
-    }
-
     public void CreateDirectory(string directory)
     {
         if (string.IsNullOrWhiteSpace(directory))
@@ -52,13 +45,6 @@ public sealed class FileSystemService : IFileSystemService
         {
             Directory.Delete(directory, true);
         }
-    }
-
-    public string? GetRandomFileByExtensionFromDirectory(string directory, FileExtension extension)
-    {
-        return GetFilesInDirectory(directory)
-            .Where(f => f.ContainsIgnoringCase(extension.Value) && !f.EndsWithIgnoringCase(FileExtension.Err.Value))
-            .FirstOrDefault();
     }
 
     public bool IsDiskSpaceAvailable(string directory)
@@ -91,19 +77,6 @@ public sealed class FileSystemService : IFileSystemService
             CreateDirectory(Path.GetDirectoryName(destination) ?? throw new VideoProcessorException("Directory is null"));
             File.Move(source, destination);
         }
-    }
-
-    public FileInfo[] GetFilesInDirectoryWithInfo(string directory)
-    {
-        return (new DirectoryInfo(directory)).GetFiles();
-    }
-
-    public IEnumerable<string> GetTarballFilesInDirectory(string directory)
-    {
-        return Directory.GetFiles(directory)
-            .Where(f => f.EndsWithIgnoringCase(FileExtension.TarGz.Value) ||
-                        f.EndsWithIgnoringCase(FileExtension.TarXz.Value) ||
-                        f.EndsWithIgnoringCase(FileExtension.Tar.Value));
     }
 
     public IEnumerable<string> GetFilesInDirectory(string directory)
@@ -174,5 +147,10 @@ public sealed class FileSystemService : IFileSystemService
             .Where(f => f.FullName.EndsWithIgnoringCase(FileExtension.Mov.Value) ||
                         f.FullName.EndsWithIgnoringCase(FileExtension.Mkv.Value) ||
                         f.FullName.EndsWithIgnoringCase(FileExtension.Mp4.Value));
+    }
+
+    public bool DoesDirectoryExist(string directory)
+    {
+        return Directory.Exists(directory);
     }
 }

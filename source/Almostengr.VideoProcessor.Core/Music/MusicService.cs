@@ -29,8 +29,8 @@ public sealed class MusicService : IMusicService
     public AudioFile GetRandomMixTrack()
     {
         var musicMixes = _fileSystemService.GetFilesInDirectory(_appSettings.MusicDirectory)
-            .Where(x => x.ContainsIgnoringCase(MIX) && x.EndsWithIgnoringCase(FileExtension.Mp3.Value))
-            .Select(x => new AudioFile(x));
+            .Where(f => f.ContainsIgnoringCase(MIX) && f.EndsWithIgnoringCase(FileExtension.Mp3.Value))
+            .Select(f => new AudioFile(f));
 
         if (musicMixes.Count() == 0)
         {
@@ -63,9 +63,10 @@ public sealed class MusicService : IMusicService
         {
             _fileSystemService.SaveFileContents(ffmpegInputFile, sb.ToString());
 
-            string outputFile = Path.Combine(_appSettings.MusicDirectory, $"{MIX}{DateTime.Now.ToString("yyyyMMddHHmm")}{FileExtension.Mp3.Value}");
-            string arguments = $"-i \"{ffmpegInputFile}\" -c:a copy \"{outputFile}\"";
-            await _ffmpegService.FfmpegAsync(arguments, _appSettings.MusicDirectory, cancellationToken);
+            string outputFile = 
+                Path.Combine(_appSettings.MusicDirectory, $"{MIX}{DateTime.Now.ToString("yyyyMMddHHmm")}{FileExtension.Mp3.Value}");
+            await _ffmpegService.CreateMusicMixTrackAsync(
+                ffmpegInputFile, outputFile, _appSettings.MusicDirectory, cancellationToken);
         }
         catch (Exception ex)
         {

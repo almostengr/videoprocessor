@@ -51,6 +51,8 @@ public abstract class BaseProcess<T>
 
         await process.WaitForExitAsync(cancellationToken);
 
+        _loggerService.LogInformation($"Done running {binary} {arguments}");
+
         return await Task.FromResult((process.ExitCode, output, error));
     }
 }

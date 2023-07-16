@@ -5,7 +5,7 @@ namespace Almostengr.VideoProcessor.Core.Music;
 
 public sealed class AudioFile
 {
-    public string FilePath { get; private set; }
+    public string FilePath { get; init; }
 
     public AudioFile(string filePath)
     {
@@ -20,10 +20,5 @@ public sealed class AudioFile
         }
 
         FilePath = filePath;
-    }
-    
-    public string FileName()
-    {
-        return Path.GetFileName(FilePath);
     }
 }

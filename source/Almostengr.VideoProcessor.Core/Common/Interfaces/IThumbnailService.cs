@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Core.Common.Videos;
+using Almostengr.VideoProcessor.Core.Thumbnails;
 
 namespace Almostengr.VideoProcessor.Core.Common.Interfaces;
 
