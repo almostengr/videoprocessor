@@ -1,3 +1,5 @@
+using Almostengr.VideoProcessor.Core.Constants;
+
 namespace Almostengr.VideoProcessor.Core.Videos;
 
 public sealed class ToastmastersVideoProject : BaseVideoProject
@@ -18,12 +20,12 @@ public sealed class ToastmastersVideoProject : BaseVideoProject
     
     public override string UploadDirectory()
     {
-        return Path.Combine(BaseDirectory, "uploadtoastmaster");
+        return Path.Combine(BaseDirectory, Constant.ToastmastersUploadDirectory);
     }
 
     public override string ArchiveDirectory()
     {
-        return Path.Combine(BaseDirectory, "archivetoastmasters");
+        return Path.Combine(BaseDirectory, Constant.ToastmastersArchiveDirectory);
     }
 
     public override string ArchiveFilePath()

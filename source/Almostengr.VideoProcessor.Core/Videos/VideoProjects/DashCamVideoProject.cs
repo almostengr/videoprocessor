@@ -1,4 +1,5 @@
 using Almostengr.VideoProcessor.Core.Common;
+using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Videos;
 
@@ -14,12 +15,12 @@ public abstract class DashCamVideoProject : BaseVideoProject
 
     public override string UploadDirectory()
     {
-        return Path.Combine(BaseDirectory, "uploaddashcam");
+        return Path.Combine(BaseDirectory, Constant.DashCamUploadDirectory);
     }
 
     public override string ArchiveDirectory()
     {
-        return Path.Combine(BaseDirectory, "archivedashcam");
+        return Path.Combine(BaseDirectory, Constant.DashCamArchiveDirectory);
     }
 
     public override string ArchiveFilePath()

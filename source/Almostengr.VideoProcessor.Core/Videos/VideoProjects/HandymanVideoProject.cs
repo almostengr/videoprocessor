@@ -20,12 +20,12 @@ public sealed class HandymanVideoProject : BaseVideoProject
 
     public override string UploadDirectory()
     {
-        return Path.Combine(BaseDirectory, "uploadhandyman");
+        return Path.Combine(BaseDirectory, Constant.HandymanUploadDirectory);
     }
 
     public override string ArchiveDirectory()
     {
-        return Path.Combine(BaseDirectory, "archivehandyman");
+        return Path.Combine(BaseDirectory, Constant.HandymanArchiveDirectory);
     }
 
     public override string ArchiveFilePath()

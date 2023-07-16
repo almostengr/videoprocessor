@@ -38,12 +38,12 @@ public abstract class TechnologyVideoProject : BaseVideoProject
 
     public override string UploadDirectory()
     {
-        return Path.Combine(BaseDirectory, "uploadtechnology");
+        return Path.Combine(BaseDirectory, Constant.TechnologyUploadDirectory);
     }
 
     public override string ArchiveDirectory()
     {
-        return Path.Combine(BaseDirectory, "archivetechnology");
+        return Path.Combine(BaseDirectory, Constant.TechnologyArchiveDirectory);
     }
 
     public override string ArchiveFilePath()
