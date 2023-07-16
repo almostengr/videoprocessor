@@ -59,16 +59,16 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         return await Task.FromResult((results.stdOut, results.stdErr));
     }
 
-    public async Task<(string stdOut, string stdErr)> RenderVideoAsCopyAsync(
-        string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken)
-    {
-        string workingDirectory =
-            Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-        string arguments =
-            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -filter_hw_device foo -c copy \"{outputFilePath}\"";
+    // public async Task<(string stdOut, string stdErr)> RenderVideoAsCopyAsync(
+    //     string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken)
+    // {
+    //     string workingDirectory =
+    //         Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+    //     string arguments =
+    //         $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -filter_hw_device foo -c copy \"{outputFilePath}\"";
 
-        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-    }
+    //     return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    // }
 
     public async Task<(string stdOut, string stdErr)> RenderVideoAsync(
         string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken)
@@ -94,123 +94,146 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         string arguments =
             $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i \"{videoFilePath}\" -i \"{audioTrackFilePath}\" -filter_hw_device foo -vf \"{videoFilter} format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
 
-        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-    }
 
-    public async Task<(string stdOut, string stdErr)> AddAudioToVideoAsync(
-        string videoFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken)
-    {
-        string workingDirectory =
-            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-
-        return await FfmpegAsync(
-            $"-hwaccel vaapi -hwaccel_output_format vaapi -i \"{videoFilePath}\" -i \"{audioFilePath}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"",
-            workingDirectory,
-            cancellationToken
-        );
-    }
-
-    public async Task<(string stdOut, string stdErr)> AddAccAudioToVideoAsync(
-        string videoFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken)
-    {
-        string workingDirectory =
-            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-
-        return await FfmpegAsync(
-            $"-hwaccel vaapi -hwaccel_output_format vaapi -i \"{videoFilePath}\" -i \"{audioFilePath}\" -c:v h264_vaapi -c:a aac -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"",
-            workingDirectory,
-            cancellationToken
-        );
-    }
-
-    public async Task<(string stdOut, string stdErr)> ConcatTsFilesToMp4FileAsync(
-        string ffmpegInputFilePath, string outputFilePath, string videoFilter, CancellationToken cancellationToken)
-    {
-        string workingDirectory = Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-
-        return await FfmpegAsync(
-            $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -c:a copy -bsf:a aac_adtstoasc -vf \"{videoFilter}\" \"{outputFilePath}\"",
-            workingDirectory,
-            cancellationToken);
-    }
-
-    public async Task<(string stdOut, string stdErr)> ConcatTsFilesToMp4FileAsync(
-        string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken)
-    {
-        string workingDirectory = Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-
-        return await FfmpegAsync(
-            $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -c:v copy -c:a copy -bsf:a aac_adtstoasc \"{outputFilePath}\"",
-            workingDirectory,
-            cancellationToken);
-    }
-
-    public async Task<(string stdOut, string stdErr)> ConvertMp4VideoFileToTsFormatAsync(
-        string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
-    {
-
-        if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
+        try
         {
-            throw new InvalidPathException("Invalid paths provided");
+            return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+        }
+        catch (FfmpegRenderVideoException)
+        {
+            _logger.LogWarning(HARDWARE_RENDERING_FAILED);
+            arguments = $"-f concat -safe 0 -i \"{videoFilePath}\" -i \"{audioTrackFilePath}\" -vf \"{videoFilter}\" -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
+            return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
         }
 
-        if (!videoFilePath.IsVideoFile())
-        {
-            throw new ArgumentException("Not a video file", nameof(videoFilePath));
-        }
-
-        string workingDirectory =
-            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-
-        return await FfmpegAsync(
-            $"-i \"{videoFilePath}\" -c copy -bsf:v h264_mp4toannexb -f mpegts \"{outputFilePath}\"",
-            workingDirectory,
-            cancellationToken
-        );
+        // return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
-
-    public async Task<(string stdOut, string stdErr)> ConvertVideoFileToTsFormatWithFiltersAsync(
-        string videoFilePath, string outputFilePath, string videoFilters, CancellationToken cancellationToken)
+    public async Task<(string stdOut, string stdErr)> RenderVideoWithAudioAsync(
+        string ffmpegInputFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken)
     {
-
-        if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
-        {
-            throw new ArgumentException("Invalid path(s) provided");
-        }
-
-        if (!videoFilePath.IsVideoFile())
-        {
-            throw new ArgumentException("Not a video file", nameof(videoFilePath));
-        }
-
         string workingDirectory =
-            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-        string arguments = $"-i \"{videoFilePath}\" -vf \"{videoFilters}\" -f mpegts \"{outputFilePath}\"";
+            Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+        string arguments =
+            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -i \"{audioFilePath}\" -filter_hw_device foo -vf \"format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
 
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
-    public async Task<(string stdOut, string stdErr)> ConvertVideoFileToTsFormatAsync(
-        string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
-    {
+    // public async Task<(string stdOut, string stdErr)> AddAudioToVideoAsync(
+    //     string videoFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken)
+    // {
+    //     string workingDirectory =
+    //         Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
 
-        if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
-        {
-            throw new ArgumentException("Invalid path(s) provided", nameof(videoFilePath));
-        }
+    //     return await FfmpegAsync(
+    //         $"-hwaccel vaapi -hwaccel_output_format vaapi -i \"{videoFilePath}\" -i \"{audioFilePath}\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"",
+    //         workingDirectory,
+    //         cancellationToken
+    //     );
+    // }
 
-        if (!videoFilePath.IsVideoFile())
-        {
-            throw new ArgumentException("Not a video file", nameof(videoFilePath));
-        }
+    // public async Task<(string stdOut, string stdErr)> AddAccAudioToVideoAsync(
+    //     string videoFilePath, string audioFilePath, string outputFilePath, CancellationToken cancellationToken)
+    // {
+    //     string workingDirectory =
+    //         Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
 
-        string workingDirectory =
-            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-        string arguments = $"-i \"{videoFilePath}\" -c:v copy -f mpegts \"{outputFilePath}\"";
+    //     return await FfmpegAsync(
+    //         $"-hwaccel vaapi -hwaccel_output_format vaapi -i \"{videoFilePath}\" -i \"{audioFilePath}\" -c:v h264_vaapi -c:a aac -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"",
+    //         workingDirectory,
+    //         cancellationToken
+    //     );
+    // }
 
-        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-    }
+    // public async Task<(string stdOut, string stdErr)> ConcatTsFilesToMp4FileAsync(
+    //     string ffmpegInputFilePath, string outputFilePath, string videoFilter, CancellationToken cancellationToken)
+    // {
+    //     string workingDirectory = Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+
+    //     return await FfmpegAsync(
+    //         $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -c:a copy -bsf:a aac_adtstoasc -vf \"{videoFilter}\" \"{outputFilePath}\"",
+    //         workingDirectory,
+    //         cancellationToken);
+    // }
+
+    // public async Task<(string stdOut, string stdErr)> ConcatTsFilesToMp4FileAsync(
+    //     string ffmpegInputFilePath, string outputFilePath, CancellationToken cancellationToken)
+    // {
+    //     string workingDirectory = Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+
+    //     return await FfmpegAsync(
+    //         $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -c:v copy -c:a copy -bsf:a aac_adtstoasc \"{outputFilePath}\"",
+    //         workingDirectory,
+    //         cancellationToken);
+    // }
+
+    // public async Task<(string stdOut, string stdErr)> ConvertMp4VideoFileToTsFormatAsync(
+    //     string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
+    // {
+
+    //     if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
+    //     {
+    //         throw new InvalidPathException("Invalid paths provided");
+    //     }
+
+    //     if (!videoFilePath.IsVideoFile())
+    //     {
+    //         throw new ArgumentException("Not a video file", nameof(videoFilePath));
+    //     }
+
+    //     string workingDirectory =
+    //         Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+
+    //     return await FfmpegAsync(
+    //         $"-i \"{videoFilePath}\" -c copy -bsf:v h264_mp4toannexb -f mpegts \"{outputFilePath}\"",
+    //         workingDirectory,
+    //         cancellationToken
+    //     );
+    // }
+
+
+    // public async Task<(string stdOut, string stdErr)> ConvertVideoFileToTsFormatWithFiltersAsync(
+    //     string videoFilePath, string outputFilePath, string videoFilters, CancellationToken cancellationToken)
+    // {
+
+    //     if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
+    //     {
+    //         throw new ArgumentException("Invalid path(s) provided");
+    //     }
+
+    //     if (!videoFilePath.IsVideoFile())
+    //     {
+    //         throw new ArgumentException("Not a video file", nameof(videoFilePath));
+    //     }
+
+    //     string workingDirectory =
+    //         Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+    //     string arguments = $"-i \"{videoFilePath}\" -vf \"{videoFilters}\" -f mpegts \"{outputFilePath}\"";
+
+    //     return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    // }
+
+    // public async Task<(string stdOut, string stdErr)> ConvertVideoFileToTsFormatAsync(
+    //     string videoFilePath, string outputFilePath, CancellationToken cancellationToken)
+    // {
+
+    //     if (string.IsNullOrWhiteSpace(videoFilePath) || string.IsNullOrWhiteSpace(outputFilePath))
+    //     {
+    //         throw new ArgumentException("Invalid path(s) provided", nameof(videoFilePath));
+    //     }
+
+    //     if (!videoFilePath.IsVideoFile())
+    //     {
+    //         throw new ArgumentException("Not a video file", nameof(videoFilePath));
+    //     }
+
+    //     string workingDirectory =
+    //         Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+    //     string arguments = $"-i \"{videoFilePath}\" -c:v copy -f mpegts \"{outputFilePath}\"";
+
+    //     return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    // }
 
     public async Task<(string stdOut, string stdErr)> ConvertVideoFileToMp3FileAsync(
         string videoInputFilePath, string audioOutputFilePath, string workingDirectory, CancellationToken cancellationToken)
@@ -221,74 +244,99 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
             cancellationToken);
     }
 
-    public async Task<(string stdOut, string stdErr)> RenderVideoWithFiltersAsync(
-        string videoFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken)
-    {
-        _ = videoFilePath ?? throw new ArgumentException(nameof(videoFilePath));
-        _ = videoFilters ?? throw new ArgumentException(nameof(videoFilters));
-        _ = outputFilePath ?? throw new ArgumentException(nameof(outputFilePath));
-        string workingDirectory =
-            Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-        string arguments =
-            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i \"{videoFilePath}\" -filter_hw_device foo -vf \"{videoFilters}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{outputFilePath}\"";
+    // public async Task<(string stdOut, string stdErr)> RenderVideoWithFiltersAsync(
+    //     string videoFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken)
+    // {
+    //     _ = videoFilePath ?? throw new ArgumentException(nameof(videoFilePath));
+    //     _ = videoFilters ?? throw new ArgumentException(nameof(videoFilters));
+    //     _ = outputFilePath ?? throw new ArgumentException(nameof(outputFilePath));
+    //     string workingDirectory =
+    //         Path.GetDirectoryName(videoFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+    //     string arguments =
+    //         $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i \"{videoFilePath}\" -filter_hw_device foo -vf \"{videoFilters}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{outputFilePath}\"";
 
-        try
-        {
-            return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-        }
-        catch (FfmpegRenderVideoException)
-        {
-            arguments = $"-i \"{videoFilePath}\" -vf \"{videoFilters}\" \"{outputFilePath}\"";
-            return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-        }
-    }
+    //     try
+    //     {
+    //         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    //     }
+    //     catch (FfmpegRenderVideoException)
+    //     {
+    //         arguments = $"-i \"{videoFilePath}\" -vf \"{videoFilters}\" \"{outputFilePath}\"";
+    //         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    //     }
+    // }
 
-    public async Task<(string stdOut, string stdErr)> RenderVideoWithInputFileAndFiltersAsync(
-        string ffmpegInputFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken)
-    {
-        _ = ffmpegInputFilePath ?? throw new ArgumentException(nameof(ffmpegInputFilePath));
-        _ = videoFilters ?? throw new ArgumentException(nameof(videoFilters));
-        _ = outputFilePath ?? throw new ArgumentException(nameof(outputFilePath));
-        string workingDirectory =
-            Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-        string arguments =
-            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -filter_hw_device foo -vf \"{videoFilters}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{outputFilePath}\"";
+    // public async Task<(string stdOut, string stdErr)> RenderVideoWithInputFileAndFiltersAsync(
+    //     string ffmpegInputFilePath, string videoFilters, string outputFilePath, CancellationToken cancellationToken)
+    // {
+    //     _ = ffmpegInputFilePath ?? throw new ArgumentException(nameof(ffmpegInputFilePath));
+    //     _ = videoFilters ?? throw new ArgumentException(nameof(videoFilters));
+    //     _ = outputFilePath ?? throw new ArgumentException(nameof(outputFilePath));
+    //     string workingDirectory =
+    //         Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+    //     string arguments =
+    //         $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -filter_hw_device foo -vf \"{videoFilters}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi \"{outputFilePath}\"";
 
-        try
-        {
-            return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-        }
-        catch (FfmpegRenderVideoException)
-        {
-            _logger.LogWarning(HARDWARE_RENDERING_FAILED);
-            arguments = $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -vf \"{videoFilters}\" \"{outputFilePath}\"";
-            return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-        }
-    }
+    //     try
+    //     {
+    //         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    //     }
+    //     catch (FfmpegRenderVideoException)
+    //     {
+    //         _logger.LogWarning(HARDWARE_RENDERING_FAILED);
+    //         arguments = $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -vf \"{videoFilters}\" \"{outputFilePath}\"";
+    //         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    //     }
+    // }
 
-    public async Task<(string stdOut, string stdErr)> RenderVideoWithInputFileAndAudioAndFiltersAsync(
-        string ffmpegInputFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
-    {
-        _ = ffmpegInputFilePath ?? throw new ArgumentException(nameof(ffmpegInputFilePath));
-        _ = audioTrackFilePath ?? throw new ArgumentException(nameof(audioTrackFilePath));
-        _ = outputFilePath ?? throw new ArgumentException(nameof(outputFilePath));
 
-        string workingDirectory =
-            Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
-        string arguments =
-            $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -i \"{audioTrackFilePath}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
+    // public async Task<(string stdOut, string stdErr)> RenderVideoWithAudioAndFiltersAsync(
+    //     string ffmpegInputFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
+    // {
+    //     _ = ffmpegInputFilePath ?? throw new ArgumentException(nameof(ffmpegInputFilePath));
+    //     _ = audioTrackFilePath ?? throw new ArgumentException(nameof(audioTrackFilePath));
+    //     _ = outputFilePath ?? throw new ArgumentException(nameof(outputFilePath));
 
-        try
-        {
-            return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-        }
-        catch (FfmpegRenderVideoException)
-        {
-            _logger.LogWarning(HARDWARE_RENDERING_FAILED);
-            arguments = $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -i \"{audioTrackFilePath}\" -vf \"{videoFilter}\" -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
-            return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-        }
-    }
+    //     string workingDirectory =
+    //         Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+    //     string arguments =
+    //         $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -i \"{audioTrackFilePath}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
+
+    //     try
+    //     {
+    //         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    //     }
+    //     catch (FfmpegRenderVideoException)
+    //     {
+    //         _logger.LogWarning(HARDWARE_RENDERING_FAILED);
+    //         arguments = $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -i \"{audioTrackFilePath}\" -vf \"{videoFilter}\" -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
+    //         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    //     }
+    // }
+
+    // public async Task<(string stdOut, string stdErr)> RenderVideoWithInputFileAndAudioAndFiltersAsync(
+    //     string ffmpegInputFilePath, string audioTrackFilePath, string videoFilter, string outputFilePath, CancellationToken cancellationToken)
+    // {
+    //     _ = ffmpegInputFilePath ?? throw new ArgumentException(nameof(ffmpegInputFilePath));
+    //     _ = audioTrackFilePath ?? throw new ArgumentException(nameof(audioTrackFilePath));
+    //     _ = outputFilePath ?? throw new ArgumentException(nameof(outputFilePath));
+
+    //     string workingDirectory =
+    //         Path.GetDirectoryName(ffmpegInputFilePath) ?? throw new ProgramWorkingDirectoryIsInvalidException();
+    //     string arguments =
+    //         $"-init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i \"{ffmpegInputFilePath}\" -i \"{audioTrackFilePath}\" -filter_hw_device foo -vf \"{videoFilter}, format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
+
+    //     try
+    //     {
+    //         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    //     }
+    //     catch (FfmpegRenderVideoException)
+    //     {
+    //         _logger.LogWarning(HARDWARE_RENDERING_FAILED);
+    //         arguments = $"-f concat -safe 0 -i \"{ffmpegInputFilePath}\" -i \"{audioTrackFilePath}\" -vf \"{videoFilter}\" -shortest -map 0:v:0 -map 1:a:0 \"{outputFilePath}\"";
+    //         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    //     }
+    // }
 
     public async Task<(string stdOut, string stdErr)> AnalyzeAudioVolumeAsync(string inputFilePath, CancellationToken cancellationToken)
     {
@@ -317,31 +365,31 @@ public sealed class FfmpegService : BaseProcess<FfmpegService>, IFfmpegService
         return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
     }
 
-    public async Task<(string stdOut, string stdErr)> RenderTsVideoFileFromImageAsync(string imageFilePath, string outputFilePath, CancellationToken cancellationToken)
-    {
-        _ = outputFilePath ?? throw new ArgumentException("invalid output path", nameof(outputFilePath));
-        string workingDirectory = Path.GetDirectoryName(imageFilePath) ?? throw new ArgumentException("Invalid working directory", nameof(imageFilePath));
-        const int CLIP_DURATION = 4;
-        string arguments = $"-loop 1 -i \"{imageFilePath}\" -c:v libx264 -t {CLIP_DURATION} -s 1920x1080 -pix_fmt yuv420p -f mpegts \"{outputFilePath}\"";
-        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-    }
+    // public async Task<(string stdOut, string stdErr)> RenderTsVideoFileFromImageAsync(string imageFilePath, string outputFilePath, CancellationToken cancellationToken)
+    // {
+    //     _ = outputFilePath ?? throw new ArgumentException("invalid output path", nameof(outputFilePath));
+    //     string workingDirectory = Path.GetDirectoryName(imageFilePath) ?? throw new ArgumentException("Invalid working directory", nameof(imageFilePath));
+    //     const int CLIP_DURATION = 4;
+    //     string arguments = $"-loop 1 -i \"{imageFilePath}\" -c:v libx264 -t {CLIP_DURATION} -s 1920x1080 -pix_fmt yuv420p -f mpegts \"{outputFilePath}\"";
+    //     return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    // }
 
-    public async Task<(string stdOut, string stdErr)> RenderTimelapseVideoAsync(string videoFilePath, CancellationToken cancellationToken)
-    {
-        string workingDirectory = Path.GetDirectoryName(videoFilePath) ?? throw new ArgumentException("Invalid working directory", nameof(videoFilePath));
-        string outputFilePath =
-            Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(videoFilePath) + ".tmp" + Path.GetExtension(videoFilePath));
-        string arguments = $"-i \"{videoFilePath}\" -filter:v \"setpts=0.5*PTS\" -an \"{outputFilePath}\"";
-        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-    }
+    // public async Task<(string stdOut, string stdErr)> RenderTimelapseVideoAsync(string videoFilePath, CancellationToken cancellationToken)
+    // {
+    //     string workingDirectory = Path.GetDirectoryName(videoFilePath) ?? throw new ArgumentException("Invalid working directory", nameof(videoFilePath));
+    //     string outputFilePath =
+    //         Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(videoFilePath) + ".tmp" + Path.GetExtension(videoFilePath));
+    //     string arguments = $"-i \"{videoFilePath}\" -filter:v \"setpts=0.5*PTS\" -an \"{outputFilePath}\"";
+    //     return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    // }
 
-    public async Task<(string stdOut, string stdErr)> ConvertImageFileToVideoAsync(string imageFile, string outputFilePath, CancellationToken cancellationToken)
-    {
-        string workingDirectory = Path.GetDirectoryName(outputFilePath) ?? throw new ArgumentException("Invalid working directory", nameof(outputFilePath));
-        const int DURATION = 3;
-        string arguments = $"-framerate 1/{DURATION} -pattern_type glob -i \"{imageFile}\" libx264 -r 30 -pix_fmt yuv420p {outputFilePath}";
-        return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
-    }
+    // public async Task<(string stdOut, string stdErr)> ConvertImageFileToVideoAsync(string imageFile, string outputFilePath, CancellationToken cancellationToken)
+    // {
+    //     string workingDirectory = Path.GetDirectoryName(outputFilePath) ?? throw new ArgumentException("Invalid working directory", nameof(outputFilePath));
+    //     const int DURATION = 3;
+    //     string arguments = $"-framerate 1/{DURATION} -pattern_type glob -i \"{imageFile}\" libx264 -r 30 -pix_fmt yuv420p {outputFilePath}";
+    //     return await FfmpegAsync(arguments, workingDirectory, cancellationToken);
+    // }
 
     public async Task<(string stdOut, string stdErr)> CreateMusicMixTrackAsync(
         string ffmpegInputFile, string outputFile, string workingDirectory, CancellationToken cancellationToken)

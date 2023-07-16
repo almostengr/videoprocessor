@@ -1,5 +1,5 @@
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
-using Almostengr.VideoProcessor.Core.Common.Videos;
+using Almostengr.VideoProcessor.Core.Transcriptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 

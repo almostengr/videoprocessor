@@ -15,7 +15,7 @@ public abstract partial class BaseVideoProject : IVideoProject
     {
         if (string.IsNullOrWhiteSpace(filePath))
         {
-            throw new ArgumentException(Constant.ArgumentCannotBeNullOrEmpty, nameof(filePath));
+            throw new ArgumentException("File path cannot be null or empty", nameof(filePath));
         }
 
         if (
@@ -31,15 +31,17 @@ public abstract partial class BaseVideoProject : IVideoProject
         BaseDirectory = baseDirectory;
     }
 
+    public abstract string ArchiveDirectory();
+    public abstract string UploadDirectory();
+    public abstract string ArchiveFilePath();
+    public abstract string UploadFilePath();
+    public abstract List<string> BrandingTextOptions();
+
     public string FilePath()
     {
         return _filePath;
     }
-
-    public abstract string ArchiveDirectory();
-    public abstract string UploadDirectory();
-    public abstract List<string> BrandingTextOptions();
-
+    
     public virtual FfMpegColor DrawTextFilterBackgroundColor()
     {
         return FfMpegColor.Black;
@@ -48,12 +50,6 @@ public abstract partial class BaseVideoProject : IVideoProject
     public virtual FfMpegColor DrawTextFilterTextColor()
     {
         return FfMpegColor.White;
-    }
-
-
-    public string ThumbnailFileName()
-    {
-        return Title() + FileExtension.ThumbTxt.Value;
     }
 
     public virtual string Title()
@@ -75,7 +71,7 @@ public abstract partial class BaseVideoProject : IVideoProject
         return title;
     }
 
-    public string VideoFileName()
+    public string OutputFileName()
     {
         return Path.GetFileName(_filePath)
             .ReplaceIgnoringCase(FileExtension.TarXz.Value, string.Empty)
@@ -83,16 +79,6 @@ public abstract partial class BaseVideoProject : IVideoProject
             .ReplaceIgnoringCase(FileExtension.Tar.Value, string.Empty)
             .Replace(Constant.Colon, string.Empty)
             + FileExtension.Mp4.Value;
-    }
-
-    public string ChaptersFileName()
-    {
-        return Path.GetFileName(_filePath)
-            .ReplaceIgnoringCase(FileExtension.TarXz.Value, string.Empty)
-            .ReplaceIgnoringCase(FileExtension.TarGz.Value, string.Empty)
-            .ReplaceIgnoringCase(FileExtension.Tar.Value, string.Empty)
-            .Replace(Constant.Colon, string.Empty)
-            + ".chapters.txt";
     }
 
     public string FileName()
@@ -104,14 +90,13 @@ public abstract partial class BaseVideoProject : IVideoProject
     {
         StringBuilder stringBuilder = new();
         stringBuilder.Append(
-            new DrawTextFilter(brandingText, 
-            DrawTextFilterTextColor(), 
+            new DrawTextFilter(brandingText,
+            DrawTextFilterTextColor(),
             Opacity.Full,
-            DrawTextFilterBackgroundColor(), 
-            Opacity.Medium, 
+            DrawTextFilterBackgroundColor(),
+            Opacity.Medium,
             DrawTextPosition.ChannelBrand).ToString()
             );
         return stringBuilder.ToString();
     }
-
 }

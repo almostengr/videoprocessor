@@ -13,7 +13,6 @@ public struct FfMpegColor
     public static readonly FfMpegColor Green = new FfMpegColor("green");
     public static readonly FfMpegColor Maroon = new FfMpegColor("maroon");
     public static readonly FfMpegColor Orange = new FfMpegColor("orange");
-    public static readonly FfMpegColor Red = new FfMpegColor("red");
     public static readonly FfMpegColor RhtYellow = new FfMpegColor("0xffc107");
     public static readonly FfMpegColor SteelBlue = new FfMpegColor("steelblue");
     public static readonly FfMpegColor White = new FfMpegColor("white");

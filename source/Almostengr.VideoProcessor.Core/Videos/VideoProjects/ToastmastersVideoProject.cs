@@ -1,5 +1,3 @@
-using Almostengr.VideoProcessor.Core.Constants;
-
 namespace Almostengr.VideoProcessor.Core.Videos;
 
 public sealed class ToastmastersVideoProject : BaseVideoProject
@@ -17,15 +15,25 @@ public sealed class ToastmastersVideoProject : BaseVideoProject
         options.Add("facebook.com/TowerToastmasters");
         return options;
     }
+    
+    public override string UploadDirectory()
+    {
+        return Path.Combine(BaseDirectory, "uploadtoastmaster");
+    }
 
     public override string ArchiveDirectory()
     {
         return Path.Combine(BaseDirectory, "archivetoastmasters");
     }
 
-    public override string UploadDirectory()
+    public override string ArchiveFilePath()
     {
-        return Path.Combine(BaseDirectory, "uploadtoastmasters");
+        return Path.Combine(ArchiveDirectory(), FileName());
+    }
+
+    public override string UploadFilePath()
+    {
+        return Path.Combine(UploadDirectory(), OutputFileName());
     }
 
     public override FfMpegColor DrawTextFilterBackgroundColor()

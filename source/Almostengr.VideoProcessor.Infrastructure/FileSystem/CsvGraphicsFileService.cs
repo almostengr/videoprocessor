@@ -1,5 +1,5 @@
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
-using Almostengr.VideoProcessor.Core.Common.Videos;
+using Almostengr.VideoProcessor.Core.Transcriptions;
 
 namespace Almostengr.VideoProcessor.Infrastructure.FileSystem;
 
@@ -24,5 +24,10 @@ public sealed class CsvGraphicsFileService : ICsvGraphicsFileService
         }
 
         return subtitles;
+    }
+
+    List<SubtitleFileEntry> ISubtitleReadFileService.ReadFile(string filePath)
+    {
+        throw new NotImplementedException();
     }
 }

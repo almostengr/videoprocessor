@@ -1,4 +1,4 @@
-using Almostengr.VideoProcessor.Core.Common.Videos;
+using Almostengr.VideoProcessor.Core.Transcriptions;
 
 namespace Almostengr.VideoProcessor.Core.Common.Interfaces;
 
@@ -14,15 +14,8 @@ public interface ISubtitleReadWriteFileService : ISubtitleReadFileService
 
 public interface ISrtSubtitleFileService : ISubtitleReadWriteFileService
 {
-    
-}
-
-public interface IAssSubtitleFileService : ISubtitleReadFileService
-{
-
 }
 
 public interface ICsvGraphicsFileService : ISubtitleReadFileService
 {
-
 }

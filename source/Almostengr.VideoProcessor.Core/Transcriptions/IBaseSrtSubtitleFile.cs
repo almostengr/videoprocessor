@@ -1,6 +1,6 @@
 namespace Almostengr.VideoProcessor.Core.Transcriptions;
 
-public interface IBaseTranscriptionService
+public interface IBaseSrtSubtitleFile
 {
     void ProcessSrtSubtitleFile();
 }

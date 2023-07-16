@@ -10,13 +10,6 @@ public sealed class HandymanVideoProject : BaseVideoProject
 
     public override List<string> BrandingTextOptions()
     {
-    //     return new string[] {
-    //         Constant.ROBINSON_SERVICES);
-    //         Constant.RHT_WEBSITE);
-    //         "@rhtservicesllc");
-    //         "#rhtservicesllc");
-    //     };
-
         List<string> options = new();
         options.Add(Constant.ROBINSON_SERVICES);
         options.Add(Constant.RHT_WEBSITE);
@@ -25,14 +18,24 @@ public sealed class HandymanVideoProject : BaseVideoProject
         return options;
     }
 
+    public override string UploadDirectory()
+    {
+        return Path.Combine(BaseDirectory, "uploadhandyman");
+    }
+
     public override string ArchiveDirectory()
     {
         return Path.Combine(BaseDirectory, "archivehandyman");
     }
 
-    public override string UploadDirectory()
+    public override string ArchiveFilePath()
     {
-        return Path.Combine(BaseDirectory, "uploadhandyman");
+        return Path.Combine(ArchiveDirectory(), FileName());
+    }
+
+    public override string UploadFilePath()
+    {
+        return Path.Combine(UploadDirectory(), OutputFileName());
     }
     
     public override FfMpegColor DrawTextFilterTextColor()

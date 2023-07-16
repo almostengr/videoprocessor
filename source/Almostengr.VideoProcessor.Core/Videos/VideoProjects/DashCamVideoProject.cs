@@ -1,25 +1,15 @@
 using Almostengr.VideoProcessor.Core.Common;
-using Almostengr.VideoProcessor.Core.Constants;
 
 namespace Almostengr.VideoProcessor.Core.Videos;
 
-public sealed partial class DashCamVideoProject : BaseVideoProject
+public abstract class DashCamVideoProject : BaseVideoProject
 {
-    internal DashCamVideoType SubType { get; private set; }
-
     public DashCamVideoProject(string filePath, string baseDirectory) : base(filePath, baseDirectory)
     {
         if (filePath.ContainsIgnoringCase("bad drivers of montgomery"))
         {
             throw new ArgumentException("Title contains invalid text");
         }
-
-        SetSubtype(FileName());
-    }
-
-    public override string ArchiveDirectory()
-    {
-        return Path.Combine(BaseDirectory, "archivedashcam");
     }
 
     public override string UploadDirectory()
@@ -27,47 +17,24 @@ public sealed partial class DashCamVideoProject : BaseVideoProject
         return Path.Combine(BaseDirectory, "uploaddashcam");
     }
 
-
-    private void SetSubtype(string title)
+    public override string ArchiveDirectory()
     {
-        SubType = DashCamVideoType.Normal;
+        return Path.Combine(BaseDirectory, "archivedashcam");
+    }
 
-        if (title.ContainsIgnoringCase("night") || title.ContainsIgnoringCase("sunset"))
-        {
-            SubType = DashCamVideoType.Night;
-        }
-        else if (title.ContainsIgnoringCase("firework"))
-        {
-            SubType = DashCamVideoType.Fireworks;
-        }
-        else if (title.ContainsIgnoringCase(Constant.NissanAltima) || title.ContainsIgnoringCase(Constant.GmcSierra))
-        {
-            SubType = DashCamVideoType.CarRepair;
-        }
+    public override string ArchiveFilePath()
+    {
+        return Path.Combine(ArchiveDirectory(), FileName());
+    }
+
+    public override string UploadFilePath()
+    {
+        return Path.Combine(UploadDirectory(), OutputFileName());
     }
 
     public override FfMpegColor DrawTextFilterBackgroundColor()
     {
-        switch (SubType)
-        {
-            case DashCamVideoType.Fireworks:
-                return FfMpegColor.Blue;
-
-            default:
-                return FfMpegColor.Black;
-        }
-    }
-
-    public override FfMpegColor DrawTextFilterTextColor()
-    {
-        switch (SubType)
-        {
-            case DashCamVideoType.Night:
-                return FfMpegColor.Orange;
-
-            default:
-                return FfMpegColor.White;
-        }
+        return FfMpegColor.Black;
     }
 
     public override List<string> BrandingTextOptions()
@@ -77,12 +44,62 @@ public sealed partial class DashCamVideoProject : BaseVideoProject
         options.Add("#KennyRamDashCam");
         return options;
     }
+}
 
-    internal enum DashCamVideoType
+
+public class DayTimeDashCamVideoProject : DashCamVideoProject, IDayTimeDashCamVideoProject
+{
+    public DayTimeDashCamVideoProject(string filePath, string baseDirectory) : base(filePath, baseDirectory)
     {
-        Normal,
-        Night,
-        Fireworks,
-        CarRepair
+    }
+
+    public override FfMpegColor DrawTextFilterBackgroundColor()
+    {
+        return FfMpegColor.Green;
+    }
+
+    public string UploadDescriptionTextFile()
+    {
+        return Path.Combine(UploadDirectory(), FileName() + "description.txt");
+    }
+
+}
+
+public sealed class NightTimeDashCamVideoProject : DayTimeDashCamVideoProject
+{
+    public NightTimeDashCamVideoProject(string filePath, string baseDirectory) : base(filePath, baseDirectory)
+    {
+    }
+
+    public override FfMpegColor DrawTextFilterTextColor()
+    {
+        return FfMpegColor.Orange;
+    }
+
+}
+
+public sealed class FireworksDashCamVideoProject : DashCamVideoProject
+{
+    public FireworksDashCamVideoProject(string filePath, string baseDirectory) : base(filePath, baseDirectory)
+    {
+    }
+
+    public override FfMpegColor DrawTextFilterBackgroundColor()
+    {
+        return FfMpegColor.Blue;
+    }
+}
+
+public sealed class CarRepairDashCamVideoProject : DashCamVideoProject
+{
+    public CarRepairDashCamVideoProject(string filePath, string baseDirectory) : base(filePath, baseDirectory)
+    {
+    }
+}
+
+public sealed class ArmchairDashCamVideoProject : DashCamVideoProject
+{
+    public ArmchairDashCamVideoProject(string filePath, string baseDirectory) : base(filePath, baseDirectory)
+    {
     }
 }

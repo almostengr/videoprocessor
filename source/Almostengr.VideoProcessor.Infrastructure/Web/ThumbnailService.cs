@@ -1,6 +1,6 @@
 using Almostengr.VideoProcessor.Core.Common;
 using Almostengr.VideoProcessor.Core.Common.Interfaces;
-using Almostengr.VideoProcessor.Core.Common.Videos;
+using Almostengr.VideoProcessor.Core.Thumbnails;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
