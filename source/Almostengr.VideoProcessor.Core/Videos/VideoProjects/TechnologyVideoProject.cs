@@ -13,7 +13,6 @@ public abstract class TechnologyVideoProject : BaseVideoProject
     {
         List<string> options = new();
         options.Add("Tech Talk with RHT Services");
-        options.Add(Constant.ROBINSON_SERVICES);
         options.Add(Constant.RHT_WEBSITE);
         options.Add("@rhtservicestech");
         options.Add("#rhtservicestech");
