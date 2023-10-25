@@ -1,4 +1,5 @@
 #!/bin/bash
+PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 
 INCOMING_DIRECTORY="/home/almostengr/"
 
