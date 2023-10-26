@@ -1,4 +1,5 @@
 #!/bin/bash
+PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 
 BASE_DIRECTORY="/home/almostengr"
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
