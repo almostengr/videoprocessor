@@ -3,6 +3,7 @@ PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 
 BASE_DIRECTORY="/home/almostengr"
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
+PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
 OUTPUT_FILENAME="output.mp4"
 
 PADDING=70
@@ -28,7 +29,7 @@ checkForSingleProcess()
 
 getFirstDirectory()
 {
-    directory=$(/bin/ls -1td */ | /usr/bin/head -1)
+    directory=$(/bin/ls -1td */ | grep -i -v errorOccurred | /usr/bin/head -1)
     if [ $directory == "" ]; then 
         sleep 3600
     else 
@@ -43,6 +44,7 @@ stopProcessingIfExcludedFilesExist()
     fileCount=$(ls -1 *kdenlive details.txt *ffmpeg* | wc -l)
     if [ $fileCount -gt 0 ]; then
         echo "Multiple invalid files exist. Please remove the files from the directory"
+        mv $1 "$1.errorOccurred"
         exit 2
     fi
 }
@@ -106,6 +108,18 @@ archiveFinalVideo()
     mv "${tarFileName}" "${archiveDirectory}"
 }
 
+deleteProcessedRawVideoFiles()
+{
+    find "${PROCESSED_DIRECTORY}" -type d -mtime +14 -exec echo {} \; -exec rm -r {} \;
+}
+
+moveToProcessed()
+{
+    cd ${INCOMING_DIRECTORY}
+    touch $1
+    mv $1 ${PROCESSED_DIRECTORY}
+}
+
 ###############################################################################
 ###############################################################################
 ## main
@@ -116,6 +130,8 @@ checkForSingleProcess()
 
 while (true)
 {
+    deleteProcessedRawVideoFiles()
+
     cd ${INCOMING_DIRECTORY}
 
     videoDirectory=$(getFirstDirectory)
@@ -126,7 +142,7 @@ while (true)
 
     cd ${videoDirectory}
 
-    stopProcessingIfExcludedFilesExist
+    stopProcessingIfExcludedFilesExist ${videoDirectory}
 
     lowercaseAllFileNames
 
@@ -134,4 +150,6 @@ while (true)
     do
         normalizeAudio "${videoFile}"
     done
+
+    moveToProcessed ${videoDirectory}
 }
