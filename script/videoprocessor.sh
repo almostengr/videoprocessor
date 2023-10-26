@@ -77,7 +77,6 @@ normalizeAudio()
 {
     videoFile=$1
     audioFile="${videoFile}.mp3"
-    tsFile="${videoFile}.ts"
     audioCount=$(/usr/bin/ffprobe -hide_banner ${videoFile} | grep -i audio | wc -l)
 
     if [ audioCount -eq 0 ]; then
@@ -91,6 +90,7 @@ normalizeAudio()
         adjustAudioVolume $audioFile $volumeGain
     fi
 
+    tsFile="${videoFile}.ts"
     /usr/bin/ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i \"${videoFile}\" -i \"${audioFile}\" -filter_hw_device foo -vf \"format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"${tsFile}\";
 }
 
