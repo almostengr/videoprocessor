@@ -25,8 +25,13 @@ checkForSingleProcess()
 
 getFirstDirectory()
 {
-    directory=$(/bin/ls -1d */ | /usr/bin/head -1)
-    echo "Processing ${directory}"
+    directory=$(/bin/ls -1td */ | /usr/bin/head -1)
+    if [ $directory == "" ]; then 
+        sleep 3600
+    else 
+        echo "Processing ${directory}"
+    fi
+
     return directory
 }
 
@@ -96,17 +101,24 @@ normalizeAudio()
 
 checkForSingleProcess()
 
-cd ${INCOMING_DIRECTORY}
+while (true)
+{
+    cd ${INCOMING_DIRECTORY}
 
-videoDirectory=$(getFirstDirectory)
+    videoDirectory=$(getFirstDirectory)
 
-cd ${videoDirectory}
+    if [ ${videoDirectory} == "" ]; then
+        continue
+    fi
 
-stopProcessingIfExcludedFilesExist
+    cd ${videoDirectory}
 
-lowercaseAllFileNames
+    stopProcessingIfExcludedFilesExist
 
-for videoFile in *mp4 *mov *mkv
-do
-    normalizeAudio "${videoFile}"
-done
+    lowercaseAllFileNames
+
+    for videoFile in *mp4 *mov *mkv
+    do
+        normalizeAudio "${videoFile}"
+    done
+}
