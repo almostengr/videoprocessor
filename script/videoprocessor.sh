@@ -1,6 +1,7 @@
 #!/bin/bash
 
-INCOMING_DIRECTORY="/home/almostengr/"
+BASE_DIRECTORY="/home/almostengr"
+INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 
 PADDING=70
 UPPERLEFT="x=${PADDING}:y=${PADDING}"
@@ -91,7 +92,18 @@ normalizeAudio()
     /usr/bin/ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i \"${videoFile}\" -i \"${audioFile}\" -filter_hw_device foo -vf \"format=vaapi|nv12,hwupload\" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 \"${tsFile}\";
 }
 
+archiveFinalVideo()
+{
+    fileName="output.mp4"
 
+    videoTitle=$(basename $(pwd))
+    archiveDirectory="${BASE_DIRECTORY}/archive"
+
+    tarFileName="${videoTitle}.tar"
+    tar -cf ${tarFileName} $fileName
+
+    mv "${tarFileName}" "${archiveDirectory}"
+}
 
 ###############################################################################
 ###############################################################################
