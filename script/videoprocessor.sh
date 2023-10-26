@@ -3,6 +3,7 @@ PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 
 BASE_DIRECTORY="/home/almostengr"
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
+OUTPUT_FILENAME="output.mp4"
 
 PADDING=70
 UPPERLEFT="x=${PADDING}:y=${PADDING}"
@@ -95,13 +96,12 @@ normalizeAudio()
 
 archiveFinalVideo()
 {
-    fileName="output.mp4"
-
     videoTitle=$(basename $(pwd))
-    archiveDirectory="${BASE_DIRECTORY}/archive"
 
-    tarFileName="${videoTitle}.tar"
-    tar -cf ${tarFileName} $fileName
+    archiveDirectory="${BASE_DIRECTORY}/archive"
+    tarFileName="${videoTitle}.tar.xz"
+
+    tar -cJf ${tarFileName} ${OUTPUT_FILENAME}
 
     mv "${tarFileName}" "${archiveDirectory}"
 }
