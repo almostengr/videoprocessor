@@ -2,14 +2,14 @@
 PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
-DEBUG=1
+DEBUG=0
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY=""
 ARCHIVE_DIRECTORY=""
 UPLOAD_DIRECTORY=""
-OUTPUT_FILENAME="output.mp4"
 ACTIVE_FILE="${BASE_DIRECTORY}/.active.txt"
+MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix05.mp3"
 
 PADDING=70
 UPPERLEFT="x=${PADDING}:y=${PADDING}"
@@ -22,7 +22,12 @@ LOWERRIGHT="x=w-tw-${PADDING}:y=h-th-${PADDING}"
 
 CHANNEL_BRAND="x=w-tw-${PADDING}:y=${PADDING}"
 
-logMessage()
+errorMessage()
+{
+    echo "ERROR $(date) $1"
+}
+
+infoMessage()
 {
     echo "INFO $(date) $1"
 }
@@ -51,7 +56,7 @@ createMissingDirectories()
 checkForSingleProcess()
 {
     if [ -e "$ACTIVE_FILE" ]; then
-        echo "Active file was found. If no files are being processed, then manually remove it."
+        errorMessage "Active file was found. If no files are being processed, then manually remove it."
         exit
     fi
 
@@ -69,10 +74,10 @@ getFirstDirectory()
     videoDirectory=$(/bin/ls -1td */ | grep -i -v errorOccurred | /usr/bin/head -1)
     videoDirectory=${videoDirectory%/}
     if [ "$videoDirectory" == "" ]; then 
-        echo "No videos to process"
+        infoMessage "No videos to process"
         sleep 3600
     else 
-        echo "Processing ${videoDirectory}"
+        infoMessage "Processing ${videoDirectory}"
     fi
 
     # return $directory
@@ -80,12 +85,10 @@ getFirstDirectory()
 
 stopProcessingIfExcludedFilesExist()
 {
-    # fileCount=$(ls -1 *kdenlive details.txt *ffmpeg* | wc -l)
-    # =$(find . -type f \( -name "*.kdenlive" -o -name "*ffmpeg*" -o -name "details.txt" \) | grep -E -c '\.(txt|csv)$')
     fileCount=$(find . -type f \( -name "*.kdenlive" -o -name "*ffmpeg*" -o -name "details.txt" \) | wc -l)
 
     if [ $fileCount -gt 0 ]; then
-        echo "Invalid files present. Please remove the files from the directory"
+        errorMessage "Invalid files present. Please remove the files from the directory"
         mv $1 "$1.errorOccurred"
         exit
     fi
@@ -119,14 +122,14 @@ adjustAudioVolume()
 
 normalizeAudio()
 {
+    debugMessage "Normalizing audio for $1"
+
     videoFile=$1
+    audioCount=$(/usr/bin/ffprobe -hide_banner ${videoFile} 2>&1 | grep -i audio | wc -l)
     audioFile="${videoFile}.mp3"
-    audioCount=$(/usr/bin/ffprobe -hide_banner ${videoFile} | grep -i audio | wc -l)
 
     if [ $audioCount -eq 0 ]; then
-
-        # todo get mix track
-        date
+        cp -p MIX_AUDIO_TRACK_FILE $audioFile # todo get mix track
     else 
         convertVideoFileToMp3Audio $videoFile $audioFile
 
@@ -134,10 +137,15 @@ normalizeAudio()
 
         adjustAudioVolume $audioFile $volumeGain
     fi
+}
 
-    tsFile="${videoFile}.ts"
-    # /usr/bin/ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i "${videoFile}" -i "${audioFile}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "${tsFile}";
-    # ffmpeg -y -hide_banner -i "$videoFile" -vn "$audioFile"
+createTsFile()
+{
+    videoClipFile=$1
+    audioClipFile="$videoClipFile.mp3"
+    tsFile="${videoClipFile}.ts"
+
+    /usr/bin/ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i "${videoClipFile}" -i "${audioClipFile}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "${tsFile}";
 }
 
 compressOutputVideoFile()
@@ -166,52 +174,51 @@ moveVideoAsProcessed()
 
 createFfmpegInputFile()
 {
-    echo $1
-    ls -1 *$1 > ffmpeg.input
+    debugMessage "Video format type: $1"
+    touch ffmpeg.input
+
+    for tsFile in *$1
+    do
+        echo "file ${tsFile}" >> ffmpeg.input
+    done
 }
 
-renderVideo()
+renderVideoWithoutGraphics()
 {
     ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi "output.mp4";
 }
 
 renderVideoWithAudio()
 {
-    ffmpeg -i -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -i "${audioFilePath}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "output.mp4";
-}
-
-getRandomHandymanBrandingText()
-{
-    text[0]="Robinson Handy and Technology Services"
-    text[1]="rhtservices.net"
-    text[2]="@rhtservicesllc"
-    text[3]="#rhtservicesllc"
-
-    rand=$[$RANDOM % ${#text[@]}]
-    # echo ${text[$rand]}
-    return ${text[$rand]}
+    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -i "${audioFilePath}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "output.mp4";
 }
 
 setVideoType()
 {
     videoType=$(echo "$videoDirectory" | awk -F'.' '{print $NF}')
 
-    echo "Video type: ${videoType}"
+    debugMessage "Video type: ${videoType}"
 
     case $videoType in
         handyman)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivehandyman"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadhandyman"
             PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processedhandyman"
-            channelBrandText="rhtservices.net/home-improvement"
+            channelBrandText="rhtservices.net"
             ;;
-        lightshow | techtalk)
+        techtalk)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
             PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processedtechnology"
-            channelBrandText="rhtservices.net/technology"
+            channelBrandText="rhtservices.net"
             ;;
-        dashcam | fireworks | armchair)
+        lightshow)
+            ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
+            UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
+            PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processedtechnology"
+            channelBrandText="2023 Christmas Light Show"
+            ;;
+        dashcam | fireworks | roads)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivedashcam"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploaddashcam"
             PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processeddashcam"
@@ -224,35 +231,31 @@ setVideoType()
             channelBrandText="towertoastmasters.org"
             ;;
         *)
-            echo "Invalid video type."
+            errorMessage "Invalid video type."
             exit
             ;;
     esac
 }
 
-renderVideoByType()
+renderVideoSegments()
 {
-    logMessage "Rendering video"
-
     case $videoType in
         dashcam | fireworks)
-            createFfmpegInputFile mov
-
-            renderVideoWithAudio
+            errorMessage "Dash cam and fireworks videos not implemented"
+            exit
             ;;
             
         *)
-            for videoFile in *mp4 *mov *mkv
+            for videoFile in *mp4 *mkv
             do
                 normalizeAudio "${videoFile}"
+
+                createTsFile "${videoFile}"
             done
-
-            # createFfmpegInputFile ts
-
-            # renderVideo
             ;;
     esac
 }
+
 
 ###############################################################################
 ###############################################################################
@@ -260,46 +263,48 @@ renderVideoByType()
 ###############################################################################
 ###############################################################################
 
-set -x
+if [ $DEBUG -eq 1 ]; then
+    set -x
+fi
 
-logMessage "test"
+checkForSingleProcess
 
-debugMessage "debugging"
-
-# checkForSingleProcess
-
-# # while (true)
-# # {
+# while (true)
+# {
 
 
-#     # deleteProcessedRawVideoFiles
+    # deleteProcessedRawVideoFiles
 
-# # cd ${INCOMING_DIRECTORY}
-# changeToIncomingDirectory
+# cd ${INCOMING_DIRECTORY}
+changeToIncomingDirectory
 
-# videoDirectory=$(getFirstDirectory)
+videoDirectory=$(getFirstDirectory)
 
-# getFirstDirectory
+getFirstDirectory
 
-#     # if [[ ${videoDirectory} == "" ]]; then
-#     #     continue
-#     # fi
+    # if [[ ${videoDirectory} == "" ]]; then
+    #     continue
+    # fi
 
-# setVideoType
+setVideoType
 
-# createMissingDirectories
+createMissingDirectories
 
-# cd ${videoDirectory}
+cd ${videoDirectory}
 
-# stopProcessingIfExcludedFilesExist ${videoDirectory}
+stopProcessingIfExcludedFilesExist ${videoDirectory}
 
-# lowercaseAllFileNames
+lowercaseAllFileNames
     
-# renderVideoByType
+renderVideoSegments
 
-#     # render video with graphics
+createFfmpegInputFile ts
 
-#     # compressOutputVideoFile # archive final video; move archive
+renderVideoWithoutGraphics
 
-#     # moveVideoAsProcessed ${videoDirectory}
-# # }
+    # render video with graphics
+
+    # compressOutputVideoFile # archive final video; move archive
+
+    # moveVideoAsProcessed ${videoDirectory}
+# }
