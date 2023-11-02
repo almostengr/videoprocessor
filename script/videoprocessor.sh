@@ -1,8 +1,9 @@
 #!/bin/bash
+
 PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
-DEBUG=0
+DEBUG=1
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY=""
@@ -59,15 +60,12 @@ checkForSingleProcess()
         errorMessage "Active file was found. If no files are being processed, then manually remove it."
         exit
     fi
-
-    # touch "$ACTIVE_FILE"
 }
 
 removeActiveFile()
 {
     rm "$ACTIVE_FILE"
 }
-
 
 getFirstDirectory()
 {
@@ -79,8 +77,6 @@ getFirstDirectory()
     else 
         infoMessage "Processing ${videoDirectory}"
     fi
-
-    # return $directory
 }
 
 stopProcessingIfExcludedFilesExist()
@@ -129,7 +125,7 @@ normalizeAudio()
     audioFile="${videoFile}.mp3"
 
     if [ $audioCount -eq 0 ]; then
-        cp -p MIX_AUDIO_TRACK_FILE $audioFile # todo get mix track
+        cp $MIX_AUDIO_TRACK_FILE $audioFile
     else 
         convertVideoFileToMp3Audio $videoFile $audioFile
 
@@ -183,14 +179,20 @@ createFfmpegInputFile()
     done
 }
 
+addChannelBrandToVideo() 
+{
+    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.5:fontsize=h/28:${UPPERRIGHT}"
+    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
+}
+
 renderVideoWithoutGraphics()
 {
-    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi "output.mp4";
+    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi "outputNoGraphics.mp4";
 }
 
 renderVideoWithAudio()
 {
-    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -i "${audioFilePath}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "output.mp4";
+    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -i "${audioFilePath}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4";
 }
 
 setVideoType()
@@ -271,40 +273,39 @@ checkForSingleProcess
 
 # while (true)
 # {
+    changeToIncomingDirectory
 
+    videoDirectory=$(getFirstDirectory)
 
-    # deleteProcessedRawVideoFiles
+    getFirstDirectory
 
-# cd ${INCOMING_DIRECTORY}
-changeToIncomingDirectory
+    setVideoType
 
-videoDirectory=$(getFirstDirectory)
+    createMissingDirectories
 
-getFirstDirectory
+    cd ${videoDirectory}
 
-    # if [[ ${videoDirectory} == "" ]]; then
-    #     continue
-    # fi
+    stopProcessingIfExcludedFilesExist ${videoDirectory}
 
-setVideoType
+    lowercaseAllFileNames
+        
+    renderVideoSegments
 
-createMissingDirectories
+    createFfmpegInputFile ts
 
-cd ${videoDirectory}
+    renderVideoWithoutGraphics
 
-stopProcessingIfExcludedFilesExist ${videoDirectory}
+    addChannelBrandToVideo
 
-lowercaseAllFileNames
-    
-renderVideoSegments
+    mv outputFinal.mp4 "${UPLOAD_DIRECTORY}/${videoDirectory}.mp4"
 
-createFfmpegInputFile ts
+    tarballArchiveFile="${videoDirectory}.tar.xz"
 
-renderVideoWithoutGraphics
+    tar -cJf "$tarballArchiveFile" outputNoGraphics.mp4
 
-    # render video with graphics
+    mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
 
-    # compressOutputVideoFile # archive final video; move archive
+    changeToIncomingDirectory
 
-    # moveVideoAsProcessed ${videoDirectory}
+    mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
 # }
