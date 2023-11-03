@@ -271,8 +271,8 @@ fi
 
 checkForSingleProcess
 
-# while (true)
-# {
+while true
+do
     changeToIncomingDirectory
 
     videoDirectory=$(getFirstDirectory)
@@ -308,4 +308,4 @@ checkForSingleProcess
     changeToIncomingDirectory
 
     mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
-# }
+done
