@@ -6,7 +6,7 @@ BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
 DEBUG=1
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
-PROCESSED_DIRECTORY=""
+PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
 ARCHIVE_DIRECTORY=""
 UPLOAD_DIRECTORY=""
 ACTIVE_FILE="${BASE_DIRECTORY}/.active.txt"
@@ -206,7 +206,6 @@ setVideoType()
         handyman)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivehandyman"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadhandyman"
-            PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processedhandyman"
 
             if [ dayOfWeek -lt 4 ]; then
                 channelBrandText="Robinson Handy and Technology Services"
@@ -217,7 +216,6 @@ setVideoType()
         techtalk)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
-            PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processedtechnology"
 
             if [ dayOfWeek -lt 4 ]; then
                 channelBrandText="Tech Talk with RHT Services"
@@ -228,19 +226,16 @@ setVideoType()
         lightshow)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
-            PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processedtechnology"
             channelBrandText="2023 Christmas Light Show"
             ;;
         dashcam | fireworks | roads)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivedashcam"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploaddashcam"
-            PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processeddashcam"
             channelBrandText="Kenny Ram Dash Cam"
             ;;
         toastmasters)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetoastmasters"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtoastmasters"
-            PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processedtoastmasters"
             channelBrandText="towertoastmasters.org"
             ;;
         *)
