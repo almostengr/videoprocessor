@@ -200,19 +200,30 @@ setVideoType()
     videoType=$(echo "$videoDirectory" | awk -F'.' '{print $NF}')
 
     debugMessage "Video type: ${videoType}"
+    dayOfWeek=$(date +%u)
 
     case $videoType in
         handyman)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivehandyman"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadhandyman"
             PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processedhandyman"
-            channelBrandText="rhtservices.net"
+
+            if [ dayOfWeek -lt 4 ]; then
+                channelBrandText="Robinson Handy and Technology Services"
+            else 
+                channelBrandText="rhtservices.net"
+            fi
             ;;
         techtalk)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
             PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processedtechnology"
-            channelBrandText="rhtservices.net"
+
+            if [ dayOfWeek -lt 4 ]; then
+                channelBrandText="Tech Talk with RHT Services"
+            else 
+                channelBrandText="rhtservices.net"
+            fi
             ;;
         lightshow)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
