@@ -80,3 +80,9 @@ ffmpeg -framerate 1/3 -pattern_type glob -i '*.jpg' -c:v libx264 -r 30 -pix_fmt 
 ```bash
 fmpeg -i 20230401_110000.mp4 -i ../../../ytvideostructure/07music/mix03.mp3 -shortest -c:v copy -c:a copy -map 0:v:0 -map 1:a:0 output.mp4
 ```
+
+### Convert Variable Rate Video To Constant Rate Video
+
+```bash
+ffmpeg -i input.mp4 -vf "setpts=1.0*PTS" -r 30 -c:v libx264 -crf 18 -c:a aac -b:a 192k output.mp4
+```
