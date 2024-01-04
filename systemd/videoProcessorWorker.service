@@ -5,7 +5,7 @@ Documentation=https://thealmostengineer.com/
 [Service]
 Type=simple
 Restart=always
-ExecStart=/home/iamadmin/videoprocessor/Almostengr.VideoProcessor.Worker
+ExecStart=/home/iamadmin/videoprocessor/videoprocessor.sh
 User=iamadmin
 
 [Install]

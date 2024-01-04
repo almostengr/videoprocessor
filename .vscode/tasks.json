@@ -37,17 +37,6 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "Clean Release Project",
-            "command": "dotnet",
-            "type": "shell",
-            "args": [
-                "clean",
-                "-c",
-                "Release",
-            ],
-            "group": "none"
-        },
-        {
             "label": "Publish Release",
             "command": "dotnet",
             "type": "shell",

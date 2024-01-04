@@ -14,16 +14,6 @@ channels have a predefined structure for each video. Thus they are easy to autom
 content or on screen text needs to be displayed, the automation for that particular channel is modified
 accordingly.
 
-Thumbnails are generated using a custom webpage and Selenium Webdriver. Selenium Webdriver is used 
-to connect to a specified URL which includes the video title in the URL. That title is use to 
-display text on the page. From there, Webdriver then takes a screenshot of the page with the title, 
-so that it can be used for the video thumbnail.
-
-## Additional Resources
-
-* Video on [Getting API Key to Use with YouTube API](https://www.youtube.com/watch?v=JbWnRhHfTDA)
-* Video on [Walk-through of Upload Video](https://www.youtube.com/watch?v=pb_t5_ShQOM)
-
 ## My YouTube Channels
 
 * [Dash Cam Channel](https://www.youtube.com/channel/UCB7rvymUaUbbig3skv2zvCQ?sub_confirmation=1)
@@ -89,4 +79,10 @@ ffmpeg -framerate 1/3 -pattern_type glob -i '*.jpg' -c:v libx264 -r 30 -pix_fmt 
 
 ```bash
 fmpeg -i 20230401_110000.mp4 -i ../../../ytvideostructure/07music/mix03.mp3 -shortest -c:v copy -c:a copy -map 0:v:0 -map 1:a:0 output.mp4
+```
+
+### Convert Variable Rate Video To Constant Rate Video
+
+```bash
+ffmpeg -i input.mp4 -vf "setpts=1.0*PTS" -r 30 -c:v libx264 -crf 18 -c:a aac -b:a 192k output.mp4
 ```
