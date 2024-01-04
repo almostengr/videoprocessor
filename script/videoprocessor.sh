@@ -3,7 +3,7 @@
 PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
-DEBUG=1
+DEBUG=0
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
@@ -188,16 +188,11 @@ createFfmpegInputFile()
     do
         echo "file '${tsFile}'" >> ffmpeg.input
     done
-    # find . -type f \( -name "*.$1" -exec 
 }
 
 addChannelBrandToVideo() 
 {
-    # videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT}"
-    # videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT},drawtext=text='Subscribe and Like!':fontcolor=white@0.7:fontsize=h/28:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,10,20)+between(t,30,40)+between(t,50,60)'"
-    # videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT},drawtext=text='Subscribe and Like!':fontcolor=white:box=1:boxcolor=red@1:fontsize=h/28:${LOWERLEFT}:enable='mod(t,10)<5'"
-    # videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT},drawtext=text='Please Subscribe and Follow!':fontcolor=white:box=1:boxcolor=red@1:boxborderw=20:fontsize=h/28:${LOWERLEFT}:enable='lt(mod(t,297),10)'"
-    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT},drawtext=text='Please Subscribe and Follow!':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=h/28:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297),${subscribeBoxDuration}),1,0))'"
+    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT},drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=h/28:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297),${subscribeBoxDuration}),1,0))'"
 
     ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
 
@@ -229,7 +224,6 @@ renderVideoWithoutGraphics()
 
 renderVideoWithMixTrack()
 {
-    # ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -i "${audioFilePath}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4"
     ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -i "${MIX_AUDIO_TRACK_FILE}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4"
 
     commandReturnCode=$?
@@ -246,16 +240,18 @@ setVideoType()
     dayOfWeek=$(date +%u)
     subscribeBoxColor="red"
     subscribeBoxDuration="5"
+    subscribeBoxText="Please subscribe and follow!"
 
     case $videoType in
         handyman)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivehandyman"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadhandyman"
+            subscribeBoxColor="black"
 
             if [ $dayOfWeek -lt 2 ]; then
                 channelBrandText="rhtservices.net"
             elif [ $dayOfWeek -lt 5 ]; then
-                channelBrandTExt="@rhtservicesllc"
+                channelBrandText="@rhtservicesllc"
             else 
                 channelBrandText="Robinson Handy and Technology Services"
             fi
@@ -264,6 +260,7 @@ setVideoType()
         techtalk | lightshow)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
+            subscribeBoxColor="black"
 
             if [ $dayOfWeek -lt 2 ]; then
                 channelBrandText="@rhtservicestech"
@@ -277,21 +274,28 @@ setVideoType()
         dashcam | fireworks | carrepair)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivedashcam"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploaddashcam"
+            subscribeBoxColor="green"
+            subscribeBoxDuration="10"
+            subscribeBoxText="Please subscribe for new videos weekly!"
 
             if [ $dayOfWeek -lt 4 ]; then
                 channelBrandText="#KennyRamDashCam"
             else
                 channelBrandText="Kenny Ram Dash Cam"
             fi
-
-            subscribeBoxColor="red"
-            subscribeBoxDuration="10"
             ;;
 
         toastmasters)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetoastmasters"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtoastmasters"
-            channelBrandText="towertoastmasters.org"
+            subscribeBoxColor="blue"
+            subscribeBoxText="Follow us at facebook.com/towertoastmasters"
+
+            if [ $dayOfWeek -lt 4 ]; then
+                channelBrandText="towertoastmasters.org"
+            else
+                channelBrandText="Tower Toastmasters"
+            fi
             ;;
 
         *)
@@ -309,7 +313,6 @@ renderVideoSegments()
             ;;
             
         *)
-            # for videoFile in *mp4 *mkv
             for videoFile in "$(pwd)"/*.{mp4,mkv}
             do
                 normalizeAudio "${videoFile}"
@@ -397,5 +400,6 @@ checkForSingleProcess
 
     mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
 
-    removeActiveFile
 # done
+
+removeActiveFile
