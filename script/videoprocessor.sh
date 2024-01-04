@@ -21,8 +21,6 @@ LOWERLEFT="x=${PADDING}:y=h-th-${PADDING}"
 LOWERCENTER="x=(w-tw)/2:y=h-th-${PADDING}"
 LOWERRIGHT="x=w-tw-${PADDING}:y=h-th-${PADDING}"
 
-CHANNEL_BRAND="x=w-tw-${PADDING}:y=${PADDING}"
-
 errorMessage()
 {
     echo "ERROR $(date) $1"
@@ -43,7 +41,7 @@ debugMessage()
 changeToIncomingDirectory() 
 {
     mkdir -p "${INCOMING_DIRECTORY}"
-    cd "${INCOMING_DIRECTORY}"
+    cd "${INCOMING_DIRECTORY}" || exit
     pwd
 }
 
@@ -60,6 +58,8 @@ checkForSingleProcess()
         errorMessage "Active file was found. If no files are being processed, then manually remove it."
         exit
     fi
+
+    touch "$ACTIVE_FILE"
 }
 
 removeActiveFile()
@@ -70,7 +70,7 @@ removeActiveFile()
 getFirstDirectory()
 {
     videoDirectory=$(/bin/ls -1td */ | grep -i -v errorOccurred | /usr/bin/head -1)
-    videoDirectory=${videoDirectory%/}
+    videoDirectory="${videoDirectory%/}"
     if [ "$videoDirectory" == "" ]; then 
         infoMessage "No videos to process"
         sleep 3600
@@ -81,11 +81,11 @@ getFirstDirectory()
 
 stopProcessingIfExcludedFilesExist()
 {
-    fileCount=$(find . -type f \( -name "*.kdenlive" -o -name "*ffmpeg*" -o -name "details.txt" \) | wc -l)
+    fileCount=$(find . -type f \( -name "*.kdenlive" -o -name "details.txt" \) | wc -l)
 
     if [ $fileCount -gt 0 ]; then
         errorMessage "Invalid files present. Please remove the files from the directory"
-        mv $1 "$1.errorOccurred"
+        mv "$1" "$1.errorOccurred"
         exit
     fi
 }
@@ -105,15 +105,15 @@ analyzeAudioVolume()
     analysisResult=$(/usr/bin/ffmpeg -y -hide_banner -i $1 -af "volumedetect" -vn -sn -dn -f null /dev/null 2>&1 | grep max_volume)
     read -ra newArray <<< "${analysisResult}"
     maxVolume=${newArray[1]}
-    return maxVolume
+    return $maxVolume
 }
 
 adjustAudioVolume()
 {
     tempFile="temp.mp3"
-    volumeLevel=$(echo $2 | tr -d ' ')
-    /usr/bin/ffmpeg -hide_banner -i $1 -af "volume=${volumeLevel}" $tempFile
-    /bin/mv $tempFile $1
+    volumeLevel=$(echo "$2" | tr -d ' ')
+    /usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volume=${volumeLevel}" "$tempFile"
+    /bin/mv "$tempFile" "$1"
 }
 
 normalizeAudio()
@@ -121,17 +121,22 @@ normalizeAudio()
     debugMessage "Normalizing audio for $1"
 
     videoFile=$1
-    audioCount=$(/usr/bin/ffprobe -hide_banner ${videoFile} 2>&1 | grep -i audio | wc -l)
+    audioCount=$(/usr/bin/ffprobe -hide_banner "${videoFile}" 2>&1 | grep -i audio | wc -l)
     audioFile="${videoFile}.mp3"
 
     if [ $audioCount -eq 0 ]; then
-        cp $MIX_AUDIO_TRACK_FILE $audioFile
+        # videos that do not have audio track, have silent track added
+        ffmpeg -y  -i "${videoFile}" -f lavfi -i anullsrc -vcodec copy -acodec aac -shortest temp.mp4
+
+        mv temp.mp4 "${videoFile}"
+
+        convertVideoFileToMp3Audio "${videoFile}" "${audioFile}"
     else 
-        convertVideoFileToMp3Audio $videoFile $audioFile
+        convertVideoFileToMp3Audio "${videoFile}" "${audioFile}"
 
         volumeGain=$(analyzeAudioVolume)
 
-        adjustAudioVolume $audioFile $volumeGain
+        adjustAudioVolume "$audioFile" "$volumeGain"
     fi
 }
 
@@ -142,16 +147,22 @@ createTsFile()
     tsFile="${videoClipFile}.ts"
 
     /usr/bin/ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i "${videoClipFile}" -i "${audioClipFile}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "${tsFile}";
+
+    conversionReturnCode=$?
+
+    if [ $conversionReturnCode -gt 0 ]; then
+        errorMessage "Using CPU conversion for ${tsFile}"
+        /usr/bin/ffmpeg -y -hide_banner -i "${videoClipFile}" -i "${audioClipFile}" -shortest -map 0:v:0 -map 1:a:0 "${tsFile}";
+    fi
 }
 
 compressOutputVideoFile()
 {
-    videoTitle=$(basename $(pwd))
-
+    videoTitle=$(basename "$(pwd)")
     archiveDirectory="${BASE_DIRECTORY}/archive"
     tarFileName="${videoTitle}.tar.xz"
 
-    tar -cJf ${tarFileName} ${OUTPUT_FILENAME}
+    tar -cJf "${tarFileName}" "${OUTPUT_FILENAME}"
 
     mv "${tarFileName}" "${archiveDirectory}"
 }
@@ -163,9 +174,9 @@ deleteProcessedRawVideoFiles()
 
 moveVideoAsProcessed()
 {
-    cd ${INCOMING_DIRECTORY}
-    touch $1
-    mv $1 ${PROCESSED_DIRECTORY}
+    cd "${INCOMING_DIRECTORY}"
+    touch "$1"
+    mv "$1" "${PROCESSED_DIRECTORY}"
 }
 
 createFfmpegInputFile()
@@ -173,71 +184,116 @@ createFfmpegInputFile()
     debugMessage "Video format type: $1"
     touch ffmpeg.input
 
-    for tsFile in *$1
+    for tsFile in "$(pwd)"/*$1
     do
-        echo "file ${tsFile}" >> ffmpeg.input
+        echo "file '${tsFile}'" >> ffmpeg.input
     done
+    # find . -type f \( -name "*.$1" -exec 
 }
 
 addChannelBrandToVideo() 
 {
-    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.5:fontsize=h/28:${UPPERRIGHT}"
+    # videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT}"
+    # videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT},drawtext=text='Subscribe and Like!':fontcolor=white@0.7:fontsize=h/28:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,10,20)+between(t,30,40)+between(t,50,60)'"
+    # videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT},drawtext=text='Subscribe and Like!':fontcolor=white:box=1:boxcolor=red@1:fontsize=h/28:${LOWERLEFT}:enable='mod(t,10)<5'"
+    # videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT},drawtext=text='Please Subscribe and Follow!':fontcolor=white:box=1:boxcolor=red@1:boxborderw=20:fontsize=h/28:${LOWERLEFT}:enable='lt(mod(t,297),10)'"
+    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT},drawtext=text='Please Subscribe and Follow!':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=h/28:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297),${subscribeBoxDuration}),1,0))'"
+
     ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
+
+    commandReturnCode=$?
+    if [ $commandReturnCode -gt 0 ]; then
+        errorMessage "Rendering with CPU"
+        ffmpeg -y -hide_banner -i outputNoGraphics.mp4 -vf "${videoGraphicsFilter}" -shortest -c:a copy outputFinal.mp4;
+    fi
 }
 
 renderVideoWithoutGraphics()
 {
-    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi "outputNoGraphics.mp4";
+    case $videoType in 
+        dashcam)
+            renderVideoWithMixTrack
+            ;;
+
+        *)
+            ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi "outputNoGraphics.mp4";
+
+            commandReturnCode=$?
+            if [ $commandReturnCode -gt 0 ]; then
+                errorMessage "Rendering with CPU"
+                ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input "outputNoGraphics.mp4";
+            fi
+            ;;
+    esac
 }
 
-renderVideoWithAudio()
+renderVideoWithMixTrack()
 {
-    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -i "${audioFilePath}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4";
+    # ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -i "${audioFilePath}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4"
+    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -i "${MIX_AUDIO_TRACK_FILE}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4"
+
+    commandReturnCode=$?
+    if [ $commandReturnCode -gt 0 ]; then
+        errorMessage "Rendering with CPU"
+        ffmpeg -y -hide_banner -f concat -safe 0 -i -i ffmpeg.input -i "${MIX_AUDIO_TRACK_FILE}" -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4"
+    fi
 }
 
 setVideoType()
 {
     videoType=$(echo "$videoDirectory" | awk -F'.' '{print $NF}')
-
     debugMessage "Video type: ${videoType}"
     dayOfWeek=$(date +%u)
+    subscribeBoxColor="red"
+    subscribeBoxDuration="5"
 
     case $videoType in
         handyman)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivehandyman"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadhandyman"
 
-            if [ dayOfWeek -lt 4 ]; then
-                channelBrandText="Robinson Handy and Technology Services"
-            else 
+            if [ $dayOfWeek -lt 2 ]; then
                 channelBrandText="rhtservices.net"
+            elif [ $dayOfWeek -lt 5 ]; then
+                channelBrandTExt="@rhtservicesllc"
+            else 
+                channelBrandText="Robinson Handy and Technology Services"
             fi
             ;;
-        techtalk)
+
+        techtalk | lightshow)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
 
-            if [ dayOfWeek -lt 4 ]; then
-                channelBrandText="Tech Talk with RHT Services"
-            else 
+            if [ $dayOfWeek -lt 2 ]; then
+                channelBrandText="@rhtservicestech"
+            elif [ $dayOfWeek -lt 5 ]; then
                 channelBrandText="rhtservices.net"
+            else 
+  		        channelBrandText="Tech Talk with RHT Services"
             fi
             ;;
-        lightshow)
-            ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
-            UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
-            channelBrandText="2023 Christmas Light Show"
-            ;;
-        dashcam | fireworks | roads)
+
+        dashcam | fireworks | carrepair)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivedashcam"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploaddashcam"
-            channelBrandText="Kenny Ram Dash Cam"
+
+            if [ $dayOfWeek -lt 4 ]; then
+                channelBrandText="#KennyRamDashCam"
+            else
+                channelBrandText="Kenny Ram Dash Cam"
+            fi
+
+            subscribeBoxColor="red"
+            subscribeBoxDuration="10"
             ;;
+
         toastmasters)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetoastmasters"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtoastmasters"
             channelBrandText="towertoastmasters.org"
             ;;
+
         *)
             errorMessage "Invalid video type."
             exit
@@ -249,21 +305,49 @@ renderVideoSegments()
 {
     case $videoType in
         dashcam | fireworks)
-            errorMessage "Dash cam and fireworks videos not implemented"
-            exit
+            createFfmpegInputFile mov
             ;;
             
         *)
-            for videoFile in *mp4 *mkv
+            # for videoFile in *mp4 *mkv
+            for videoFile in "$(pwd)"/*.{mp4,mkv}
             do
                 normalizeAudio "${videoFile}"
 
                 createTsFile "${videoFile}"
             done
+
+            createFfmpegInputFile ts
             ;;
     esac
 }
 
+renderVideoFromImages()
+{
+    if [ "$(find . -maxdepth 1 -name '*.jpg' -print -quit)" ]; then
+        for imageFile in *.jpg; do
+            imageFileName="${imageFile%.*}"
+            # ffmpeg -y -loop 1 -i "$imageFile" -c:v libx264 -t 5 -pix_fmt yuv420p "${imageFileName}.mp4"
+            ffmpeg -y -framerate 1/3 -i "${imageFile}" -c:v libx264 -r 30 -pix_fmt yuv420p "${imageFileName}.mp4"
+        done
+    fi
+}
+
+removePreviousRenderFiles()
+{
+    rm ffmpeg.input outputFinal.mp4 outputNoGraphics.mp4 *ts
+}
+
+archiveVideoFile()
+{
+    tarballArchiveFile="${videoDirectory}.tar.xz"
+
+    infoMessage "Archiving video file ${tarballArchiveFile}"
+
+    tar -cJf "$tarballArchiveFile" outputNoGraphics.mp4
+
+    mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
+}
 
 ###############################################################################
 ###############################################################################
@@ -277,11 +361,11 @@ fi
 
 checkForSingleProcess
 
-while true
-do
+# while true
+# do
     changeToIncomingDirectory
 
-    videoDirectory=$(getFirstDirectory)
+    videoDirectory="$(getFirstDirectory)"
 
     getFirstDirectory
 
@@ -289,15 +373,17 @@ do
 
     createMissingDirectories
 
-    cd ${videoDirectory}
+    cd "${videoDirectory}" || exit
 
-    stopProcessingIfExcludedFilesExist ${videoDirectory}
+    stopProcessingIfExcludedFilesExist "${videoDirectory}"
 
     lowercaseAllFileNames
-        
-    renderVideoSegments
 
-    createFfmpegInputFile ts
+    removePreviousRenderFiles
+        
+    renderVideoFromImages
+
+    renderVideoSegments
 
     renderVideoWithoutGraphics
 
@@ -305,13 +391,11 @@ do
 
     mv outputFinal.mp4 "${UPLOAD_DIRECTORY}/${videoDirectory}.mp4"
 
-    tarballArchiveFile="${videoDirectory}.tar.xz"
-
-    tar -cJf "$tarballArchiveFile" outputNoGraphics.mp4
-
-    mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
+    archiveVideoFile
 
     changeToIncomingDirectory
 
     mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
-done
+
+    removeActiveFile
+# done
