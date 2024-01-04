@@ -1,5 +1,3 @@
-using Almostengr.VideoProcessor.Core.Common.Constants;
-
 namespace Almostengr.VideoProcessor.Core.Common;
 
 public static class ExtensionMethods
@@ -27,13 +25,6 @@ public static class ExtensionMethods
         }
         
         return haystack.EndsWith(needle, StringComparison.OrdinalIgnoreCase);
-    }
-
-    public static bool IsVideoFile(this string haystack)
-    {
-        return haystack.EndsWithIgnoringCase(FileExtension.Mov.Value) || 
-            haystack.EndsWithIgnoringCase(FileExtension.Mp4.Value) || 
-            haystack.EndsWithIgnoringCase(FileExtension.Mkv.Value);
     }
 
     public static bool IsNotNullOrWhiteSpace(this string value)
