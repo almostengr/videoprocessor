@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATH=/usr/bin/:/bin:/usr/sbin:/sbin
+PATH=/usr/bin:/bin:/usr/sbin:/sbin
 
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
 DEBUG=0
@@ -10,9 +10,9 @@ PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
 ARCHIVE_DIRECTORY=""
 UPLOAD_DIRECTORY=""
 ACTIVE_FILE="${BASE_DIRECTORY}/.active.txt"
-MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix05.mp3"
+MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix02.mp3"
 
-PADDING=70
+PADDING=70 # Padding for the graphics from the end of the screen
 UPPERLEFT="x=${PADDING}:y=${PADDING}"
 UPPERCENTER="x=(w-tw)/2:y=${PADDING}"
 UPPERRIGHT="x=w-tw-${PADDING}:y=${PADDING}"
@@ -24,6 +24,9 @@ LOWERRIGHT="x=w-tw-${PADDING}:y=h-th-${PADDING}"
 errorMessage()
 {
     echo "ERROR $(date) $1"
+    if [ "${videoDirectory}" != "" ]; then
+        echo "ERROR $(date) $1" > "${videoDirectory}/errorOccurred.txt"
+    fi
 }
 
 infoMessage()
@@ -38,7 +41,7 @@ debugMessage()
     fi
 }
 
-changeToIncomingDirectory() 
+changeToIncomingDirectory()
 {
     mkdir -p "${INCOMING_DIRECTORY}"
     cd "${INCOMING_DIRECTORY}" || exit
@@ -64,17 +67,21 @@ checkForSingleProcess()
 
 removeActiveFile()
 {
-    rm "$ACTIVE_FILE"
+    if [ -e "$ACTIVE_FILE" ]; then
+        rm "$ACTIVE_FILE"
+    fi
 }
 
 getFirstDirectory()
 {
-    videoDirectory=$(/bin/ls -1td */ | grep -i -v errorOccurred | /usr/bin/head -1)
-    videoDirectory="${videoDirectory%/}"
-    if [ "$videoDirectory" == "" ]; then 
+    # videoDirectory=$(/bin/ls -1td */ | grep -i -v errorOccurred | /usr/bin/head -1)
+    videoDirectory=$(find * -type d | grep -i -v errorOccurred | head -1)
+    if [ "$videoDirectory" == "" ]; then
         infoMessage "No videos to process"
-        sleep 3600
-    else 
+        removeActiveFile
+        exit
+    else
+        videoDirectory="${videoDirectory%/}"
         infoMessage "Processing ${videoDirectory}"
     fi
 }
@@ -86,6 +93,7 @@ stopProcessingIfExcludedFilesExist()
     if [ $fileCount -gt 0 ]; then
         errorMessage "Invalid files present. Please remove the files from the directory"
         mv "$1" "$1.errorOccurred"
+        removeActiveFile
         exit
     fi
 }
@@ -131,7 +139,7 @@ normalizeAudio()
         mv temp.mp4 "${videoFile}"
 
         convertVideoFileToMp3Audio "${videoFile}" "${audioFile}"
-    else 
+    else
         convertVideoFileToMp3Audio "${videoFile}" "${audioFile}"
 
         volumeGain=$(analyzeAudioVolume)
@@ -190,9 +198,9 @@ createFfmpegInputFile()
     done
 }
 
-addChannelBrandToVideo() 
+addChannelBrandToVideo()
 {
-    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT},drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=h/28:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297),${subscribeBoxDuration}),1,0))'"
+    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT}:box=1:boxcolor=${bgBoxColor}@.5:boxborderw=10,drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=h/28:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297),${subscribeBoxDuration}),1,0))'"
 
     ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
 
@@ -205,7 +213,7 @@ addChannelBrandToVideo()
 
 renderVideoWithoutGraphics()
 {
-    case $videoType in 
+    case $videoType in
         dashcam)
             renderVideoWithMixTrack
             ;;
@@ -241,6 +249,7 @@ setVideoType()
     subscribeBoxColor="red"
     subscribeBoxDuration="5"
     subscribeBoxText="Please subscribe and follow!"
+    bgBoxColor="black"
 
     case $videoType in
         handyman)
@@ -252,7 +261,7 @@ setVideoType()
                 channelBrandText="rhtservices.net"
             elif [ $dayOfWeek -lt 5 ]; then
                 channelBrandText="@rhtservicesllc"
-            else 
+            else
                 channelBrandText="Robinson Handy and Technology Services"
             fi
             ;;
@@ -266,7 +275,7 @@ setVideoType()
                 channelBrandText="@rhtservicestech"
             elif [ $dayOfWeek -lt 5 ]; then
                 channelBrandText="rhtservices.net"
-            else 
+            else
   		        channelBrandText="Tech Talk with RHT Services"
             fi
             ;;
@@ -277,6 +286,7 @@ setVideoType()
             subscribeBoxColor="green"
             subscribeBoxDuration="10"
             subscribeBoxText="Please subscribe for new videos weekly!"
+            bgBoxColor="green"
 
             if [ $dayOfWeek -lt 4 ]; then
                 channelBrandText="#KennyRamDashCam"
@@ -290,6 +300,7 @@ setVideoType()
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtoastmasters"
             subscribeBoxColor="blue"
             subscribeBoxText="Follow us at facebook.com/towertoastmasters"
+            bgBoxColor="royalblue"
 
             if [ $dayOfWeek -lt 4 ]; then
                 channelBrandText="towertoastmasters.org"
@@ -300,7 +311,9 @@ setVideoType()
 
         *)
             errorMessage "Invalid video type."
-            exit
+            mv "$videoDirectory" "${videoDirectory}.errorOccurred"
+            removeActiveFile
+            exit # todo needs to return value to know whether to continue or not
             ;;
     esac
 }
@@ -311,7 +324,7 @@ renderVideoSegments()
         dashcam | fireworks)
             createFfmpegInputFile mov
             ;;
-            
+
         *)
             for videoFile in "$(pwd)"/*.{mp4,mkv}
             do
@@ -338,7 +351,7 @@ renderVideoFromImages()
 
 removePreviousRenderFiles()
 {
-    rm ffmpeg.input outputFinal.mp4 outputNoGraphics.mp4 *ts
+    rm ffmpeg.input outputFinal.mp4 outputNoGraphics.mp4 *ts *mp3
 }
 
 archiveVideoFile()
@@ -370,7 +383,7 @@ checkForSingleProcess
 
     videoDirectory="$(getFirstDirectory)"
 
-    getFirstDirectory
+    # getFirstDirectory
 
     setVideoType
 
@@ -380,10 +393,10 @@ checkForSingleProcess
 
     stopProcessingIfExcludedFilesExist "${videoDirectory}"
 
+    removePreviousRenderFiles
+
     lowercaseAllFileNames
 
-    removePreviousRenderFiles
-        
     renderVideoFromImages
 
     renderVideoSegments
@@ -399,7 +412,6 @@ checkForSingleProcess
     changeToIncomingDirectory
 
     mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
-
 # done
 
 removeActiveFile
