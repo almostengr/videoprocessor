@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATH=/usr/bin:/bin:/usr/sbin:/sbin
+PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
 DEBUG=0
@@ -20,6 +20,8 @@ CENTERED="x=(w-tw)/2:y=(h-th)/2"
 LOWERLEFT="x=${PADDING}:y=h-th-${PADDING}"
 LOWERCENTER="x=(w-tw)/2:y=h-th-${PADDING}"
 LOWERRIGHT="x=w-tw-${PADDING}:y=h-th-${PADDING}"
+
+videoDirectory=""
 
 errorMessage()
 {
@@ -381,9 +383,9 @@ checkForSingleProcess
 # do
     changeToIncomingDirectory
 
-    videoDirectory="$(getFirstDirectory)"
+    # videoDirectory="$(getFirstDirectory)"
 
-    # getFirstDirectory
+    getFirstDirectory
 
     setVideoType
 
