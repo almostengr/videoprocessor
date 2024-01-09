@@ -22,24 +22,26 @@ LOWERCENTER="x=(w-tw)/2:y=h-th-${PADDING}"
 LOWERRIGHT="x=w-tw-${PADDING}:y=h-th-${PADDING}"
 
 videoDirectory=""
+TIMESTAMP=$(date +'%Y%m%d.%H%M%S')
+LOG_FILE="/var/log/videoprocessor.${TIMESTAMP}.log"
 
 errorMessage()
 {
-    echo "ERROR $(date) $1"
+    echo "ERROR $(date) $1" | tee -a "${LOG_FILE}"
     if [ "${videoDirectory}" != "" ]; then
-        echo "ERROR $(date) $1" > "${videoDirectory}/errorOccurred.txt"
+        echo "$message" > "${videoDirectory}/errorOccurred.txt"
     fi
 }
 
 infoMessage()
 {
-    echo "INFO $(date) $1"
+    echo "INFO $(date) $1" | tee -a "${LOG_FILE}"
 }
 
 debugMessage()
 {
     if [ $DEBUG -eq 1 ]; then
-        echo "DEBUG $(date) $1"
+        echo "DEBUG $(date) $1" | tee -a "${LOG_FILE}"
     fi
 }
 
@@ -76,7 +78,6 @@ removeActiveFile()
 
 getFirstDirectory()
 {
-    # videoDirectory=$(/bin/ls -1td */ | grep -i -v errorOccurred | /usr/bin/head -1)
     videoDirectory=$(find * -type d | grep -i -v errorOccurred | head -1)
     if [ "$videoDirectory" == "" ]; then
         infoMessage "No videos to process"
@@ -315,7 +316,7 @@ setVideoType()
             errorMessage "Invalid video type."
             mv "$videoDirectory" "${videoDirectory}.errorOccurred"
             removeActiveFile
-            exit # todo needs to return value to know whether to continue or not
+            exit
             ;;
     esac
 }
@@ -331,7 +332,6 @@ renderVideoSegments()
             for videoFile in "$(pwd)"/*.{mp4,mkv}
             do
                 normalizeAudio "${videoFile}"
-
                 createTsFile "${videoFile}"
             done
 
@@ -361,9 +361,7 @@ archiveVideoFile()
     tarballArchiveFile="${videoDirectory}.tar.xz"
 
     infoMessage "Archiving video file ${tarballArchiveFile}"
-
     tar -cJf "$tarballArchiveFile" outputNoGraphics.mp4
-
     mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
 }
 
@@ -381,9 +379,9 @@ checkForSingleProcess
 
 # while true
 # do
-    changeToIncomingDirectory
+    touch "${LOG_FILE}"
 
-    # videoDirectory="$(getFirstDirectory)"
+    changeToIncomingDirectory
 
     getFirstDirectory
 
