@@ -220,7 +220,7 @@ createFfmpegInputFile()
 
 addChannelBrandToVideo()
 {
-    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/28:${UPPERRIGHT}:box=1:boxcolor=${bgBoxColor}@.5:boxborderw=10,drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=h/28:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297),${subscribeBoxDuration}),1,0))'"
+    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/34:${UPPERRIGHT}:box=1:boxcolor=${bgBoxColor}@.5:boxborderw=10,drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=h/34:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297),${subscribeBoxDuration}),1,0))'"
 
     ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
 
