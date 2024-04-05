@@ -26,6 +26,13 @@ TIMESTAMP=$(date +'%Y%m%d.%H%M%S')
 LOG_FILE="/var/log/videoprocessor.${TIMESTAMP}.log"
 dayOfWeek=$(date +%u)
 
+setBaseDirectory()
+{
+    HOSTNAME=$(hostname)
+    if [ "${HOSTNAME}" == "media" ]; then
+        BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
+    fi
+}
 
 selectMixTrack()
 {
@@ -35,7 +42,7 @@ selectMixTrack()
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix02.mp3"
     elif [ $dayOfWeek -eq 3 ]; then
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix03.mp3"
-    elif [ $dayOfWeek -eq 4 ]; then
+    elif [ $dayOfWeek -eq 6 ]; then
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix04.mp3"
     else
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix05.mp3"
@@ -220,7 +227,16 @@ createFfmpegInputFile()
 
 addChannelBrandToVideo()
 {
-    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.7:fontsize=h/34:${UPPERRIGHT}:box=1:boxcolor=${bgBoxColor}@.5:boxborderw=10,drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=h/34:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297),${subscribeBoxDuration}),1,0))'"
+    fontSize="h/34"
+    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.6:fontsize=${fontSize}:${UPPERRIGHT}:box=1:boxcolor=${bgBoxColor}@0.4:boxborderw=10"
+
+    if [ "${subscribeBoxText}" != "" ]; then
+        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=:${fontSize}${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297),${ctaDuration}),1,0))'"
+    fi
+
+    if [ "${followPageText}" != "" ]; then
+        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${followPageText}':fontcolor=white:box=1:boxcolor=${followBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297+${ctaDuration}),${ctaDuration}),1,0))'"
+    fi
 
     ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
 
@@ -268,67 +284,76 @@ setVideoType()
 {
     videoType=$(echo "$videoDirectory" | awk -F'.' '{print $NF}')
     debugMessage "Video type: ${videoType}"
+    ctaDuration=5
+    
     subscribeBoxColor="red"
-    subscribeBoxDuration="5"
-    subscribeBoxText="Please subscribe and follow!"
+    # subscribeBoxDuration=$duration
+    subscribeBoxText=""
+
+    followBoxColor="blue"
+    # followPageDuration=$duration
+    followPageText=""
+
     bgBoxColor="black"
 
     case $videoType in
         handyman | handymanvertical)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivehandyman"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadhandyman"
-            subscribeBoxColor="black"
+            
+            subscribeBoxText="SUBSCRIBE FOR MORE HOME IMPROVEMENT IDEAS!"
+            followPageText="FOLLOW US FOR MORE DIY HOME REPAIRS"
 
             if [ $dayOfWeek -lt 2 ]; then
-                channelBrandText="rhtservices.net"
+                channelBrandText="RHTSERVICES.NET"
             elif [ $dayOfWeek -lt 5 ]; then
-                channelBrandText="@rhtservicesllc"
+                channelBrandText="@RHTSERVICESLLC"
             else
-                channelBrandText="Robinson Handy and Technology Services"
+                channelBrandText="ROBINSON HANDY AND TECHNOLOGY SERVICES"
             fi
             ;;
 
         techtalk | lightshow | techtalkvertical)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
-            subscribeBoxColor="black"
+
+            subscribeBoxText="SUBSCRIBE TO SEE MORE SOFTWARE AND TECH PROJECTS"
+            followPageText="FOLLOW US FOR TECH CAREER ADVICE"
 
             if [ $dayOfWeek -lt 2 ]; then
-                channelBrandText="@rhtservicestech"
+                channelBrandText="@RHTSERVICESTECH"
             elif [ $dayOfWeek -lt 5 ]; then
-                channelBrandText="rhtservices.net"
+                channelBrandText="RHTSERVICES.NET"
             else
-	        channelBrandText="Tech Talk with RHT Services"
+	        channelBrandText="TECH TALK WITH RHT SERVICES"
             fi
             ;;
 
         dashcam | fireworks | carrepair | dashcamvertical)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivedashcam"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploaddashcam"
+            
+            ctaDuration="10"
             subscribeBoxColor="green"
-            subscribeBoxDuration="10"
-            subscribeBoxText="Please subscribe for new videos weekly!"
+            subscribeBoxText="SUBSCRIBE TO SEE WEEKLY DASH CAM VIDEOS!"
             bgBoxColor="green"
 
             if [ $dayOfWeek -lt 4 ]; then
                 channelBrandText="#KennyRamDashCam"
             else
-                channelBrandText="Kenny Ram Dash Cam"
+                channelBrandText="KENNY RAM DASH CAM"
             fi
             ;;
 
         toastmasters)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetoastmasters"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtoastmasters"
-            subscribeBoxColor="blue"
-            subscribeBoxText="Follow us at facebook.com/towertoastmasters"
+            # subscribeBoxColor="blue"
+            # subscribeBoxText="Follow us at facebook.com/towertoastmasters"
+            followPageText="FOLLOW US AT FACEBOOK.COM/TOWERTOASTMASTERS"
             bgBoxColor="royalblue"
 
-            if [ $dayOfWeek -lt 4 ]; then
-                channelBrandText="towertoastmasters.org"
-            else
-                channelBrandText="Tower Toastmasters"
-            fi
+            channelBrandText="TOWERTOASTMASTERS.ORG"
             ;;
 
         *)
@@ -406,6 +431,8 @@ fi
 checkForSingleProcess
 
 touch "${LOG_FILE}"
+
+setBaseDirectory
 
 changeToIncomingDirectory
 
