@@ -5,6 +5,8 @@ PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
 DEBUG=1
 
+setBaseDirectory
+
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
 ARCHIVE_DIRECTORY=""
@@ -210,8 +212,9 @@ deleteProcessedRawVideoFiles()
 moveVideoAsProcessed()
 {
     cd "${INCOMING_DIRECTORY}"
-    touch "$1"
-    mv "$1" "${PROCESSED_DIRECTORY}"
+    # touch "$1"
+    # mv "$1" "${PROCESSED_DIRECTORY}"
+    mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
 }
 
 createFfmpegInputFile()
@@ -232,16 +235,16 @@ addChannelBrandToVideo()
     videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.6:fontsize=${fontSize}:${UPPERRIGHT}:box=1:boxcolor=${bgBoxColor}@0.4:boxborderw=10"
 
     if [ "${subscribeBoxText}" != "" ]; then
-        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=:${fontSize}${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297),${ctaDuration}),1,0))'"
+        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=:${fontSize}${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}),${ctaDuration}),1,0))'"
     fi
 
     if [ "${followPageText}" != "" ]; then
-        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${followPageText}':fontcolor=white:box=1:boxcolor=${followBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297+${ctaDuration}),${ctaDuration}),1,0))'"
+        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${followPageText}':fontcolor=white:box=1:boxcolor=${followBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}+${ctaDuration}),${ctaDuration}),1,0))'"
     fi
 
-    if [ "${commentText}" != "" ]; then
-        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${commentText}':fontcolor=white:box=1:boxcolor=black@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,297+${ctaDuration}),${ctaDuration}),1,0))'"
-    fi
+    # if [ "${commentText}" != "" ]; then
+    #     videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${commentText}':fontcolor=white:box=1:boxcolor=black@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}+${ctaDuration}),${ctaDuration}),1,0))'"
+    # fi
 
     ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
 
@@ -292,11 +295,9 @@ setVideoType()
     ctaDuration=5
     
     subscribeBoxColor="red"
-    # subscribeBoxDuration=$duration
     subscribeBoxText=""
 
     followBoxColor="blue"
-    # followPageDuration=$duration
     followPageText=""
 
     bgBoxColor="black"
@@ -309,12 +310,10 @@ setVideoType()
             subscribeBoxText="SUBSCRIBE FOR MORE HOME IMPROVEMENT IDEAS!"
             followPageText="FOLLOW US FOR MORE DIY HOME REPAIRS"
 
-            if [ $dayOfWeek -lt 2 ]; then
+            if [ $dayOfWeek -lt 4 ]; then
                 channelBrandText="RHTSERVICES.NET"
-            elif [ $dayOfWeek -lt 5 ]; then
-                channelBrandText="@RHTSERVICESLLC"
             else
-                channelBrandText="ROBINSON HANDY AND TECHNOLOGY SERVICES"
+                channelBrandText="@RHTSERVICESLLC"
             fi
             ;;
 
@@ -325,12 +324,13 @@ setVideoType()
             subscribeBoxText="SUBSCRIBE TO SEE MORE SOFTWARE AND TECH PROJECTS"
             followPageText="FOLLOW US FOR TECH CAREER ADVICE"
 
-            if [ $dayOfWeek -lt 2 ]; then
+            if [ "${videoType}" == "lightshow" ]; then
+                channelBrandText="$(date +%Y) CHRISTMAS LIGHT SHOW"
+                bgBoxColor="maroon"
+            elif [ $dayOfWeek -lt 4 ]; then
                 channelBrandText="@RHTSERVICESTECH"
-            elif [ $dayOfWeek -lt 5 ]; then
-                channelBrandText="RHTSERVICES.NET"
             else
-	        channelBrandText="TECH TALK WITH RHT SERVICES"
+                channelBrandText="RHTSERVICES.NET"
             fi
             ;;
 
@@ -338,7 +338,7 @@ setVideoType()
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivedashcam"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploaddashcam"
             
-            ctaDuration="10"
+            ctaDuration=10
             subscribeBoxColor="green"
             subscribeBoxText="SUBSCRIBE TO SEE WEEKLY DASH CAM VIDEOS!"
             bgBoxColor="green"
@@ -437,8 +437,6 @@ checkForSingleProcess
 
 touch "${LOG_FILE}"
 
-setBaseDirectory
-
 changeToIncomingDirectory
 
 getFirstDirectory
@@ -469,6 +467,6 @@ archiveVideoFile
 
 changeToIncomingDirectory
 
-mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
+moveVideoAsProcessed
 
 removeActiveFile
