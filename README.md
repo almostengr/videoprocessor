@@ -91,3 +91,16 @@ ffmpeg -i input.mp4 -vf "setpts=1.0*PTS" -r 30 -c:v libx264 -crf 18 -c:a aac -b:
 ```bash
 ffmpeg -y  -i input.mp4 -f lavfi -i anullsrc -vcodec copy -acodec aac -shortest output.mp3
 ```
+
+### Rotate Video Clip
+
+```bash
+ffmpeg -i in.mov -vf "transpose=1" out.mov
+```
+
+For the transpose parameter you can pass:
+
+0 = 90° counterclockwise and vertical flip (default)
+1 = 90° clockwise
+2 = 90° counterclockwise
+3 = 90° clockwise and vertical flip
