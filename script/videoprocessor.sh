@@ -27,6 +27,8 @@ videoDirectory=""
 TIMESTAMP=$(date +'%Y%m%d.%H%M%S')
 LOG_FILE="/var/log/videoprocessor.${TIMESTAMP}.log"
 dayOfWeek=$(date +%u)
+archiveFileExist=false
+manualFileExist=false
 
 setBaseDirectory()
 {
@@ -38,17 +40,35 @@ setBaseDirectory()
 
 selectMixTrack()
 {
-    if [ $dayOfWeek -le 1 ]; then
+    case $dayOfWeek in
+        0) 
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix01.mp3"
-    elif [ $dayOfWeek -eq 2 ]; then
+        ;;
+
+        1) 
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix02.mp3"
-    elif [ $dayOfWeek -eq 3 ]; then
+        ;; 
+
+        2) 
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix03.mp3"
-    elif [ $dayOfWeek -eq 6 ]; then
+        ;;
+
+        3)
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix04.mp3"
-    else
+        ;;
+
+        4)
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix05.mp3"
-    fi
+        ;;
+
+        5) 
+	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix06.mp3"
+        ;;
+
+        *) 
+	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix06.mp3"
+        ;;
+    esac
 }
 
 errorMessage()
@@ -212,8 +232,6 @@ deleteProcessedRawVideoFiles()
 moveVideoAsProcessed()
 {
     cd "${INCOMING_DIRECTORY}"
-    # touch "$1"
-    # mv "$1" "${PROCESSED_DIRECTORY}"
     mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
 }
 
@@ -235,15 +253,11 @@ addChannelBrandToVideo()
     videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.6:fontsize=${fontSize}:${UPPERRIGHT}:box=1:boxcolor=${bgBoxColor}@0.4:boxborderw=10"
 
     if [ "${subscribeBoxText}" != "" ]; then
-        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=:${fontSize}${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}),${ctaDuration}),1,0))'"
+        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}),${ctaDuration}),1,0))'"
     fi
 
-    if [ "${followPageText}" != "" ]; then
-        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${followPageText}':fontcolor=white:box=1:boxcolor=${followBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}+${ctaDuration}),${ctaDuration}),1,0))'"
-    fi
-
-    # if [ "${commentText}" != "" ]; then
-    #     videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${commentText}':fontcolor=white:box=1:boxcolor=black@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}+${ctaDuration}),${ctaDuration}),1,0))'"
+    # if [ "${followPageText}" != "" ]; then
+        # videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${followPageText}':fontcolor=white:box=1:boxcolor=${followBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}+${ctaDuration}),${ctaDuration}),1,0))'"
     # fi
 
     ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
@@ -257,6 +271,10 @@ addChannelBrandToVideo()
 
 renderVideoWithoutGraphics()
 {
+    if [ "${archiveFileExist}" == true ]; then
+        return;
+    fi
+
     case $videoType in
         handymanvertical | techtalkvertical | dashcamvertical)
             ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input -vf "scale=1920:1080,boxblur=50" -an background.mp4
@@ -307,7 +325,7 @@ setVideoType()
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivehandyman"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadhandyman"
             
-            subscribeBoxText="SUBSCRIBE FOR MORE HOME IMPROVEMENT IDEAS!"
+            subscribeBoxText="SUBSCRIBE AND FOLLOW FOR MORE HOME IMPROVEMENT IDEAS!"
             followPageText="FOLLOW US FOR MORE DIY HOME REPAIRS"
 
             if [ $dayOfWeek -lt 4 ]; then
@@ -321,7 +339,7 @@ setVideoType()
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
 
-            subscribeBoxText="SUBSCRIBE TO SEE MORE SOFTWARE AND TECH PROJECTS"
+            subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE SOFTWARE AND TECH PROJECTS"
             followPageText="FOLLOW US FOR TECH CAREER ADVICE"
 
             if [ "${videoType}" == "lightshow" ]; then
@@ -353,9 +371,8 @@ setVideoType()
         toastmasters)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetoastmasters"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtoastmasters"
-            # subscribeBoxColor="blue"
-            # subscribeBoxText="Follow us at facebook.com/towertoastmasters"
-            followPageText="FOLLOW US AT FACEBOOK.COM/TOWERTOASTMASTERS"
+            subscribeBoxColor="royalblue"
+            subscribeBoxText="FOLLOW US AT FACEBOOK.COM/TOWERTOASTMASTERS"
             bgBoxColor="royalblue"
 
             channelBrandText="TOWERTOASTMASTERS.ORG"
@@ -372,6 +389,10 @@ setVideoType()
 
 renderVideoSegments()
 {
+    if [ "${archiveFileExist}" == true ]; then
+        return;
+    fi
+
     case $videoType in
         dashcam | fireworks)
             createFfmpegInputFile mov
@@ -400,6 +421,10 @@ renderVideoSegments()
 
 renderVideoFromImages()
 {
+    if [ "${archiveFileExist}" == true || "${manualFileExist}" == true ]; then
+        return;
+    fi
+
     if [ "$(find . -maxdepth 1 -name '*.jpg' -print -quit)" ]; then
         for imageFile in *.jpg; do
             imageFileName="${imageFile%.*}"
@@ -421,6 +446,20 @@ archiveVideoFile()
     infoMessage "Archiving video file ${tarballArchiveFile}"
     tar -cJf "$tarballArchiveFile" outputNoGraphics.mp4
     mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
+}
+
+doesArchiveFileExist()
+{
+    if [ -e "${videoDirectory}/archive.option" ]; then
+        archiveFileExist=true
+    fi
+}
+
+doesManualEditFileExist()
+{
+    if [ -e "${videoDirectory}/manual.option" ]; then
+        manualFileExist=true
+    fi
 }
 
 ###############################################################################
@@ -452,6 +491,10 @@ stopProcessingIfExcludedFilesExist "${videoDirectory}"
 removePreviousRenderFiles
 
 lowercaseAllFileNames
+
+doesArchiveFileExist
+
+doesManualEditFileExist
 
 renderVideoFromImages
 
