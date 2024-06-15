@@ -41,15 +41,15 @@ setBaseDirectory()
 selectMixTrack()
 {
     case $dayOfWeek in
-        0) 
+        0)
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix01.mp3"
         ;;
 
-        1) 
+        1)
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix02.mp3"
-        ;; 
+        ;;
 
-        2) 
+        2)
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix03.mp3"
         ;;
 
@@ -61,12 +61,12 @@ selectMixTrack()
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix05.mp3"
         ;;
 
-        5) 
+        5)
 	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix06.mp3"
         ;;
 
-        *) 
-	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix06.mp3"
+        *)
+	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix07.mp3"
         ;;
     esac
 }
@@ -311,7 +311,7 @@ setVideoType()
     videoType=$(echo "$videoDirectory" | awk -F'.' '{print $NF}')
     debugMessage "Video type: ${videoType}"
     ctaDuration=5
-    
+
     subscribeBoxColor="red"
     subscribeBoxText=""
 
