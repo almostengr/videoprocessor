@@ -100,7 +100,7 @@ ffmpeg -i in.mov -vf "transpose=1" out.mov
 
 For the transpose parameter you can pass:
 
-0 = 90° counterclockwise and vertical flip (default)
-1 = 90° clockwise
-2 = 90° counterclockwise
-3 = 90° clockwise and vertical flip
+* 0 = 90° counterclockwise and vertical flip (default)
+* 1 = 90° clockwise
+* 2 = 90° counterclockwise
+* 3 = 90° clockwise and vertical flip
