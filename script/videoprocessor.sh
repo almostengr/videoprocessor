@@ -25,7 +25,7 @@ LOWERRIGHT="x=w-tw-${PADDING}:y=h-th-${PADDING}"
 
 videoDirectory=""
 TIMESTAMP=$(date +'%Y%m%d.%H%M%S')
-LOG_FILE="/var/log/videoprocessor.${TIMESTAMP}.log"
+LOG_FILE="/home/almostengr/Documents/videoprocessor.${TIMESTAMP}.log"
 dayOfWeek=$(date +%u)
 archiveFileExist=false
 manualFileExist=false
