@@ -378,6 +378,15 @@ setVideoType()
             channelBrandText="TOWERTOASTMASTERS.ORG"
             ;;
 
+	neighborhood)
+		ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archive_neighborhood"
+		UPLOAD_DIRECTORY="${BASE_DIRECTORY}/upload_neighborhood"
+		subscribeBoxColor="green"
+		subscribeBoxText="JOIN CARRIAGE HILLS NEIGHBORHOOD ASSOCATION. DUES ARE $25 PER HOUSEHOLD PER YEAR"
+		bgBoxColor="green"
+		channelBrandText="CARRIAGE HILLS NEIGHBORHOOD ASSOCATION"
+		;;
+
         *)
             errorMessage "Invalid video type."
             mv "$videoDirectory" "${videoDirectory}.errorOccurred"
