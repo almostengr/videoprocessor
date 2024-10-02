@@ -40,33 +40,35 @@ setBaseDirectory()
 
 selectMixTrack()
 {
+    MUSIC_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/"
+
     case $dayOfWeek in
         0)
-	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix01.mp3"
+	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix01.mp3"
         ;;
 
         1)
-	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix02.mp3"
+	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix02.mp3"
         ;;
 
         2)
-	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix03.mp3"
+	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix03.mp3"
         ;;
 
         3)
-	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix04.mp3"
+	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix04.mp3"
         ;;
 
         4)
-	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix05.mp3"
+	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix05.mp3"
         ;;
 
         5)
-	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix06.mp3"
+	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix06.mp3"
         ;;
 
         *)
-	    MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix07.mp3"
+	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix07.mp3"
         ;;
     esac
 }
@@ -124,7 +126,8 @@ removeActiveFile()
 
 getFirstDirectory()
 {
-    videoDirectory=$(find * -type d | grep -i -v errorOccurred | head -1)
+    # videoDirectory=$(find * -type d | grep -i -v errorOccurred | head -1)
+    videoDirectory=$(ls -trd1 */ | grep -i -v errorOccurred |  cut -f1 -d'/' | head -1)
     if [ "$videoDirectory" == "" ]; then
         infoMessage "No videos to process"
         removeActiveFile
@@ -150,6 +153,12 @@ stopProcessingIfExcludedFilesExist()
 lowercaseAllFileNames()
 {
     /usr/bin/rename 'y/A-Z/a-z/' *
+    result=$?
+
+    if [ "${result}" -gt 0 ]; then
+        errorMessage "Rename binary not installed. Run sudo apt-get install rename"
+        exit
+    fi
 }
 
 convertVideoFileToMp3Audio()
@@ -162,6 +171,11 @@ analyzeAudioVolume()
     analysisResult=$(/usr/bin/ffmpeg -y -hide_banner -i $1 -af "volumedetect" -vn -sn -dn -f null /dev/null 2>&1 | grep max_volume)
     read -ra newArray <<< "${analysisResult}"
     maxVolume=${newArray[1]}
+
+    if [ "${maxVolume}" == "" ]; then
+        maxVolume="0"
+    fi
+
     return $maxVolume
 }
 
@@ -169,6 +183,12 @@ adjustAudioVolume()
 {
     tempFile="temp.mp3"
     volumeLevel=$(echo "$2" | tr -d ' ')
+
+    # dont render the audio file if the volume level has not changed
+    if [ "${volumeLevel}" == "0" ]; then
+        return
+    fi
+
     /usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volume=${volumeLevel}" "$tempFile"
     /bin/mv "$tempFile" "$1"
 }
