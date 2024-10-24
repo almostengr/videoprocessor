@@ -5,16 +5,6 @@ PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
 DEBUG=0
 
-setBaseDirectory()
-{
-    HOSTNAME=$(hostname)
-    if [ "${HOSTNAME}" == "media" ]; then
-        BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
-    fi
-}
-
-setBaseDirectory
-
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
 ARCHIVE_DIRECTORY=""
@@ -256,6 +246,13 @@ moveVideoAsProcessed()
     mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
 }
 
+removeVideoDirectory()
+{    
+    infoMessage "Removing video directory ${videoDirectory}"
+    cd "${INCOMING_DIRECTORY}"
+    rm -r "${videoDirectory}"
+}
+
 createFfmpegInputFile()
 {
     debugMessage "Video format type: $1"
@@ -475,6 +472,12 @@ archiveVideoFile()
 
     infoMessage "Archiving video file ${tarballArchiveFile}"
     tar -cJf "$tarballArchiveFile" outputNoGraphics.mp4
+
+    returnCode=$?
+    if [ ${returnCode} -gt 0 ]; then
+        errorMessage "Unable to archive video file."
+        exit
+    fi
     mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
 }
 
@@ -541,5 +544,7 @@ archiveVideoFile
 changeToIncomingDirectory
 
 moveVideoAsProcessed
+
+# removeVideoDirectory  # todo implement after being tested
 
 removeActiveFile
