@@ -3,7 +3,15 @@
 PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
-DEBUG=1
+DEBUG=0
+
+setBaseDirectory()
+{
+    HOSTNAME=$(hostname)
+    if [ "${HOSTNAME}" == "media" ]; then
+        BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
+    fi
+}
 
 setBaseDirectory
 
@@ -30,13 +38,6 @@ dayOfWeek=$(date +%u)
 archiveFileExist=false
 manualFileExist=false
 
-setBaseDirectory()
-{
-    HOSTNAME=$(hostname)
-    if [ "${HOSTNAME}" == "media" ]; then
-        BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
-    fi
-}
 
 selectMixTrack()
 {
@@ -341,6 +342,15 @@ setVideoType()
     bgBoxColor="black"
 
     case $videoType in
+        carriagehills)
+            ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivecarriagehills"
+            UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadcarriagehills"
+            
+            subscribeBoxColor="green"
+            subscribeBoxText="JOIN OUR NEXT DOOR GROUP!"
+            channelBrandText="CARRIAGE HILLS NEIGHBORHOOD ASSOCATION"
+            ;;
+
         handyman | handymanvertical)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivehandyman"
             UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadhandyman"
