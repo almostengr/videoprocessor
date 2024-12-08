@@ -3,7 +3,7 @@
 PATH=/usr/bin/:/bin:/usr/sbin:/sbin
 
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
-DEBUG=0
+DEBUG=1
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
@@ -244,6 +244,12 @@ moveVideoAsProcessed()
 {
     cd "${INCOMING_DIRECTORY}"
     mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
+}
+
+moveVideoFolderToTrash()
+{
+    infoMessage "Moving video directory ${videoDirectory} to trash"
+    /usr/bin/gio trash "${videoDirectory}"
 }
 
 removeVideoDirectory()
@@ -543,8 +549,10 @@ archiveVideoFile
 
 changeToIncomingDirectory
 
-moveVideoAsProcessed
+# moveVideoAsProcessed
 
 # removeVideoDirectory  # todo implement after being tested
+
+moveVideoFolderToTrash
 
 removeActiveFile
