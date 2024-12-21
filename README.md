@@ -3,7 +3,7 @@
 ## Purpose
 
 Ask any content creator and they will tell you that creating videos is a time consuming process.
-For me, the most mundane and worse part of the process is waiting on the videos to render and waiting on 
+For me, the most mundane and worse part of the process is waiting on the videos to render and waiting on
 the uploads to complete.
 
 Some video editors, have a version of their software that can be ran on a server to render the video files
@@ -32,6 +32,18 @@ accordingly.
 * https://stackoverflow.com/questions/44280903/ffmpeg-vaapi-and-drawtext
 * https://trac.ffmpeg.org/wiki/Hardware/VAAPI
 * https://stackoverflow.com/questions/7333232/how-to-concatenate-two-mp4-files-using-ffmpeg
+
+## Crontab Command
+
+Command below to render videos on a schedule.
+
+```bash
+5 0-5 * * * /home/almostengr/videoprocessor/script/videoprocessor.sh
+```
+
+Command will run 5 minutes after the hour between the hours of midnight (00:05) and 05:05. This time was selected
+as it is the time that I would be using the computer. Thus the work I would be doing would not be slowed
+down by the rendering process and visa versa.
 
 ## Additional FFMPEG Commands
 
