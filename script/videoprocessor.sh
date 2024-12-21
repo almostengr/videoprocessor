@@ -8,7 +8,7 @@ DEBUG=1
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
 ARCHIVE_DIRECTORY=""
-UPLOAD_DIRECTORY=""
+# UPLOAD_DIRECTORY=""
 ACTIVE_FILE="${BASE_DIRECTORY}/.active.txt"
 MIX_AUDIO_TRACK_FILE="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/mix02.mp3"
 
@@ -95,7 +95,7 @@ createMissingDirectories()
 {
     mkdir -p "${PROCESSED_DIRECTORY}"
     mkdir -p "${ARCHIVE_DIRECTORY}"
-    mkdir -p "${UPLOAD_DIRECTORY}"
+    # mkdir -p "${UPLOAD_DIRECTORY}"
 }
 
 checkForSingleProcess()
@@ -347,7 +347,7 @@ setVideoType()
     case $videoType in
         carriagehills)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivecarriagehills"
-            UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadcarriagehills"
+            # UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadcarriagehills"
             
             subscribeBoxColor="green"
             subscribeBoxText="JOIN OUR NEXT DOOR GROUP!"
@@ -356,7 +356,7 @@ setVideoType()
 
         handyman | handymanvertical)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivehandyman"
-            UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadhandyman"
+            # UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadhandyman"
             
             subscribeBoxText="SUBSCRIBE AND FOLLOW FOR MORE HOME IMPROVEMENT IDEAS!"
             followPageText="FOLLOW US FOR MORE DIY HOME REPAIRS"
@@ -370,7 +370,7 @@ setVideoType()
 
         techtalk | lightshow | techtalkvertical)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetechnology"
-            UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
+            # UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtechnology"
 
             subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE SOFTWARE AND TECH PROJECTS"
             followPageText="FOLLOW US FOR TECH CAREER ADVICE"
@@ -387,7 +387,7 @@ setVideoType()
 
         dashcam | fireworks | carrepair | dashcamvertical)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivedashcam"
-            UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploaddashcam"
+            # UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploaddashcam"
             
             ctaDuration=10
             subscribeBoxColor="green"
@@ -403,7 +403,7 @@ setVideoType()
 
         toastmasters)
             ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archivetoastmasters"
-            UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtoastmasters"
+            # UPLOAD_DIRECTORY="${BASE_DIRECTORY}/uploadtoastmasters"
             subscribeBoxColor="royalblue"
             subscribeBoxText="FOLLOW US AT FACEBOOK.COM/TOWERTOASTMASTERS"
             bgBoxColor="royalblue"
@@ -543,7 +543,8 @@ renderVideoWithoutGraphics
 
 addChannelBrandToVideo
 
-mv outputFinal.mp4 "${UPLOAD_DIRECTORY}/${videoDirectory}.mp4"
+# mv outputFinal.mp4 "${UPLOAD_DIRECTORY}/${videoDirectory}.mp4"
+mv outputFinal.mp4 "${ARCHIVE_DIRECTORY}/${videoDirectory}.mp4"
 
 archiveVideoFile
 
