@@ -32,7 +32,10 @@ selectMixTrack()
 {
     MUSIC_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/"
 
-    case $dayOfWeek in
+    hourOfDay=$(date +%H)
+
+    # case $dayOfWeek in
+    case $hourOfDay in
         0)
 	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix01.mp3"
         ;;
