@@ -95,7 +95,7 @@ changeToIncomingDirectory()
 
 createMissingDirectories()
 {
-    mkdir -p "${PROCESSED_DIRECTORY}"
+    # mkdir -p "${PROCESSED_DIRECTORY}"
     mkdir -p "${ARCHIVE_DIRECTORY}"
 }
 
@@ -394,7 +394,7 @@ setVideoType()
             if [ $dayOfWeek -lt 4 ]; then
                 channelBrandText="#KennyRamDashCam"
             else
-                channelBrandText="KENNY RAM DASH CAM"
+                channelBrandText="Kenny Ram Dash Cam"
             fi
             ;;
 
@@ -450,7 +450,7 @@ renderVideoSegments()
 
 renderVideoFromImages()
 {
-    if [ "${archiveFileExist}" == true || "${manualFileExist}" == true ]; then
+    if [ "${archiveFileExist}" == true ] || [ "${manualFileExist}" == true ]; then
         return;
     fi
 
