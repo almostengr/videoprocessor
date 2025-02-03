@@ -308,7 +308,7 @@
                     {
                         "name": "gridlines",
                         "source_uuid": "e56ab8e8-8c72-4c92-b626-78d8bc250adf",
-                        "visible": false,
+                        "visible": true,
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
@@ -543,7 +543,7 @@
                         "name": "Screen Capture (PipeWire)",
                         "source_uuid": "c4ee05b9-9cdc-4ca6-9478-866055cdee6a",
                         "visible": true,
-                        "locked": false,
+                        "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
                             "x": 1920.0,
@@ -624,7 +624,7 @@
             "id": "pipewire-screen-capture-source",
             "versioned_id": "pipewire-screen-capture-source",
             "settings": {
-                "RestoreToken": "cb1901c1-8484-4307-a714-ec30d489f077"
+                "RestoreToken": "f3145aac-e422-4b06-9e9e-890529cac9e5"
             },
             "mixers": 0,
             "sync": 0,
