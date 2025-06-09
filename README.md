@@ -9,29 +9,26 @@ the uploads to complete.
 Some video editors, have a version of their software that can be ran on a server to render the video files
 created. By offloading the video rendering to another machine, you can edit more videos in less time.
 
-Purpose of this script is to automate the video creation process. Videos that I post on my various content
-platforms have a predefined structure for each video type. Thus they are easy to automate. When additional
-content or on screen text needs to be displayed, the automation for that particular channel is modified
-accordingly.
+## Solution
+
+I created this script to automate the video creation process. Videos that I post on my various content
+platforms have a predefined structure for each video type. Thus they are easy to automate. 
+
+I am a member of organizations, where I am partically or fully responsible for the marketing and 
+branding of that organization. Some of the marketing is done with the use of video. This script also 
+accomidates those additional video types.
 
 ## My YouTube Channels
 
 * [Dash Cam Channel](https://www.youtube.com/channel/UCB7rvymUaUbbig3skv2zvCQ?sub_confirmation=1)
 * [Home Improvement Channel](https://www.youtube.com/channel/UC4HCouBLtXD1j1U_17aBqig?sub_confirmation=1)
-* [Technology Channel](http://www.youtube.com/channel/UC4xp-TEEIAL-4XtMVvfRaQw?sub_confirmation=1)
+* [Tech / Personal Channel](http://www.youtube.com/channel/UC4xp-TEEIAL-4XtMVvfRaQw?sub_confirmation=1)
 
 ## Video Schedule By Channel
 
 * Kenny Ram Dash Cam - on Monday, Wednesdays, and Fridays
-* Robinson Handy and Technology Services - on Saturdays
-* Tech Talk with RHT Services - on Tuesdays, sometimes Thursdays
-
-## References
-
-* https://filme.imyfone.com/video-editing-tips/how-to-merge-or-combine-videos-using-ffmpeg/
-* https://stackoverflow.com/questions/44280903/ffmpeg-vaapi-and-drawtext
-* https://trac.ffmpeg.org/wiki/Hardware/VAAPI
-* https://stackoverflow.com/questions/7333232/how-to-concatenate-two-mp4-files-using-ffmpeg
+* RHT Services Home Improvement - on Saturdays
+* RHT Services Tech Talk - on Tuesdays, sometimes Thursdays
 
 ## Crontab Command
 
@@ -116,3 +113,10 @@ For the transpose parameter you can pass:
 * 1 = 90° clockwise
 * 2 = 90° counterclockwise
 * 3 = 90° clockwise and vertical flip
+
+## References
+
+* https://filme.imyfone.com/video-editing-tips/how-to-merge-or-combine-videos-using-ffmpeg/
+* https://stackoverflow.com/questions/44280903/ffmpeg-vaapi-and-drawtext
+* https://trac.ffmpeg.org/wiki/Hardware/VAAPI
+* https://stackoverflow.com/questions/7333232/how-to-concatenate-two-mp4-files-using-ffmpeg
