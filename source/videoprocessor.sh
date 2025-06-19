@@ -257,10 +257,10 @@ case $videoType in
         bgBoxColor="maroon"
         ;;
 
-    dashcam | fireworks | carrepair | dashcamvertical)
+    dashcam | fireworks | carrepair | dashcamvertical | dashcam2)
         ctaDuration=12
         subscribeBoxColor="green"
-        subscribeBoxText="HELP US GET TO 1000 SUBSCRIBERS! SUBSCRIBE NOW!"
+        subscribeBoxText="HELP THE CHANNEL GROW bY SUBSCRIBING NOW!"
         bgBoxColor="green"
 
         if [ $dayOfWeek -lt 4 ]; then
@@ -352,6 +352,10 @@ case $videoType in
         createFfmpegInputFile mov
         ;;
 
+    dashcam2) 
+        createFfmpegInputFile mp4
+        ;;
+
     handymanvertical | techtalkvertical | dashcamvertical)
         for videoFile in "$(pwd)"/*.{mp4}
         do
@@ -403,7 +407,7 @@ case $videoType in
         ffmpeg -y -hide_banner -i foreground.mp4 -i background.mp4 -filter_complex "[0:v]setpts=PTS-STARTPTS[fg];[1:v]setpts=PTS-STARTPTS[bg];[bg][fg]overlay=(W-w)/2:(H-h)/2" -c:a copy "outputNoGraphics.mp4"
         ;;
 
-    dashcam)
+    dashcam | dashcam2)
         selectMixTrack
 
         ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -i "${MIX_AUDIO_TRACK_FILE}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4"
