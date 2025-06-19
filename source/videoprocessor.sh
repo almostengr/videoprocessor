@@ -490,14 +490,3 @@ changeToIncomingDirectory
 mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
 
 removeActiveFile
-
-# move video files to respective directories by type
-
-mv "${ARCHIVE_DIRECTORY}/*carrepair*mp4" "${BASE_DIRECTORY}/upload_dashcam"
-mv "${ARCHIVE_DIRECTORY}/*carriagehills*mp4" "${BASE_DIRECTORY}/upload_carriagehills"
-mv "${ARCHIVE_DIRECTORY}/*dashcam*mp4" "${BASE_DIRECTORY}/upload_dashcam"
-mv "${ARCHIVE_DIRECTORY}/*fireworks*mp4" "${BASE_DIRECTORY}/upload_dashcam"
-mv "${ARCHIVE_DIRECTORY}/*handyman*mp4" "${BASE_DIRECTORY}/upload_handyman"
-mv "${ARCHIVE_DIRECTORY}/*lightshow*mp4" "${BASE_DIRECTORY}/upload_techtalk"
-mv "${ARCHIVE_DIRECTORY}/*techtalk*mp4" "${BASE_DIRECTORY}/upload_techtalk"
-mv "${ARCHIVE_DIRECTORY}/*toastmasters*mp4" "${BASE_DIRECTORY}/upload_toastmasters"
