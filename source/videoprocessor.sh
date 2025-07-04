@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATH=/usr/bin/:/bin:/usr/sbin:/sbin
+PATH="/usr/bin/:/bin:/usr/sbin:/sbin:${PATH}"
 
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
 DEBUG=1
@@ -9,8 +9,7 @@ INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
 ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archive"
 ACTIVE_FILE="${BASE_DIRECTORY}/.active.txt"
-MUSIC_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/"
-MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}/mix02.mp3"
+MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix07.mp3"
 
 PADDING=70 # Padding for the graphics from the end of the screen
 UPPERLEFT="x=${PADDING}:y=${PADDING}"
@@ -27,18 +26,17 @@ TIMESTAMP=$(date +'%Y%m%d.%H%M%S')
 LOG_DIRECTORY="/home/almostengr/Documents/videoprocessor"
 LOG_FILE="${LOG_DIRECTORY}/${TIMESTAMP}.log"
 dayOfWeek=$(date +%u)
-archiveFileExist=false
-manualFileExist=false
+# archiveFileExist=false
+# manualFileExist=false
 
 FINAL_OUTPUT_VERTICAL="outputVerticalFinal.mp4"
 FINAL_OUTPUT_HORIZONTAL="outputFinal.mp4"
 
 selectMixTrack()
 {
-    # hourOfDay=$(date +%H)
+    MUSIC_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/"
 
     case $dayOfWeek in
-    # case $hourOfDay in
         0)
 	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix01.mp3"
         ;;
@@ -75,6 +73,8 @@ errorMessage()
     if [ "${videoDirectory}" != "" ]; then
         echo "$message" > "errorOccurred.txt"
     fi
+
+    removeActiveFile
     exit 4
 }
 
@@ -104,46 +104,74 @@ removeActiveFile()
     fi
 }
 
-normalizeAudio()
-{
-    debugMessage "Normalizing audio for $1"
+# normalizeAudio()
+# {
+#     debugMessage "Normalizing audio for $1"
 
-    videoFile=$1
-    audioCount=$(/usr/bin/ffprobe -hide_banner "${videoFile}" 2>&1 | grep -i audio | wc -l)
-    audioFile="${videoFile}.mp3"
+#     videoFile=$1
+#     audioCount=$(/usr/bin/ffprobe -hide_banner "${videoFile}" 2>&1 | grep -i audio | wc -l)
+#     audioFile="${videoFile}.mp3"
 
-    if [ $audioCount -eq 0 ]; then
-        # videos that do not have audio track, have silent track added
-        ffmpeg -y  -i "${videoFile}" -f lavfi -i anullsrc -vcodec copy -acodec aac -shortest temp.mp4
+#     if [ $audioCount -eq 0 ]; then
+#         # videos that do not have audio track, have silent track added
+#         ffmpeg -y  -i "${videoFile}" -f lavfi -i anullsrc -vcodec copy -acodec aac -shortest temp.mp4
 
-        mv temp.mp4 "${videoFile}"
+#         mv temp.mp4 "${videoFile}"
 
-        ffmpeg -y -hide_banner -i "${videoFile}" -vn "${audioFile}"
-    else
-        ffmpeg -y -hide_banner -i "${videoFile}" -vn "${audioFile}"
+#         ffmpeg -y -hide_banner -i "${videoFile}" -vn "${audioFile}"
+#     else
+#         ffmpeg -y -hide_banner -i "${videoFile}" -vn "${audioFile}"
 
-        ## analyze audio volume
-        analysisResult=$(/usr/bin/ffmpeg -y -hide_banner -i $1 -af "volumedetect" -vn -sn -dn -f null /dev/null 2>&1 | grep max_volume)
-        read -ra newArray <<< "${analysisResult}"
-        maxVolume=${newArray[1]}
+#         ## analyze audio volume
+#         # analysisResult=$(/usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volumedetect" -vn -sn -dn -f null /dev/null 2>&1 | grep max_volume)
+#         # read -ra newArray <<< "${analysisResult}"
+#         # maxVolume=${newArray[1]}
 
-        if [ "${maxVolume}" == "" ]; then
-            volumeGain="0"
-        fi
+#         # if [ "${maxVolume}" == "" ]; then
+#         #     volumeGain="0"
+#         # fi
 
-        ### adjust audio volume
-        tempFile="temp.mp3"
-        volumeLevel=$(echo "$2" | tr -d ' ')
+#         # ### adjust audio volume
+#         # # tempFile="temp.mp3"
+#         # tempFile=$audioFile
+#         # volumeLevel=$(echo "$2" | tr -d ' ')
 
-        # dont render the audio file if the volume level has not changed
-        if [ "${volumeLevel}" == "0" ]; then
-            return
-        fi
+#         # # dont render the audio file if the volume level has not changed
+#         # if [ "${volumeLevel}" == "0" ]; then
+#         #     return
+#         # fi
 
-        /usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volume=${volumeLevel}" "$tempFile"
-        /bin/mv "$tempFile" "$1"
-    fi
-}
+#         # source https://superuser.com/questions/323119/how-can-i-normalize-audio-using-ffmpeg
+#         # /usr/bin/ffmpeg -i "${audioFile}" -filter:a
+
+#         # source https://medium.com/@peter_forgacs/audio-loudness-normalization-with-ffmpeg-1ce7f8567053
+#         # ffmpeg -i "${audioFile}" -af loudnorm=I=-23:LRA=7:tp=-2:print_format=json -f null > loudness.json
+
+#         # ffmpeg -i "${audioFile}" -af loudnorm=I=-23:LRA=7:tp=-2:measured_I=-30:measured_LRA=1.1:measured_tp=-11 04:measured_thresh=-40.21:offset=-0.47 -ar 48k -y temp.mp3
+
+#         # /usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volume=${volumeLevel}" "$tempFile"
+#         # /bin/mv "$tempFile" "$1"
+
+#         maxVolume=$(/usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volumedetect" -vn -sn -dn -f null /dev/null 2>&1 | grep max_volume | awk -F ' ' '{print $5}')
+#         # maxVolume="${analysisResult} 
+
+#         if [ "${maxVolume}" == "0.1" ]; then
+#             return 
+#         fi
+
+#         maxVolume=$(echo $maxVolume | tr -d '-')
+
+
+#         echo $maxVolume
+
+#         /usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volume=${maxVolume}" "newAudio.mp3"
+
+#         exit
+#         exit
+
+#         /bin/mv "$tempFile" "$videoFile"
+#     fi
+# }
 
 createFfmpegInputFile()
 {
@@ -166,6 +194,8 @@ if [ $DEBUG -eq 1 ]; then
     set -x
 fi
 
+shopt -s nullglob   # remove wild card files from being shown
+
 # check for single process running
 if [ -e "$ACTIVE_FILE" ]; then
     errorMessage "Active file was found. If no files are being processed, then manually remove it."
@@ -178,10 +208,10 @@ touch "$ACTIVE_FILE"
 
 mkdir -p "${PROCESSED_DIRECTORY}"
 mkdir -p "${ARCHIVE_DIRECTORY}"
-mkdir -p "${BASE_DIRECTORY}/upload_carriagehills"
-mkdir -p "${BASE_DIRECTORY}/upload_dashcam"
-mkdir -p "${BASE_DIRECTORY}/upload_handyman"
-mkdir -p "${BASE_DIRECTORY}/upload_techtalk"
+# mkdir -p "${BASE_DIRECTORY}/upload_carriagehills"
+# mkdir -p "${BASE_DIRECTORY}/upload_dashcam"
+# mkdir -p "${BASE_DIRECTORY}/upload_handyman"
+# mkdir -p "${BASE_DIRECTORY}/upload_techtalk"
 mkdir -p "${LOG_DIRECTORY}"
 
 # create log file
@@ -202,10 +232,10 @@ if [ "$videoDirectory" == "" ]; then
     infoMessage "No videos to process"
     removeActiveFile
     exit
-else
-    videoDirectory="${videoDirectory%/}"
-    infoMessage "Processing ${videoDirectory}"
 fi
+
+videoDirectory="${videoDirectory%/}"
+infoMessage "Processing ${videoDirectory}"
 
 # set the video type
 
@@ -252,7 +282,7 @@ case $videoType in
         fi
         ;;
 
-    lightshow) 
+    lightshow)
         channelBrandText="$(date +%Y) CHRISTMAS LIGHT SHOW"
         bgBoxColor="maroon"
         ;;
@@ -281,10 +311,8 @@ case $videoType in
         ;;
 
     *)
-        errorMessage "Invalid video type."
         mv "$videoDirectory" "${videoDirectory}.errorOccurred"
-        removeActiveFile
-        exit
+        errorMessage "Invalid video type."
         ;;
 esac
 
@@ -295,10 +323,8 @@ cd "${videoDirectory}" || exit
 fileCount=$(find . -type f \( -name "*.kdenlive" -o -name "details.txt" \) | wc -l)
 
 if [ $fileCount -gt 0 ]; then
-    errorMessage "Invalid files present. Please remove the files from the directory"
     mv "$1" "$1.errorOccurred"
-    removeActiveFile
-    exit
+    errorMessage "Invalid files present. Please remove the files from the directory"
 fi
 
 # remove previous render files
@@ -321,7 +347,7 @@ fi
 #     archiveFileExist=true
 # fi
 
-# check if manual file already exists 
+# check if manual file already exists
 
 # if [ -e "${videoDirectory}/manual.option" ]; then
 #     manualFileExist=true
@@ -352,38 +378,112 @@ case $videoType in
         createFfmpegInputFile mov
         ;;
 
-    dashcam2) 
+    dashcam2)
         createFfmpegInputFile mp4
         ;;
 
-    handymanvertical | techtalkvertical | dashcamvertical)
-        for videoFile in "$(pwd)"/*.{mp4}
-        do
-            normalizeAudio "${videoFile}"
-        done
+    # handymanvertical | techtalkvertical | dashcamvertical)
+    #     for videoFile in "$(pwd)"/*.{mp4}
+    #     do
+    #         normalizeAudio "${videoFile}"
+    #     done
 
-        createFfmpegInputFile mp4
-        ;;
+    #     createFfmpegInputFile mp4
+    #     ;;
 
     *)
         for videoFile in "$(pwd)"/*.{mp4,mkv}
         do
-            normalizeAudio "${videoFile}"
+            # normalizeAudio "${videoFile}"
             # createTsFile "${videoFile}"
+
+
+            ## normalize the audio 
+
+
+            # videoFile=$1
+            audioCount=$(/usr/bin/ffprobe -hide_banner "${videoFile}" 2>&1 | grep -i audio | wc -l)
+            audioFile="${videoFile}.mp3"
+
+            if [ $audioCount -eq 0 ]; then
+                # videos that do not have audio track, have silent track added
+                ffmpeg -y  -i "${videoFile}" -f lavfi -i anullsrc -vcodec copy -acodec aac -shortest temp.mp4
+
+                mv temp.mp4 "${videoFile}"
+
+                # convert video file to audio 
+                ffmpeg -y -hide_banner -i "${videoFile}" -vn "${audioFile}"
+            else
+                # convert video file to audio file
+                ffmpeg -y -hide_banner -i "${videoFile}" -vn "${audioFile}"
+
+                ## analyze audio volume
+                # analysisResult=$(/usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volumedetect" -vn -sn -dn -f null /dev/null 2>&1 | grep max_volume)
+                # read -ra newArray <<< "${analysisResult}"
+                # maxVolume=${newArray[1]}
+
+                # if [ "${maxVolume}" == "" ]; then
+                #     volumeGain="0"
+                # fi
+
+                # ### adjust audio volume
+                # # tempFile="temp.mp3"
+                # tempFile=$audioFile
+                # volumeLevel=$(echo "$2" | tr -d ' ')
+
+                # # dont render the audio file if the volume level has not changed
+                # if [ "${volumeLevel}" == "0" ]; then
+                #     return
+                # fi
+
+                # source https://superuser.com/questions/323119/how-can-i-normalize-audio-using-ffmpeg
+                # /usr/bin/ffmpeg -i "${audioFile}" -filter:a
+
+                # source https://medium.com/@peter_forgacs/audio-loudness-normalization-with-ffmpeg-1ce7f8567053
+                # ffmpeg -i "${audioFile}" -af loudnorm=I=-23:LRA=7:tp=-2:print_format=json -f null > loudness.json
+
+                # ffmpeg -i "${audioFile}" -af loudnorm=I=-23:LRA=7:tp=-2:measured_I=-30:measured_LRA=1.1:measured_tp=-11 04:measured_thresh=-40.21:offset=-0.47 -ar 48k -y temp.mp3
+
+                # /usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volume=${volumeLevel}" "$tempFile"
+                # /bin/mv "$tempFile" "$1"
+
+                tempAudioFile="temp.mp3"
+
+                maxVolume=$(/usr/bin/ffmpeg -y -hide_banner -i "${audioFile}" -af "volumedetect" -vn -sn -dn -f null /dev/null 2>&1 | grep max_volume | awk -F ' ' '{print $5}')
+                # maxVolume="${analysisResult} 
+
+                if [ "${maxVolume}" != "0.0" ]; then
+                    # return 
+                    maxVolume=$(echo $maxVolume | tr -d '-')
+
+                    echo $maxVolume
+
+                    /usr/bin/ffmpeg -y -hide_banner -i "${audioFile}" -af "volume=${maxVolume}" "$tempAudioFile"
+
+                    # exit
+                    # exit
+
+                    /bin/mv "$tempFile" "$audioFile"
+                fi
+            fi
 
             ## Create TS formatted file
 
-            videoClipFile=$1
+            videoClipFile=$videoFile
             audioClipFile="$videoClipFile.mp3"
             tsFile="${videoClipFile}.ts"
 
             /usr/bin/ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i "${videoClipFile}" -i "${audioClipFile}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "${tsFile}";
 
             conversionReturnCode=$?
-
             if [ $conversionReturnCode -gt 0 ]; then
-                errorMessage "Using CPU conversion for ${tsFile}"
+                infoMessage "Using CPU conversion for ${tsFile}"
                 /usr/bin/ffmpeg -y -hide_banner -i "${videoClipFile}" -i "${audioClipFile}" -shortest -map 0:v:0 -map 1:a:0 "${tsFile}";
+
+                commandReturnCode=$?
+                if [ $commandReturnCode -gt 0 ]; then
+                    errorMessage "Unable to render with CPU"
+                fi 
             fi
         done
 
@@ -414,8 +514,13 @@ case $videoType in
 
         commandReturnCode=$?
         if [ $commandReturnCode -gt 0 ]; then
-            errorMessage "Rendering with CPU"
+            infoMessage "Rendering with CPU"
             ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input -i "${MIX_AUDIO_TRACK_FILE}" -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4"
+
+            commandReturnCode=$?
+            if [ $commandReturnCode -gt 0 ]; then
+                errorMessage "Unable to render with CPU"
+            fi 
         fi
         ;;
 
@@ -424,8 +529,13 @@ case $videoType in
 
         commandReturnCode=$?
         if [ $commandReturnCode -gt 0 ]; then
-            errorMessage "Rendering with CPU"
+            infoMessage "Rendering with CPU"
             ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input "outputNoGraphics.mp4";
+            
+            commandReturnCode=$?
+            if [ $commandReturnCode -gt 0 ]; then
+                errorMessage "Unable to render with CPU"
+            fi 
         fi
 
         case $videoType in
@@ -433,7 +543,7 @@ case $videoType in
 
             ## Double check command for output
             # https://www.reddit.com/r/ffmpeg/comments/tgkd2o/making_portrait_video_from_a_landscape_video/
-            ffmpeg -i outputNoGraphics.mp4 -vf "crop=w=607:h=1080:x=896:y=0" -c:v libx265 -crf 26 ${FINAL_OUTPUT_VERTICAL}
+            # ffmpeg -i outputNoGraphics.mp4 -vf "crop=w=607:h=1080:x=896:y=0" -c:v libx265 -crf 26 ${FINAL_OUTPUT_VERTICAL}
             ;;
             esac
         ;;
@@ -461,6 +571,11 @@ commandReturnCode=$?
 if [ $commandReturnCode -gt 0 ]; then
     infoMessage "Rendering with CPU"
     ffmpeg -y -hide_banner -i outputNoGraphics.mp4 -vf "${videoGraphicsFilter}" -shortest -c:a copy outputFinal.mp4;
+
+    commandReturnCode=$?
+    if [ $commandReturnCode -gt 0 ]; then
+        errorMessage "Unable to render with CPU"
+    fi 
 fi
 
 # move output file
@@ -483,7 +598,7 @@ tar -cJf "$tarballArchiveFile" outputNoGraphics.mp4
 returnCode=$?
 if [ ${returnCode} -gt 0 ]; then
     errorMessage "Unable to archive video file."
-    exit
+    # exit
 fi
 mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
 
