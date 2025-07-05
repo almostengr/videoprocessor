@@ -17,7 +17,7 @@ UPPERCENTER="x=(w-tw)/2:y=${PADDING}"
 UPPERRIGHT="x=w-tw-${PADDING}:y=${PADDING}"
 CENTERED="x=(w-tw)/2:y=(h-th)/2"
 LOWERLEFT="x=${PADDING}:y=h-th-${PADDING}"
-LOWER_LEFT1="x=${PADDING}:y=h-th-${PADDING}-20"
+LOWER_LEFT1="x=${PADDING}:y=h-th-${PADDING}-50"
 LOWERCENTER="x=(w-tw)/2:y=h-th-${PADDING}"
 LOWERRIGHT="x=w-tw-${PADDING}:y=h-th-${PADDING}"
 
@@ -26,8 +26,6 @@ TIMESTAMP=$(date +'%Y%m%d.%H%M%S')
 LOG_DIRECTORY="/home/almostengr/Documents/videoprocessor"
 LOG_FILE="${LOG_DIRECTORY}/${TIMESTAMP}.log"
 dayOfWeek=$(date +%u)
-# archiveFileExist=false
-# manualFileExist=false
 
 FINAL_OUTPUT_VERTICAL="outputVerticalFinal.mp4"
 FINAL_OUTPUT_HORIZONTAL="outputFinal.mp4"
@@ -104,75 +102,6 @@ removeActiveFile()
     fi
 }
 
-# normalizeAudio()
-# {
-#     debugMessage "Normalizing audio for $1"
-
-#     videoFile=$1
-#     audioCount=$(/usr/bin/ffprobe -hide_banner "${videoFile}" 2>&1 | grep -i audio | wc -l)
-#     audioFile="${videoFile}.mp3"
-
-#     if [ $audioCount -eq 0 ]; then
-#         # videos that do not have audio track, have silent track added
-#         ffmpeg -y  -i "${videoFile}" -f lavfi -i anullsrc -vcodec copy -acodec aac -shortest temp.mp4
-
-#         mv temp.mp4 "${videoFile}"
-
-#         ffmpeg -y -hide_banner -i "${videoFile}" -vn "${audioFile}"
-#     else
-#         ffmpeg -y -hide_banner -i "${videoFile}" -vn "${audioFile}"
-
-#         ## analyze audio volume
-#         # analysisResult=$(/usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volumedetect" -vn -sn -dn -f null /dev/null 2>&1 | grep max_volume)
-#         # read -ra newArray <<< "${analysisResult}"
-#         # maxVolume=${newArray[1]}
-
-#         # if [ "${maxVolume}" == "" ]; then
-#         #     volumeGain="0"
-#         # fi
-
-#         # ### adjust audio volume
-#         # # tempFile="temp.mp3"
-#         # tempFile=$audioFile
-#         # volumeLevel=$(echo "$2" | tr -d ' ')
-
-#         # # dont render the audio file if the volume level has not changed
-#         # if [ "${volumeLevel}" == "0" ]; then
-#         #     return
-#         # fi
-
-#         # source https://superuser.com/questions/323119/how-can-i-normalize-audio-using-ffmpeg
-#         # /usr/bin/ffmpeg -i "${audioFile}" -filter:a
-
-#         # source https://medium.com/@peter_forgacs/audio-loudness-normalization-with-ffmpeg-1ce7f8567053
-#         # ffmpeg -i "${audioFile}" -af loudnorm=I=-23:LRA=7:tp=-2:print_format=json -f null > loudness.json
-
-#         # ffmpeg -i "${audioFile}" -af loudnorm=I=-23:LRA=7:tp=-2:measured_I=-30:measured_LRA=1.1:measured_tp=-11 04:measured_thresh=-40.21:offset=-0.47 -ar 48k -y temp.mp3
-
-#         # /usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volume=${volumeLevel}" "$tempFile"
-#         # /bin/mv "$tempFile" "$1"
-
-#         maxVolume=$(/usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volumedetect" -vn -sn -dn -f null /dev/null 2>&1 | grep max_volume | awk -F ' ' '{print $5}')
-#         # maxVolume="${analysisResult} 
-
-#         if [ "${maxVolume}" == "0.1" ]; then
-#             return 
-#         fi
-
-#         maxVolume=$(echo $maxVolume | tr -d '-')
-
-
-#         echo $maxVolume
-
-#         /usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volume=${maxVolume}" "newAudio.mp3"
-
-#         exit
-#         exit
-
-#         /bin/mv "$tempFile" "$videoFile"
-#     fi
-# }
-
 createFfmpegInputFile()
 {
     debugMessage "Video format type: $1"
@@ -194,7 +123,8 @@ if [ $DEBUG -eq 1 ]; then
     set -x
 fi
 
-shopt -s nullglob   # remove wild card files from being shown
+# remove wild card files from being shown
+shopt -s nullglob
 
 # check for single process running
 if [ -e "$ACTIVE_FILE" ]; then
@@ -205,28 +135,18 @@ fi
 touch "$ACTIVE_FILE"
 
 # create missing directories
-
 mkdir -p "${PROCESSED_DIRECTORY}"
 mkdir -p "${ARCHIVE_DIRECTORY}"
-# mkdir -p "${BASE_DIRECTORY}/upload_carriagehills"
-# mkdir -p "${BASE_DIRECTORY}/upload_dashcam"
-# mkdir -p "${BASE_DIRECTORY}/upload_handyman"
-# mkdir -p "${BASE_DIRECTORY}/upload_techtalk"
 mkdir -p "${LOG_DIRECTORY}"
-
-# create log file
 
 touch "${LOG_FILE}"
 
 # clean up old log files
-
 find "${LOG_DIRECTORY}" -mtime +30 -exec rm {} \;
 
 changeToIncomingDirectory
 
 # get first directory
-
-# videoDirectory=$(find * -type d | grep -i -v errorOccurred | head -1)
 videoDirectory=$(ls -trd1 */ --time=birth | grep -i -v errorOccurred |  cut -f1 -d'/' | head -1)
 if [ "$videoDirectory" == "" ]; then
     infoMessage "No videos to process"
@@ -341,24 +261,6 @@ if [ "${result}" -gt 0 ]; then
     exit
 fi
 
-# check if archive file already exists
-
-# if [ -e "${videoDirectory}/archive.option" ]; then
-#     archiveFileExist=true
-# fi
-
-# check if manual file already exists
-
-# if [ -e "${videoDirectory}/manual.option" ]; then
-#     manualFileExist=true
-# fi
-
-# create video from images
-
-# if [ "${archiveFileExist}" == true ] || [ "${manualFileExist}" == true ]; then
-#     return;
-# fi
-
 if [ "$(find . -maxdepth 1 -name '*.jpg' -print -quit)" ]; then
     for imageFile in *.jpg; do
         imageFileName="${imageFile%.*}"
@@ -367,12 +269,8 @@ if [ "$(find . -maxdepth 1 -name '*.jpg' -print -quit)" ]; then
     done
 fi
 
+
 # create video segments
-
-# if [ "${archiveFileExist}" == true ]; then
-#     return;
-# fi
-
 case $videoType in
     dashcam | fireworks)
         createFfmpegInputFile mov
@@ -382,26 +280,9 @@ case $videoType in
         createFfmpegInputFile mp4
         ;;
 
-    # handymanvertical | techtalkvertical | dashcamvertical)
-    #     for videoFile in "$(pwd)"/*.{mp4}
-    #     do
-    #         normalizeAudio "${videoFile}"
-    #     done
-
-    #     createFfmpegInputFile mp4
-    #     ;;
-
     *)
         for videoFile in "$(pwd)"/*.{mp4,mkv}
         do
-            # normalizeAudio "${videoFile}"
-            # createTsFile "${videoFile}"
-
-
-            ## normalize the audio 
-
-
-            # videoFile=$1
             audioCount=$(/usr/bin/ffprobe -hide_banner "${videoFile}" 2>&1 | grep -i audio | wc -l)
             audioFile="${videoFile}.mp3"
 
@@ -411,57 +292,20 @@ case $videoType in
 
                 mv temp.mp4 "${videoFile}"
 
-                # convert video file to audio 
+                # convert video file to audio
                 ffmpeg -y -hide_banner -i "${videoFile}" -vn "${audioFile}"
             else
                 # convert video file to audio file
                 ffmpeg -y -hide_banner -i "${videoFile}" -vn "${audioFile}"
 
                 ## analyze audio volume
-                # analysisResult=$(/usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volumedetect" -vn -sn -dn -f null /dev/null 2>&1 | grep max_volume)
-                # read -ra newArray <<< "${analysisResult}"
-                # maxVolume=${newArray[1]}
-
-                # if [ "${maxVolume}" == "" ]; then
-                #     volumeGain="0"
-                # fi
-
-                # ### adjust audio volume
-                # # tempFile="temp.mp3"
-                # tempFile=$audioFile
-                # volumeLevel=$(echo "$2" | tr -d ' ')
-
-                # # dont render the audio file if the volume level has not changed
-                # if [ "${volumeLevel}" == "0" ]; then
-                #     return
-                # fi
-
-                # source https://superuser.com/questions/323119/how-can-i-normalize-audio-using-ffmpeg
-                # /usr/bin/ffmpeg -i "${audioFile}" -filter:a
-
-                # source https://medium.com/@peter_forgacs/audio-loudness-normalization-with-ffmpeg-1ce7f8567053
-                # ffmpeg -i "${audioFile}" -af loudnorm=I=-23:LRA=7:tp=-2:print_format=json -f null > loudness.json
-
-                # ffmpeg -i "${audioFile}" -af loudnorm=I=-23:LRA=7:tp=-2:measured_I=-30:measured_LRA=1.1:measured_tp=-11 04:measured_thresh=-40.21:offset=-0.47 -ar 48k -y temp.mp3
-
-                # /usr/bin/ffmpeg -y -hide_banner -i "$1" -af "volume=${volumeLevel}" "$tempFile"
-                # /bin/mv "$tempFile" "$1"
-
-                tempAudioFile="temp.mp3"
-
                 maxVolume=$(/usr/bin/ffmpeg -y -hide_banner -i "${audioFile}" -af "volumedetect" -vn -sn -dn -f null /dev/null 2>&1 | grep max_volume | awk -F ' ' '{print $5}')
-                # maxVolume="${analysisResult} 
 
                 if [ "${maxVolume}" != "0.0" ]; then
-                    # return 
                     maxVolume=$(echo $maxVolume | tr -d '-')
 
-                    echo $maxVolume
-
+                    tempAudioFile="temp.mp3"
                     /usr/bin/ffmpeg -y -hide_banner -i "${audioFile}" -af "volume=${maxVolume}" "$tempAudioFile"
-
-                    # exit
-                    # exit
 
                     /bin/mv "$tempFile" "$audioFile"
                 fi
@@ -483,7 +327,7 @@ case $videoType in
                 commandReturnCode=$?
                 if [ $commandReturnCode -gt 0 ]; then
                     errorMessage "Unable to render with CPU"
-                fi 
+                fi
             fi
         done
 
@@ -493,11 +337,6 @@ esac
 
 
 # render the video file without graphics included
-
-# if [ "${archiveFileExist}" == true ]; then
-#     return;
-# fi
-
 case $videoType in
     handymanvertical | techtalkvertical | dashcamvertical)
         ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input -vf "scale=1920:1080,boxblur=50" -an background.mp4
@@ -520,7 +359,7 @@ case $videoType in
             commandReturnCode=$?
             if [ $commandReturnCode -gt 0 ]; then
                 errorMessage "Unable to render with CPU"
-            fi 
+            fi
         fi
         ;;
 
@@ -531,21 +370,21 @@ case $videoType in
         if [ $commandReturnCode -gt 0 ]; then
             infoMessage "Rendering with CPU"
             ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input "outputNoGraphics.mp4";
-            
+
             commandReturnCode=$?
             if [ $commandReturnCode -gt 0 ]; then
                 errorMessage "Unable to render with CPU"
-            fi 
+            fi
         fi
 
-        case $videoType in
-            handyman | techtalk)
+        # case $videoType in
+        #     handyman | techtalk)
 
-            ## Double check command for output
-            # https://www.reddit.com/r/ffmpeg/comments/tgkd2o/making_portrait_video_from_a_landscape_video/
-            # ffmpeg -i outputNoGraphics.mp4 -vf "crop=w=607:h=1080:x=896:y=0" -c:v libx265 -crf 26 ${FINAL_OUTPUT_VERTICAL}
-            ;;
-            esac
+        #     ## Double check command for output
+        #     # https://www.reddit.com/r/ffmpeg/comments/tgkd2o/making_portrait_video_from_a_landscape_video/
+        #     ffmpeg -i outputNoGraphics.mp4 -vf "crop=w=607:h=1080:x=896:y=0" -c:v libx265 -crf 26 ${FINAL_OUTPUT_VERTICAL}
+        #     ;;
+        #     esac
         ;;
 esac
 
@@ -575,7 +414,7 @@ if [ $commandReturnCode -gt 0 ]; then
     commandReturnCode=$?
     if [ $commandReturnCode -gt 0 ]; then
         errorMessage "Unable to render with CPU"
-    fi 
+    fi
 fi
 
 # move output file
@@ -598,7 +437,6 @@ tar -cJf "$tarballArchiveFile" outputNoGraphics.mp4
 returnCode=$?
 if [ ${returnCode} -gt 0 ]; then
     errorMessage "Unable to archive video file."
-    # exit
 fi
 mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
 
