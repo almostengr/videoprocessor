@@ -35,7 +35,7 @@ accomidates those additional video types.
 Command below to render videos on a schedule.
 
 ```bash
-5 0-5 * * * /home/almostengr/videoprocessor/source/videoprocessor.sh
+5 0-5 * * * /home/almostengr/videoprocessor/videoprocessor.sh
 ```
 
 Command will run 5 minutes after the hour between the hours of midnight (00:05) and 05:05. This time was selected
