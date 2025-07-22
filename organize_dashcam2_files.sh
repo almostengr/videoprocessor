@@ -14,8 +14,6 @@ do
 
     newDirectory="${INCOMING_DIRECTORY}/${fileDate}.dashcam2"
 
-    # echo "${fileDate}"
-
     /usr/bin/mkdir -p "$newDirectory"
 
     /usr/bin/mv "${file}" "${newDirectory}"
