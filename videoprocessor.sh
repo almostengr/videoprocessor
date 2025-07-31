@@ -129,7 +129,7 @@ shopt -s nullglob
 # check for single process running
 if [ -e "$ACTIVE_FILE" ]; then
     errorMessage "Active file was found. If no files are being processed, then manually remove it."
-    exit
+    exit 5
 fi
 
 touch "$ACTIVE_FILE"
@@ -151,7 +151,7 @@ videoDirectory=$(ls -trd1 */ --time=birth | grep -i -v errorOccurred |  cut -f1 
 if [ "$videoDirectory" == "" ]; then
     infoMessage "No videos to process"
     removeActiveFile
-    exit
+    exit 6
 fi
 
 videoDirectory="${videoDirectory%/}"
@@ -182,24 +182,27 @@ case $videoType in
 
     handyman | handymanvertical)
         subscribeBoxText="SUBSCRIBE AND FOLLOW FOR MORE HOME IMPROVEMENT IDEAS!"
-        followPageText="FOLLOW US FOR MORE DIY HOME REPAIRS"
+        followPageText="VISIT RHTSERVICES.NET FOR MORE TIPS AND TRICKS"
 
         if [ $dayOfWeek -lt 4 ]; then
             channelBrandText="RHTSERVICES.NET"
+	    # followPageText="VISIT RHTSERVICES.NET FOR MORE TIPS AND TRICKS"
         else
             channelBrandText="@RHTSERVICESLLC"
+	    followPageText="VISIT RHTSERVICES.NET FOR DETAILS ABOUT OUR PREVIOUS AND CURRENT PROJECTS"
         fi
         ;;
 
+    personal | personalvertical)
+        subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE SOFTWARE AND TECH PROJECTS"
+        # followPageText="FOLLOW FOR MORE DAD AND CAREER ADVICE"
+	channelBrandText="@ALMOSTENGR"
+	;;
+
     techtalk | techtalkvertical)
         subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE SOFTWARE AND TECH PROJECTS"
-        followPageText="FOLLOW US FOR TECH CAREER ADVICE"
-
-        if [ $dayOfWeek -lt 4 ]; then
-            channelBrandText="@ALMOSTENGR"
-        else
-            channelBrandText="RHTSERVICES.NET"
-        fi
+        # followPageText="FOLLOW US FOR TECH CAREER ADVICE"
+        channelBrandText="RHTSERVICES.NET"
         ;;
 
     lightshow)
@@ -226,7 +229,6 @@ case $videoType in
         bgBoxColor="royalblue"
         followPageText="FOLLOW US AT FACEBOOK.COM/TOWERTOASTMASTERS"
         subscribeBoxText="LEARN MORE ABOUT US AT TOWERTOASTMASTERS.COM"
-
         channelBrandText="TOWERTOASTMASTERS.ORG"
         ;;
 
@@ -258,7 +260,7 @@ result=$?
 
 if [ "${result}" -gt 0 ]; then
     errorMessage "Rename binary not installed. Run sudo apt-get install rename"
-    exit
+    exit 7
 fi
 
 if [ "$(find . -maxdepth 1 -name '*.jpg' -print -quit)" ]; then
@@ -338,7 +340,7 @@ esac
 
 # render the video file without graphics included
 case $videoType in
-    handymanvertical | techtalkvertical | dashcamvertical)
+    handymanvertical | techtalkvertical | dashcamvertical | personalvertical)
         ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input -vf "scale=1920:1080,boxblur=50" -an background.mp4
 
         ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input -c:v copy -c:a copy foreground.mp4
