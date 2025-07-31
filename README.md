@@ -105,6 +105,16 @@ ffmpeg -i input.mp4 -vf "setpts=1.0*PTS" -r 30 -c:v libx264 -crf 18 -c:a aac -b:
 ffmpeg -y  -i input.mp4 -f lavfi -i anullsrc -vcodec copy -acodec aac -shortest output.mp3
 ```
 
+### Extract Audio from Video
+
+```bash
+ffmpeg -i in.mp4 -vn -ac 2 out.mp3
+```
+
+```bash
+ffmpeg -i in.mp4 -vn -c:a copy out.m4a
+```
+
 ### Rotate Video Clip
 
 ```bash
