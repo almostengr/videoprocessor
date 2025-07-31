@@ -18,6 +18,9 @@ I am a member of organizations, where I am partically or fully responsible for t
 branding of that organization. Some of the marketing is done with the use of video. This script also 
 accomidates those additional video types.
 
+Depending on the content that is being render, different graphics with different colors are rendered 
+to the video.
+
 ## My YouTube Channels
 
 * [Dash Cam Channel](https://www.youtube.com/channel/UCB7rvymUaUbbig3skv2zvCQ?sub_confirmation=1)
@@ -29,6 +32,7 @@ accomidates those additional video types.
 * Kenny Ram Dash Cam - on Monday, Wednesdays, and Fridays
 * RHT Services Home Improvement - on Saturdays
 * RHT Services Tech Talk - on Tuesdays, sometimes Thursdays
+
 
 ## Crontab Command
 
