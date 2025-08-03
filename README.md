@@ -128,6 +128,10 @@ For the transpose parameter you can pass:
 * 2 = 90° counterclockwise
 * 3 = 90° clockwise and vertical flip
 
+### Vertical Flip Video
+
+ffmpeg -i 00000514_20250802094515_NR.mp4 -vf "vflip" output.mp4
+
 ## References
 
 * https://filme.imyfone.com/video-editing-tips/how-to-merge-or-combine-videos-using-ffmpeg/
