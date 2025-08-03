@@ -279,6 +279,25 @@ case $videoType in
         ;;
 
     dashcam2)
+	# look for rear video files; if found, then flip
+	rearCameraFiles=$(ls -1 *NR* | wc -l)
+
+	if [ $rearCameraFiles -gt 0 ]; then
+		for rearCameraFile in *NR*mp4
+		do
+			ffmpeg -i "${rearCameraFile}" -vf "vflip" "${rearCameraFlie}.flipped.mp4"
+
+			# find the front file
+
+			# render with rear file overlaid with front file
+
+			# remove rear and front files
+
+			# rename rendered file
+		done
+	fi
+
+	# when front and rear videos exist, the rear should be overlaid over the front
         createFfmpegInputFile mp4
         ;;
 
