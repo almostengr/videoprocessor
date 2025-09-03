@@ -144,6 +144,9 @@ touch "${LOG_FILE}"
 # clean up old log files
 find "${LOG_DIRECTORY}" -mtime +30 -exec rm {} \;
 
+# clean up old directories from processed directory
+find "${PROCESSED_DIRECTORY}" -mtime +30 -exec rm -r {} \;
+
 changeToIncomingDirectory
 
 # get first directory
