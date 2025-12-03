@@ -30,39 +30,32 @@ dayOfWeek=$(date +%u)
 FINAL_OUTPUT_VERTICAL="outputVerticalFinal.mp4"
 FINAL_OUTPUT_HORIZONTAL="outputFinal.mp4"
 
+verticalMotionAware(){ 
+    # 1. Detect the best crop zone
+    ffprobe -f lavfi -i movie=input.mp4,smartcrop=9/16 -show_entries frame=width,height -of csv=p=0 2> /dev/null | tail -1 > crop.txt
+
+    # 2. Apply it
+    read cw ch cx cy < crop.txt
+    ffmpeg -i input.mp4 -vf "crop=$cw:$ch:$cx:$cy,scale=-2:1080" -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 128k output_vertical.mp4
+}
+
 selectMixTrack()
 {
     MUSIC_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/"
 
-    case $dayOfWeek in
-        0)
-	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix01.mp3"
-        ;;
+    cd "${MUSIC_DIRECTORY}"
+    rm audio.txt mixtrack.mp3
 
-        1)
-	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix02.mp3"
-        ;;
+    for filename in $(ls -1 "${MUSIC_DIRECTORY}" | shuf)
+    do 
+        echo  "file '${filename}'" >> audio.txt
+    done 
 
-        2)
-	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix03.mp3"
-        ;;
+    ffmpeg -f concat -i audio.txt -c copy > mixtrack.mp3
+    
+    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mixtrack.mp3"
 
-        3)
-	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix04.mp3"
-        ;;
-
-        4)
-	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix05.mp3"
-        ;;
-
-        5)
-	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix06.mp3"
-        ;;
-
-        *)
-	    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix07.mp3"
-        ;;
-    esac
+    cd "${videoDirectory}"
 }
 
 errorMessage()
@@ -72,7 +65,6 @@ errorMessage()
         echo "$message" > "errorOccurred.txt"
     fi
 
-    removeActiveFile
     exit 4
 }
 
@@ -192,20 +184,28 @@ case $videoType in
 	    # followPageText="VISIT RHTSERVICES.NET FOR MORE TIPS AND TRICKS"
         else
             channelBrandText="@RHTSERVICESLLC"
-	    followPageText="VISIT RHTSERVICES.NET FOR DETAILS ABOUT OUR PREVIOUS AND CURRENT PROJECTS"
+	        followPageText="VISIT RHTSERVICES.NET FOR DETAILS ABOUT OUR PREVIOUS AND CURRENT PROJECTS"
         fi
         ;;
 
     personal | personalvertical)
-        subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE SOFTWARE AND TECH PROJECTS"
-        # followPageText="FOLLOW FOR MORE DAD AND CAREER ADVICE"
-	channelBrandText="@ALMOSTENGR"
+        subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE DAD LIFE VIDEOS"
+
+        if [ $dayOfWeek -lt 4 ]; then
+            channelBrandText="THEALMOSTENGINEER.COM"
+        else 
+            channelBrandText="@ALMOSTENGR"
+        fi
 	;;
 
     techtalk | techtalkvertical)
         subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE SOFTWARE AND TECH PROJECTS"
-        # followPageText="FOLLOW US FOR TECH CAREER ADVICE"
-        channelBrandText="RHTSERVICES.NET"
+
+        if [ $dayOfWeek -lt 4 ]; then
+            channelBrandText="THEALMOSTENGINEER.COM"
+        else 
+            channelBrandText="@ALMOSTENGR"
+        fi
         ;;
 
     lightshow)
@@ -381,6 +381,9 @@ case $videoType in
                 errorMessage "Unable to render with CPU"
             fi
         fi
+
+        ## create vertical video
+        ffmpeg -i "outputNoGraphics.mp4" -vf "crop=ih*9/16:ih,scale=-2:1080" -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 128k "${FINAL_OUTPUT_VERTICAL}"
 
         # case $videoType in
         #     handyman | techtalk)
