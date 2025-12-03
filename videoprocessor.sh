@@ -30,14 +30,14 @@ dayOfWeek=$(date +%u)
 FINAL_OUTPUT_VERTICAL="outputVerticalFinal.mp4"
 FINAL_OUTPUT_HORIZONTAL="outputFinal.mp4"
 
-verticalMotionAware(){ 
-    # 1. Detect the best crop zone
-    ffprobe -f lavfi -i movie=input.mp4,smartcrop=9/16 -show_entries frame=width,height -of csv=p=0 2> /dev/null | tail -1 > crop.txt
+# verticalMotionAware(){ 
+#     # 1. Detect the best crop zone
+#     ffprobe -f lavfi -i movie=input.mp4,smartcrop=9/16 -show_entries frame=width,height -of csv=p=0 2> /dev/null | tail -1 > crop.txt
 
-    # 2. Apply it
-    read cw ch cx cy < crop.txt
-    ffmpeg -i input.mp4 -vf "crop=$cw:$ch:$cx:$cy,scale=-2:1080" -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 128k output_vertical.mp4
-}
+#     # 2. Apply it
+#     read cw ch cx cy < crop.txt
+#     ffmpeg -i input.mp4 -vf "crop=$cw:$ch:$cx:$cy,scale=-2:1080" -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 128k output_vertical.mp4
+# }
 
 selectMixTrack()
 {
