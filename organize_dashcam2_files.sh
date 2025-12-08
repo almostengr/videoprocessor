@@ -6,6 +6,13 @@
 
 INCOMING_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos/"
 
+SDCARD="/media/almostengr/AZDOME/Normal"
+
+if [ "$(pwd)" != "${SDCARD}" ]; then
+	echo "Memory card location not found."
+	exit 4
+fi
+
 # todo - use NR files in the future, but for now remove them
 
 echo "Removing NR files"
