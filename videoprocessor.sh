@@ -216,7 +216,7 @@ case $videoType in
     dashcam | fireworks | carrepair | dashcamvertical | dashcam2)
         ctaDuration=12
         subscribeBoxColor="green"
-        subscribeBoxText="HELP THE CHANNEL GROW bY SUBSCRIBING NOW!"
+        subscribeBoxText="HELP THE CHANNEL GROW BY SUBSCRIBING NOW!"
         bgBoxColor="green"
 
         if [ $dayOfWeek -lt 4 ]; then
