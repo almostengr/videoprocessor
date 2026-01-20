@@ -383,7 +383,10 @@ case $videoType in
         fi
 
         ## create vertical video
-        ffmpeg -i "outputNoGraphics.mp4" -vf "crop=ih*9/16:ih,scale=-2:1080" -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 128k "${FINAL_OUTPUT_VERTICAL}"
+        if [ "$videoType" != "toastmasters" ]; then
+            infoMessage "Creating vertical video from horizontal video"
+            ffmpeg -i "outputNoGraphics.mp4" -vf "crop=ih*9/16:ih,scale=-2:1080" -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 128k "${FINAL_OUTPUT_VERTICAL}"
+        fi
 
         # case $videoType in
         #     handyman | techtalk)
@@ -426,11 +429,9 @@ if [ $commandReturnCode -gt 0 ]; then
 fi
 
 # move output file
-
 mv outputFinal.mp4 "${ARCHIVE_DIRECTORY}/${videoDirectory}.mp4"
 
 # if vertical file was created, the move it to the archive directory
-
 if [ -f "${FINAL_OUTPUT_VERTICAL}" ]; then
     mv ${FINAL_OUTPUT_VERTICAL} "${ARCHIVE_DIRECTORY}/${videoDirectory}.vertical.mp4"
 fi
