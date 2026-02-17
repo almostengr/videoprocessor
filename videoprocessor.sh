@@ -7,30 +7,40 @@ DEBUG=1
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
+WORKING_DIRECTORY="${BASE_DIRECTORY}/working"
 ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archive"
 ACTIVE_FILE="${BASE_DIRECTORY}/.active.txt"
 MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mix07.mp3"
 
 PADDING=70 # Padding for the graphics from the end of the screen
-UPPERLEFT="x=${PADDING}:y=${PADDING}"
-UPPERCENTER="x=(w-tw)/2:y=${PADDING}"
-UPPERRIGHT="x=w-tw-${PADDING}:y=${PADDING}"
+UPPER_LEFT="x=${PADDING}:y=${PADDING}"
+UPPER_CENTER="x=(w-tw)/2:y=${PADDING}"
+UPPER_RIGHT="x=w-tw-${PADDING}:y=${PADDING}"
 CENTERED="x=(w-tw)/2:y=(h-th)/2"
-LOWERLEFT="x=${PADDING}:y=h-th-${PADDING}"
+LOWER_LEFT="x=${PADDING}:y=h-th-${PADDING}"
 LOWER_LEFT1="x=${PADDING}:y=h-th-${PADDING}-50"
-LOWERCENTER="x=(w-tw)/2:y=h-th-${PADDING}"
-LOWERRIGHT="x=w-tw-${PADDING}:y=h-th-${PADDING}"
+LOWER_CENTER="x=(w-tw)/2:y=h-th-${PADDING}"
+LOWER_RIGHT="x=w-tw-${PADDING}:y=h-th-${PADDING}"
 
 videoDirectory=""
 TIMESTAMP=$(date +'%Y%m%d.%H%M%S')
 LOG_DIRECTORY="/home/almostengr/Documents/videoprocessor"
 LOG_FILE="${LOG_DIRECTORY}/${TIMESTAMP}.log"
-dayOfWeek=$(date +%u)
+DAY_OF_WEEK=$(date +%u)
 
 FINAL_OUTPUT_VERTICAL="outputVerticalFinal.mp4"
 FINAL_OUTPUT_HORIZONTAL="outputFinal.mp4"
 
-# verticalMotionAware(){ 
+ctaDuration=7
+subscribeBoxColor="black"
+subscribeBoxText=""
+followBoxColor="black"
+followPageText=""
+bgBoxColor="black"
+channelBrandText=""
+musicTrackFile=""
+
+# verticalMotionAware(){
 #     # 1. Detect the best crop zone
 #     ffprobe -f lavfi -i movie=input.mp4,smartcrop=9/16 -show_entries frame=width,height -of csv=p=0 2> /dev/null | tail -1 > crop.txt
 
@@ -47,13 +57,14 @@ selectMixTrack()
     rm audio.txt mixtrack.mp3
 
     for filename in $(ls -1 "${MUSIC_DIRECTORY}" | shuf)
-    do 
+    do
         echo  "file '${filename}'" >> audio.txt
-    done 
+    done
 
     ffmpeg -f concat -i audio.txt -c copy > mixtrack.mp3
-    
-    MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mixtrack.mp3"
+
+    # MIX_AUDIO_TRACK_FILE="${MUSIC_DIRECTORY}mixtrack.mp3"
+    musicTrackFile="${MUSIC_DIRECTORY}mixtrack.mp3"
 
     cd "${videoDirectory}"
 }
@@ -105,15 +116,107 @@ createFfmpegInputFile()
     done
 }
 
+setVideoBranding() {
+    case $1 in
+        carriagehills)
+            subscribeBoxColor="green"
+            subscribeBoxText="JOIN OUR GROUP ON NEXTDOOR.COM"
+            channelBrandText="CARRIAGE HILLS NEIGHBORHOOD ASSOCATION"
+            ;;
+
+        handyman | handymanvertical)
+            subscribeBoxText="SUBSCRIBE AND FOLLOW FOR MORE HOME IMPROVEMENT IDEAS!"
+            followPageText="VISIT RHTSERVICES.NET FOR MORE TIPS AND TRICKS"
+
+            if [ $DAY_OF_WEEK -lt 4 ]; then
+                channelBrandText="RHTSERVICES.NET"
+            else
+                channelBrandText="@RHTSERVICESLLC"
+                followPageText="VISIT RHTSERVICES.NET FOR DETAILS ABOUT OUR PREVIOUS AND CURRENT PROJECTS"
+            fi
+            ;;
+
+        personal | personalvertical)
+            subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE DAD LIFE VIDEOS"
+
+            if [ $DAY_OF_WEEK -lt 4 ]; then
+                channelBrandText="THEALMOSTENGINEER.COM"
+            else
+                channelBrandText="@ALMOSTENGR"
+            fi
+        ;;
+
+        techtalk | techtalkvertical)
+            subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE SOFTWARE AND TECH PROJECTS"
+
+            if [ $DAY_OF_WEEK -lt 4 ]; then
+                channelBrandText="THEALMOSTENGINEER.COM"
+            else
+                channelBrandText="@ALMOSTENGR"
+            fi
+            ;;
+
+        lightshow)
+            channelBrandText="$(date +%Y) CHRISTMAS LIGHT SHOW"
+            bgBoxColor="maroon"
+            ;;
+
+        dashcam | fireworks | carrepair | dashcamvertical | dashcam2)
+            ctaDuration=12
+            subscribeBoxColor="green"
+            subscribeBoxText="HELP THE CHANNEL GROW BY SUBSCRIBING NOW!"
+            bgBoxColor="green"
+            channelBrandText="Kenny Ram Dash Cam"
+            ;;
+
+        toastmasters)
+            subscribeBoxColor="royalblue"
+            followBoxColor="royalblue"
+            bgBoxColor="royalblue"
+            followPageText="FOLLOW US AT FACEBOOK.COM/TOWERTOASTMASTERS"
+            subscribeBoxText="LEARN MORE ABOUT US AT TOWERTOASTMASTERS.COM"
+            channelBrandText="TOWERTOASTMASTERS.ORG"
+            ;;
+
+        *)
+            mv "$videoDirectory" "${videoDirectory}.errorOccurred"
+            errorMessage "Invalid video type."
+            ;;
+    esac
+}
+
+enableDebugging() {
+    if [ $DEBUG -eq 1 ]; then
+        set -x
+    fi
+}
+
+removeOldLogFiles() {
+    find "${LOG_DIRECTORY}" -mtime +30 -exec rm {} \;
+}
+
+removePreviousRenderFiles() {
+    rm ffmpeg.input outputNoGraphics.mp4 outputFinal.mp4 outputVerticalFinal.mp4 foreground.mp4 background.mp4 *ts *mp3
+}
+
+cleanupIncomingDirectory() {
+    infoMessage "Moving video directory to Processed folder"
+    changeToIncomingDirectory
+    mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
+}
+
+setVideoType() {
+    videoType=$(echo "$videoDirectory" | awk -F'.' '{print $NF}')
+    debugMessage "Video type: ${videoType}"
+}
+
 ###############################################################################
 ###############################################################################
 ## main
 ###############################################################################
 ###############################################################################
 
-if [ $DEBUG -eq 1 ]; then
-    set -x
-fi
+enableDebugging
 
 # remove wild card files from being shown
 shopt -s nullglob
@@ -124,21 +227,16 @@ if [ -e "$ACTIVE_FILE" ]; then
     exit 5
 fi
 
-touch "$ACTIVE_FILE"
-
 # create missing directories
 mkdir -p "${PROCESSED_DIRECTORY}"
 mkdir -p "${ARCHIVE_DIRECTORY}"
 mkdir -p "${LOG_DIRECTORY}"
+mkdir -p "${WORKING_DIRECTORY}"
 
 touch "${LOG_FILE}"
+touch "$ACTIVE_FILE"
 
-# clean up old log files
-find "${LOG_DIRECTORY}" -mtime +30 -exec rm {} \;
-
-# clean up old directories from processed directory
-# find "${PROCESSED_DIRECTORY}" -mtime +30 -type d -exec rm -r {} \;
-
+removeOldLogFiles
 changeToIncomingDirectory
 
 # get first directory
@@ -152,112 +250,35 @@ fi
 videoDirectory="${videoDirectory%/}"
 infoMessage "Processing ${videoDirectory}"
 
-# set the video type
+setVideoType
 
-videoType=$(echo "$videoDirectory" | awk -F'.' '{print $NF}')
-debugMessage "Video type: ${videoType}"
-ctaDuration=7
+# ctaDuration=7
 
-subscribeBoxColor="black"
-subscribeBoxText=""
+# subscribeBoxColor="black"
+# subscribeBoxText=""
 
-followBoxColor="black"
-followPageText=""
+# followBoxColor="black"
+# followPageText=""
 
-bgBoxColor="black"
+# bgBoxColor="black"
 
 ## set the text for the graphics
-
-case $videoType in
-    carriagehills)
-        subscribeBoxColor="green"
-        subscribeBoxText="JOIN OUR NEXT DOOR GROUP!"
-        channelBrandText="CARRIAGE HILLS NEIGHBORHOOD ASSOCATION"
-        ;;
-
-    handyman | handymanvertical)
-        subscribeBoxText="SUBSCRIBE AND FOLLOW FOR MORE HOME IMPROVEMENT IDEAS!"
-        followPageText="VISIT RHTSERVICES.NET FOR MORE TIPS AND TRICKS"
-
-        if [ $dayOfWeek -lt 4 ]; then
-            channelBrandText="RHTSERVICES.NET"
-	    # followPageText="VISIT RHTSERVICES.NET FOR MORE TIPS AND TRICKS"
-        else
-            channelBrandText="@RHTSERVICESLLC"
-	        followPageText="VISIT RHTSERVICES.NET FOR DETAILS ABOUT OUR PREVIOUS AND CURRENT PROJECTS"
-        fi
-        ;;
-
-    personal | personalvertical)
-        subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE DAD LIFE VIDEOS"
-
-        if [ $dayOfWeek -lt 4 ]; then
-            channelBrandText="THEALMOSTENGINEER.COM"
-        else 
-            channelBrandText="@ALMOSTENGR"
-        fi
-	;;
-
-    techtalk | techtalkvertical)
-        subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE SOFTWARE AND TECH PROJECTS"
-
-        if [ $dayOfWeek -lt 4 ]; then
-            channelBrandText="THEALMOSTENGINEER.COM"
-        else 
-            channelBrandText="@ALMOSTENGR"
-        fi
-        ;;
-
-    lightshow)
-        channelBrandText="$(date +%Y) CHRISTMAS LIGHT SHOW"
-        bgBoxColor="maroon"
-        ;;
-
-    dashcam | fireworks | carrepair | dashcamvertical | dashcam2)
-        ctaDuration=12
-        subscribeBoxColor="green"
-        subscribeBoxText="HELP THE CHANNEL GROW BY SUBSCRIBING NOW!"
-        bgBoxColor="green"
-
-        if [ $dayOfWeek -lt 4 ]; then
-            channelBrandText="#KennyRamDashCam"
-        else
-            channelBrandText="Kenny Ram Dash Cam"
-        fi
-        ;;
-
-    toastmasters)
-        subscribeBoxColor="royalblue"
-        followBoxColor="royalblue"
-        bgBoxColor="royalblue"
-        followPageText="FOLLOW US AT FACEBOOK.COM/TOWERTOASTMASTERS"
-        subscribeBoxText="LEARN MORE ABOUT US AT TOWERTOASTMASTERS.COM"
-        channelBrandText="TOWERTOASTMASTERS.ORG"
-        ;;
-
-    *)
-        mv "$videoDirectory" "${videoDirectory}.errorOccurred"
-        errorMessage "Invalid video type."
-        ;;
-esac
+setVideoBranding
 
 cd "${videoDirectory}" || exit
 
 # stop processing if excluded files are present
 
 fileCount=$(find . -type f \( -name "*.kdenlive" -o -name "details.txt" \) | wc -l)
-
 if [ $fileCount -gt 0 ]; then
     mv "$1" "$1.errorOccurred"
     errorMessage "Invalid files present. Please remove the files from the directory"
 fi
 
 # remove previous render files
-
-rm ffmpeg.input outputFinal.mp4 outputNoGraphics.mp4 $FINAL_OUTPUT_VERTICAL foreground.mp4 background.mp4 *ts *mp3
+removePreviousRenderFiles
 
 # lower case all file names
-
 /usr/bin/rename 'y/A-Z/a-z/' *
 result=$?
 
@@ -403,10 +424,10 @@ esac
 
 brandDelaySeconds=297
 fontSize="h/34"
-videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.6:fontsize=${fontSize}:${UPPERRIGHT}:box=1:boxcolor=${bgBoxColor}@0.4:boxborderw=10"
+videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.6:fontsize=${fontSize}:${UPPER_RIGHT}:box=1:boxcolor=${bgBoxColor}@0.4:boxborderw=10"
 
 if [ "${subscribeBoxText}" != "" ]; then
-    videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}),${ctaDuration}),1,0))'"
+    videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWER_LEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}),${ctaDuration}),1,0))'"
 fi
 
 if [ "${followPageText}" != "" ]; then
@@ -449,10 +470,7 @@ if [ ${returnCode} -gt 0 ]; then
 fi
 mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
 
-# move video directory to Processed directory
+cleanupIncomingDirectory
 
-infoMessage "Moving video directory to Processed folder"
-changeToIncomingDirectory
-mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
 
 removeActiveFile
