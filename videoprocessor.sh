@@ -119,9 +119,6 @@ createFfmpegInputFile()
 ###############################################################################
 ###############################################################################
 
-if [ $DEBUG -eq 1 ]; then
-    set -x
-fi
 
 # remove wild card files from being shown
 shopt -s nullglob
