@@ -3,7 +3,7 @@
 PATH="/usr/bin/:/bin:/usr/sbin:/sbin:${PATH}"
 
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
-DEBUG=1
+DEBUG=0
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
@@ -29,6 +29,17 @@ dayOfWeek=$(date +%u)
 
 FINAL_OUTPUT_VERTICAL="outputVerticalFinal.mp4"
 FINAL_OUTPUT_HORIZONTAL="outputFinal.mp4"
+
+ctaDuration=7
+subscribeBoxColor="black"
+# subscribeBoxText=""
+
+followBoxColor="black"
+# followPageText=""
+
+bgBoxColor="black"
+brandDelaySeconds=297
+fontSize="h/34"
 
 selectMixTrack()
 {
@@ -113,19 +124,56 @@ createFfmpegInputFile()
     done
 }
 
+# check for single process running
+exitWhenActiveFilePresent() { 
+    if [ -e "$ACTIVE_FILE" ]; then
+        errorMessage "Active file was found. If no files are being processed, then manually remove it."
+        exit 5
+    fi
+
+    touch "$ACTIVE_FILE"
+}
+
+createMissingDirectories() { 
+    mkdir -p "${PROCESSED_DIRECTORY}"
+    mkdir -p "${ARCHIVE_DIRECTORY}"
+    mkdir -p "${LOG_DIRECTORY}"
+}
+
+lowercaseAllFileNames() {
+    /usr/bin/rename 'y/A-Z/a-z/' *
+    result=$?
+
+    if [ "${result}" -gt 0 ]; then
+        errorMessage "Rename binary not installed. Run sudo apt-get install rename"
+        exit 7
+    fi
+}
+
+exitWhenExcludedFilesPresent() {
+    # stop processing if excluded files are present
+
+    fileCount=$(find . -type f \( -name "*.kdenlive" -o -name "details.txt" \) | wc -l)
+
+    if [ $fileCount -gt 0 ]; then
+        mv "$1" "$1.errorOccurred"
+        errorMessage "Invalid files present. Please remove the files from the directory"
+    fi
+}
+
+removePreviousRenderFiles() {
+    rm ffmpeg.input outputFinal.mp4 outputNoGraphics.mp4 $FINAL_OUTPUT_VERTICAL foreground.mp4 background.mp4 *ts *mp3
+}
 
 if [ $DEBUG -eq 1 ]; then
     set -x
 fi
 
 
+touch "${LOG_FILE}"
+
 # remove wild card files from being shown
 shopt -s nullglob
 
-# check for single process running
-if [ -e "$ACTIVE_FILE" ]; then
-    errorMessage "Active file was found. If no files are being processed, then manually remove it."
-    exit 5
-fi
-
-touch "$ACTIVE_FILE"
+# clean up old log files
+find "${LOG_DIRECTORY}" -mtime +30 -exec rm {} \;
