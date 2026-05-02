@@ -41,6 +41,20 @@ bgBoxColor="black"
 brandDelaySeconds=297
 fontSize="h/34"
 
+getFirstVideoDirectory() { 
+    videoDirectory=$(ls -trd1 */ --time=birth | grep -i -v errorOccurred |  cut -f1 -d'/' | head -1)
+    if [ "$videoDirectory" == "" ]; then
+        infoMessage "No videos to process"
+        removeActiveFile
+        exit 6
+    fi
+
+    videoDirectory="${videoDirectory%/}"
+    infoMessage "Processing ${videoDirectory}"
+    
+    return ${videoDirectory}
+}
+
 selectMixTrack()
 {
     MUSIC_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/ytvideostructure/07music/"
