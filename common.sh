@@ -44,7 +44,7 @@ bgBoxColor="black"
 brandDelaySeconds=297
 fontSize="h/34"
 
-getFirstVideoDirectory() { 
+getFirstVideoDirectory() {
     videoDirectory=$(ls -trd1 */ --time=birth | grep -i -v errorOccurred |  cut -f1 -d'/' | head -1)
     if [ "$videoDirectory" == "" ]; then
         infoMessage "No videos to process"
@@ -54,7 +54,7 @@ getFirstVideoDirectory() {
 
     videoDirectory="${videoDirectory%/}"
     infoMessage "Processing ${videoDirectory}"
-    
+
     return ${videoDirectory}
 }
 
@@ -100,7 +100,6 @@ errorMessage()
         echo "$message" > "errorOccurred.txt"
     fi
 
-    removeActiveFile
     exit 4
 }
 
@@ -126,6 +125,7 @@ changeToIncomingDirectory()
 removeActiveFile()
 {
     if [ -e "$ACTIVE_FILE" ]; then
+        debugMessage "Removing active file"
         rm "$ACTIVE_FILE"
     fi
 }
@@ -142,7 +142,7 @@ createFfmpegInputFile()
 }
 
 # check for single process running
-exitWhenActiveFilePresent() { 
+exitWhenActiveFilePresent() {
     if [ -e "$ACTIVE_FILE" ]; then
         errorMessage "Active file was found. If no files are being processed, then manually remove it."
         exit 5
@@ -151,7 +151,7 @@ exitWhenActiveFilePresent() {
     touch "$ACTIVE_FILE"
 }
 
-createMissingDirectories() { 
+createMissingDirectories() {
     mkdir -p "${PROCESSED_DIRECTORY}"
     mkdir -p "${ARCHIVE_DIRECTORY}"
     mkdir -p "${LOG_DIRECTORY}"

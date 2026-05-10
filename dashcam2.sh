@@ -1,13 +1,17 @@
 #!/bin/bash
 
-source /mnt/d74511ce-4722-471d-8d27-05013fd521b3/repositories/videoprocessor/common.sh
+# Get the directory where the current script resides
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
+# Source the file using the absolute path
+source "$SCRIPT_DIR/common.sh"
 
 DEBUG=1
-BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/testvideo"
+# BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/testvideo"
+BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/video/azdome_dashcam"
 
 ctaDuration=12
 subscribeBoxColor="green"
-subscribeBoxText="HELP THE CHANNEL GROW BY SUBSCRIBING NOW!"
 bgBoxColor="green"
 channelBrandText="Kenny Ram Dash Cam"
 
@@ -36,6 +40,30 @@ flipRearCameraFiles() {
 	fi
 }
 
+selectCallToAction() {
+    case $dayOfWeek in
+        0)
+        subscribeBoxText="ONE WAY TO SUPPORT THE CHANNEL - PLEASE SUBSCRIBE"
+        ;;
+
+        1)
+        subscribeBoxText="NEXT EXIT: SUBSCRIBE"
+        ;;
+
+        2)
+        subscribeBoxText="MERGE INTO THE COMMUNITY - SUBSCRIBE NOW!"
+        ;;
+
+        4)
+        subscribeBoxText="STOP AND SUBSCRIBE"
+        ;;
+
+        *)
+        subscribeBoxText="HELP THE CHANNEL GROW BY SUBSCRIBING NOW!"
+        ;;
+    esac
+}
+
 exitWhenActiveFilePresent
 
 createMissingDirectories
@@ -45,7 +73,7 @@ do
     changeToIncomingDirectory
 
     fullVideoDirectory="${INCOMING_DIRECTORY}/${videoDirectory}"
-    
+
     cd "${fullVideoDirectory}" || exit
 
     exitWhenExcludedFilesPresent
@@ -57,6 +85,8 @@ do
     createFfmpegInputFile mp4
 
     selectMixTrack
+
+    selectCallToAction
 
     debugMessage "Creating output with graphics file"
 
@@ -122,6 +152,6 @@ do
     infoMessage "Moving video directory to Processed folder"
     changeToIncomingDirectory
     mv "${videoDirectory}" "${PROCESSED_DIRECTORY}"
-done 
+done
 
 removeActiveFile
