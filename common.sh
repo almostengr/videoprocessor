@@ -152,8 +152,9 @@ exitWhenActiveFilePresent() {
 }
 
 createMissingDirectories() {
-    mkdir -p "${PROCESSED_DIRECTORY}"
     mkdir -p "${ARCHIVE_DIRECTORY}"
+    mkdir -p "${INCOMING_DIRECTORY}"
+    mkdir -p "${PROCESSED_DIRECTORY}"
     mkdir -p "${LOG_DIRECTORY}"
 }
 
@@ -202,6 +203,14 @@ moveArchive(){
         mv "${fullVideoDirectory}" "${ERROR_DIRECTORY}"
     fi
     mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
+}
+
+renderVerticalVideo() {
+    ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input -vf "scale=1920:1080,boxblur=50" -an background.mp4
+
+    ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input -c:v copy -c:a copy foreground.mp4
+
+    ffmpeg -y -hide_banner -i foreground.mp4 -i background.mp4 -filter_complex "[0:v]setpts=PTS-STARTPTS[fg];[1:v]setpts=PTS-STARTPTS[bg];[bg][fg]overlay=(W-w)/2:(H-h)/2" -c:a copy "outputNoGraphics.mp4"
 }
 
 if [ $DEBUG -eq 1 ]; then
