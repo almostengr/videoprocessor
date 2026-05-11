@@ -120,8 +120,7 @@ do
     fi
 
     # move output file
-    # mv outputFinal.mp4 "${ARCHIVE_DIRECTORY}/${videoDirectory}.mp4"
-    moveFinalOutputFIle
+    mv outputFinal.mp4 "${ARCHIVE_DIRECTORY}/${videoDirectory}.mp4"
 
     # archive the file video file and move it
     tarballArchiveFile="${videoDirectory}.tar.xz"
