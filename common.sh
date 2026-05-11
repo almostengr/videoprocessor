@@ -3,7 +3,7 @@
 PATH="/usr/bin/:/bin:/usr/sbin:/sbin:${PATH}"
 
 BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos"
-DEBUG=0
+DEBUG=1
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
@@ -97,7 +97,7 @@ errorMessage()
 {
     echo "ERROR $(date) $1" | tee -a "${LOG_FILE}"
     if [ "${videoDirectory}" != "" ]; then
-        echo "$message" > "errorOccurred.txt"
+        echo "$1" > "errorOccurred.txt"
     fi
 
     exit 4
@@ -182,10 +182,31 @@ removePreviousRenderFiles() {
     rm ffmpeg.input outputFinal.mp4 outputNoGraphics.mp4 $FINAL_OUTPUT_VERTICAL foreground.mp4 background.mp4 *ts *mp3
 }
 
+moveFinalOutputFIle() {
+    mv outputFinal.mp4 "${ARCHIVE_DIRECTORY}/${videoDirectory}.mp4"
+}
+
+archiveVideoDirectory() {
+    debugMessage "Archiving video file ${tarballArchiveFile}"
+
+    tarballArchiveFile="${videoDirectory}.tar.xz"
+    tar -cJf "$tarballArchiveFile" outputNoGraphics.mp4
+
+    returnCode=$?
+    return ${returnCode}
+}
+
+moveArchive(){
+    if [ ${returnCode} -gt 0 ]; then
+        errorMessage "Unable to archive video file."
+        mv "${fullVideoDirectory}" "${ERROR_DIRECTORY}"
+    fi
+    mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
+}
+
 if [ $DEBUG -eq 1 ]; then
     set -x
 fi
-
 
 touch "${LOG_FILE}"
 

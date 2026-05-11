@@ -8,12 +8,12 @@ source "$SCRIPT_DIR/common.sh"
 
 DEBUG=1
 # BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/testvideo"
-BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/video/azdome_dashcam"
+BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/video/dashcam2"
 
 ctaDuration=12
 subscribeBoxColor="green"
 bgBoxColor="green"
-channelBrandText="Kenny Ram Dash Cam"
+channelBrandText="KENNY RAM DASH CAM"
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
@@ -68,11 +68,13 @@ exitWhenActiveFilePresent
 
 createMissingDirectories
 
-for videoDirectory in $(ls -1 "${INCOMING_DIRECTORY}")
-do
-    changeToIncomingDirectory
+changeToIncomingDirectory
 
-    fullVideoDirectory="${INCOMING_DIRECTORY}/${videoDirectory}"
+# for videoDirectory in $(ls -1 "${INCOMING_DIRECTORY}")
+for videoDirectory in */
+do
+    # fullVideoDirectory="${INCOMING_DIRECTORY}/${videoDirectory}"
+    fullVideoDirectory="${videoDirectory}"
 
     cd "${fullVideoDirectory}" || exit
 

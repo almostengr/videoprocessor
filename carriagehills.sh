@@ -1,14 +1,18 @@
 #!/bin/bash
 
-source common.sh
+# Get the directory where the current script resides
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
+# Source the file using the absolute path
+source "$SCRIPT_DIR/common.sh"
 
 DEBUG=1
+# BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/testvideo"
+BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos/carriagehills"
 
-subscribeBoxColor="green"
-subscribeBoxText=""
+bgBoxColor="black"
 channelBrandText="CARRIAGE HILLS NEIGHBORHOOD ASSOCIATION"
 
-BASE_DIRECTORY="${BASE_DIRECTORY}/carriagehills"
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
 ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archive"
@@ -18,13 +22,13 @@ exitWhenActiveFilePresent
 
 createMissingDirectories
 
-while true
+changeToIncomingDirectory
+
+for videoDirectory in */
 do
-    changeToIncomingDirectory
+    fullVideoDirectory="${videoDirectory}"
 
-    videoDirectory=$(getFirstVideoDirectory)
-
-    cd "${videoDirectory}" || exit
+    cd "${fullVideoDirectory}" || exit
 
     exitWhenExcludedFilesPresent
 
@@ -32,9 +36,13 @@ do
 
     lowercaseAllFileNames
 
-    for videoFile in "$(pwd)"/*.{mp4,mkv}
+    # echo $(pwd)
+
+    # exit 0
+
+    for videoFile in "$(pwd)"/*.mp4
     do
-        audioCount=$(/usr/bin/ffprobe -hide_banner "${videoFile}" 2>&1 | grep -i audio | wc -l)
+        # audioCount=$(/usr/bin/ffprobe -hide_banner "${videoFile}" 2>&1 | grep -i audio | wc -l)
         audioFile="${videoFile}.mp3"
 
         # convert video file to audio file
@@ -49,21 +57,18 @@ do
             tempAudioFile="temp.mp3"
             /usr/bin/ffmpeg -y -hide_banner -i "${audioFile}" -af "volume=${maxVolume}" "$tempAudioFile"
 
-            /bin/mv "$tempFile" "$audioFile"
+            /bin/mv "$tempAudioFile" "$audioFile"
         fi
 
         ## Create TS formatted file
+        tsFile="${videoFile}.ts"
 
-        videoClipFile=$videoFile
-        audioClipFile="$videoClipFile.mp3"
-        tsFile="${videoClipFile}.ts"
-
-        /usr/bin/ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i "${videoClipFile}" -i "${audioClipFile}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "${tsFile}";
+        /usr/bin/ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -safe 0 -i "${videoFile}" -i "${audioFile}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "${tsFile}";
 
         conversionReturnCode=$?
         if [ $conversionReturnCode -gt 0 ]; then
             infoMessage "Using CPU conversion for ${tsFile}"
-            /usr/bin/ffmpeg -y -hide_banner -i "${videoClipFile}" -i "${audioClipFile}" -shortest -map 0:v:0 -map 1:a:0 "${tsFile}";
+            /usr/bin/ffmpeg -y -hide_banner -i "${videoFile}" -i "${audioFile}" -shortest -map 0:v:0 -map 1:a:0 "${tsFile}";
 
             commandReturnCode=$?
             if [ $commandReturnCode -gt 0 ]; then
@@ -80,7 +85,7 @@ do
     commandReturnCode=$?
     if [ $commandReturnCode -gt 0 ]; then
         infoMessage "Rendering with CPU"
-        ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input "outputNoGraphics.mp4";
+        ffmpeg -y -hide_banner -f concat -i ffmpeg.input "outputNoGraphics.mp4";
 
         commandReturnCode=$?
         if [ $commandReturnCode -gt 0 ]; then
@@ -101,7 +106,7 @@ do
 
     debugMessage "Creating output without graphics file"
 
-    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
+    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -safe 0 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
 
     commandReturnCode=$?
     if [ $commandReturnCode -gt 0 ]; then
@@ -115,22 +120,22 @@ do
     fi
 
     # move output file
-    mv outputFinal.mp4 "${ARCHIVE_DIRECTORY}/${videoDirectory}.mp4"
+    # mv outputFinal.mp4 "${ARCHIVE_DIRECTORY}/${videoDirectory}.mp4"
+    moveFinalOutputFIle
 
     # archive the file video file and move it
-
     tarballArchiveFile="${videoDirectory}.tar.xz"
 
-    infoMessage "Archiving video file ${tarballArchiveFile}"
+    # infoMessage "Archiving video file ${tarballArchiveFile}"
     tar -cJf "$tarballArchiveFile" outputNoGraphics.mp4
 
-    returnCode=$?
+    returnCode=$(archiveVideoDirectory)
+
     if [ ${returnCode} -gt 0 ]; then
         errorMessage "Unable to archive video file."
+        mv "${fullVideoDirectory}" "${ERROR_DIRECTORY}"
     fi
     mv "${tarballArchiveFile}" "${ARCHIVE_DIRECTORY}/${tarballArchiveFile}"
-
-    # move video directory to Processed directory
 
     infoMessage "Moving video directory to Processed folder"
     changeToIncomingDirectory
