@@ -31,7 +31,7 @@ to the video.
 
 * Kenny Ram Dash Cam - on Monday, Wednesdays, and Fridays
 * RHT Services Home Improvement - on Saturdays
-* RHT Services Tech Talk - on Tuesdays, sometimes Thursdays
+* Kenny Robinson @almostengr - on Thursdays
 
 
 ## Crontab Command
@@ -39,7 +39,7 @@ to the video.
 Command below to render videos on a schedule.
 
 ```bash
-5 0-5 * * * /home/almostengr/videoprocessor/videoprocessor.sh
+5 0-5 * * * /home/almostengr/videoprocessor/personal.sh
 ```
 
 Command will run 5 minutes after the hour between the hours of midnight (00:05) and 05:05. This time was selected
