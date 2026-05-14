@@ -4,7 +4,7 @@
 # Organize the dash cam 2 files by date into their own directory.
 ################################################################
 
-INCOMING_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos/incoming"
+INCOMING_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos/dashcam2/"
 
 for file in *NF*mp4
 do 
@@ -12,7 +12,7 @@ do
 
     echo "Moving ${file}"
 
-    newDirectory="${INCOMING_DIRECTORY}/${fileDate}.dashcam2"
+    newDirectory="${INCOMING_DIRECTORY}/${fileDate}"
 
     /usr/bin/mkdir -p "$newDirectory"
 
