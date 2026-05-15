@@ -8,11 +8,11 @@ source "$SCRIPT_DIR/common.sh"
 
 DEBUG=1
 # BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/testvideo"
-BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos/techtalk"
+BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos/carrepair"
 
-bgBoxColor="black"
-channelBrandText="@ALMOSTENGR"
-subscribeBoxText="SUBSCRIBE AND FOLLOW TO SEE MORE SOFTWARE AND TECH PROJECTS"
+bgBoxColor="green"
+channelBrandText="KENNY RAM DASH CAM"
+subscribeBoxText="SUBSCRIBE TO SEE MORE CAR REPAIR AND DASH CAM VIDEOS"
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
@@ -39,7 +39,6 @@ do
 
     for videoFile in "$(pwd)"/*.mp4
     do
-        # audioCount=$(/usr/bin/ffprobe -hide_banner "${videoFile}" 2>&1 | grep -i audio | wc -l)
         audioFile="${videoFile}.mp3"
 
         # convert video file to audio file
@@ -77,25 +76,16 @@ do
     createFfmpegInputFile ts
 
     # render the video file without graphics included
-    if [ -e vertical ]; then
-        renderVerticalVideo
-        
+    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi "outputNoGraphics.mp4";
+
+    commandReturnCode=$?
+    if [ $commandReturnCode -gt 0 ]; then
+        infoMessage "Rendering with CPU"
+        ffmpeg -y -hide_banner -f concat -i ffmpeg.input "outputNoGraphics.mp4";
+
         commandReturnCode=$?
         if [ $commandReturnCode -gt 0 ]; then
             errorMessage "Unable to render with CPU"
-        fi
-    else
-        ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi "outputNoGraphics.mp4";
-    
-        commandReturnCode=$?
-        if [ $commandReturnCode -gt 0 ]; then
-            infoMessage "Rendering with CPU"
-            ffmpeg -y -hide_banner -f concat -i ffmpeg.input "outputNoGraphics.mp4";
-
-            commandReturnCode=$?
-            if [ $commandReturnCode -gt 0 ]; then
-                errorMessage "Unable to render with CPU"
-            fi
         fi
     fi
 

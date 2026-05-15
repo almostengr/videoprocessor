@@ -130,12 +130,9 @@ do
 
     # archive the file video file and move it
     tarballArchiveFile="${videoDirectory}.tar.xz"
-
-    # infoMessage "Archiving video file ${tarballArchiveFile}"
     tar -cJf "$tarballArchiveFile" outputNoGraphics.mp4
 
-    returnCode=$(archiveVideoDirectory)
-
+    returnCode=$?
     if [ ${returnCode} -gt 0 ]; then
         errorMessage "Unable to archive video file."
         mv "${fullVideoDirectory}" "${ERROR_DIRECTORY}"
