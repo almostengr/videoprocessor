@@ -8,11 +8,12 @@ source "$SCRIPT_DIR/common.sh"
 
 DEBUG=1
 # BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/testvideo"
-BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/video/dashcam2"
+BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos/dashcam2"
 
 ctaDuration=12
 subscribeBoxColor="green"
 bgBoxColor="green"
+textColor="white"
 channelBrandText="KENNY RAM DASH CAM"
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
@@ -107,15 +108,23 @@ do
         fi
     fi
 
+    # loweredVideoName=$(echo "${videoDirectory}" | tr '[:upper:]' '[:lower:]')
+    # textColor="white"
+    # if [[ "${loweredVideoName}" == *"night"* || "${loweredVideoName}" == *"dark"* ]]; then  
+    #     textColor="white"
+    #     subscribeBoxColor="black"
+    #     bgBoxColor="black"
+    # fi
+
     # add graphics to video
-    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=white@0.6:fontsize=${fontSize}:${UPPERRIGHT}:box=1:boxcolor=${bgBoxColor}@0.4:boxborderw=10"
+    videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=${textColor}@0.6:fontsize=${fontSize}:${UPPERRIGHT}:box=1:boxcolor=${bgBoxColor}@0.4:boxborderw=10"
 
     if [ "${subscribeBoxText}" != "" ]; then
-        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${subscribeBoxText}':fontcolor=white:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}),${ctaDuration}),1,0))'"
+        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${subscribeBoxText}':fontcolor=${textColor}:box=1:boxcolor=${subscribeBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWERLEFT}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}),${ctaDuration}),1,0))'"
     fi
 
     if [ "${followPageText}" != "" ]; then
-        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${followPageText}':fontcolor=white:box=1:boxcolor=${followBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWER_LEFT1}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}),${ctaDuration}),1,0))'"
+        videoGraphicsFilter="${videoGraphicsFilter},drawtext=text='${followPageText}':fontcolor=${textColor}:box=1:boxcolor=${followBoxColor}@1:boxborderw=20:fontsize=${fontSize}:${LOWER_LEFT1}:enable='if(lt(t,10),0,if(lt(mod(t-10,${brandDelaySeconds}),${ctaDuration}),1,0))'"
     fi
 
     debugMessage "Creating output with graphics file"
