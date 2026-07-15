@@ -44,6 +44,34 @@ bgBoxColor="black"
 brandDelaySeconds=297
 fontSize="h/34"
 
+check_disk_space() {
+    # Set your minimum required space in Gigabytes (e.g., 20 GB)
+    local MIN_SPACE_GB=20
+    
+    # Specify the directory where your rendering/processing happens
+    local TARGET_DIR="${BASE_DIRECTORY}" 
+    
+    # Extract available space in KB using df, then convert to GB
+    # 'df -k' ensures portability across different Unix flavors
+    local AVAILABLE_KB=$(df -k "$TARGET_DIR" | awk 'NR==2 {print $4}')
+    local AVAILABLE_GB=$(( AVAILABLE_KB / 1024 / 1024 ))
+
+    #  "Checking disk space..."
+    # echo "Available space in $(realpath "$TARGET_DIR"): ${AVAILABLE_GB} GB"
+
+    if [ "$AVAILABLE_GB" -lt "$MIN_SPACE_GB" ]; then
+        errorMessage "CRITICAL ERROR: Insufficient disk space!" >&2
+        errorMessage "Required: ${MIN_SPACE_GB} GB | Available: ${AVAILABLE_GB} GB" >&2
+        
+        # If you set up a webhook alert later, trigger it here:
+        # send_webhook_alert "Disk space low! Render canceled for folder: $(basename "$PWD")"
+        
+        exit 1
+    fi
+    
+    # echo "Disk space check passed. Proceeding with video generation..."
+}
+
 getFirstVideoDirectory() {
     videoDirectory=$(ls -trd1 */ --time=birth | grep -i -v errorOccurred |  cut -f1 -d'/' | head -1)
     if [ "$videoDirectory" == "" ]; then

@@ -7,31 +7,22 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 source "$SCRIPT_DIR/dashcam_common.sh"
 
 DEBUG=1
-BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos/dashcam2"
+BASE_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos/dashcam3"
 
 INCOMING_DIRECTORY="${BASE_DIRECTORY}/incoming"
 PROCESSED_DIRECTORY="${BASE_DIRECTORY}/processed"
 ARCHIVE_DIRECTORY="${BASE_DIRECTORY}/archive"
 ACTIVE_FILE="${BASE_DIRECTORY}/.active.txt"
 
-flipRearCameraFiles() {
-	rearCameraFiles=$(ls -1 *NR* | wc -l)
+mergeFrontAndRearFiles() {
+    ## merge front and rear files
+    for frontVideo in *f*mp4
+    do
+        backVideo=$(echo $frontVideo | sed 's/f/b/g')
 
-	if [ $rearCameraFiles -gt 0 ]; then
-		for rearCameraFile in *NR*mp4
-		do
-			ffmpeg -i "${rearCameraFile}" -vf "vflip" "${rearCameraFlie}.flipped.mp4"
-
-			# find the front file
-
-			# render with rear file overlaid with front file
-
-			# remove rear and front files
-
-			# rename rendered file
-            mv "${rearCameraFile}.flipped.mp4" "${rearCameraFile}"
-		done
-	fi
+        # /usr/bin/ffmpeg -i 2026-07-11_12_46_26_f.mp4 -i 2026-07-11_12_46_26_b.mp4 -filter_complex "[1:v]scale=480:270[back];[0:v][back]overlay=W-w-20:H-h-20:format=auto" -c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 128k -shortest output2.mp4
+        /usr/bin/ffmpeg -i "${frontVideo}" -i "${backVideo}" -filter_complex "[1:v]scale=480:270[back];[0:v][back]overlay=W-w-20:H-h-20:format=auto" -c:v libx264 -preset veryfast -crf 23 -an -shortest "${frontVideo}.ts"
+    done
 }
 
 exitWhenActiveFilePresent
@@ -56,7 +47,9 @@ do
 
     lowercaseAllFileNames
 
-    createFfmpegInputFile mp4
+    mergeFrontAndRearFiles
+
+    createFfmpegInputFile ts
 
     selectMixTrack
 
@@ -65,12 +58,12 @@ do
     debugMessage "Creating output with graphics file"
 
     # render the video file without graphics included
-    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i ffmpeg.input -i "${MIX_AUDIO_TRACK_FILE}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4"
+    /usr/bin/ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -f concat -safe 0 -i /usr/bin/ffmpeg.input -i "${MIX_AUDIO_TRACK_FILE}" -filter_hw_device foo -vf "format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4"
 
     commandReturnCode=$?
     if [ $commandReturnCode -gt 0 ]; then
         infoMessage "Rendering with CPU"
-        ffmpeg -y -hide_banner -f concat -safe 0 -i ffmpeg.input -i "${MIX_AUDIO_TRACK_FILE}" -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4"
+        /usr/bin/ffmpeg -y -hide_banner -f concat -safe 0 -i /usr/bin/ffmpeg.input -i "${MIX_AUDIO_TRACK_FILE}" -shortest -map 0:v:0 -map 1:a:0 "outputNoGraphics.mp4"
 
         commandReturnCode=$?
         if [ $commandReturnCode -gt 0 ]; then
@@ -78,14 +71,6 @@ do
             mv "${fullVideoDirectory}" "${ERROR_DIRECTORY}"
         fi
     fi
-
-    # loweredVideoName=$(echo "${videoDirectory}" | tr '[:upper:]' '[:lower:]')
-    # textColor="white"
-    # if [[ "${loweredVideoName}" == *"night"* || "${loweredVideoName}" == *"dark"* ]]; then  
-    #     textColor="white"
-    #     subscribeBoxColor="black"
-    #     bgBoxColor="black"
-    # fi
 
     # add graphics to video
     videoGraphicsFilter="drawtext=textfile:'${channelBrandText}':fontcolor=${textColor}@0.6:fontsize=${fontSize}:${UPPERRIGHT}:box=1:boxcolor=${bgBoxColor}@0.4:boxborderw=10"
@@ -100,12 +85,12 @@ do
 
     debugMessage "Creating output with graphics file"
 
-    ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
+    /usr/bin/ffmpeg -y -hide_banner -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format nv12 -i outputNoGraphics.mp4 -filter_hw_device foo -vf "${videoGraphicsFilter}, format=vaapi|nv12,hwupload" -vcodec h264_vaapi -shortest -c:a copy outputFinal.mp4
 
     commandReturnCode=$?
     if [ $commandReturnCode -gt 0 ]; then
         infoMessage "Rendering with CPU"
-        ffmpeg -y -hide_banner -i outputNoGraphics.mp4 -vf "${videoGraphicsFilter}" -shortest -c:a copy outputFinal.mp4;
+        /usr/bin/ffmpeg -y -hide_banner -i outputNoGraphics.mp4 -vf "${videoGraphicsFilter}" -shortest -c:a copy outputFinal.mp4;
 
         commandReturnCode=$?
         if [ $commandReturnCode -gt 0 ]; then

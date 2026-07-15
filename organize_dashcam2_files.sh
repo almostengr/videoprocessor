@@ -6,15 +6,24 @@
 
 INCOMING_DIRECTORY="/mnt/d74511ce-4722-471d-8d27-05013fd521b3/videos/dashcam2/"
 
-for file in *NF*mp4
-do 
-    fileDate=$(/usr/bin/ffprobe "${file}" 2>&1 | /usr/bin/grep "Input" | /usr/bin/awk -F '_' '{print $2}' | /usr/bin/head -c 8)
+DIRS=(
+    "/media/almostengr/AZDOME/Event"
+    "/media/almostengr/AZDOME/Normal"
+)
 
-    echo "Moving ${file}"
+for srcDir in "${DIRS[@]}"; do
+    cd "$srcDir" || exit 1
+    
+    for file in *mp4
+    do 
+        fileDate=$(/usr/bin/ffprobe "${file}" 2>&1 | /usr/bin/grep "Input" | /usr/bin/awk -F '_' '{print $2}' | /usr/bin/head -c 8)
 
-    newDirectory="${INCOMING_DIRECTORY}/${fileDate}"
+        echo "Moving ${file}"
 
-    /usr/bin/mkdir -p "$newDirectory"
+        newDirectory="${INCOMING_DIRECTORY}/${fileDate}"
 
-    /usr/bin/mv "${file}" "${newDirectory}"
+        /usr/bin/mkdir -p "$newDirectory"
+
+        /usr/bin/mv "${file}" "${newDirectory}"
+    done
 done
